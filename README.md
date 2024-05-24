@@ -9,7 +9,7 @@ Link for other benchmards code(so far) -https://docs.google.com/document/d/1YtvN
 https://docs.google.com/spreadsheets/d/1x9UcnEhYcPZEOIvl6JBHrmrUk4FbWiwDqfdPGLikRNw/edit?usp=sharing
 ## criteria for catagorization
 https://docs.google.com/document/d/1xChFtlseYdnfJKehhrdEoeKIBxl0KIvL6Xrhy4Bnkqw/edit
-## table of performance catagorization
+## table of catagorization of specifications
 ![image](https://github.com/gradual-verification/ai-for-verification/assets/74476225/bcba2208-4319-46db-b4e0-7615690cc2c7)
 
 ## verifast-github
