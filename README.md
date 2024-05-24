@@ -10,6 +10,8 @@ https://docs.google.com/spreadsheets/d/1x9UcnEhYcPZEOIvl6JBHrmrUk4FbWiwDqfdPGLik
 ## criteria for catagorization
 https://docs.google.com/document/d/1xChFtlseYdnfJKehhrdEoeKIBxl0KIvL6Xrhy4Bnkqw/edit
 ## table of performance catagorization
+![image](https://github.com/gradual-verification/ai-for-verification/assets/74476225/bcba2208-4319-46db-b4e0-7615690cc2c7)
+
 ## verifast-github
 https://github.com/verifast/verifast
 ### verifast tutorial 
