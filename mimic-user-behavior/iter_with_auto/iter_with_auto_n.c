@@ -83,7 +83,7 @@ void llist_add(struct llist *list, int x)
   l->next = n;
   l->value = x;
   list->last = n;
-  //@ lseg_add(l);
+ 
 }
 
 /*@
@@ -112,17 +112,17 @@ void llist_append(struct llist *list1, struct llist *list2)
   struct node *l1 = list1->last;
   struct node *f2 = list2->first;
   struct node *l2 = list2->last;
-  //@ open lseg(f2, l2, _v2);  // Causes case split.
+ 
   if (f2 == l2) {
-    //@ if (f2 != l2) pointer_fractions_same_address(&f2->next, &l2->next);
+   
     free(l2);
     free(list2);
   } else {
-    //@ distinct_nodes(l1, l2);
+  
     l1->next = f2->next;
     l1->value = f2->value;
     list1->last = l2;
-    //@ lseg_append(list1->first, l1, l2);
+ 
     free(f2);
     free(list2);
   }
@@ -138,14 +138,13 @@ void llist_dispose(struct llist *list)
   struct node *n = list->first;
   struct node *l = list->last;
   while (n != l)
-    //@ invariant lseg(n, l, ?vs);
-    //@ decreases length(vs);
+   
   {
     struct node *next = n->next;
     free(n);
     n = next;
   }
-  //@ if (n != l) pointer_fractions_same_address(&n->next, &l->next);
+
   free(l);
   free(list);
 }
@@ -203,24 +202,19 @@ int llist_length(struct llist *list)
   struct node *n = f;
   struct node *l = list->last;
   int c = 0;
-  //@ close [frac]lseg2(f, f, l, nil);
+  
   while (n != l)
-    //@ invariant [frac]lseg2(f, n, l, ?_ls1) &*& [frac]lseg(n, l, ?_ls2) &*& _v == append(_ls1, _ls2) &*& c + length(_ls2) == length(_v);
-    //@ decreases length(_ls2);
+    
   {
-    //@ open lseg(n, l, _ls2);
-    //@ open node(n, _, _);
+    
     struct node *next = n->next;
-    //@ int value = n->value;
-    //@ lseg2_add(f);
+  
     n = next;
     if (c == INT_MAX) abort();
     c = c + 1;
-    //@ assert [frac]lseg(next, l, ?ls3);
-    //@ append_assoc(_ls1, cons(value, nil), ls3);
+  
   }
-  //@ if (n != l) pointer_fractions_same_address(&n->next, &l->next);
-  //@ open lseg(n, l, _ls2);
+
   return c;
 }
 /**
@@ -238,23 +232,18 @@ int llist_lookup(struct llist *list, int index)
   struct node *n = f;
   int i = 0;
   while (i < index)
-    //@ invariant 0 <= i &*& i <= index &*& lseg(f, n, ?_ls1) &*& lseg(n, l, ?_ls2) &*& _v == append(_ls1, _ls2) &*& _ls2 == drop(i, _v) &*& i + length(_ls2) == length(_v);
-    //@ decreases index - i;
+    
   {
-    //@ open lseg(n, l, _);
-    //@ int value = n->value;
+   
     struct node *next = n->next;
-    //@ open lseg(next, l, ?ls3); // To produce a witness node for next.
-    //@ lseg_add(n);
-    //@ drop_n_plus_one(i, _v);
+    
     n = next;
     i = i + 1;
-    //@ append_assoc(_ls1, cons(value, nil), ls3);
+  
   }
-  //@ open lseg(n, l, _);
+ 
   int value = n->value;
-  //@ lseg_append(f, n, l);
-  //@ drop_n_plus_one(index, _v);
+
   return value;
 }
 /**
@@ -343,13 +332,10 @@ struct iter *llist_create_iter(struct llist *l)
     if (i == 0) {
       abort();
     }
-    //@ open [frac/2]llist(l, v);
+ 
     f = l->first;
     i->current = f;
-    //@ struct node *last = l->last;
-    //@ close [frac/2]lseg2(f, f, last, nil);
-    //@ close [frac/2]llist_with_node(l, v, f, v);
-    //@ close iter(i, frac/2, l, v, v);
+   
     return i;
 }
 /**
@@ -359,21 +345,14 @@ struct iter *llist_create_iter(struct llist *l)
  */
 int iter_next(struct iter *i)
 {
-    //@ open iter(i, f, l, v0, v);
+    
     struct node *c = i->current;
-    //@ open llist_with_node(l, v0, c, v);
-    //@ open lseg(c, ?last, v);
-    //@ open node(c, _, _);
+  
     int value = c->value;
     struct node *n = c->next;
-    //@ close [f]node(c, n, value);
-    //@ assert [f]lseg2(?first, _, _, ?vleft);
-    //@ lseg2_add(first);
+    
     i->current = n;
-    //@ assert [f]lseg(n, last, ?tail);
-    //@ append_assoc(vleft, cons(value, nil), tail);
-    //@ close [f]llist_with_node(l, v0, n, tail);
-    //@ close iter(i, f, l, v0, tail);
+ 
     return value;
 }
 
@@ -401,9 +380,7 @@ lemma void lseg2_lseg_append(struct node *n)
  */
 void iter_dispose(struct iter *i)
 {
-    //@ open iter(i, f1, l, v0, v);
-    //@ open llist_with_node(l, v0, ?n, v);
-    //@ lseg2_lseg_append(n);
+    
     free(i);
 }
 

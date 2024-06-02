@@ -95,7 +95,7 @@ struct cell* cell_create()
   //@ requires exists<fixpoint(trace, bool)>(?allowed) &*& allowed(zero) == true;
   //@ ensures result == 0 ? true : cell(result, allowed) &*& observed(result, zero);
 {
-  //@ open exists(_);
+  
   struct cell* c = malloc(sizeof(struct cell));
   if(c == 0) return 0;
   c->x = 0;

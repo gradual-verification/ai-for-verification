@@ -75,6 +75,10 @@ predicate exists<t>(t x) = true;
 predicate_ctor lock_invariant(struct cell* c, fixpoint(trace, bool) allowed)() =
   c->x |-> ?v &*& [_]c->id |-> ?id &*& malloc_block_cell(c) &*& exists(?trace) &*& trace_extension(id, trace) &*& execute_trace(trace) == v &*& allowed(trace) == true;
   
+
+predicate_ctor lock_invariant_functional(struct cell* c, fixpoint(trace, bool) allowed)() =
+  c->x |-> ?v  &*& exists(?trace) &*& trace_extension(id, trace) &*& execute_trace(trace) == v &*& allowed(trace) == true;
+
 fixpoint int execute_trace(trace trace) {
   switch(trace) {
     case zero: return 0;
@@ -98,20 +102,14 @@ predicate observed(struct cell* c, trace trace) =
 
  */
 struct cell* cell_create()
- // @requires true;
- //@ensures result == NULL || (result->x == 0 && result->mutex != NULL);
+ //@ requires exists<fixpoint(trace, bool)>(?allowed) &*& allowed(zero) == true;
+  //@ ensures result == 0 ? true : cell(result, allowed) &*& observed(result, zero);
 {
-  //@ open exists(_);
+
   struct cell* c = malloc(sizeof(struct cell));
   if(c == 0) return 0;
   c->x = 0;
-  //@ close exists(zero);
-  //@ create_box boxId = trace_extension(zero) and_handle h = is_prefix_handle(zero); 
-  //@ c->id = boxId;
-  //@ leak c->id |-> _;
-  //@ close observed(c, zero);
-  //@ close lock_invariant(c, allowed)();
-  //@ close create_mutex_ghost_arg(lock_invariant(c, allowed));
+
   struct mutex* m = create_mutex();
   c->mutex = m;
   return c;
@@ -131,33 +129,18 @@ typedef lemma void inc_allowed(fixpoint(trace, bool) allowed)(trace t);
 
  */
 void increment(struct cell* c)
- // @requires c != NULL;
- // @ensures c != NULL ;
+ //@ requires is_inc_allowed(?lem, allowed) &*& observed(c, ?trace0);
+  //@ ensures is_inc_allowed(lem, allowed) &*& observed(c, ?trace) &*& is_prefix(trace0, trace) == true;
 {
-  //@ open observed(c, trace0);
-  //@ assert is_prefix_handle(?h, _, trace0);
+
   mutex_acquire(c->mutex);
-  //@ open lock_invariant(c, allowed)();
-  //@ open exists(?trace);
+
   c->x++;
-  //@ assert trace_extension(?id, trace);
-  /*@
-    consuming_box_predicate trace_extension(id, trace)
-    consuming_handle_predicate is_prefix_handle(h, trace0)
-    perform_action inc() {
-  @*/
+
   {
   
   }
-  /*@
-    }
-    producing_box_predicate trace_extension(inc(trace))
-    producing_handle_predicate is_prefix_handle(inc(trace));
-  @*/
-  //@ close observed(c, inc(trace));
-  //@ lem(trace);
-  //@ close exists(inc(trace));
-  //@ close lock_invariant(c, allowed)();
+
   mutex_release(c->mutex);
 }
 
@@ -178,33 +161,18 @@ typedef lemma void dec_allowed(fixpoint(trace, bool) allowed)(trace t);
  */
 
 void decrement(struct cell* c)
-  //@ requires c != NULL;
-//@ ensures c != NULL;
+ //@ requires is_dec_allowed(?lem, allowed) &*& observed(c, ?trace0);
+  //@ ensures is_dec_allowed(lem, allowed) &*& observed(c, ?trace) &*& is_prefix(trace0, trace) == true;
 {
-  //@ open observed(c, trace0);
-  //@ assert is_prefix_handle(?h, _, trace0);
+
   mutex_acquire(c->mutex);
-  //@ open lock_invariant(c, allowed)();
-  //@ open exists(?trace);
+
   c->x--;
-  //@ assert trace_extension(?id, trace);
-  /*@
-    consuming_box_predicate trace_extension(id, trace)
-    consuming_handle_predicate is_prefix_handle(h, trace0)
-    perform_action dec() {
-  @*/
+
   {
     
   }
-  /*@
-    }
-    producing_box_predicate trace_extension(dec(trace))
-    producing_handle_predicate is_prefix_handle(dec(trace));
-  @*/
-  //@ close observed(c, dec(trace));
-  //@ lem(trace);
-  //@ close exists(dec(trace));
-  //@ close lock_invariant(c, allowed)();
+
   mutex_release(c->mutex);
 }
 /**The function is invoked with a pointer c to a cell object.
@@ -230,40 +198,23 @@ typedef lemma void cas_allowed(fixpoint(trace, bool) allowed, int old, int new)(
  */
 int cas(struct cell* c, int old, int new)
   
- // requires c != NULL;
- 
- // ensures res!=NULL; 
+ //@ requires  is_cas_allowed(?lem, allowed, old, new) &*& observed(c, ?trace0);
+  //@ ensures  is_cas_allowed(lem, allowed, old, new) &*& observed(c, ?trace) &*& allowed(trace) == true &*& is_prefix(trace0, trace) == true;
 
 {
-  //@ open observed(c, trace0);
-  //@ assert is_prefix_handle(?h, _, trace0);
+  
   int res;
   mutex_acquire(c->mutex);
-  //@ open lock_invariant(c, allowed)();
-  //@ open exists(?trace);
+  
   res = c->x;
   if(c->x == old) {
     c->x = new;
   }
-  //@ assert trace_extension(?id, trace);
-  /*@
-    consuming_box_predicate trace_extension(id, trace)
-    consuming_handle_predicate is_prefix_handle(h, trace0)
-    perform_action cas(old, new) {
-  @*/
+
   {
     
   }
-  /*@
-    }
-    producing_box_predicate trace_extension(cas_(old, new, trace))
-    producing_handle_predicate is_prefix_handle(cas_(old, new, trace));
-  @*/
-  //@ close observed(c, cas_(old, new, trace));
-  //@ lem(trace);
-  //@ trace cs = cas_(old, new , trace);
-  //@ close exists(cas_(old, new, trace));
-  //@ close lock_invariant(c, allowed)();
+
   mutex_release(c->mutex);
   return res;
 }
@@ -276,32 +227,19 @@ int cas(struct cell* c, int old, int new)
 
  */
 int get(struct cell* c)
-  //@ requires c != NULL;
-//@ ensures result == c->value;
+  //@ requires observed(c, ?trace0);
+  //@ ensures  observed(c, ?trace) &*& allowed(trace) == true &*& execute_trace(trace) == result &*& is_prefix(trace0, trace) == true;
 {
-  //@ open observed(c, trace0);
-  //@ assert is_prefix_handle(?h, _, trace0);
+  
   int res;
   mutex_acquire(c->mutex);
-  //@ open lock_invariant(c, allowed)();
-  //@ assert exists(?trace);
+
   res = c->x;
-    //@ assert trace_extension(?id, trace);
-  /*@
-    consuming_box_predicate trace_extension(id, trace)
-    consuming_handle_predicate is_prefix_handle(h, trace0)
-    perform_action read() {
-  @*/
+ 
   {
-    //@ is_prefix_refl(trace);
+   
   }
-  /*@
-    }
-    producing_box_predicate trace_extension(trace)
-    producing_handle_predicate is_prefix_handle(trace);
-  @*/
-  //@ close lock_invariant(c, allowed)();
-  //@ close observed(c, trace);
+
   mutex_release(c->mutex);
   return res;
 }
@@ -343,10 +281,9 @@ void only_allow_incrementing(struct cell* c)
 //@ ensures true &*& x1<=x2;
 {
   int x1 = get(c);
-  //@ assert observed(c, ?trace1);
+
   int x2 = get(c);
-  //@ assert observed(c, ?trace2);
-  //@ prefix_smaller(trace1, trace2);
+
   assert x1 <= x2;
-  //@ leak observed(c, _);
+
 }

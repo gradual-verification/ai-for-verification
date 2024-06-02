@@ -39,10 +39,7 @@ struct room * create_room()
         abort();
     }
     room -> members = 0;
-    //@ close lseg(0, 0, nil, member);
-    //@ int i = create_ghost_list();
-    //@ room->ghost_list_id = i;
-    //@ close room(room);
+  
     return room;
 }
 
@@ -260,11 +257,11 @@ void session_run(void * data) //@ : thread_run
                     done = true;
                 } else {
                     lock_acquire(roomLock);
-                    //@ open room_ctor(room)();
+                   
                     {
                         bool hasMember = room_has_member(room, nick);
                         if (hasMember) {
-                            //@ close room_ctor(room)();
+                           
                             lock_release(roomLock);
                             writer_write_string(writer, "Error: This nick is already in use.\r\n");
                         } else {

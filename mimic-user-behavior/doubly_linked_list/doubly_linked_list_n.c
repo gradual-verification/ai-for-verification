@@ -127,38 +127,27 @@ lemma void rev_twice(intlist l)
 
 void reverse(dllist arg)
 {
-	//@ open dll(arg, alpha);
+
 	node ptr = arg->head;
 	node temp1 = 0;
 	node temp2 = 0;
-	//@ close list(0, inil, nnil, nnil);
-	//@ close linked(ptr, nnil, nnil, ptr);
+
 	while (ptr != 0)
-		//@ invariant list(ptr, ?beta, ?lambda1, ?lambda2) &*& arg->tail |-> ?l &*& linked(l, lambda1, lambda2, ?lp) &*& list(lp, ?gamma, ?lambda3, ?lambda4) &*& arg->head |-> ?f &*& linked(f, lambda3, lambda4, ptr) &*& alpha == app(rev(gamma), beta);
+		
 	{
-		//@ open list(ptr, beta, lambda1, lambda2);
-		//@ open linked(l, lambda1, lambda2, lp);
-		//@ open node(ptr, ?i, ?n, ?p);
+		
 		temp1 = ptr->next;
 		temp2 = ptr->prev;
 		ptr->next = temp2;
 		ptr->prev = temp1;
-		//@ close node(ptr, i, p, n);
-		//@ close list(ptr, icons(i, gamma), ncons(ptr, lambda3), ncons(temp1, lambda4));
-		//@ close linked(f, ncons(ptr, lambda3), ncons(temp1, lambda4), temp1);
+
 		ptr = temp1;
-        // The following two lines bind the tail of beta to variable betap.
-		//@ open list(temp1, ?betap, ?t1, ?t2);
-		//@ close list(temp1, betap, t1, t2);
-		//@ rev_lemma(i, gamma, betap);
+   
 	}
-	//@ open list(ptr, beta, lambda1, lambda2);
-	//@ open linked(l, lambda1, lambda2, lp);
+
 	temp1 = arg->head;
 	temp2 = arg->tail;
 	arg->head = temp2;
 	arg->tail = temp1;
-	//@ app_to_nil(rev(gamma));
-	//@ rev_twice(gamma);
-	//@ close dll(arg, rev(alpha));
+	
 }

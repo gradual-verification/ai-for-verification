@@ -8,19 +8,13 @@ struct Counter {
 predicate Counter(struct Counter* c, int v) =
   c->value |-> v &*& malloc_block_Counter(c);
 @*/
-/**
- * Description:
- * The `init` function initializes a new Counter structure with the given initial value.
- it uses the malloc to allocate the memory for that, if it fails to malloc, the program will terminate
- *
- * @param v The initial value for the counter.
- * @returns A pointer to the initialized Counter structure.
- * @requires None.
- * @ensures The returned pointer points to a valid Counter structure with the provided initial value.
- */
+/*@
+predicate Counter_functional_behavior(struct Counter* c, int v) =
+  c->value |-> v;
+@*/
 struct Counter* init(int v)
-// requires v!=NULL
-//ensures c!=NULL
+//@ requires emp;
+  //@ ensures Counter(result, v);
 
 {
   struct Counter* c = malloc(sizeof(struct Counter));
@@ -42,8 +36,8 @@ struct Counter* init(int v)
  */
 
 void increment(struct Counter* c)
-//requires c!=NULL &*& c->value!=NULL
-//ensures c->value!=NULL;
+  //@ requires Counter(c, ?v) &*& v < INT_MAX;
+  //@ ensures Counter(c, v+1);
 
 {
   //@ open Counter(c, v);
@@ -61,8 +55,8 @@ void increment(struct Counter* c)
  */
 
 void dispose(struct Counter* c)
-//requires c!=NULL
-//ensures c==NULL
+  //@ requires Counter(c, _);
+  //@ ensures emp;
 {
   //@ open Counter(c, _);
   free(c);
@@ -79,8 +73,8 @@ void dispose(struct Counter* c)
  */
 
 void swap(struct Counter* c1, struct Counter* c2)
-//requires c1!=NULL &*& c2!=NULL
-//ensures c1!=NULL &*& c2!=NULL
+  //@ requires Counter(c1, ?v1) &*& Counter(c2, ?v2);
+  //@ ensures Counter(c1, v2) &*& Counter(c2, v1); 
 {
   //@ open Counter(c1, v1); 
   //@ open Counter(c2, v2);
@@ -101,8 +95,8 @@ void swap(struct Counter* c1, struct Counter* c2)
  * @ensures The current value stored in the Counter structure is returned.
  */
 int get(struct Counter* c)
-//requires c!=NULL
-//ensures tmp!=NULL
+  //@ requires Counter(c, ?v);
+  //@ ensures Counter(c, v) &*& result==v; 
 {
   //@ open Counter(c, v);
   int tmp = c->value;

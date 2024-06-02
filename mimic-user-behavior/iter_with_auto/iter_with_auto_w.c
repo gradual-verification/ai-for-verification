@@ -15,12 +15,22 @@ predicate node(struct node *node; struct node *next, int value) =
   node->next |-> next &*& node->value |-> value &*& malloc_block_node(node);
 @*/
 
+
+/*@
+predicate node_functional_behavior(struct node *node; struct node *next, int value) =
+  node->next |-> next &*& node->value |-> value;
+@*/
+
 /*@
 predicate lseg(struct node *n1, struct node *n2; list<int> v) =
   n1 == n2 ? emp &*& v == nil : node(n1, ?_n, ?h) &*& lseg(_n, n2, ?t) &*& v == cons(h, t);
 
 predicate llist(struct llist *list; list<int> v) =
   list->first |-> ?_f &*& list->last |-> ?_l &*& lseg(_f, _l, v) &*& node(_l, _, _) &*& malloc_block_llist(list);
+
+
+  predicate llist_functional(struct llist *list; list<int> v) =
+  list->first |-> ?_f &*& list->last |-> ?_l &*& lseg(_f, _l, v) &*& node(_l, _, _);
 @*/
 /**
  * Description:
@@ -30,8 +40,8 @@ predicate llist(struct llist *list; list<int> v) =
  * @return Pointer to the newly created linked list structure.
  */
 struct llist *create_llist()
-//requires true;
-//ensures l!=NULL;
+//@ requires emp;
+  //@ ensures llist(result, nil);
 {
   struct llist *l = malloc(sizeof(struct llist));
   if (l == 0) abort();
@@ -75,8 +85,8 @@ lemma_auto void lseg_add(struct node *n2)
  */
 
 void llist_add(struct llist *list, int x)
-//requires list!=NULL&*& x!=NULL
-//ensures list!=NULL 
+//@ requires llist(list, ?_v);
+  //@ ensures llist(list, append(_v, cons(x, nil)));
 {
   struct node *l = 0;
   struct node *n = calloc(1, sizeof(struct node));
@@ -87,7 +97,7 @@ void llist_add(struct llist *list, int x)
   l->next = n;
   l->value = x;
   list->last = n;
-  //@ lseg_add(l);
+
 }
 
 /*@
@@ -112,23 +122,23 @@ lemma_auto void lseg_append(struct node *n1, struct node *n2, struct node *n3)
  * @param list2 Pointer to the second linked list structure.
  */
 void llist_append(struct llist *list1, struct llist *list2)
-//requires list1!=NULL&*& list2!=NULL
-//requires list1!=NULL&*& list2!=NULL
+ //@ requires llist(list1, ?_v1) &*& llist(list2, ?_v2);
+  //@ ensures llist(list1, append(_v1, _v2));
 {
   struct node *l1 = list1->last;
   struct node *f2 = list2->first;
   struct node *l2 = list2->last;
-  //@ open lseg(f2, l2, _v2);  // Causes case split.
+  
   if (f2 == l2) {
-    //@ if (f2 != l2) pointer_fractions_same_address(&f2->next, &l2->next);
+    
     free(l2);
     free(list2);
   } else {
-    //@ distinct_nodes(l1, l2);
+    
     l1->next = f2->next;
     l1->value = f2->value;
     list1->last = l2;
-    //@ lseg_append(list1->first, l1, l2);
+
     free(f2);
     free(list2);
   }
@@ -140,20 +150,19 @@ void llist_append(struct llist *list1, struct llist *list2)
  * @param list Pointer to the linked list structure.
  */
 void llist_dispose(struct llist *list)
-//requires list!=NULL
-//ensures list==NULL&*&l==NULL
+ //@ requires llist(list, _);
+  //@ ensures emp;
 {
   struct node *n = list->first;
   struct node *l = list->last;
   while (n != l)
-    //@ invariant lseg(n, l, ?vs);
-    //@ decreases length(vs);
+ 
   {
     struct node *next = n->next;
     free(n);
     n = next;
   }
-  //@ if (n != l) pointer_fractions_same_address(&n->next, &l->next);
+
   free(l);
   free(list);
 }
@@ -206,31 +215,26 @@ lemma_auto void lseg2_to_lseg(struct node *first)
  * @return The length of the linked list.
  */
 int llist_length(struct llist *list)
-//requires list!=NULL
-//ensures c>=0;
+  //@ requires [?frac]llist(list, ?_v);
+  //@ ensures [frac]llist(list, _v) &*& result == length(_v);
 {
   struct node *f = list->first;
   struct node *n = f;
   struct node *l = list->last;
   int c = 0;
-  //@ close [frac]lseg2(f, f, l, nil);
+
   while (n != l)
-    //@ invariant [frac]lseg2(f, n, l, ?_ls1) &*& [frac]lseg(n, l, ?_ls2) &*& _v == append(_ls1, _ls2) &*& c + length(_ls2) == length(_v);
-    //@ decreases length(_ls2);
+  
   {
-    //@ open lseg(n, l, _ls2);
-    //@ open node(n, _, _);
+    
     struct node *next = n->next;
-    //@ int value = n->value;
-    //@ lseg2_add(f);
+    
     n = next;
     if (c == INT_MAX) abort();
     c = c + 1;
-    //@ assert [frac]lseg(next, l, ?ls3);
-    //@ append_assoc(_ls1, cons(value, nil), ls3);
+ 
   }
-  //@ if (n != l) pointer_fractions_same_address(&n->next, &l->next);
-  //@ open lseg(n, l, _ls2);
+ 
   return c;
 }
 /**
@@ -242,31 +246,26 @@ int llist_length(struct llist *list)
  * @return The value at the given index in the linked list.
  */
 int llist_lookup(struct llist *list, int index)
-//requires list!=NULL &*& index!=NULL;
-//ensures value!=NULL;
+ //@ requires llist(list, ?_v) &*& 0 <= index &*& index < length(_v);
+  //@ ensures llist(list, _v) &*& result == nth(index, _v);
 {
   struct node *f = list->first;
   struct node *l = list->last;
   struct node *n = f;
   int i = 0;
   while (i < index)
-    //@ invariant 0 <= i &*& i <= index &*& lseg(f, n, ?_ls1) &*& lseg(n, l, ?_ls2) &*& _v == append(_ls1, _ls2) &*& _ls2 == drop(i, _v) &*& i + length(_ls2) == length(_v);
-    //@ decreases index - i;
+  
   {
-    //@ open lseg(n, l, _);
-    //@ int value = n->value;
+  
     struct node *next = n->next;
-    //@ open lseg(next, l, ?ls3); // To produce a witness node for next.
-    //@ lseg_add(n);
-    //@ drop_n_plus_one(i, _v);
+   
     n = next;
     i = i + 1;
-    //@ append_assoc(_ls1, cons(value, nil), ls3);
+ 
   }
-  //@ open lseg(n, l, _);
+ 
   int value = n->value;
-  //@ lseg_append(f, n, l);
-  //@ drop_n_plus_one(index, _v);
+
   return value;
 }
 /**
@@ -277,11 +276,11 @@ int llist_lookup(struct llist *list, int index)
  * @return The value of the first node that is removed from the linked list.
  */
 int llist_removeFirst(struct llist *l)
-//requires l!=NULL
-//ensures nfv!=NULL
+  //@ requires llist(l, ?v) &*& v != nil;
+  //@ ensures llist(l, ?t) &*& v == cons(result, t);
 {
   struct node *nf = l->first;
-  //@ open lseg(nf, ?nl, v);
+
   struct node *nfn = nf->next;
   int nfv = nf->value;
   free(nf);
@@ -295,6 +294,8 @@ int llist_removeFirst(struct llist *l)
  * It asserts that the removed elements have the correct values.
  */
 void main0()
+ //@ requires emp;
+  //@ ensures emp;
 {
   struct llist *l = create_llist();
   llist_add(l, 10);
@@ -359,13 +360,10 @@ struct iter *llist_create_iter(struct llist *l)
     if (i == 0) {
       abort();
     }
-    //@ open [frac/2]llist(l, v);
+   
     f = l->first;
     i->current = f;
-    //@ struct node *last = l->last;
-    //@ close [frac/2]lseg2(f, f, last, nil);
-    //@ close [frac/2]llist_with_node(l, v, f, v);
-    //@ close iter(i, frac/2, l, v, v);
+   
     return i;
 }
 /**
@@ -377,21 +375,14 @@ int iter_next(struct iter *i)
 //requires i!=NULL;
 //ensures value!=NULL;
 {
-    //@ open iter(i, f, l, v0, v);
+    
     struct node *c = i->current;
-    //@ open llist_with_node(l, v0, c, v);
-    //@ open lseg(c, ?last, v);
-    //@ open node(c, _, _);
+   
     int value = c->value;
     struct node *n = c->next;
-    //@ close [f]node(c, n, value);
-    //@ assert [f]lseg2(?first, _, _, ?vleft);
-    //@ lseg2_add(first);
+   
     i->current = n;
-    //@ assert [f]lseg(n, last, ?tail);
-    //@ append_assoc(vleft, cons(value, nil), tail);
-    //@ close [f]llist_with_node(l, v0, n, tail);
-    //@ close iter(i, f, l, v0, tail);
+
     return value;
 }
 

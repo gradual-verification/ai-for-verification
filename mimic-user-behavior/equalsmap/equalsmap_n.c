@@ -52,7 +52,7 @@ struct node *map_cons(void *key, void *value, struct node *tail)
  */
 void map_dispose(struct node *map)
 {
-    //@ open map(map, _);
+
     if (map != 0) {
         map_dispose(map->next);
         free(map);
@@ -138,17 +138,16 @@ lemma_auto void is_suffix_of_refl<t>(list<t> xs)
  */
 bool map_contains_key(struct node *map, void *key, equalsFuncType *equalsFunc)
 {
-    //@ open map(map, _);
+   
     if (map == 0)
         return false;
     else {
-        //@ is_suffix_of_mem(map((fst), entries), keys, map->key);
+        
         bool eq = equalsFunc(map->key, key);
         if (eq)
             return true;
         else {
-            //@ assert is_suffix_of(map((fst), tail(entries)), map((fst), entries)) == true;
-            //@ is_suffix_of_trans(map((fst), tail(entries)), map((fst), entries), keys);
+           
             return map_contains_key(map->next, key, equalsFunc);
         }
     }
@@ -186,11 +185,9 @@ fixpoint b assoc<a, b>(list<pair<a, b> > xys, a x) {
  */
 bool foo_equals(struct foo *f1, struct foo *f2)
 {
-    //@ foreach_remove(pair(f1, assoc(fvs, f1)), fvs);
-    //@ open foo(pair(f1, assoc(fvs, f1)));
+    
     return f1->value == f2->value;
-    //@ close foo(pair(f1, assoc(fvs, f1)));
-    //@ foreach_unremove(pair(f1, assoc(fvs, f1)), fvs);
+   
 }
 /**
  * Description:
@@ -201,6 +198,8 @@ bool foo_equals(struct foo *f1, struct foo *f2)
  * @return Pointer to the newly created foo structure.
  */
 struct foo *create_foo(int value);
+//@ requires true;
+//@ ensures result->value |-> value &*& malloc_block_foo(result);
 {
     struct foo *foo = malloc(sizeof(struct foo));
     if (foo == 0) abort();
@@ -221,48 +220,13 @@ int main()
     map = map_cons(foo1, 0, map);
     struct foo *fooX = create_foo(200);
     struct foo *fooY = create_foo(400);
-    //@ list<pair<struct foo *, int> > fvs = cons(pair(foo1, 100), cons(pair(foo2, 200), cons(pair(foo3, 300), nil)));
-    /*@
-    produce_function_pointer_chunk
-        equalsFuncType(foo_equals)(cons(foo1, cons(foo2, cons(foo3, nil))), fooX, cons(foo2, nil), foos_ctor(fvs, fooX, 200))
-            (f1, f2) {
-        open foos_ctor(fvs, fooX, 200)();
-        bool result = call();
-        close foos_ctor(fvs, fooX, 200)();
-        if (result) {} else {}
-    }
-    @*/
-    //@ close foreach(nil, foo);
-    //@ close foo(pair(foo3, 300));
-    //@ close foreach(cons(pair(foo3, 300), nil), foo);
-    //@ close foo(pair(foo2, 200));
-    //@ close foreach(cons(pair(foo2, 200), cons(pair(foo3, 300), nil)), foo);
-    //@ close foo(pair(foo1, 100));
-    //@ close foreach(cons(pair(foo1, 100), cons(pair(foo2, 200), cons(pair(foo3, 300), nil))), foo);
-    //@ close foos_ctor(fvs, fooX, 200)();
+ 
     bool c = map_contains_key(map, fooX, foo_equals);
     assert(c);
-    /*@
-    produce_function_pointer_chunk
-        equalsFuncType(foo_equals)(cons(foo1, cons(foo2, cons(foo3, nil))), fooY, nil, foos_ctor(fvs, fooY, 400))
-            (f1, f2) {
-        open foos_ctor(fvs, fooY, 400)();
-        call();
-        close foos_ctor(fvs, fooY, 400)();
-    }
-    @*/
-    //@ open foos_ctor(fvs, fooX, 200)();
-    //@ close foos_ctor(fvs, fooY, 400)();
+   
     c = map_contains_key(map, fooY, foo_equals);
     assert(!c);
-    //@ open foos_ctor(fvs, fooY, 400)();
-    //@ open foreach(_, foo);
-    //@ open foo(_);
-    //@ open foreach(_, foo);
-    //@ open foo(_);
-    //@ open foreach(_, foo);
-    //@ open foo(_);
-    //@ open foreach(_, foo);
+
     free(foo1);
     free(foo2);
     free(foo3);

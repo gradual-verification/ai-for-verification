@@ -11,12 +11,23 @@ struct arraylist {
 
 /*@
 predicate arraylist(struct arraylist *a; list<void*> vs) =
-  a->data |-> ?data &*& a->size |-> ?size &*& a->capacity |-> ?capacity &*& malloc_block_arraylist(a) &*&
-  malloc_block_pointers(data, capacity) &*& data[0..size] |-> vs &*& data[size..capacity] |-> _;
+  a->data |-> ?data &*& a->size |-> ?size &*& a->capacity |-> ?capacity  &*&
+   &*& data[0..size] |-> vs &*& data[size..capacity] |-> _;
 @*/
 
 
-????
+
+/*@
+predicate arraylist_length(struct arraylist *a, int size,int capacity) =
+  a->size |->size &*& a->capacity|->capacity;
+@*/
+
+
+
+//???? 
+//? create the connection between data and a->data
+//_means all other members, we don't care what the value is
+
 
 
 
@@ -30,7 +41,7 @@ predicate arraylist(struct arraylist *a; list<void*> vs) =
 ***/
 struct arraylist *create_arraylist() 
   //@ requires true;
-  //@ ensures a!=null &*& a->capacity |-> ?capacity==100;
+  //@ ensures arraylist(result, nil);
 {
   struct arraylist *a = malloc(sizeof(struct arraylist));
   void *data = 0;
@@ -48,7 +59,7 @@ struct arraylist *create_arraylist()
 
 void *list_get(struct arraylist *a, int i)
   //@ requires a != NULL &*& i >= 0 &*& i<a->size -1;
-//@ ensures a != NULL &*& a->data[i]!=NULL
+ //@ ensures arraylist(a, vs) &*& result == nth(i, vs);
 {
   return a->data[i];
 }
@@ -57,7 +68,7 @@ void *list_get(struct arraylist *a, int i)
 
 int list_length(struct arraylist *a)
   //@ requires a != NULL;
-//@ ensures  a->size >= 0;
+//@ ensures arraylist(a, vs) &*& result == length(vs);
 {
   return a->size;
 }
@@ -78,7 +89,7 @@ The function uses various assertions and mathematical
 **/
 void list_add(struct arraylist *a, void *v)
  //@ requires a != NULL &*& v!=NULL
-//@ ensures a->size>0;
+//@ ensures arraylist(a, append(vs, cons(v, nil)));
 {
   int size = 0;
   void** data = 0;
@@ -127,7 +138,7 @@ it decrements the size of the array list by one. The function ensures that the p
 void list_remove_nth(struct arraylist *a, int n)
 
   //@ requires a != NULL &*& n>=0&*& n<=a->size-1;
-//@ ensures a!=NULL &*& a->size>=0;
+ //@ ensures arraylist(a, append(take(n, vs), tail(drop(n, vs))));
 {
   void** data = a->data;
   int size = a->size;

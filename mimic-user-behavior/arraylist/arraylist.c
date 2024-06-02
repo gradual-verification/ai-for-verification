@@ -89,6 +89,7 @@ void *list_get(struct arraylist *a, int i)
 {
   return a->data[i];
 }
+//what is the ?vs mark?
 
 int list_length(struct arraylist *a)
   //@ requires arraylist(a, ?vs);
