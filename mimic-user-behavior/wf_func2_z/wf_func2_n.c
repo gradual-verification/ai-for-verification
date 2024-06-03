@@ -5,14 +5,27 @@ fixpoint_auto list<t> n_times<t>(t x, int count) {
 }
 
 @*/
-
+/**
+ * Function: fill
+ *
+ * This function fills a buffer with a specified character up to a given length.
+ *
+ * Inputs:
+ * - buf: A pointer to a character buffer.
+ * - length: An integer specifying the number of positions in the buffer to fill.
+ * - c: A character that will be used to fill the buffer.
+ *
+ *
+ * Behavior:
+ * - The function iterates from 0 to length - 1.
+ * - In each iteration, it assigns the character c to the current position in the buffer.
+ * - The loop invariant ensures that at any point during the loop, the portion of the buffer that has been processed is correctly filled with the character c.
+ */
 void fill(char *buf, int length, char c)
-//@ requires buf[..length] |-> _;
-//@ ensures buf[..length] |-> n_times(c, length);
+
 {
     for (int i = 0; i < length; i++)
-    //@ requires i <= length &*& chars_(buf + i, length - i, ?cs0) &*& switch (cs0) { case nil: return true; case cons(c0, cs00): return true; };
-    //@ ensures buf[old_i..length] |-> n_times(c, length - old_i);
+  ;
     {
         buf[i] = c;
     }
