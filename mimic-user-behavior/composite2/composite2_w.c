@@ -70,7 +70,7 @@ void abort();
 
 struct node *create_tree()
     //@ requires emp;
-    //@ ensures tree(result);
+    //@ ensures tree_funct(result);
 {
     struct node *n = malloc(sizeof(struct node));
     if (n == 0) {
