@@ -361,9 +361,7 @@ void iter_dispose(struct iter *i)
 //requires i!=NULL;
 //ensures value!=NULL;
 {
-    //@ open iter(i, f1, l, v0, v);
-    //@ open llist_with_node(l, v0, ?n, v);
-    //@ lseg2_lseg_append(n);
+  
     free(i);
 }
 
