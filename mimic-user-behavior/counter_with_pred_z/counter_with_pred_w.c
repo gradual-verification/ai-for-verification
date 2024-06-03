@@ -33,10 +33,10 @@ void increment(struct Counter* c)
   //@ ensures Counter(c, v+1);
 
 {
-  //@ open Counter(c, v);
+  
   int tmp = c->value;
   c->value = tmp + 1;
-  //@ close Counter(c, v+1);
+  
 }
 
 
@@ -44,7 +44,7 @@ void dispose(struct Counter* c)
   //@ requires Counter(c, _);
   //@ ensures emp;
 {
-  //@ open Counter(c, _);
+  
   free(c);
 }
 
