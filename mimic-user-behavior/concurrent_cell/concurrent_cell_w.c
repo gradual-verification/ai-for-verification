@@ -120,14 +120,7 @@ typedef lemma void inc_allowed(fixpoint(trace, bool) allowed)(trace t);
   requires allowed(t) == true;
   ensures allowed(inc(t)) == true;
 @*/
-/**
- * Description:
- * The increment function safely increments the x value of a given cell structure. 
- It uses a mutex to ensure that the operation is thread-safe, preventing concurrent modifications to the cell's x value.
- *
- * @param c A pointer to the cell structure to be incremented. The pointer must not be NULL.
 
- */
 void increment(struct cell* c)
  //@ requires is_inc_allowed(?lem, allowed) &*& observed(c, ?trace0);
   //@ ensures is_inc_allowed(lem, allowed) &*& observed(c, ?trace) &*& is_prefix(trace0, trace) == true;
@@ -151,14 +144,7 @@ typedef lemma void dec_allowed(fixpoint(trace, bool) allowed)(trace t);
 @*/
 
 
-/**
- * Description:
- * The decrement function safely decrements the x value of a given cell structure. 
- It uses a mutex to ensure that the operation is thread-safe, preventing concurrent modifications to the cell's x value.
- *
- * @param c A pointer to the cell structure to be decremented. The pointer must not be NULL.
 
- */
 
 void decrement(struct cell* c)
  //@ requires is_dec_allowed(?lem, allowed) &*& observed(c, ?trace0);
@@ -185,17 +171,7 @@ typedef lemma void cas_allowed(fixpoint(trace, bool) allowed, int old, int new)(
   requires allowed(t) == true;
   ensures allowed(cas_(old, new, t)) == true;
 @*/
-/**
- * Description:
- * The `cas` function (compare-and-swap) checks if the current value of `x` in the given cell structure is equal to `old`. If it is, the function updates `x` to `new`. This operation is thread-safe due to the use of a mutex.
- *
- * @param c A pointer to the cell structure.
- * @param old The value to compare against the current value of `x`.
- * @param new The value to set `x` to if the current value of `x` is equal to `old`.
- * @return The original value of `x` before the operation.
- * @requires c != NULL;
- * @ensures result != NULL;
- */
+
 int cas(struct cell* c, int old, int new)
   
  //@ requires  is_cas_allowed(?lem, allowed, old, new) &*& observed(c, ?trace0);
@@ -218,14 +194,7 @@ int cas(struct cell* c, int old, int new)
   mutex_release(c->mutex);
   return res;
 }
-/**
- * Description:
- * The `get` function retrieves the current value of the `x` field in the given cell structure.
- *
- * @param c A pointer to the cell structure.
- * @return The current value of the `x` field in the cell.
 
- */
 int get(struct cell* c)
   //@ requires observed(c, ?trace0);
   //@ ensures  observed(c, ?trace) &*& allowed(trace) == true &*& execute_trace(trace) == result &*& is_prefix(trace0, trace) == true;
@@ -268,14 +237,7 @@ lemma void prefix_smaller(trace t1, trace t2)
   }
 }
 @*/
-/**
- * Description:
- * The `only_allow_incrementing` function ensures that the value of the `x` field in the given cell structure
- * can only be incremented, not decremented or changed in any other way.
- *
- * @param c A pointer to the cell structure.
 
- */
 void only_allow_incrementing(struct cell* c)
  //@ requires c != NULL;
 //@ ensures true &*& x1<=x2;

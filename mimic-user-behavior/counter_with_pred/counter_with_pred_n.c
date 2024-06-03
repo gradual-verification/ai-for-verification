@@ -99,8 +99,7 @@ int get(struct Counter* c)
 }
 
 int main() //@ : main
-  //@ requires emp;
-  //@ ensures emp;
+
 {
   struct Counter* c1 = init(0); struct Counter* c2 = init(5);
 

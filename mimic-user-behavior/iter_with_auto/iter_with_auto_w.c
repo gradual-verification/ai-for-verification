@@ -76,13 +76,7 @@ lemma_auto void lseg_add(struct node *n2)
 }
 @*/
 
-/**
- * Description:
- * The `llist_add` function adds a new node with the given value to the end of the linked list.
- *
- * @param list Pointer to the linked list structure.
- * @param x Value to be added to the linked list.
- */
+
 
 void llist_add(struct llist *list, int x)
 //@ requires llist(list, ?_v);
@@ -114,13 +108,7 @@ lemma_auto void lseg_append(struct node *n1, struct node *n2, struct node *n3)
   }
 }
 @*/
-/**
- * Description:
- * The `llist_append` function appends the second linked list to the end of the first linked list.
- *
- * @param list1 Pointer to the first linked list structure.
- * @param list2 Pointer to the second linked list structure.
- */
+
 void llist_append(struct llist *list1, struct llist *list2)
  //@ requires llist(list1, ?_v1) &*& llist(list2, ?_v2);
   //@ ensures llist(list1, append(_v1, _v2));
@@ -143,12 +131,7 @@ void llist_append(struct llist *list1, struct llist *list2)
     free(list2);
   }
 }
-/**
- * Description:
- * The `llist_dispose` function frees the memory occupied by all nodes in the linked list and the linked list itself.
- *
- * @param list Pointer to the linked list structure.
- */
+
 void llist_dispose(struct llist *list)
  //@ requires llist(list, _);
   //@ ensures emp;
@@ -207,13 +190,7 @@ lemma_auto void lseg2_to_lseg(struct node *first)
 }
 
 @*/
-/**
- * Description:
- * The `llist_length` function calculates the length of the linked list.
- *
- * @param list Pointer to the linked list structure.
- * @return The length of the linked list.
- */
+
 int llist_length(struct llist *list)
   //@ requires [?frac]llist(list, ?_v);
   //@ ensures [frac]llist(list, _v) &*& result == length(_v);
@@ -237,14 +214,7 @@ int llist_length(struct llist *list)
  
   return c;
 }
-/**
- * Description:
- * The `llist_lookup` function looks up the value at the given index in the linked list.
- *
- * @param list Pointer to the linked list structure.
- * @param index The index of the value to be looked up.
- * @return The value at the given index in the linked list.
- */
+
 int llist_lookup(struct llist *list, int index)
  //@ requires llist(list, ?_v) &*& 0 <= index &*& index < length(_v);
   //@ ensures llist(list, _v) &*& result == nth(index, _v);
@@ -268,13 +238,7 @@ int llist_lookup(struct llist *list, int index)
 
   return value;
 }
-/**
- * Description:
- * The `llist_removeFirst` function removes the first node from the linked list and returns its value.
- *
- * @param l Pointer to the linked list structure.
- * @return The value of the first node that is removed from the linked list.
- */
+
 int llist_removeFirst(struct llist *l)
   //@ requires llist(l, ?v) &*& v != nil;
   //@ ensures llist(l, ?t) &*& v == cons(result, t);
@@ -287,12 +251,7 @@ int llist_removeFirst(struct llist *l)
   l->first = nfn;
   return nfv;
 }
-/**
- * Description:
- * The `main0` function tests the `llist_removeFirst` function by creating a linked list,
- * adding elements to it, removing the first two elements, and then disposing of the list.
- * It asserts that the removed elements have the correct values.
- */
+
 void main0()
  //@ requires emp;
   //@ ensures emp;
@@ -346,10 +305,7 @@ predicate iter(struct iter *i, real frac, struct llist *l, list<int> v0, list<in
   i->current |-> ?n &*& [frac]llist_with_node(l, v0, n, v) &*& malloc_block_iter(i);
 
 @*/
-/**
- * Description:
- * The `llist_create_iter` function creates an iterator for a given linked list.
- */
+
 struct iter *llist_create_iter(struct llist *l)
 //requires l!=NULL;
 //ensures l!=NULL;
@@ -366,11 +322,7 @@ struct iter *llist_create_iter(struct llist *l)
    
     return i;
 }
-/**
- * Description:
- * The `iter_next` function returns the value of the current node of the iterator
- * and moves the iterator to the next node.
- */
+
 int iter_next(struct iter *i)
 //requires i!=NULL;
 //ensures value!=NULL;
@@ -404,10 +356,7 @@ lemma void lseg2_lseg_append(struct node *n)
 }
 
 @*/
-/**
- * Description:
- * The `iter_dispose` function deallocates the memory associated with the iterator.
- */
+
 void iter_dispose(struct iter *i)
 //requires i!=NULL;
 //ensures value!=NULL;

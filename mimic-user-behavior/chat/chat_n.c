@@ -55,10 +55,7 @@ struct room * create_room()
     abort();
   }
   room -> members = 0;
-  //@ close lseg(0, 0, nil, member);
-  //@ int i = create_ghost_list();
-  //@ room->ghost_list_id = i;
-  //@ close room(room);
+
   return room;
 }
 /**
