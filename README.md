@@ -1,6 +1,6 @@
 # ai-for-verification
-This is the github for applying the AI and ML technique to proof synthesis and repair for gradual verifiers.
- \n*[relavant paper about AI verfication](https://docs.google.com/document/d/16jJQRmn3wdS32sVm6E0tbiLfklzGGjq477zxIOceNmw/edit?usp=sharing)
+*This is the github for applying the AI and ML technique to proof synthesis and repair for gradual verifiers.
+ *[relavant paper about AI verfication](https://docs.google.com/document/d/16jJQRmn3wdS32sVm6E0tbiLfklzGGjq477zxIOceNmw/edit?usp=sharing)
 
 ## benchmark code
 * [Links for verifast benchmarks code compilation in google drive](https://drive.google.com/drive/folders/1kvmUYWKOSkAvLouAUVkiLBEnz_kIOCyC?usp=drive_link)
