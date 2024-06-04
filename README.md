@@ -14,7 +14,7 @@
 * [verifast tutorial link](https://zenodo.org/records/1068185)
 * [verifast github link](https://github.com/verifast/verifast)
 * [verifast relavant paper](https://people.cs.kuleuven.be/~bart.jacobs/verifast/)
-* [verifast paper compilation under this github](./main/relavant-paper-folder/verifast_paper)
+* [verifast paper compilation under this github](https://github.com/gradual-verification/ai-for-verification/tree/main/relavant-paper-folder/verifast_paper)
 
 
 
