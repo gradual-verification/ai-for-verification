@@ -5,8 +5,8 @@
 ## benchmark code
 * [Links for verifast benchmarks code compilation in google drive](https://drive.google.com/drive/folders/1kvmUYWKOSkAvLouAUVkiLBEnz_kIOCyC?usp=drive_link)
 * [Links for other benchmarks code(so far) in google docs](https://docs.google.com/document/d/1YtvNV5uO69zFpidrWCVrJmY45mm8Io5JmhwdETKr6Sw/edit)
-* [catagorization of the benchmarks](https://docs.google.com/spreadsheets/d/1x9UcnEhYcPZEOIvl6JBHrmrUk4FbWiwDqfdPGLikRNw/edit?usp=sharing)
-* [criteria for catagorization](https://docs.google.com/document/d/1xChFtlseYdnfJKehhrdEoeKIBxl0KIvL6Xrhy4Bnkqw/edit)
+* [categorization of the benchmarks](https://docs.google.com/spreadsheets/d/1x9UcnEhYcPZEOIvl6JBHrmrUk4FbWiwDqfdPGLikRNw/edit?usp=sharing)
+* [criteria for categorization](https://docs.google.com/document/d/1xChFtlseYdnfJKehhrdEoeKIBxl0KIvL6Xrhy4Bnkqw/edit)
 
 
 
