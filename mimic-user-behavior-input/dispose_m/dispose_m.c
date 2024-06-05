@@ -29,15 +29,12 @@ struct stack *create_stack()
         abort();
     }
     stack->head = 0;
-    //@ close nodes(0, 0);
-    //@ close stack(stack, 0);
     return stack;
 }
 void stack_push(struct stack *stack, int value)
 //@ requires stack(stack, ?count);
 //@ ensures stack(stack, count + 1);
 {
-    //@ open stack(stack, count);
     struct node *n = malloc(sizeof(struct node));
     if (n == 0)
     {
@@ -46,27 +43,21 @@ void stack_push(struct stack *stack, int value)
     n->next = stack->head;
     n->value = value;
     stack->head = n;
-    //@ close nodes(n, count + 1);
-    //@ close stack(stack, count + 1);
 }
 int stack_pop(struct stack *stack)
 //@ requires stack(stack, ?count) &*& 0 < count;
 //@ ensures stack(stack, count - 1);
 {
-    //@ open stack(stack, count);
     struct node *head = stack->head;
-    //@ open nodes(head, count);
     int result = head->value;
     stack->head = head->next;
     free(head);
-    //@ close stack(stack, count - 1);
     return result;
 }
 void nodes_dispose(struct node *n)
 //@ requires nodes(n, _);
 //@ ensures true;
 {
-    //@ open nodes(n, _);
     if (n != 0)
     {
         nodes_dispose(n->next);
@@ -77,7 +68,6 @@ void stack_dispose(struct stack *stack)
 //@ requires stack(stack, _);
 //@ ensures true;
 {
-    //@ open stack(stack, _);
     nodes_dispose(stack->head);
     free(stack);
 }
