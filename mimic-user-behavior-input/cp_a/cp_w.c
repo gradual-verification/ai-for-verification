@@ -1,4 +1,3 @@
-//only keep pre post condition without the thing only related to the verifast to work, malloc emp-> true
 #include "stdlib.h"
 #include "stdio.h"
 #include "malloc.h"

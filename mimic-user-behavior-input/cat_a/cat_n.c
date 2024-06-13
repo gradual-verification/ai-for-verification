@@ -8,9 +8,7 @@
       - `argc`: Number of command-line arguments passed to the program.
       - `argv`: Array of command-line arguments provided to the program.
 */
-int main(int argc, char** argv) //@ : main
-  //@ requires 0 <= argc &*& [_]char_array(argv, argc);
-  //@ ensures true;
+int main(int argc, char** argv)
 {
   struct file* fp = 0; char* buffer = 0; char* res = 0;
   if(argc < 2) { puts("Enter a file name."); return -1; }
