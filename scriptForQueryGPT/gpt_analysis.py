@@ -35,7 +35,7 @@ def analyze_code(content):
             {"role": "user", "content": GPT_PROMPT + f"\n\n{content}"}
 
         ],
-        model="gpt-3.5-turbo",
+        model=GPT_MODEL,
     )
     print(chat_completion)
     return chat_completion.choices[0].message.content
