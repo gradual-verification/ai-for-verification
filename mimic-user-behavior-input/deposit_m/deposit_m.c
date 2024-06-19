@@ -5,7 +5,7 @@ struct account
 };
 struct account *create_account()
 //@ requires true;
-//@ ensures account_balance(result, 0) &*& malloc_block_account(result);
+//@ ensures account_balance(result, 0);
 {
     struct account *myAccount = malloc(sizeof(struct account));
     if (myAccount == 0)
@@ -30,7 +30,7 @@ void account_set_balance(struct account *myAccount, int newBalance)
     myAccount->balance = newBalance;
 }
 void account_dispose(struct account *myAccount)
-//@ requires account_balance(myAccount, _) &*& malloc_block_account(myAccount);
+//@ requires account_balance(myAccount, _);
 //@ ensures true;
 {
     free(myAccount);

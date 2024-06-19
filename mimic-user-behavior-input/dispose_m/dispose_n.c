@@ -8,18 +8,6 @@ struct stack
 {
     struct node *head;
 };
-/*@
-predicate nodes(struct node *node, int count) =
-node == 0 ?
-count == 0
-:
-0 < count
-&*& node->next |-> ?next &*& node->value |-> ?value
-&*& malloc_block_node(node) &*& nodes(next, count - 1);
-predicate stack(struct stack *stack, int count) =
-stack->head |-> ?head &*& malloc_block_stack(stack) &*& 0 <= count &*& nodes(head, count);
-@*/
-
 /***
  * Description:
 The `create_stack` function is a constructor for a stack data structure.

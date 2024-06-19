@@ -8,18 +8,6 @@ struct stack
 {
     struct node *head;
 };
-/*@
-inductive ints = ints_nil | ints_cons(int, ints);
-predicate nodes(struct node *node, ints values) =
-node == 0 ?
-values == ints_nil
-:
-node->next |-> ?next &*& node->value |-> ?value &*& malloc_block_node(node) &*&
-nodes(next, ?values0) &*& values == ints_cons(value, values0);
-predicate stack(struct stack *stack, ints values) =
-stack->head |-> ?head &*& malloc_block_stack(stack) &*& nodes(head, values);
-@*/
-
 /***
  * Description:
 The function creates a stack.
