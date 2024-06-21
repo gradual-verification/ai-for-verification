@@ -1,3 +1,5 @@
+
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -122,11 +124,6 @@ post condition, the arraylist a and also the arraylist append the v to the origi
 void list_add(struct arraylist *a, void *v)
   //@ requires arraylist(a, ?vs);
   //@ ensures arraylist(a, append(vs, cons(v, nil)));
-
-
-
-
-
 {
   int size = 0;
   void** data = 0;
