@@ -61,6 +61,17 @@ struct point {
     int y;
 };
 
+/***
+ * Description:
+ * The main function serves as the entry point of the program, demonstrating safe memory allocation, initialization, and deallocation for an array of structures in C.
+ *
+ * It performs the following steps:
+ * 1. Validates that allocating memory for two instances of `struct point` will not cause an integer overflow. If an overflow is detected, the program terminates.
+ * 2. Allocates memory for two `struct point` structures. If the memory allocation fails, the program terminates.
+ * 3. Initializes the `x` and `y` members of the two `struct point` structures with specific values.
+ * 4. Frees the allocated memory to prevent memory leaks.
+ * 5. Returns 0 to indicate successful program termination.
+ */
 int main() 
    
 {
