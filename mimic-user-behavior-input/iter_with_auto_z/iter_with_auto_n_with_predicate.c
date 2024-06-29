@@ -10,7 +10,18 @@ struct llist {
   struct node *last;
 };
 
+/*@
+predicate node(struct node *node; struct node *next, int value) =
+  node->next |-> next &*& node->value |-> value &*& malloc_block_node(node);
+@*/
 
+/*@
+predicate lseg(struct node *n1, struct node *n2; list<int> v) =
+  n1 == n2 ? emp &*& v == nil : node(n1, ?_n, ?h) &*& lseg(_n, n2, ?t) &*& v == cons(h, t);
+
+predicate llist(struct llist *list; list<int> v) =
+  list->first |-> ?_f &*& list->last |-> ?_l &*& lseg(_f, _l, v) &*& node(_l, _, _) &*& malloc_block_llist(list);
+@*/
 /**
  * Description:
  * The `create_llist` function dynamically allocates memory for a linked list structure
@@ -29,7 +40,29 @@ struct llist *create_llist()
   return l;
 }
 
+/*@
+lemma void distinct_nodes(struct node *n1, struct node *n2)
+  requires node(n1, ?n1n, ?n1v) &*& node(n2, ?n2n, ?n2v);
+  ensures node(n1, n1n, n1v) &*& node(n2, n2n, n2v) &*& n1 != n2;
+{
+  open node(n1, _, _);
+  open node(n2, _, _);
+  close node(n1, _, _);
+  close node(n2, _, _);
+}
 
+lemma_auto void lseg_add(struct node *n2)
+  requires lseg(?n1, n2, ?_v) &*& node(n2, ?n3, ?_x) &*& node(n3, ?n3next, ?n3value);
+  ensures lseg(n1, n3, append(_v, cons(_x, nil))) &*& node(n3, n3next, n3value);
+{
+  distinct_nodes(n2, n3);
+  open lseg(n1, n2, _v);
+  if (n1 != n2) {
+    distinct_nodes(n1, n3);
+    lseg_add(n2);
+  }
+}
+@*/
 
 /**
  * Description:
@@ -53,6 +86,20 @@ void llist_add(struct llist *list, int x)
  
 }
 
+/*@
+lemma_auto void lseg_append(struct node *n1, struct node *n2, struct node *n3)
+  requires lseg(n1, n2, ?_v1) &*& lseg(n2, n3, ?_v2) &*& node(n3, ?n3n, ?n3v);
+  ensures lseg(n1, n3, append(_v1, _v2)) &*& node(n3, n3n, n3v);
+{
+  open lseg(n1, n2, _v1);
+  switch (_v1) {
+    case nil:
+    case cons(x, v):
+      distinct_nodes(n1, n3);
+      lseg_append(n1->next, n2, n3);
+  }
+}
+@*/
 /**
  * Description:
  * The `llist_append` function appends the second linked list to the end of the first linked list.
@@ -102,7 +149,46 @@ void llist_dispose(struct llist *list)
   free(list);
 }
 
+/*@
 
+predicate lseg2(struct node *first, struct node *last, struct node *final, list<int> v;) =
+  switch (v) {
+    case nil: return first == last;
+    case cons(head, tail):
+      return first != final &*& node(first, ?next, head) &*& lseg2(next, last, final, tail);
+  };
+
+lemma_auto void lseg2_add(struct node *first)
+  requires [?f]lseg2(first, ?last, ?final, ?v) &*& [f]node(last, ?next, ?value) &*& last != final;
+  ensures [f]lseg2(first, next, final, append(v, cons(value, nil)));
+{
+  open lseg2(first, last, final, v);
+  switch (v) {
+    case nil:
+      close [f]lseg2(next, next, final, nil);
+    case cons(head, tail):
+      open node(first, ?firstNext, head); // To produce witness field.
+      lseg2_add(firstNext);
+      close [f]node(first, firstNext, head);
+  }
+  close [f]lseg2(first, next, final, append(v, cons(value, nil)));
+}
+
+lemma_auto void lseg2_to_lseg(struct node *first)
+  requires [?f]lseg2(first, ?last, ?final, ?v) &*& last == final;
+  ensures [f]lseg(first, last, v);
+{
+  switch (v) {
+    case nil:
+      open lseg2(first, last, final, v);
+    case cons(head, tail):
+      open lseg2(first, last, final, v);
+      open node(first, ?next, head);
+      lseg2_to_lseg(next);
+  }
+}
+
+@*/
 /**
  * Description:
  * The `llist_length` function calculates the length of the linked list.
@@ -197,7 +283,9 @@ void main0()
   llist_dispose(l);
 }
 
-int main() 
+int main() //@ : main
+  //@ requires emp;
+  //@ ensures emp;
 {
   struct llist *l1 = create_llist();
   struct llist *l2 = create_llist();
@@ -223,6 +311,15 @@ struct iter {
     struct node *current;
 };
 
+/*@
+
+predicate llist_with_node(struct llist *list, list<int> v0, struct node *n, list<int> vn) =
+  list->first |-> ?f &*& list->last |-> ?l &*& malloc_block_llist(list) &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
+
+predicate iter(struct iter *i, real frac, struct llist *l, list<int> v0, list<int> v) =
+  i->current |-> ?n &*& [frac]llist_with_node(l, v0, n, v) &*& malloc_block_iter(i);
+
+@*/
 /**
  * Description:
  * The `llist_create_iter` function creates an iterator for a given linked list.
@@ -259,7 +356,24 @@ int iter_next(struct iter *i)
     return value;
 }
 
+/*@
 
+lemma void lseg2_lseg_append(struct node *n)
+  requires [?frac]lseg2(?f, n, ?l, ?vs1) &*& [frac]lseg(n, l, ?vs2);
+  ensures [frac]lseg(f, l, append(vs1, vs2));
+{
+  open lseg2(f, n, l, vs1);
+  switch (vs1) {
+    case nil:
+    case cons(h, t):
+      open [frac]node(f, ?next, h);
+      lseg2_lseg_append(n);
+      close [frac]node(f, next, h);
+      close [frac]lseg(f, l, append(vs1, vs2));
+  }
+}
+
+@*/
 /**
  * Description:
  * The `iter_dispose` function deallocates the memory associated with the iterator.
@@ -271,6 +385,8 @@ void iter_dispose(struct iter *i)
 }
 
 int main2()
+    //@ requires emp;
+    //@ ensures emp;
 {
     struct llist *l = create_llist();
     llist_add(l, 5);

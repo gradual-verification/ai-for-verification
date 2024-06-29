@@ -1,4 +1,10 @@
+/*@
 
+fixpoint_auto list<t> n_times<t>(t x, int count) {
+    return count == 0 ? nil : cons(x, n_times(x, count - 1));
+}
+
+@*/
 /**
  * Function: fill
  *
@@ -16,6 +22,7 @@
  * - The loop invariant ensures that at any point during the loop, the portion of the buffer that has been processed is correctly filled with the character c.
  */
 void fill(char *buf, int length, char c)
+
 {
     for (int i = 0; i < length; i++)
   

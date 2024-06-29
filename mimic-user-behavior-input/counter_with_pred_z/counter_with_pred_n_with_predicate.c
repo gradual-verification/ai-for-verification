@@ -4,7 +4,10 @@ struct Counter {
   int value;
 };
 
-
+/*@
+predicate Counter(struct Counter* c, int v) =
+  c->value |-> v &*& malloc_block_Counter(c);
+@*/
 /**
  * Description:
  * The `init` function initializes a new Counter structure with the given initial value.

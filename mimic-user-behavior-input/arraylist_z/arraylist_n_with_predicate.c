@@ -9,6 +9,11 @@ struct arraylist {
   int capacity;
 };
 
+/*@
+predicate arraylist(struct arraylist *a; list<void*> vs) =
+  a->data |-> ?data &*& a->size |-> ?size &*& a->capacity |-> ?capacity &*& malloc_block_arraylist(a) &*&
+  malloc_block_pointers(data, capacity) &*& data[0..size] |-> vs &*& data[size..capacity] |-> _;
+@*/
 
 
 
