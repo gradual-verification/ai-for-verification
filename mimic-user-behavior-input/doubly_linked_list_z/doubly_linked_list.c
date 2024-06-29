@@ -116,16 +116,6 @@ lemma void rev_twice(intlist l)
 @*/
 
 
-/**
- * Specification:
-
-Precondition:
-The function is invoked with a doubly linked list arg, which satisfies the dll predicate with elements represented by the list alpha.
-Postcondition:
-Upon completion, the function ensures that the doubly linked list arg maintains its structure but with the elements reversed. 
-The reversed list is represented by the list rev(alpha).
-
-*/
 
 void reverse(dllist arg)
 	//@ requires dll(arg, ?alpha);

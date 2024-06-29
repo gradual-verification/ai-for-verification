@@ -29,17 +29,7 @@ predicate room(struct room* room) =
     lseg(membersList, 0, ?members, member) &*&
     ghost_list(id, members) &*& malloc_block_room(room);
 @*/
-/***
- * Description:
-This function is responsible for creating a new room object. It allocates memory for the room structure, initializes its members, and returns a pointer to the newly created room.
 
-Specification:
-
-Precondition:
-There are no specific preconditions required for calling this function.
-Postcondition:
-Upon successful execution, the function ensures that a valid room object is created and returned.
-*/
 struct room *create_room()
     //@ requires emp;
     //@ ensures room(result);
@@ -56,18 +46,7 @@ struct room *create_room()
     //@ close room(room);
     return room;
 }
-/**
- * Description:
-This function checks whether a given room contains a member with a specified nickname. It iterates through the list of members in the room and compares each member's nickname with the provided nickname.
 
-Specification:
-
-Precondition:
-The room parameter points to a valid room object.
-The nick parameter points to a valid string buffer object.
-Postcondition:
-The function leaves the input parameters unchanged.
-*/
 bool room_has_member(struct room *room, struct string_buffer *nick)
     //@ requires room(room) &*& string_buffer(nick, _);
     //@ ensures room(room) &*& string_buffer(nick, _);
@@ -96,18 +75,7 @@ bool room_has_member(struct room *room, struct string_buffer *nick)
     //@ close room(room);
     return hasMember;
 }
-/***
- * Description:
-This function broadcasts a message to all members of a given room. It iterates through the list of members in the room and sends the message to each member.
 
-Specification:
-
-Precondition:
-The room parameter points to a valid room object.
-The message parameter points to a valid string buffer object.
-Postcondition:
-The function leaves the input parameters unchanged.
-*/
 void room_broadcast_message(struct room *room, struct string_buffer *message)
     //@ requires room(room) &*& string_buffer(message, _);
     //@ ensures room(room) &*& string_buffer(message, _);
@@ -148,17 +116,6 @@ predicate session(struct session *session) =
 
 @*/
 
-/**
- * Description:
-This function creates a new session object associated with a specific room. It initializes the session with the provided room, room lock, and socket objects.
-
-Specification:
-
-Precondition:
-The roomLock parameter points to a lock object associated with the provided room.
-The socket parameter points to a valid socket object, with associated reader and writer objects.
-Postcondition:
-Upon successful execution, the function ensures that a valid session object is created and returned.**/
 
 struct session *create_session(struct room *room, struct lock *roomLock, struct socket *socket)
     //@ requires [_]lock(roomLock, _, room_ctor(room)) &*& socket(socket, ?reader, ?writer) &*& reader(reader) &*& writer(writer);
@@ -174,19 +131,7 @@ struct session *create_session(struct room *room, struct lock *roomLock, struct 
     //@ close session(session);
     return session;
 }
-/**
- * Description:
-This function represents the execution of a session within a specified room. It handles the operations associated with joining, communicating, and leaving the room, while ensuring proper synchronization using locks.
 
-Specification:
-
-Precondition:
-The roomLock parameter points to a locked room lock associated with the provided room.
-The reader parameter points to a valid reader object.
-The writer parameter points to a valid writer object.
-The nick parameter points to a valid string buffer containing the nickname of the session participant.
-Postcondition:
-Upon completion, the function ensures that the session operations have been executed successfully and the resources associated with the session have been released.**/
 void session_run_with_nick(struct room *room, struct lock *roomLock, struct reader *reader, struct writer *writer, struct string_buffer *nick)
     /*@
     requires
@@ -298,16 +243,7 @@ predicate_family_instance thread_run_data(session_run)(void *data) = session(dat
 
 @*/
 
-/**Description:
-This function represents the execution of a session within a chat room. It handles the initialization of session parameters, interaction with users, and cleanup operations.
 
-Specification:
-
-Precondition:
-The function is invoked with a valid data parameter representing a session.
-The current thread does not hold any locks.
-Postcondition:
-Upon completion, the function ensures that the current thread does not hold any locks.*/
 
 void session_run(void *data) //@ : thread_run
     //@ requires thread_run_data(session_run)(data) &*& lockset(currentThread, nil);
