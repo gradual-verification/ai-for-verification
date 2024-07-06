@@ -21,6 +21,8 @@
 
 ## mimic user behavior
 * [FAQ for writing the mimic user behavior](https://docs.google.com/document/d/1tlnr1CvUrPeCGGVXcCLwu28nN646ZoPXhN_lbsXuCQ4/edit?usp=sharing)
+## codellama
+* [prompt web](https://chat.tune.app/?ref=promptengineering.org)
 
 
 
