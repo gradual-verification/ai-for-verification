@@ -19,13 +19,22 @@ struct member {
   struct writer * writer;
 };
 
+/*@
+predicate member(struct member* member) =
+    member->nick |-> ?nick &*& [1/2]member->writer |-> ?writer &*& string_buffer(nick, _) &*& writer(writer) &*& malloc_block_member(member);
+@*/
 
 struct room {
   struct member * members;
   //@ int ghost_list_id;
 };
 
-
+/*@
+predicate room(struct room* room) =
+    room->members |-> ?membersList &*& [?f]room->ghost_list_id |-> ?id &*&
+    lseg(membersList, 0, ?members, member) &*&
+    ghost_list(id, members) &*& malloc_block_room(room);
+@*/
 /**
  * Description:
  * This function is responsible for creating a new room object. It allocates memory for the room structure, initializes its members, and returns a pointer to the newly created room.
@@ -112,7 +121,16 @@ struct session {
   struct socket * socket;
 };
 
+/*@
 
+predicate_ctor room_ctor(struct room *room)() =
+    room(room);
+
+predicate session(struct session *session) =
+    session->room |-> ?room &*& session->room_lock |-> ?roomLock &*& session->socket |-> ?socket &*& malloc_block_session(session)
+        &*& [_]lock(roomLock, _, room_ctor(room)) &*& socket(socket, ?reader, ?writer) &*& reader(reader) &*& writer(writer);
+
+@*/
 
 /**
  * Description:
@@ -227,6 +245,11 @@ void session_run_with_nick(struct room * room, struct lock * roomLock, struct re
   free(member);
 }
 
+/*@
+
+predicate_family_instance thread_run_data(session_run)(void *data) = session(data);
+
+@*/
 
 /**
  * Description:

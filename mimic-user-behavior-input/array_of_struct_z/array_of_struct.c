@@ -19,19 +19,7 @@ predicate students(struct student *students, int count;) =
 
 @*/
 
-/***
- * Description:
-This function prompts the user to input the number of students and then reads their names and ages from the user. It dynamically allocates memory for an array of struct student objects based on the user-provided count and populates the array with the entered student information.
 
-Specification:
-
-Precondition:
-The pointer 'count' points to a valid integer that represents the number of students to be read.
-Postcondition:
-The pointer 'count' is updated to reflect the actual number of students read.
-The function returns a pointer to a dynamically allocated array of struct student objects, containing the information of the read students.
-Memory is allocated for the array of students, and it is guaranteed to be a valid memory block.
-*/
 
 struct student *read_students(int *count)
     //@ requires *count |-> _;

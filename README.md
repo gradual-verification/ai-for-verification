@@ -19,6 +19,12 @@
 * [viper link](https://www.pm.inf.ethz.ch/research/viper.html)
 * [viper tutorial](https://viper.ethz.ch/tutorial/)
 
+## mimic user behavior
+* [FAQ for writing the mimic user behavior](https://docs.google.com/document/d/1tlnr1CvUrPeCGGVXcCLwu28nN646ZoPXhN_lbsXuCQ4/edit?usp=sharing)
+## codellama
+* [prompt web](https://chat.tune.app/?ref=promptengineering.org)
+
+
 
 
 

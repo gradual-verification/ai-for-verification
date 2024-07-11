@@ -6,7 +6,16 @@ struct node {
     void *value;
 };
 
+/*@
 
+predicate map(struct node *n; list<pair<void *, void *> > entries) =
+    n == 0 ?
+        entries == nil
+    :
+        n->next |-> ?next &*& n->key |-> ?key &*& n->value |-> ?value &*& malloc_block_node(n) &*&
+        map(next, ?entriesTail) &*& entries == cons(pair(key, value), entriesTail);
+
+@*/
 /**
  * Description:
  * The `map_nil` function returns a null pointer, indicating the end of a mapped list.
@@ -50,7 +59,74 @@ void map_dispose(struct node *map)
     }
 }
 
+typedef bool equalsFuncType/*@ (list<void *> keys, void *key00, list<void *> eqKeys, predicate() p) @*/(void *key, void *key0);
+    //@ requires p() &*& mem(key, keys) == true &*& key0 == key00;
+    //@ ensures p() &*& result == contains(eqKeys, key);
 
+/*@
+
+fixpoint bool eq<t>(unit u, t x, t y) {
+    switch (u) {
+        case unit: return x == y;
+    }
+}
+
+fixpoint bool contains<t>(list<t> xs, t x) {
+    switch (xs) {
+        case nil: return false;
+        case cons(x0, xs0): return x0 == x || contains(xs0, x);
+    }
+}
+
+fixpoint bool is_suffix_of<t>(list<t> xs, list<t> ys) {
+    switch (ys) {
+        case nil: return xs == ys;
+        case cons(y, ys0): return xs == ys || is_suffix_of(xs, ys0);
+    }
+}
+
+lemma void is_suffix_of_mem<t>(list<t> xs, list<t> ys, t y)
+    requires is_suffix_of(xs, ys) == true &*& mem(y, xs) == true;
+    ensures mem(y, ys) == true;
+{
+    switch (ys) {
+        case nil:
+        case cons(y0, ys0):
+            if (xs == ys) {
+            } else {
+                if (y0 == y) {
+                } else {
+                    is_suffix_of_mem(xs, ys0, y);
+                }
+            }
+    }
+}
+
+lemma void is_suffix_of_trans<t>(list<t> xs, list<t> ys, list<t> zs)
+    requires is_suffix_of(xs, ys) == true &*& is_suffix_of(ys, zs) == true;
+    ensures is_suffix_of(xs, zs) == true;
+{
+    switch (zs) {
+        case nil:
+        case cons(z, zs0):
+            if (zs == ys) {
+            } else {
+                is_suffix_of_trans(xs, ys, zs0);
+            }
+    }
+}
+
+lemma_auto void is_suffix_of_refl<t>(list<t> xs)
+    requires true;
+    ensures is_suffix_of(xs, xs) == true;
+{
+    switch (xs) {
+        case nil:
+        case cons(x, xs0):
+    }
+}
+
+@*/
 /**
  * Description:
  * The `map_contains_key` function checks if the given key exists in the map by recursively traversing through the map nodes.
@@ -81,7 +157,24 @@ struct foo {
     int value;
 };
 
+/*@
 
+predicate foo(pair<struct foo *, int> fv;) =
+    switch (fv) {
+        case pair(f, v): return f->value |-> v;
+    };
+
+predicate_ctor foos_ctor(list<pair<struct foo *, int> > fvs, struct foo *f, int value)() =
+    foreach(fvs, foo) &*& f->value |-> value;
+
+fixpoint b assoc<a, b>(list<pair<a, b> > xys, a x) {
+    switch (xys) {
+        case nil: return default_value;
+        case cons(xy, xys0): return fst(xy) == x ? snd(xy) : assoc(xys0, x);
+    }
+}
+
+@*/
 /**
  * Description:
  * The `foo_equals` function compares two foo structures for equality based on their `value` members.
@@ -105,6 +198,8 @@ bool foo_equals(struct foo *f1, struct foo *f2)
  * @return Pointer to the newly created foo structure.
  */
 struct foo *create_foo(int value);
+//@ requires true;
+//@ ensures result->value |-> value &*& malloc_block_foo(result);
 {
     struct foo *foo = malloc(sizeof(struct foo));
     if (foo == 0) abort();
@@ -113,6 +208,8 @@ struct foo *create_foo(int value);
 }
 
 int main()
+    //@ requires true;
+    //@ ensures true;
 {
     struct foo *foo1 = create_foo(100);
     struct foo *foo2 = create_foo(200);

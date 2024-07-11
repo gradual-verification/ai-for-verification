@@ -8,6 +8,33 @@ struct node {
     int count;
 };
 
+/*@
+
+predicate subtree(struct node *root, struct node *parent, int count)
+    requires
+        root == 0 ?
+            count == 0
+        :
+            root->left |-> ?left &*& root->right |-> ?right &*& root->parent |-> parent &*& root->count |-> count &*& malloc_block_node(root) &*&
+            subtree(left, root, ?leftCount) &*& subtree(right, root, ?rightCount) &*& count == 1 + leftCount + rightCount;
+
+predicate context(struct node *node, struct node *parent, int count)
+    requires
+        parent == 0 ?
+            emp
+        :
+            parent->left |-> ?left &*& parent->right |-> ?right &*& parent->parent |-> ?grandparent &*& parent->count |-> ?parentCount &*& malloc_block_node(parent) &*&
+            context(parent, grandparent, parentCount) &*&
+            (node == left ? 
+                 subtree(right, parent, ?rightCount) &*& parentCount == 1 + count + rightCount
+             :
+                 node == right &*& subtree(left, parent, ?leftCount) &*& parentCount == 1 + count + leftCount
+            );
+
+predicate tree(struct node *node)
+    requires context(node, ?parent, ?count) &*& subtree(node, parent, count);
+
+@*/
 
 void abort();
     //@ requires true;
@@ -31,6 +58,7 @@ void abort();
  * - The function then returns a pointer to the newly created and initialized node.
  */
 struct node *create_tree()
+  
 {
     struct node *n = malloc(sizeof(struct node));
     if (n == 0) {
@@ -63,6 +91,7 @@ struct node *create_tree()
  * - Finally, it returns the result.
  */
 int subtree_get_count(struct node *node)
+   
 {
     int result = 0;
     

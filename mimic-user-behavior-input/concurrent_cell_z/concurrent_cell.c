@@ -90,19 +90,7 @@ predicate cell(struct cell* c, fixpoint(trace, bool) allowed;) =
 predicate observed(struct cell* c, trace trace) =
   [_]c->id |-> ?id &*& is_prefix_handle(?h, id, trace);
 @*/
-/***
- * Description:
-This function creates a new cell object and initializes its fields. It also associates a mutex with the cell to enable thread-safe access.
 
-Specification:
-
-Precondition:
-There exists a fixed-point function  that determines whether certain operations are permitted. 
-The function allowed must evaluate to true when applied to the value zero.
-Postcondition:
-If the function returns NULL, it indicates that memory allocation failed. Otherwise, 
-the function ensures that the returned cell object satisfies the cell predicate and has been observed with the value zero.
-**/
 struct cell* cell_create()
   //@ requires exists<fixpoint(trace, bool)>(?allowed) &*& allowed(zero) == true;
   //@ ensures result == 0 ? true : cell(result, allowed) &*& observed(result, zero);
@@ -128,21 +116,7 @@ typedef lemma void inc_allowed(fixpoint(trace, bool) allowed)(trace t);
   requires allowed(t) == true;
   ensures allowed(inc(t)) == true;
 @*/
-/**
- * Specification:
 
-Precondition:
-The function is invoked with a pointer c to a cell object.
-There exists a fractional permission f representing ownership of the cell object.
-The cell object satisfies the cell predicate with a permission function allowed.
-The increment operation is allowed according to the function is_inc_allowed, which is consistent with the permission function allowed.
-The cell object has been observed with the trace trace0.
-Postcondition:
-Upon completion, the function ensures that the cell object remains unchanged except for the incremented value.
-The permission function allowed remains consistent with the cell object's state.
-The trace of observed changes to the cell object is updated to reflect the increment operation.
-The trace of observed changes is a prefix of the previous trace.
-*/
 void increment(struct cell* c)
   //@ requires [?f]cell(c, ?allowed) &*& is_inc_allowed(?lem, allowed) &*& observed(c, ?trace0);
   //@ ensures [f]cell(c, allowed) &*& is_inc_allowed(lem, allowed) &*& observed(c, ?trace) &*& is_prefix(trace0, trace) == true;
@@ -180,24 +154,7 @@ typedef lemma void dec_allowed(fixpoint(trace, bool) allowed)(trace t);
   ensures allowed(dec(t)) == true;
 @*/
 
-/**
- * Description:
-This function decrements the value stored in a cell object while ensuring thread safety through mutex locking. It also observes changes to the cell's state and ensures that the decrement operation is allowed according to a specified condition.
 
-Specification:
-
-Precondition:
-The function is invoked with a pointer c to a cell object.
-There exists a fractional permission f representing ownership of the cell object.
-The cell object satisfies the cell predicate with a permission function allowed.
-The decrement operation is allowed according to the function is_dec_allowed, which is consistent with the permission function allowed.
-The cell object has been observed with the trace trace0.
-Postcondition:
-Upon completion, the function ensures that the cell object remains unchanged except for the decremented value.
-The permission function allowed remains consistent with the cell object's state.
-The trace of observed changes to the cell object is updated to reflect the decrement operation.
-The trace of observed changes is a prefix of the previous trace.
-*/
 
 void decrement(struct cell* c)
   //@ requires [?f]cell(c, ?allowed) &*& is_dec_allowed(?lem, allowed) &*& observed(c, ?trace0);
@@ -229,22 +186,7 @@ void decrement(struct cell* c)
   //@ close lock_invariant(c, allowed)();
   mutex_release(c->mutex);
 }
-/**The function is invoked with a pointer c to a cell object.
-The cell object satisfies the cell predicate with a permission function allowed.
-The CAS operation is allowed according to the function is_cas_allowed, which is consistent with the permission function allowed.
-The cell object has been observed with the trace trace0.
-Postcondition:
-Upon completion, the function ensures that the cell object remains unchanged if the CAS operation fails.
-If the CAS operation succeeds, the cell object's value is updated to the new value.
-The permission function allowed remains consistent with the cell object's state.
-The trace of observed changes to the cell object is updated to reflect the CAS operation.
-The trace of observed changes is a prefix of the previous trace.
-The function returns the original value stored in the cell object before the CAS operation.*/
-/*@
-typedef lemma void cas_allowed(fixpoint(trace, bool) allowed, int old, int new)(trace t);
-  requires allowed(t) == true;
-  ensures allowed(cas_(old, new, t)) == true;
-@*/
+
 
 int cas(struct cell* c, int old, int new)
   //@ requires [?f]cell(c, ?allowed) &*& is_cas_allowed(?lem, allowed, old, new) &*& observed(c, ?trace0);
@@ -282,20 +224,7 @@ int cas(struct cell* c, int old, int new)
   mutex_release(c->mutex);
   return res;
 }
-/**
- * Specification:
 
-Precondition:
-The function is invoked with a pointer c to a cell object.
-The cell object satisfies the cell predicate with a permission function allowed.
-The cell object has been observed with the trace trace0.
-Postcondition:
-Upon completion, the function ensures that the cell object remains unchanged.
-The permission function allowed remains consistent with the cell object's state.
-The observed changes to the cell object are updated to reflect the read operation.
-The observed changes to the cell object form a prefix of the previous trace.
-The value returned by the function corresponds to the value stored in the cell object at the time of observation.
-*/
 int get(struct cell* c)
   //@ requires [?f]cell(c, ?allowed) &*& observed(c, ?trace0);
   //@ ensures [f]cell(c, allowed) &*& observed(c, ?trace) &*& allowed(trace) == true &*& execute_trace(trace) == result &*& is_prefix(trace0, trace) == true;
@@ -351,20 +280,7 @@ lemma void prefix_smaller(trace t1, trace t2)
   }
 }
 @*/
-/**
- * Description:
-This function enforces a constraint where the value stored in a cell object can only be incremented.
 
-Specification:
-
-Precondition:
-The function is invoked with a pointer c to a cell object.
-The cell object satisfies the cell predicate with a permission function incr_only.
-The cell object has been observed with the trace trace0.
-Postcondition:
-Upon completion, the function ensures that the permission function incr_only remains consistent with the cell object's state.
-No observable changes are made to the cell object's state.
-*/
 void only_allow_incrementing(struct cell* c)
   //@ requires [?f]cell(c, incr_only) &*& observed(c, ?trace0);
   //@ ensures [f]cell(c, incr_only);

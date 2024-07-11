@@ -9,6 +9,11 @@ struct arraylist {
   int capacity;
 };
 
+/*@
+predicate arraylist(struct arraylist *a; list<void*> vs) =
+  a->data |-> ?data &*& a->size |-> ?size &*& a->capacity |-> ?capacity &*& malloc_block_arraylist(a) &*&
+  malloc_block_pointers(data, capacity) &*& data[0..size] |-> vs &*& data[size..capacity] |-> _;
+@*/
 
 
 
@@ -48,6 +53,8 @@ void *list_get(struct arraylist *a, int i)
 
 //description: get the length of the arraylist a
 int list_length(struct arraylist *a)
+  //@ requires arraylist(a, ?vs);
+  //@ ensures arraylist(a, vs) &*& result == length(vs);
 {
   return a->size;
 }
@@ -68,6 +75,7 @@ The function uses various assertions and mathematical
 **/
 
 void list_add(struct arraylist *a, void *v)
+
 {
   int size = 0;
   void** data = 0;
@@ -139,6 +147,8 @@ void list_dispose(struct arraylist* a)
 
 
 int main()
+  //@ requires true;
+  //@ ensures true;
 {
   struct arraylist* a = create_arraylist();
   void* tmp = 0;
