@@ -1,49 +1,12 @@
 #include "stdlib.h"
 #include "bool.h"
-#include "lists.h"
+#include "lists.h"  
 
-/*@
-
-lemma void lseg_append(void *n1)
-    requires lseg(n1, ?n2, ?xs0, ?p) &*& lseg(n2, ?n3, ?xs1, p) &*& lseg(n3, 0, ?xs2, p);
-    ensures lseg(n1, n3, append(xs0, xs1), p) &*& lseg(n3, 0, xs2, p);
-{
-    open lseg(n1, n2, xs0, p);
-    if (n1 == n2) {
-    } else {
-        assert pointer(n1, ?n1Next);
-        lseg_append(n1Next);
-        if (n3 != 0) {
-            open lseg(n3, 0, xs2, p);
-            pointer_distinct(n1, n3);
-            close lseg(n3, 0, xs2, p);
-        }
-        close lseg(n1, n3, append(xs0, xs1), p);
-    }
-}
-
-lemma void lseg_append_final(void *n1)
-    requires lseg(n1, ?n2, ?xs0, ?p) &*& lseg(n2, 0, ?xs1, p);
-    ensures lseg(n1, 0, append(xs0, xs1), p);
-{
-    close lseg(0, 0, nil, p);
-    lseg_append(n1);
-    open lseg(0, 0, nil, p);
-}
-
-lemma void lseg_add(void *n1)
-    requires lseg(n1, ?n2, ?xs0, ?p) &*& pointer(n2, ?n3) &*& p(n2) &*& lseg(n3, 0, ?xs1, p);
-    ensures lseg(n1, n3, append(xs0, cons(n2, nil)), p) &*& lseg(n3, 0, xs1, p) &*& append(xs0, cons(n2, xs1)) == append(append(xs0, cons(n2, nil)), xs1);
-{
-    open lseg(n3, 0, xs1, p);
-    close lseg(n3, n3, nil, p);
-    if (n3 != 0) pointer_distinct(n2, n3);
-    close lseg(n2, n3, cons(n2, nil), p);
-    close lseg(n3, 0, xs1, p);
-    lseg_append(n1);
-    append_assoc(xs0, cons(n2, nil), xs1);
-}
-
+/*@ predicate lseg1(void *first, void *last, list<void *> xs, predicate(void *) p) =
+    first == last ?
+        xs == nil
+    :
+        pointer(first, ?next) &*& lseg1(next, last, ?xs0, p) &*& xs == cons(first, xs0) &*& p(first);
 @*/
 
 void lseg_remove(void *phead, void *element)

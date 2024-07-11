@@ -8,9 +8,12 @@ struct counter {
 
 static struct counter *c;
 
+//no counter_f defined, defined my own one
+//@ predicate counter_f(struct counter* c, int v) = c->f |-> v
+
 void m()
-    //@ requires integer(&x, 7) &*& pointer(&c, ?ctr) &*& counter_f(ctr, ?v);
-    //@ ensures integer(&x, 8) &*& pointer(&c, ctr) &*& counter_f(ctr, v + 1);
+//@ requires x == 7 &*& counter_f(c, ?v)
+//@ ensures x == 8 &*& counter_f(c, v+1)
 {
     int y = x;
     x = y + 1;
