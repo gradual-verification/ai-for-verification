@@ -4,11 +4,6 @@ struct account
     int limit;
     int balance;
 };
-/*@
-predicate account_pred(struct account *myAccount, int theLimit, int theBalance) =
-myAccount->limit |-> theLimit &*& myAccount->balance |-> theBalance
-&*& malloc_block_account(myAccount);
-@*/
 
 /***
  * Description:
