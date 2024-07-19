@@ -1,7 +1,7 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include "malloc.h"
-#include "bool.h"
+#include <stdbool.h>
 #include "assert.h"
 
 /* Description:
@@ -10,7 +10,7 @@
       - `char* string`: The string to count words in.
       - `bool inword`: A boolean flag indicating whether the function is currently inside a word or not.
 */
-This function calculates the word count in a given string. 
+
 int wc(char* string, bool inword)
 {
   char head = * string;

@@ -1,21 +1,22 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include "malloc.h"
-#include "bool.h"
+#include <stdbool.h>
 #include "assert.h"
+
 
 /*@
 fixpoint int wcount(list<char> cs, bool inword) {
   switch(cs) {
-    case nil: return 0;
+    case nil: return inword ? 1 : 0;
     case cons(h, t): return 0 == h ? (inword ? 1 : 0) : (' ' == h ? ((inword ? 1 : 0) + wcount(t, false)) : wcount(t, true));
   }
 }
 @*/
 
 int wc(char* string, bool inword)
-  //@ requires [?f]chars(string, ?cs) &*& mem('\0', cs) == true;  
-  //@ ensures [f]chars(string, cs) &*& result == wcount(cs, inword);
+  //@ requires [?f]string(string, ?cs);
+  //@ ensures [f]string(string, cs) &*& result == wcount(cs, inword);
 {
   char head = * string;
   if(head == 0) {
@@ -40,7 +41,7 @@ void test()
 }
 
 int main(int argc, char** argv) //@ : main
-  //@ requires 0 <= argc &*& [_]char_array(argv, argc);
+  //@ requires 0 <= argc &*& [_]argv(argv, argc, _);
   //@ ensures true;
 {
   bool inword = false; struct file* fp = 0; char* buff = 0; int total = 0; char* res = 0;

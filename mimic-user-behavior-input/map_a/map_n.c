@@ -58,7 +58,7 @@ void dispose(struct node *l)
 }
 
 
-typedef int mapfunc(void *data, int x);
+typedef int (* mapfunc)(void *data, int x);
 
 /* Description
     - Behavior: This function maps a custom mapping function `f` over the values in the linked list `list` and creates a new linked list with the transformed values.
@@ -67,7 +67,7 @@ typedef int mapfunc(void *data, int x);
         - `f`: A pointer to the mapping function to be applied.
         - `data`: Additional data to be passed to the mapping function.
 */
-struct node *fmap(struct node *list, mapfunc *f, void *data)
+struct node *fmap(struct node *list, mapfunc f, void *data)
 {
     if (list == 0) {
         return 0;
@@ -87,7 +87,7 @@ struct node *fmap(struct node *list, mapfunc *f, void *data)
 */
 int plusOneFunc(void *data, int x)
 {
-    if (x == 2147483647) abort();
+    if (x == INT_MAX) abort();
     return x + 1;
 }
 
