@@ -6,7 +6,7 @@ Start
 	1. Prompt Engineering in Python: Generate a Python code prompt.
 	2. Run VeriFast: Execute VeriFast to verify the result.
 	3. Verification Successful?
-		Yes: Proceed to the next step.
+		Yes: Proceed to the End.
 		No: Go back to step 2 and re-engineer the prompt.
 	4. Send Verified Result to GPT: Submit the verified result to GPT for review.
 	5. GPT Fixes Code: GPT modifies and fixes the code.
@@ -14,7 +14,7 @@ End
 
 flowchart::
 
- Start
+   Start
      |
      v
   Prompt Engineering in Python
@@ -28,11 +28,14 @@ Verification Successful?
 Yes       No
   |         |
   v         |
+  End       |
+            |
 Send Verified Result to GPT
             |
   GPT Fixes Code
      |
      v
     End
+
 
 
