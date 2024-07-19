@@ -4,7 +4,7 @@ from openai import OpenAI
 import stat
 
 # TODO: your API key for ChatGPT
-API_KEY = "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"
+API_KEY = ""
 
 # The question that you want to ask ChatGPT
 GPT_PROMPT = ("You are a verifast expert. Given these files, there are many functions in the files, "
