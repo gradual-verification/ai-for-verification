@@ -100,6 +100,7 @@ fixpoint bool my_eq_func(unit un, void* v1, void* v2) {
 
 bool my_equals(void* v1, void* v2) //@: equals
   //@ requires equals_pre(my_equals)(v1, v2, ?eq_func);
+  // TODO: need to fix the error below
   //@ ensures equals_post(my_equals)(v1, v2, eq_func) &*& result == eq_func(unit, v1, v2);
 {
   //@ open equals_pre(my_equals)(v1, v2, eq_func);
