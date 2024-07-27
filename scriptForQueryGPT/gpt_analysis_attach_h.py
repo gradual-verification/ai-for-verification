@@ -8,7 +8,7 @@ from openai import OpenAI
 # TODO: your api key for chatgpt
 API_KEY = ""
 # the question that you want to ask ChatGPT
-GPT_PROMPT = f"I provide .c file and the references .h file for this .c, could you generate a verifast verification only for the .c file?"
+GPT_PROMPT = f"I provide .c file and the references .h file for this .c, could you generate the verifast verification only for the .c file for me?"
 # the code folder path that you want to ask CHATGPT for analyse, should be full path
 FOLDER_PATH = ''
 # chatgot model, all models are listed here https://platform.openai.com/docs/models
@@ -42,9 +42,8 @@ def analyze_code(header_content, content):
     client = OpenAI(
         api_key=API_KEY,
     )
-
-    print(header_content)
-    print("\n")
+    # print(header_content)
+    # print("\n")
     chat_completion = client.chat.completions.create(
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
@@ -53,7 +52,7 @@ def analyze_code(header_content, content):
         ],
         model=GPT_MODEL,
     )
-    print(chat_completion)
+    # print(chat_completion)
     return chat_completion.choices[0].message.content
 
 
