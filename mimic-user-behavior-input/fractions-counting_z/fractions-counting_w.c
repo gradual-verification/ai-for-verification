@@ -38,13 +38,11 @@ lemma void dispose_counter(struct C* c);
   ensures c->x |-> x;
 @*/
 
-bool random();
-//@ requires emp;
-//@ ensures emp;
+
 
 int main() 
-  //@ requires emp;
-  //@ ensures emp;
+  //@ requires true;
+  //@ ensures true;
 {
   struct C* c = create_C(5);
 
