@@ -15,8 +15,7 @@ struct person {
   - **Description:** Allocates and initializes a new `person` struct with no spouse.
   - **Parameters:** None.
   - **Returns:** A pointer to the newly created `person` struct.
-  - **Requires:** No specific preconditions.
-  - **Ensures:** The new `person` is not `0`, has no spouse, and the returned pointer is valid.
+
 */
 struct person *create_person()
   //@ requires true;
@@ -35,8 +34,7 @@ struct person *create_person()
   - **Parameters:** 
     - `this`: Pointer to the first `person`.
     - `other`: Pointer to the second `person`.
-  - **Requires:** Both `this` and `other` have no spouse.
-  - **Ensures:** The two `person` instances are married to each other, with mutual spouse pointers set.
+ 
 */
 void marry(struct person *this, struct person *other)
   //@ requires person(this, 0) &<& person(other, 0);
