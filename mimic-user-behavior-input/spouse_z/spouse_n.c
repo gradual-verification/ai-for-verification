@@ -11,10 +11,10 @@ struct person {
 
 
 /*
-  **Function `create_person`:**
-  - **Description:** Allocates and initializes a new `person` struct with no spouse.
-  - **Parameters:** None.
-  - **Returns:** A pointer to the newly created `person` struct.
+  Function `create_person`:
+  - Description: Allocates and initializes a new `person` struct with no spouse.
+  - Parameters: None.
+  - Returns: A pointer to the newly created `person` struct.
 
 */
 struct person *create_person()
@@ -47,13 +47,12 @@ void marry(struct person *this, struct person *other)
 }
 
 /*
-  **Function `person_get_spouse`:**
-  - **Description:** Retrieves the spouse of the given `person`.
-  - **Parameters:** 
+  Function `person_get_spouse`:
+  - Description: Retrieves the spouse of the given `person`.
+  - Parameters: 
     - `this`: Pointer to the `person` whose spouse is to be retrieved.
-  - **Returns:** A pointer to the spouse, or `0` if unmarried.
-  - **Requires:** The `person` instance is valid.
-  - **Ensures:** The `person` remains valid and the returned value is the current spouse.
+  - Returns:** A pointer to the spouse, or `0` if unmarried.
+ 
 */
 struct person* person_get_spouse(struct person* this)
   //@ requires person(this, ?spouse);
@@ -65,12 +64,10 @@ struct person* person_get_spouse(struct person* this)
 }
 
 /*
-  **Function `divorce`:**
-  - **Description:** Divorces two married `person` instances by setting their spouse pointers to `0`.
-  - **Parameters:** 
+  Function `divorce`:
+  - Description:** Divorces two married `person` instances by setting their spouse pointers to `0`.
+  - Parameters:
     - `this`: Pointer to one `person` in the marriage.
-  - **Requires:** Both `person` instances are married to each other.
-  - **Ensures:** Both `person` instances are no longer married and have no spouse.
 */
 void divorce(struct person* this)
   //@ requires person(this, ?other) &<& person(other, this);
@@ -83,12 +80,12 @@ void divorce(struct person* this)
 }
 
 /*
-  **Function `die`:**
-  - **Description:** Handles the death of a `person` by freeing the memory and setting the spouse's spouse pointer to `0` if married.
-  - **Parameters:** 
+  Function `die`:
+  - Description:** Handles the death of a `person` by freeing the memory and setting the spouse's spouse pointer to `0` if married.
+  - Parameters:
     - `this`: Pointer to the `person` who dies.
-  - **Requires:** The `person` instance and their spouse (if any) are valid.
-  - **Ensures:** If the `person` had a spouse, the spouse's spouse pointer is set to `0`. The `person` instance is freed.
+  - Requires: The `person` instance and their spouse (if any) are valid.
+  - Ensures: If the `person` had a spouse, the spouse's spouse pointer is set to `0`. The `person` instance is freed.
 */
 void die(struct person *this)
 
@@ -103,12 +100,11 @@ void die(struct person *this)
 }
 
 /*
-  **Function `main`:**
-  - **Description:** Demonstrates creating `person` instances, marrying, divorcing, and handling deaths. Includes basic operations to test the functionality of the `person` struct and its associated functions.
-  - **Parameters:** None.
-  - **Returns:** Always returns `0`.
-  - **Requires:** No specific preconditions.
-  - **Ensures:** The operations on `person` instances are demonstrated, and all allocated memory is freed by the end.
+  Function `main`:
+  - **Description: Demonstrates creating `person` instances, marrying, divorcing, and handling deaths. Includes basic operations to test the functionality of the `person` struct and its associated functions.
+  - Parameters: None.
+  - Returns: Always returns `0`.
+ 
 */
 int main() //@ : main
 {
