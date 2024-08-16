@@ -26,7 +26,7 @@ predicate lseg(struct node *n1, struct node *n2; list<int> v) =
   n1 == n2 ? true &*& v == nil : node(n1, ?_n, ?h) &*& lseg(_n, n2, ?t) &*& v == cons(h, t);
 
 predicate llist(struct llist *list; list<int> v) =
-  list->first |-> ?_f &*& list->last |-> ?_l &*& lseg(_f, _l, v) &*& node(_l, _, _) &*& malloc_block_llist(list);
+  list->first |-> ?_f &*& list->last |-> ?_l &*& lseg(_f, _l, v) &*& node(_l, _, _);
 
 
   predicate llist_functional(struct llist *list; list<int> v) =
