@@ -32,13 +32,7 @@ predicate llist(struct llist *list; list<int> v) =
   predicate llist_functional(struct llist *list; list<int> v) =
   list->first |-> ?_f &*& list->last |-> ?_l &*& lseg(_f, _l, v) &*& node(_l, _, _);
 @*/
-/**
- * Description:
- * The `create_llist` function dynamically allocates memory for a linked list structure
- * and initializes it with an empty node.
- *
- * @return Pointer to the newly created linked list structure.
- */
+
 struct llist *create_llist()
 //@ requires emp;
   //@ ensures llist(result, nil);
@@ -253,8 +247,8 @@ int llist_removeFirst(struct llist *l)
 }
 
 void main0()
- //@ requires emp;
-  //@ ensures emp;
+ //@ requires true;
+  //@ ensures true;
 {
   struct llist *l = create_llist();
   llist_add(l, 10);
@@ -269,8 +263,8 @@ void main0()
 }
 
 int main() //@ : main
-  //@ requires emp;
-  //@ ensures emp;
+  //@ requires true;
+  //@ ensures true;
 {
   struct llist *l1 = create_llist();
   struct llist *l2 = create_llist();
@@ -296,15 +290,7 @@ struct iter {
     struct node *current;
 };
 
-/*@
 
-predicate llist_with_node(struct llist *list, list<int> v0, struct node *n, list<int> vn) =
-  list->first |-> ?f &*& list->last |-> ?l &*& malloc_block_llist(list) &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
-
-predicate iter(struct iter *i, real frac, struct llist *l, list<int> v0, list<int> v) =
-  i->current |-> ?n &*& [frac]llist_with_node(l, v0, n, v) &*& malloc_block_iter(i);
-
-@*/
 
 struct iter *llist_create_iter(struct llist *l)
 //requires l!=NULL;
@@ -338,24 +324,7 @@ int iter_next(struct iter *i)
     return value;
 }
 
-/*@
 
-lemma void lseg2_lseg_append(struct node *n)
-  requires [?frac]lseg2(?f, n, ?l, ?vs1) &*& [frac]lseg(n, l, ?vs2);
-  ensures [frac]lseg(f, l, append(vs1, vs2));
-{
-  open lseg2(f, n, l, vs1);
-  switch (vs1) {
-    case nil:
-    case cons(h, t):
-      open [frac]node(f, ?next, h);
-      lseg2_lseg_append(n);
-      close [frac]node(f, next, h);
-      close [frac]lseg(f, l, append(vs1, vs2));
-  }
-}
-
-@*/
 
 void iter_dispose(struct iter *i)
 //requires i!=NULL;
@@ -366,8 +335,8 @@ void iter_dispose(struct iter *i)
 }
 
 int main2()
-    //@ requires emp;
-    //@ ensures emp;
+    //@ requires true;
+    //@ ensures true;
 {
     struct llist *l = create_llist();
     llist_add(l, 5);
