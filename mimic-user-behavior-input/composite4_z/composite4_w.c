@@ -43,12 +43,7 @@ predicate tree(struct node * node, tree t) =
 
 @*/
 
-/*
-  Weaker Specification:
-  - Description: Creates a new node in the tree with the specified parent node, and initializes its left and right children as empty.
-  - Weaker Preconditions: No specific preconditions.
-  - Weaker Postconditions: Returns a pointer to the newly created node.
-*/
+
 struct node *create_node(struct node *p)
   //@ requires emp;
   /*@ ensures subtree(result, p, tree(result, empty, empty)); @*/
@@ -63,14 +58,9 @@ struct node *create_node(struct node *p)
   return n;
 }
 
-/*
-  Weaker Specification:
-  - Description: Creates a new tree with a single root node.
-  - Weaker Preconditions: No specific preconditions.
-  - Weaker Postconditions: Returns a pointer to the root node of the tree.
-*/
+
 struct node *create_tree()
-  //@ requires emp;
+  //@ requires true;
   /*@ ensures subtree(result, 0, tree(result, empty, empty)); @*/
 {
   struct node *n = create_node(0);
@@ -78,12 +68,7 @@ struct node *create_tree()
   return n;
 }
 
-/*
-  Weaker Specification:
-  - Description: Retrieves the count of nodes in the subtree rooted at the specified node.
-  - Weaker Preconditions: The subtree rooted at `node` is valid.
-  - Weaker Postconditions: Returns the count of nodes in the subtree.
-*/
+
 int subtree_get_count(struct node *node)
   //@ requires subtree(node, ?parent, ?nodes);
   /*@ ensures subtree(node, parent, nodes) &*& result == tcount(nodes); @*/
@@ -95,12 +80,7 @@ int subtree_get_count(struct node *node)
   return result;
 }
 
-/*
-  Weaker Specification:
-  - Description: Updates the count of nodes in the subtree for all ancestor nodes starting from the specified node.
-  - Weaker Preconditions: The context of the node and its parent is valid.
-  - Weaker Postconditions: The context is updated with the correct count.
-*/
+
 void fixup_ancestors(struct node *n, struct node *p, int count)
   //@ requires subtree(n, p, ?t);
   //@ ensures subtree(n, p, t);
@@ -127,12 +107,7 @@ void fixup_ancestors(struct node *n, struct node *p, int count)
   }
 }
 
-/*
-  Weaker Specification:
-  - Description: Adds a new left child to the specified node in the tree.
-  - Weaker Preconditions: The left subtree of `node` is empty.
-  - Weaker Postconditions: Returns a pointer to the newly added left child.
-*/
+
 struct node *tree_add_left(struct node *node)
   //@ requires subtree(node, ?parent, ?t);
   /*@ ensures subtree(result, node, tree(result, empty, empty)); @*/
@@ -146,12 +121,7 @@ struct node *tree_add_left(struct node *node)
   return n;
 }
 
-/*
-  Weaker Specification:
-  - Description: Adds a new right child to the specified node in the tree.
-  - Weaker Preconditions: The right subtree of `node` is empty.
-  - Weaker Postconditions: Returns a pointer to the newly added right child.
-*/
+
 struct node *tree_add_right(struct node *node)
   //@ requires subtree(node, ?parent, ?t);
   /*@ ensures subtree(result, node, tree(result, empty, empty)); @*/
@@ -165,12 +135,7 @@ struct node *tree_add_right(struct node *node)
   return n;
 }
 
-/*
-  Weaker Specification:
-  - Description: Retrieves the parent node of the specified node in the tree.
-  - Weaker Preconditions: `node` is not the root of the tree.
-  - Weaker Postconditions: Returns the parent node of `node`.
-*/
+
 struct node *tree_get_parent(struct node *node)
   //@ requires subtree(node, ?parent, ?t);
   /*@ ensures subtree(node, parent, t) &*& result == parent; @*/
@@ -179,15 +144,10 @@ struct node *tree_get_parent(struct node *node)
   return p;
 }
 
-/*
-  Weaker Specification:
-  - Description: Recursively frees all memory associated with the subtree rooted at the specified node.
-  - Weaker Preconditions: The subtree rooted at `node` is valid.
-  - Weaker Postconditions: All memory associated with the subtree is freed.
-*/
+
 void subtree_dispose(struct node *node)
   //@ requires subtree(node, _, _);
-  //@ ensures emp;
+  //@ ensures true;
 {
   if (node != 0) {
     {
@@ -202,28 +162,18 @@ void subtree_dispose(struct node *node)
   }
 }
 
-/*
-  Weaker Specification:
-  - Description: Frees all memory associated with the tree rooted at the specified node.
-  - Weaker Preconditions: The tree rooted at `node` is valid.
-  - Weaker Postconditions: All memory associated with the tree is freed.
-*/
+
 void tree_dispose(struct node *node)
   //@ requires subtree(node, _, _);
-  //@ ensures emp;
+  //@ ensures true;
 {
   subtree_dispose(node);
 }
 
-/*
-  Weaker Specification:
-  - Description: Main function that creates a tree, adds left and right children, retrieves the parent, and disposes of the tree.
-  - Weaker Preconditions: No specific preconditions.
-  - Weaker Postconditions: No specific postconditions.
-*/
+
 int main()
-  //@ requires emp;
-  //@ ensures emp;
+  //@ requires true;
+  //@ ensures truep;
 {
   struct node *node = create_tree();
   node = tree_add_left(node);
