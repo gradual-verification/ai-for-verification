@@ -11,17 +11,7 @@ struct node {
 
 /*@
 
-inductive tree =
-    empty
-  | tree(struct node *, tree, tree);
 
-fixpoint int tcount(tree nodes) {
-  switch (nodes) {
-    case empty: return 0;
-    case tree(root, left, right):
-      return 1 + tcount(left) + tcount(right);
-  }
-}
 
 predicate subtree(struct node * root, struct node * parent, tree t) =
   switch (t) {
@@ -33,7 +23,6 @@ predicate subtree(struct node * root, struct node * parent, tree t) =
         root->right |-> ?right &*&
         root->parent |-> parent &*&
         root->count |-> tcount(t) &*&
-        malloc_block_node(root) &*&
         subtree(left, root, leftNodes) &*&
         subtree(right, root, rightNodes);
   };
@@ -45,7 +34,7 @@ predicate tree(struct node * node, tree t) =
 
 
 struct node *create_node(struct node *p)
-  //@ requires emp;
+  //@ requires true;
   /*@ ensures subtree(result, p, tree(result, empty, empty)); @*/
 {
   struct node *n = malloc(sizeof(struct node));
@@ -74,9 +63,9 @@ int subtree_get_count(struct node *node)
   /*@ ensures subtree(node, parent, nodes) &*& result == tcount(nodes); @*/
 {
   int result = 0;
-  //@ open subtree(node, parent, nodes);
+
   if (node != 0) { result = node->count; }
-  //@ close subtree(node, parent, nodes);
+
   return result;
 }
 
