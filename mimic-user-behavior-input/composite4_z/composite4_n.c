@@ -52,7 +52,6 @@ struct node *create_tree()
   - Ensures: Returns the count of nodes in the subtree and ensures it is non-negative.
 */
 int subtree_get_count(struct node *node)
-  
 {
   int result = 0;
  
@@ -180,7 +179,6 @@ struct node *tree_get_parent(struct node *node)
   - Ensures: All memory associated with the subtree is freed.
 */
 void subtree_dispose(struct node *node)
-
 {
   
   if (node != 0) {
@@ -204,7 +202,6 @@ void subtree_dispose(struct node *node)
   - Ensures: All memory associated with the tree is freed.
 */
 void tree_dispose(struct node *node)
- 
 {
   
   subtree_dispose(node);
@@ -218,7 +215,6 @@ void tree_dispose(struct node *node)
   - Ensures: No specific postconditions.
 */
 int main0()
-
 {
   struct node *node = create_tree();
   node = tree_add_left(node);
