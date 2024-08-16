@@ -6,19 +6,9 @@ struct person {
   struct person* spouse;
 };
 
-/*
-  Natural Language Specification:
-  - **Description:** This code defines and manipulates a `person` struct that represents an individual with a spouse. The code supports creating individuals, getting their spouse, marrying two individuals, divorcing them, and handling the death of an individual. The specification ensures correct handling of relationships, particularly maintaining mutual spousal links.
-  - **Struct `person`:** Represents an individual with a potential spouse.
-    - **Fields:**
-      - `name`: A pointer to the person's name.
-      - `spouse`: A pointer to the spouse, or `0` if unmarried.
-*/
 
-/*@
-predicate person(struct person *p, struct person *spouse) =
-  p != 0 &*& p->name |-> _ &*& (spouse == 0 ? p->spouse |-> 0 : p!=spouse &*& [1/2] p->spouse |-> spouse &<& [1/2] spouse->spouse |-> p) &<&  malloc_block_person(p);
-@*/
+
+
 
 /*
   **Function `create_person`:**
