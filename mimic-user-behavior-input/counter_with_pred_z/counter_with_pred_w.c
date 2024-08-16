@@ -13,7 +13,7 @@ predicate Counter_functional_behavior(struct Counter* c, int v) =
   c->value |-> v;
 @*/
 struct Counter* init(int v)
-//@ requires emp;
+//@ requires true;
   //@ ensures Counter(result, v);
 
 {
