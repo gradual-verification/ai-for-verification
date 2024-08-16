@@ -12,7 +12,7 @@ struct llist {
 
 /*@
 predicate node(struct node *node; struct node *next, int value) =
-  node->next |-> next &*& node->value |-> value &*& malloc_block_node(node);
+  node->next |-> next &*& node->value |-> value;
 @*/
 
 
