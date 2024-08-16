@@ -88,20 +88,7 @@ void llist_add(struct llist *list, int x)
 
 }
 
-/*@
-lemma_auto void lseg_append(struct node *n1, struct node *n2, struct node *n3)
-  requires lseg(n1, n2, ?_v1) &*& lseg(n2, n3, ?_v2) &*& node(n3, ?n3n, ?n3v);
-  ensures lseg(n1, n3, append(_v1, _v2)) &*& node(n3, n3n, n3v);
-{
-  open lseg(n1, n2, _v1);
-  switch (_v1) {
-    case nil:
-    case cons(x, v):
-      distinct_nodes(n1, n3);
-      lseg_append(n1->next, n2, n3);
-  }
-}
-@*/
+
 
 void llist_append(struct llist *list1, struct llist *list2)
  //@ requires llist(list1, ?_v1) &*& llist(list2, ?_v2);
