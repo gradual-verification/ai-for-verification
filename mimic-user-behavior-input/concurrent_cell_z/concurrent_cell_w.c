@@ -94,6 +94,9 @@ predicate cell(struct cell* c, fixpoint(trace, bool) allowed;) =
 predicate observed(struct cell* c, trace trace) =
   [_]c->id |-> ?id &*& is_prefix_handle(?h, id, trace);
 @*/
+
+
+
 /**
  * Description:
  * The cell_create function is responsible for creating and initializing a new cell structure.
@@ -120,6 +123,7 @@ typedef lemma void inc_allowed(fixpoint(trace, bool) allowed)(trace t);
   requires allowed(t) == true;
   ensures allowed(inc(t)) == true;
 @*/
+
 
 void increment(struct cell* c)
  //@ requires is_inc_allowed(?lem, allowed) &*& observed(c, ?trace0);
@@ -166,6 +170,8 @@ The cell object satisfies the cell predicate with a permission function allowed.
 The CAS operation is allowed according to the function is_cas_allowed, which is consistent with the permission function allowed.
 The cell object has been observed with the trace trace0.
 .*/
+
+
 /*@
 typedef lemma void cas_allowed(fixpoint(trace, bool) allowed, int old, int new)(trace t);
   requires allowed(t) == true;
@@ -173,10 +179,8 @@ typedef lemma void cas_allowed(fixpoint(trace, bool) allowed, int old, int new)(
 @*/
 
 int cas(struct cell* c, int old, int new)
-  
  //@ requires  is_cas_allowed(?lem, allowed, old, new) &*& observed(c, ?trace0);
   //@ ensures  is_cas_allowed(lem, allowed, old, new) &*& observed(c, ?trace) &*& allowed(trace) == true &*& is_prefix(trace0, trace) == true;
-
 {
   
   int res;
