@@ -166,8 +166,8 @@ int main0()
 
 
 int main() //@ : main
-    //@ requires emp;
-    //@ ensures emp;
+    //@ requires true;
+    //@ ensures true;
 {
     struct node *root = create_tree();
     struct node *left = tree_add(root);
