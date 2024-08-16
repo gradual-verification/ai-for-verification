@@ -5,7 +5,7 @@ struct C {
 };
 //remove the malloc block
 struct C* create_C(int x) 
-  //@ requires emp;
+  //@ requires true;
   //@ ensures result->x |-> x 
 {
   struct C* c = malloc(sizeof(struct C));
