@@ -8,7 +8,7 @@ struct person {
 
 /*@
 predicate person(struct person *p, struct person *spouse) =
-  p != 0 &*& p->name |-> _ &*& p->spouse |-> spouse &*& malloc_block_person(p);
+  p != 0 &*& p->name |-> _ &*& p->spouse |-> spouse;
 @*/
 
 
