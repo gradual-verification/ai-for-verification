@@ -1,5 +1,5 @@
 #include "stdlib.h"
-#include "bool.h"
+#include <stdbool.h>
 #include "lists.h"
 
 void lseg_remove(void *phead, void *element)

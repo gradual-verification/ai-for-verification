@@ -16,6 +16,7 @@ struct addition {
     void *operand2;
 };
 
+//TODO: need to fix the error below:
 /*@
 predicate expression(void *expression, int value) =
     integer(expression, ?tag) &*&

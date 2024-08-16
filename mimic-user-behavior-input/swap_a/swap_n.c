@@ -1,5 +1,5 @@
 #include "stdlib.h"
-#include "bool.h"
+#include <stdbool.h>
 
 /* Description:
     - Behavior: This function takes two integer pointers as parameters and swaps the values they point to.

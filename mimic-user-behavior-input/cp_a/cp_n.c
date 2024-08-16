@@ -1,7 +1,6 @@
 #include "stdlib.h"
 #include "stdio.h"
-#include "malloc.h"
-#include "bool.h"
+#include <stdbool.h>
 #include "assert.h"
 /* Description
   - Behavior: The `main` function is the entry point of the program. It takes command-line arguments `argc` and `argv`.

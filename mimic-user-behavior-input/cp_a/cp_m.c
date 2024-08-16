@@ -1,11 +1,10 @@
 #include "stdlib.h"
 #include "stdio.h"
-#include "malloc.h"
-#include "bool.h"
+#include <stdbool.h>
 #include "assert.h"
 
 int main(int argc, char** argv) //@ : main
-  //@ requires 0 <= argc &*& [_]char_array(argv, argc);
+  //@ requires 0 <= argc &*& [_]argv(argv, argc, _);
   //@ ensures true;
 {
   struct file* from = 0; struct file* to = 0; char* buffer = 0; int nb_read = 0;
