@@ -51,11 +51,7 @@ struct cell* cell_create()
   return c;
 }
 
-/*@
-typedef lemma void inc_allowed(fixpoint(trace, bool) allowed)(trace t);
-  requires allowed(t) == true;
-  ensures allowed(inc(t)) == true;
-@*/
+
 
 
 void increment(struct cell* c)
