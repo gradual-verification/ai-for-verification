@@ -25,13 +25,6 @@ inductive intlist = | inil | icons(int, intlist);
 
 inductive nodeptrlist = | nnil | ncons(node , nodeptrlist);
 
-predicate linked(node l2, nodeptrlist lambda1, nodeptrlist lambda2, node l3)
-    = lambda1 == nnil ? l2 == l3 &*& lambda2 == nnil
-                      : linked(l2, ?lambda1p, ?lambda2p, ?l) &*& lambda2 == ncons(l3, lambda2p) &*& lambda1 == ncons(l, lambda1p);
-
-predicate list(node l1, intlist alpha, nodeptrlist lambda1, nodeptrlist lambda2)
-    = l1 == 0 ? alpha == inil &*& lambda1 == nnil &*& lambda2 == nnil
-                 : node(l1, ?i, ?n, ?p) &*& list(n, ?alphap, ?lambda1p, ?lambda2p) &*& alpha == icons(i, alphap) &*& lambda1 == ncons(l1, lambda1p) &*& lambda2 == ncons(p, lambda2p); 
 
 predicate dll(dllist d, intlist alpha)
     = d->head |-> ?l1 &*& d->tail |-> ?l2 &*& list(l1,alpha,?lambda1,?lambda2) &*& linked(l2,lambda1,lambda2,0);
