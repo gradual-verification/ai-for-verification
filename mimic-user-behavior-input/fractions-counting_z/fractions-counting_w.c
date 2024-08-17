@@ -48,8 +48,8 @@ int main()
 }
 
 int main2()
-//@ requires emp;
-//@ ensures emp;
+//@ requires true;
+//@ ensures true;
 {
   struct C* c = create_C(3);
  
