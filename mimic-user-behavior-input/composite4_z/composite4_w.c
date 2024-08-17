@@ -43,7 +43,7 @@ struct node *create_node(struct node *p)
   n->right = 0; 
   n->parent = p;
   n->count = 1;
-  //@ close subtree(n, p, tree(n, empty, empty));
+  
   return n;
 }
 
@@ -53,7 +53,7 @@ struct node *create_tree()
   /*@ ensures subtree(result, 0, tree(result, empty, empty)); @*/
 {
   struct node *n = create_node(0);
-  //@ close tree(n, tree(n, empty, empty));
+ 
   return n;
 }
 
