@@ -159,9 +159,9 @@ struct node *tree_add_left(struct node *node)
   
     {
         struct node *nodeLeft = node->left;
-        //@ open subtree(nodeLeft, node, nil);
+       
         node->left = n;
-        //@ close context(n, node, 0, left_context(contextNodes, node, rightNodes));
+       
         fixup_ancestors(n, node, 1);
     }
    
@@ -350,7 +350,7 @@ int main()
     node = tree_add_left(node);
     node = tree_get_parent(node);
     node = tree_get_parent(node);
-    //@ assert(node == node0);
+   
     tree_dispose(node);
     return 0;
 }
