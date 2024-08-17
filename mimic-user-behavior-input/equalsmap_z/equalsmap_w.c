@@ -51,70 +51,7 @@ typedef bool equalsFuncType/*@ (list<void *> keys, void *key00, list<void *> eqK
     //@ requires p() &*& mem(key, keys) == true &*& key0 == key00;
     //@ ensures p() &*& result == contains(eqKeys, key);
 
-/*@
 
-fixpoint bool eq<t>(unit u, t x, t y) {
-    switch (u) {
-        case unit: return x == y;
-    }
-}
-
-fixpoint bool contains<t>(list<t> xs, t x) {
-    switch (xs) {
-        case nil: return false;
-        case cons(x0, xs0): return x0 == x || contains(xs0, x);
-    }
-}
-
-fixpoint bool is_suffix_of<t>(list<t> xs, list<t> ys) {
-    switch (ys) {
-        case nil: return xs == ys;
-        case cons(y, ys0): return xs == ys || is_suffix_of(xs, ys0);
-    }
-}
-
-lemma void is_suffix_of_mem<t>(list<t> xs, list<t> ys, t y)
-    requires is_suffix_of(xs, ys) == true &*& mem(y, xs) == true;
-    ensures mem(y, ys) == true;
-{
-    switch (ys) {
-        case nil:
-        case cons(y0, ys0):
-            if (xs == ys) {
-            } else {
-                if (y0 == y) {
-                } else {
-                    is_suffix_of_mem(xs, ys0, y);
-                }
-            }
-    }
-}
-
-lemma void is_suffix_of_trans<t>(list<t> xs, list<t> ys, list<t> zs)
-    requires is_suffix_of(xs, ys) == true &*& is_suffix_of(ys, zs) == true;
-    ensures is_suffix_of(xs, zs) == true;
-{
-    switch (zs) {
-        case nil:
-        case cons(z, zs0):
-            if (zs == ys) {
-            } else {
-                is_suffix_of_trans(xs, ys, zs0);
-            }
-    }
-}
-
-lemma_auto void is_suffix_of_refl<t>(list<t> xs)
-    requires true;
-    ensures is_suffix_of(xs, xs) == true;
-{
-    switch (xs) {
-        case nil:
-        case cons(x, xs0):
-    }
-}
-
-@*/
 
 bool map_contains_key(struct node *map, void *key, equalsFuncType *equalsFunc)
  //@ requires p() &*& map(map, ?entries) &*& is_suffix_of(map((fst), entries), keys) == true;
@@ -166,14 +103,7 @@ bool foo_equals(struct foo *f1, struct foo *f2)
     return f1->value == f2->value;
    
 }
-/**
- * Description:
- * The `create_foo` function dynamically allocates memory for a foo structure
- * and initializes its `value` member with the provided value.
- *
- * @param value The value to be assigned to the `value` member of the created foo structure.
- * @return Pointer to the newly created foo structure.
- */
+
 struct foo *create_foo(int value);
     //@ requires true;
     //@ ensures result->value |-> value;
