@@ -68,14 +68,12 @@ struct node *create_tree()
         abort();
     }
     n->left = 0;
-    //@ close subtree(0, n, nil);
+ 
     n->right = 0;
-    //@ close subtree(0, n, nil);
+    
     n->parent = 0;
     n->count = 1;
-    //@ close subtree(n, 0, tree(n, nil, nil));
-    //@ close context(n, 0, 1, root);
-    //@ close tree(n, root, tree(n, nil, nil));
+   
     return n;
 }
 
@@ -84,12 +82,12 @@ int subtree_get_count(struct node *node)
     //@ ensures subtree(node, parent, nodes) &*& result == count(nodes);
 {
     int result = 0;
-    //@ open subtree(node, parent, nodes);
+
     if (node == 0) {
     } else {
         result = node->count;
     }
-    //@ close subtree(node, parent, nodes);
+
     return result;
 }
 
@@ -128,7 +126,7 @@ void fixup_ancestors(struct node *node, struct node *parent, int count)
             fixup_ancestors(parent, grandparent, parentCount);
         }
     }
-    //@ close context(node, parent, count, contextNodes);
+
 }
 
 struct node *tree_add_left(struct node *node)
@@ -341,8 +339,8 @@ void tree_dispose(struct node *node)
 }
 
 int main()
-    //@ requires emp;
-    //@ ensures emp;
+    //@ requires true;
+    //@ ensures true;
 {
     struct node *node0 = create_tree();
     struct node *node = node0;
