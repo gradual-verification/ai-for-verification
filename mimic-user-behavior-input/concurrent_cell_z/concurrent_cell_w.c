@@ -12,7 +12,7 @@ struct cell {
 predicate exists<t>(t x) = true;
 
 predicate_ctor lock_invariant(struct cell* c, fixpoint(trace, bool) allowed)() =
-  c->x |-> ?v &*& [_]c->id |-> ?id &*& malloc_block_cell(c) &*& exists(?trace) &*& trace_extension(id, trace) &*& execute_trace(trace) == v &*& allowed(trace) == true;
+  c->x |-> ?v &*& [_]c->id |-> ?id&*& exists(?trace) &*& trace_extension(id, trace) &*& execute_trace(trace) == v &*& allowed(trace) == true;
   
 
 predicate_ctor lock_invariant_functional(struct cell* c, fixpoint(trace, bool) allowed)() =
