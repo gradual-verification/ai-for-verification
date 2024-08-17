@@ -23,7 +23,7 @@ predicate students(struct student *students, int count;) =
 
 struct student *read_students(int *count)
     //@ requires *count |-> _;
-    //@ ensures *count |-> ?nb &*& students(result, nb) &*& malloc_block_chars((void *)result, nb * sizeof(struct student));
+    //@ ensures *count |-> ?nb &*& students(result, nb);
 {
     printf("How many students?\n");
     scanf(" %d", count);
