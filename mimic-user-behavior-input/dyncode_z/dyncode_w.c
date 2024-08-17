@@ -5,12 +5,7 @@
 #include "malloc.h"
 #include "stdlib.h"
 
-/*@ This is ignored by VeriFast. @*/
-typedef int sillyfunc/*#(predicate() p)#*/();
-    //# requires [?f]p();
-    //# ensures [f]p() &*& result == 1;
 
-//# predicate_ctor chars_ctor(char *start, list<char> contents)() = chars(start, _, contents);
 
 int main() //# : main
     //# requires true;
