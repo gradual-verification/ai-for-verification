@@ -11,7 +11,6 @@ void invert(int *A, int N, int *B)
     //@ ensures ints(A, N, as) &*& ints(B, N, ?bs);
 {
     for (int i = 0; i < N; i++)
-        //@ invariant ints(A, N, as) &*& ints(B, N, ?bs) &*& 0 <= i &*& i <= N;
     {
         int ai = *(A + i);
         *(B + ai) = i;
