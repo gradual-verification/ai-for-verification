@@ -1,4 +1,3 @@
-// VSTTE 2010 Competition Problem 2. Problem statement by P. Mueller and N. Shankar.
 
 //@ #include "nat.gh"
 //@ #include "listex.gh"
