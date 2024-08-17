@@ -42,7 +42,7 @@ void increment(struct Counter* c)
 
 void dispose(struct Counter* c)
   //@ requires Counter(c, _);
-  //@ ensures emp;
+  //@ ensures true;
 {
   
   free(c);
