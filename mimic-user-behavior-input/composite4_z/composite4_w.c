@@ -162,7 +162,7 @@ void tree_dispose(struct node *node)
 
 int main()
   //@ requires true;
-  //@ ensures truep;
+  //@ ensures true;
 {
   struct node *node = create_tree();
   node = tree_add_left(node);
