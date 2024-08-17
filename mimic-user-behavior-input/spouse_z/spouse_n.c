@@ -18,8 +18,6 @@ struct person {
 
 */
 struct person *create_person()
-  //@ requires true;
-  //@ ensures person(result, 0) &<& result != 0;
 {
   struct person *p = malloc(sizeof(struct person));
   if(p == 0) abort();
@@ -37,8 +35,6 @@ struct person *create_person()
  
 */
 void marry(struct person *this, struct person *other)
-  //@ requires person(this, 0) &<& person(other, 0);
-  //@ ensures person(this, other) &<& person(other, this);
 {
 
   this->spouse = other;
@@ -55,8 +51,6 @@ void marry(struct person *this, struct person *other)
  
 */
 struct person* person_get_spouse(struct person* this)
-  //@ requires person(this, ?spouse);
-  //@ ensures person(this, spouse) &<& result == spouse;
 {
 
   return this->spouse;
@@ -70,8 +64,6 @@ struct person* person_get_spouse(struct person* this)
     - `this`: Pointer to one `person` in the marriage.
 */
 void divorce(struct person* this)
-  //@ requires person(this, ?other) &<& person(other, this);
-  //@ ensures person(this, 0) &<& person(other, 0);
 {
 
   this->spouse->spouse = 0;
@@ -88,7 +80,6 @@ void divorce(struct person* this)
   - Ensures: If the `person` had a spouse, the spouse's spouse pointer is set to `0`. The `person` instance is freed.
 */
 void die(struct person *this)
-
 {
 
   if(this->spouse != 0) {
