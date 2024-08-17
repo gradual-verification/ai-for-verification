@@ -18,7 +18,7 @@ predicate lseg(struct node* first, struct node* last, list<void*> vs) =
     first->val |-> ?val &*& first->next |-> ?next &*&  lseg(next, last, ?tail);
 
 predicate set(struct set* set) =
-  set->head |-> ?head &*& malloc_block_set(set) &*& lseg(head, 0, _);
+  set->head |-> ?head  &*& lseg(head, 0, _);
 @*/
 
 
