@@ -85,7 +85,6 @@ bool set_contains(struct set* set, void* x)
   - Ensures: All memory associated with the set is freed, and the set is no longer valid.
 */
 void set_dispose(struct set* set)
-
 {
   
   struct node* curr = set->head;
