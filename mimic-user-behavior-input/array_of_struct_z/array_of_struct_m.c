@@ -11,7 +11,7 @@ struct student {
 
 predicate students(struct student *students, int count;) =
     count == 0 ?
-        emp
+        true
     :
         students->name[..100] |-> ?cs &*& mem('\0', cs) == true &*& students->age |-> _ &*&
         struct_student_padding(students) &*&
