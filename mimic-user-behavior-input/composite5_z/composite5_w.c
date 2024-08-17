@@ -4,54 +4,8 @@
 #include <stdbool.h>
 //@ #include "ghostlist.gh"
 
-// Weaker Specifications: Simplified verification predicates and lemmas.
 
-/*@
 
-predicate foreach2<a, b>(list<a> as, list<b> bs, predicate(a, b) p) =
-  switch (as) {
-    case nil: return bs == nil;
-    case cons(a, as0): return
-      switch (bs) {
-        case nil: return false;
-        case cons(b, bs0): return
-          p(a, b) &*& foreach2(as0, bs0, p);
-      };
-  };
-
-fixpoint list<b> remove_assoc<a, b>(a a, list<a> as, list<b> bs);
-fixpoint b assoc2<a, b>(a a, list<a> as, list<b> bs);
-
-lemma void foreach2_remove<a, b>(list<a> as, a a);
-  requires foreach2<a, b>(as, ?bs, ?p) &*& mem(a, as) == true;
-  ensures foreach2<a, b>(remove(a, as), remove_assoc(a, as, bs), p);
-
-fixpoint list<b> update2<a, b>(a a, b b, list<a> as, list<b> bs);
-
-lemma void foreach2_unremove<a, b>(list<a> as, list<b> bs, a a, b b);
-  requires foreach2<a, b>(remove(a, as), remove_assoc(a, as, bs), ?p) &*& mem(a, as) == true &*& p(a, b);
-  ensures foreach2<a, b>(as, update2(a, b, as, bs), p);
-
-fixpoint int sum(list<int> xs) {
-  switch (xs) {
-    case nil: return 0;
-    case cons(x, xs0): return x + sum(xs0);
-  }
-}
-
-lemma void sum_update2<a>(a a, int b, list<a> as, list<int> bs);
-  requires true;
-  ensures sum(update2(a, b, as, bs)) == sum(bs) + b - assoc2(a, as, bs);
-
-lemma void neq_mem_remove<t>(t x1, t x2, list<t> xs)
-  requires x1 != x2 &*& mem(x1, xs) == true;
-  ensures mem(x1, remove(x2, xs)) == true;
-
-lemma void remove_commut<t>(t x1, t x2, list<t> xs);
-  requires true;
-  ensures remove(x1, remove(x2, xs)) == remove(x2, remove(x1, xs));
-
-@*/
 
 struct node {
   //@ int childrenGhostListId;
