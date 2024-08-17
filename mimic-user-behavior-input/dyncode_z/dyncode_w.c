@@ -21,32 +21,17 @@ int main() //# : main
     sillyfunc *funcptr = 0;
     int funcresult = 0;
     
-    // x86 machine code:
-    // 33 C0   xor eax, eax
-    // 40      inc eax
-    // C3      ret
+   
     
     *(code + 0) = 0x33;
     *(code + 1) = (char)0xC0;
     *(code + 2) = 0x40;
     *(code + 3) = (char)0xC3;
     
-    //# close chars(code, 4, ?contents);
-    //# close chars_ctor(code, contents)();
-    funcptr = (void *)code;
-    {
-        /*#
-        lemma void helper()
-            requires true;
-            ensures [_]is_sillyfunc(funcptr, chars_ctor(code, contents));
-        {
-            assume(false);
-        }
-        #*/
-        //# helper();
-    }
+
+  
     funcresult = funcptr();
-    //# open chars_ctor(code, contents)();
+    
     free(code);
     
     assert(funcresult == 1);
