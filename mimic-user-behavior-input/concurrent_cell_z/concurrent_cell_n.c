@@ -109,7 +109,7 @@ int cas(struct cell* c, int old, int new)
  *
  * @param c A pointer to the cell structure.
  * @return The current value of the `x` field in the cell.
- * @requires c != NULL;
+ * @requires c should not be null;
  */
 int get(struct cell* c)
 {

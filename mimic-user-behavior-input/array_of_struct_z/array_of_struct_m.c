@@ -11,7 +11,7 @@ struct student {
 
 predicate students(struct student *students, int count;) =
     count == 0 ?
-        emp
+        true
     :
         students->name[..100] |-> ?cs &*& mem('\0', cs) == true &*& students->age |-> _ &*&
         struct_student_padding(students) &*&
@@ -23,7 +23,7 @@ predicate students(struct student *students, int count;) =
 
 struct student *read_students(int *count)
     //@ requires *count |-> _;
-    //@ ensures *count |-> ?nb &*& students(result, nb) &*& malloc_block_chars((void *)result, nb * sizeof(struct student));
+    //@ ensures *count |-> ?nb &*& students(result, nb);
 {
     printf("How many students?\n");
     scanf(" %d", count);

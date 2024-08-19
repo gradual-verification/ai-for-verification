@@ -10,10 +10,7 @@ struct Counter {
  * The `init` function initializes a new Counter structure with the given initial value.
  it uses the malloc to allocate the memory for that, if it fails to malloc, the program will terminate
  *
- * @param v The initial value for the counter.
- * @returns A pointer to the initialized Counter structure.
- * @requires None.
- * @ensures The returned pointer points to a valid Counter structure with the provided initial value.
+
  */
 struct Counter* init(int v)
 

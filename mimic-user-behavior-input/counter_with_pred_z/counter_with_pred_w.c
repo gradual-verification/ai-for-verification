@@ -6,14 +6,14 @@ struct Counter {
 
 /*@
 predicate Counter(struct Counter* c, int v) =
-  c->value |-> v &*& malloc_block_Counter(c);
+  c->value |-> v;
 @*/
 /*@
 predicate Counter_functional_behavior(struct Counter* c, int v) =
   c->value |-> v;
 @*/
 struct Counter* init(int v)
-//@ requires emp;
+//@ requires true;
   //@ ensures Counter(result, v);
 
 {
@@ -42,7 +42,7 @@ void increment(struct Counter* c)
 
 void dispose(struct Counter* c)
   //@ requires Counter(c, _);
-  //@ ensures emp;
+  //@ ensures true;
 {
   
   free(c);
@@ -73,8 +73,8 @@ int get(struct Counter* c)
 }
 
 int main() //@ : main
-  //@ requires emp;
-  //@ ensures emp;
+  //@ requires true;
+  //@ ensures true;
 {
   struct Counter* c1 = init(0); struct Counter* c2 = init(5);
 

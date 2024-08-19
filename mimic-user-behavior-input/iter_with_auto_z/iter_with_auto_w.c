@@ -12,7 +12,7 @@ struct llist {
 
 /*@
 predicate node(struct node *node; struct node *next, int value) =
-  node->next |-> next &*& node->value |-> value &*& malloc_block_node(node);
+  node->next |-> next &*& node->value |-> value;
 @*/
 
 
@@ -23,24 +23,18 @@ predicate node_functional_behavior(struct node *node; struct node *next, int val
 
 /*@
 predicate lseg(struct node *n1, struct node *n2; list<int> v) =
-  n1 == n2 ? emp &*& v == nil : node(n1, ?_n, ?h) &*& lseg(_n, n2, ?t) &*& v == cons(h, t);
+  n1 == n2 ? true &*& v == nil : node(n1, ?_n, ?h) &*& lseg(_n, n2, ?t) &*& v == cons(h, t);
 
 predicate llist(struct llist *list; list<int> v) =
-  list->first |-> ?_f &*& list->last |-> ?_l &*& lseg(_f, _l, v) &*& node(_l, _, _) &*& malloc_block_llist(list);
+  list->first |-> ?_f &*& list->last |-> ?_l &*& lseg(_f, _l, v) &*& node(_l, _, _);
 
 
   predicate llist_functional(struct llist *list; list<int> v) =
   list->first |-> ?_f &*& list->last |-> ?_l &*& lseg(_f, _l, v) &*& node(_l, _, _);
 @*/
-/**
- * Description:
- * The `create_llist` function dynamically allocates memory for a linked list structure
- * and initializes it with an empty node.
- *
- * @return Pointer to the newly created linked list structure.
- */
+
 struct llist *create_llist()
-//@ requires emp;
+//@ requires true;
   //@ ensures llist(result, nil);
 {
   struct llist *l = malloc(sizeof(struct llist));
@@ -94,20 +88,7 @@ void llist_add(struct llist *list, int x)
 
 }
 
-/*@
-lemma_auto void lseg_append(struct node *n1, struct node *n2, struct node *n3)
-  requires lseg(n1, n2, ?_v1) &*& lseg(n2, n3, ?_v2) &*& node(n3, ?n3n, ?n3v);
-  ensures lseg(n1, n3, append(_v1, _v2)) &*& node(n3, n3n, n3v);
-{
-  open lseg(n1, n2, _v1);
-  switch (_v1) {
-    case nil:
-    case cons(x, v):
-      distinct_nodes(n1, n3);
-      lseg_append(n1->next, n2, n3);
-  }
-}
-@*/
+
 
 void llist_append(struct llist *list1, struct llist *list2)
  //@ requires llist(list1, ?_v1) &*& llist(list2, ?_v2);
@@ -253,8 +234,8 @@ int llist_removeFirst(struct llist *l)
 }
 
 void main0()
- //@ requires emp;
-  //@ ensures emp;
+ //@ requires true;
+  //@ ensures true;
 {
   struct llist *l = create_llist();
   llist_add(l, 10);
@@ -269,8 +250,8 @@ void main0()
 }
 
 int main() //@ : main
-  //@ requires emp;
-  //@ ensures emp;
+  //@ requires true;
+  //@ ensures true;
 {
   struct llist *l1 = create_llist();
   struct llist *l2 = create_llist();
@@ -296,15 +277,7 @@ struct iter {
     struct node *current;
 };
 
-/*@
 
-predicate llist_with_node(struct llist *list, list<int> v0, struct node *n, list<int> vn) =
-  list->first |-> ?f &*& list->last |-> ?l &*& malloc_block_llist(list) &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
-
-predicate iter(struct iter *i, real frac, struct llist *l, list<int> v0, list<int> v) =
-  i->current |-> ?n &*& [frac]llist_with_node(l, v0, n, v) &*& malloc_block_iter(i);
-
-@*/
 
 struct iter *llist_create_iter(struct llist *l)
 //requires l!=NULL;
@@ -338,24 +311,7 @@ int iter_next(struct iter *i)
     return value;
 }
 
-/*@
 
-lemma void lseg2_lseg_append(struct node *n)
-  requires [?frac]lseg2(?f, n, ?l, ?vs1) &*& [frac]lseg(n, l, ?vs2);
-  ensures [frac]lseg(f, l, append(vs1, vs2));
-{
-  open lseg2(f, n, l, vs1);
-  switch (vs1) {
-    case nil:
-    case cons(h, t):
-      open [frac]node(f, ?next, h);
-      lseg2_lseg_append(n);
-      close [frac]node(f, next, h);
-      close [frac]lseg(f, l, append(vs1, vs2));
-  }
-}
-
-@*/
 
 void iter_dispose(struct iter *i)
 //requires i!=NULL;
@@ -366,8 +322,8 @@ void iter_dispose(struct iter *i)
 }
 
 int main2()
-    //@ requires emp;
-    //@ ensures emp;
+    //@ requires true;
+    //@ ensures true;
 {
     struct llist *l = create_llist();
     llist_add(l, 5);

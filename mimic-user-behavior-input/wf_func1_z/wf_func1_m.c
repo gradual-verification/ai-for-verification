@@ -1,10 +1,6 @@
 /*@
 
-fixpoint_auto list<int> range(int min, int max)
-    decreases max - min;
-{
-    return min == max ? nil : cons(min, range(min + 1, max));
-}
+
 
 fixpoint int sum(list<int> xs) {
     switch (xs) {
