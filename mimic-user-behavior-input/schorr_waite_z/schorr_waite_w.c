@@ -9,8 +9,7 @@ struct node {
 predicate tree(struct node* t) = 
   t == 0 ? true : t->m |-> _ &*& t->c |-> _ &*& t->l |-> ?l &*& t->r |-> ?r &*& tree(l) &*& tree(r);
   
-predicate stack(struct node* t) =
-  t == 0 ? true : t->m |-> true &*& t->c |-> _ &*& t->l |-> ?l &<& t->r |-> ?r &<& (t->c == false ? stack(l) &<& tree(r) : stack(r) &<& tree(l));
+
 
 @*/
 void schorr_waite(struct node* root) 
