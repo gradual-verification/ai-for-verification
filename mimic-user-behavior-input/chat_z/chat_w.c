@@ -79,15 +79,7 @@ bool room_has_member(struct room *room, struct string_buffer *nick)
    
     return hasMember;
 }
-/**
- * Description:
- * The room_broadcast_message function broadcasts a message to all members of the specified room. 
- It iterates through the linked list of members associated with the room and sends the provided message to each member's writer.
-  A newline character is appended to the message to ensure proper formatting. The function assumes that the room and its members have been properly initialized.
- *
- * @param room A pointer to the room structure.
- * @param message A pointer to the string buffer containing the message to be broadcasted.
- */
+
 void room_broadcast_message(struct room *room, struct string_buffer *message)
     //@ requires room != NULL &*& message != NULL&*& room->members>=0;
     //@ ensures true;
@@ -135,17 +127,6 @@ predicate session_functional_behavior(struct session *session) =
 
 @*/
 
-/**
- * Description:
- * The create_session function creates and initializes a new session structure. It allocates memory for the session, sets its room, room lock, and socket members, and returns a pointer to the newly created session.
- *
- * @param room A pointer to the room structure. It must not be null.
- * @param roomLock A pointer to the lock for synchronizing access to the room. It must not be null.
- * @param socket A pointer to the socket used for communication. It must not be null.
- * @return A pointer to the newly created session. The returned pointer is guaranteed to be non-null.
- *
-
- */
 
 struct session *create_session(struct room *room, struct lock *roomLock, struct socket *socket)
  //@ socket(socket, ?reader, ?writer) &*& reader(reader) &*& writer(writer);
@@ -161,19 +142,7 @@ struct session *create_session(struct room *room, struct lock *roomLock, struct 
     
     return session;
 }
-/**
- * Description:
- * The session_run_with_nick function manages the interaction of a member within a chat room. It handles the member joining the room, broadcasting messages, and eventually leaving the room. It ensures thread-safe operations through the use of locks.
- *
- * @param room A pointer to the room structure where the session takes place. It must not be null.
- * @param roomLock A pointer to the lock used for synchronizing access to the room. It must not be null.
- * @param reader A pointer to the reader used for receiving messages from the member. It must not be null.
- * @param writer A pointer to the writer used for sending messages to the member. It must not be null.
- * @param nick A pointer to the string buffer containing the member's nickname. It must not be null.
- *
- * @requires room != NULL && roomLock != NULL && reader != NULL && writer != NULL && nick != NULL;
- * @ensures true;
- */
+
 void session_run_with_nick(struct room *room, struct lock *roomLock, struct reader *reader, struct writer *writer, struct string_buffer *nick)
    /*@
     requires

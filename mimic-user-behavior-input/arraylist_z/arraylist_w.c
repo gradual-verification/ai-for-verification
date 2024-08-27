@@ -17,13 +17,6 @@ predicate arraylist(struct arraylist *a; list<void*> vs) =
 
 
 
-/*@
-predicate arraylist_length(struct arraylist *a, int size,int capacity) =
-  a->size |->size &*& a->capacity|->capacity;
-@*/
-
-
-
 //???? 
 //? create the connection between data and a->data
 //_means all other members, we don't care what the value is

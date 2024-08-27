@@ -29,6 +29,8 @@ lemma void bitand_uint8_symm(int x, int y)
     Z_of_uint8_eq(Z_and(zx, zy), Z_and(zy, zx));
 }
 
+// TODO: calling bitor_limits has some problem, need to fix
+
 lemma void limits_test(int x, int y)
     requires 0 <= x &*& x <= UINT_MAX &*& 0 <= y &*& y <= UINT_MAX;
     ensures 0 <= (x | y) &*& (x | y) <= UINT_MAX;
@@ -83,8 +85,9 @@ void bitand_uint8_symm_test(uint8_t x, uint8_t y)
 //@ requires true;
 //@ ensures true;
 {
-   
+    //@ Z_of_uint8(x);
+    //@ Z_of_uint8(y);
     assert((x & y) == (y & x));
-   
+    //@ Z_of_uint8(123);
     assert((x & 123) == (123 & x));
 }
