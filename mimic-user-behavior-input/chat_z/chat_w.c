@@ -15,7 +15,7 @@ struct member {
 
 /*@
 predicate member(struct member* member) =
-    member->nick |-> ?nick &*& [1/2]member->writer |-> ?writer &*& string_buffer(nick, _) &*& writer(writer) &*& malloc_block_member(member);
+    member->nick |-> ?nick &*& [1/2]member->writer |-> ?writer &*& string_buffer(nick, _) &*& writer(writer);
 @*/
 
 
@@ -33,7 +33,7 @@ struct room {
 predicate room(struct room* room) =
     room->members |-> ?membersList &*& [?f]room->ghost_list_id |-> ?id &*&
     lseg(membersList, 0, ?members, member) &*&
-    ghost_list(id, members) &*& malloc_block_room(room);
+    ghost_list(id, members);
 @*/
 
 
@@ -112,7 +112,7 @@ predicate_ctor room_ctor(struct room *room)() =
     room(room);
 
 predicate session(struct session *session) =
-    session->room |-> ?room &*& session->room_lock |-> ?roomLock &*& session->socket |-> ?socket &*& malloc_block_session(session)
+    session->room |-> ?room &*& session->room_lock |-> ?roomLock &*& session->socket |-> ?socket
         &*& [_]lock(roomLock, _, room_ctor(room)) &*& socket(socket, ?reader, ?writer) &*& reader(reader) &*& writer(writer);
 
 @*/
@@ -129,8 +129,8 @@ predicate session_functional_behavior(struct session *session) =
 
 
 struct session *create_session(struct room *room, struct lock *roomLock, struct socket *socket)
- //@ socket(socket, ?reader, ?writer) &*& reader(reader) &*& writer(writer);
-    //@ ensures session_functional_behavior(result);
+//@ socket(socket, ?reader, ?writer) &*& reader(reader) &*& writer(writer);
+//@ ensures session_functional_behavior(result);
 {
     struct session *session = malloc(sizeof(struct session));
     if (session == 0) {
@@ -144,16 +144,16 @@ struct session *create_session(struct room *room, struct lock *roomLock, struct 
 }
 
 void session_run_with_nick(struct room *room, struct lock *roomLock, struct reader *reader, struct writer *writer, struct string_buffer *nick)
-   /*@
-    requires
-        locked(roomLock, ?roomLockId, room_ctor(room), currentThread, _) &*& lockset(currentThread, cons(roomLockId, nil)) &*&
-        room(room) &*& reader(reader) &*& writer(writer) &*& string_buffer(nick, _);
-    @*/
-    /*@
-    ensures
-        lockset(currentThread, nil) &*&
-        reader(reader) &*& writer(writer) &*& string_buffer(nick, _);
-    @*/
+/*@
+requires
+    locked(roomLock, ?roomLockId, room_ctor(room), currentThread, _) &*& lockset(currentThread, cons(roomLockId, nil)) &*&
+    room(room) &*& reader(reader) &*& writer(writer) &*& string_buffer(nick, _);
+@*/
+/*@
+ensures
+    lockset(currentThread, nil) &*&
+    reader(reader) &*& writer(writer) &*& string_buffer(nick, _);
+@*/
 {
     struct member *member = 0;
 
