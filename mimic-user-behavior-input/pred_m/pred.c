@@ -33,7 +33,7 @@ int account_get_balance(struct account *myAccount)
     return result;
 }
 void account_deposit(struct account *myAccount, int amount)
-//@ requires account_pred(myAccount, ?limit, ?balance) &*& 0 <= amount;
+//@ requires account_pred(myAccount, ?limit, ?balance) &*& 0 <= amount &*& balance + amount <= INT_MAX;
 //@ ensures account_pred(myAccount, limit, balance + amount);
 {
     //@ open account_pred(myAccount, limit, balance);
@@ -41,7 +41,7 @@ void account_deposit(struct account *myAccount, int amount)
     //@ close account_pred(myAccount, limit, balance + amount);
 }
 int account_withdraw(struct account *myAccount, int amount)
-//@ requires account_pred(myAccount, ?limit, ?balance) &*& 0 <= amount;
+//@ requires account_pred(myAccount, ?limit, ?balance) &*& 0 <= amount &*& balance - amount >= INT_MIN &*& balance - limit >= INT_MIN;
 /*@ ensures account_pred(myAccount, limit, balance - result)
 &*& result == (balance - amount < limit ? balance - limit : amount); @*/
 {

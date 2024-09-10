@@ -1,0 +1,202 @@
+fanweneddie@fanweneddie-Yoga-14sACH-2021-D:~/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input$ python3 test.py
+1: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/account_m/account.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/account_m/account.c
+0 errors found (9 statements verified)
+Linking...
+Program linked successfully.
+
+2: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/array_of_struct_z/array_of_struct.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/array_of_struct_z/array_of_struct.c
+0 errors found (40 statements verified)
+Linking...
+Program linked successfully.
+
+3: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/arraylist_z/arraylist.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/arraylist_z/arraylist.c
+0 errors found (64 statements verified)
+Linking...
+Program linked successfully.
+
+4: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/cat_a/cat.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/cat_a/cat.c
+/opt/verifast/bin/stddef.h(4,9-18): This token and the 31 after it were consumed by the normal preprocessor but not by the context-free preprocessor
+
+5: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/chat_z/chat.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/chat_z/chat.c
+/opt/verifast/bin/malloc.h(4,20-5,1): This token and the 396 after it were consumed by the normal preprocessor but not by the context-free preprocessor
+
+6: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/closetest_z/closetest.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/closetest_z/closetest.c
+0 errors found (2 statements verified)
+Linking...
+Program does not implement a function 'main' that implements function type 'main' or 'main_full' declared in prelude.h. Use the '-shared' option to suppress this error.
+1 link errors
+
+7: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/composite2_z/composite2.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/composite2_z/composite2.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/composite2_z/composite2.c(14,5-13): Parse error: Parse error.
+
+8: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/composite3_z/composite3.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/composite3_z/composite3.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/composite3_z/composite3.c(23,5-13): Parse error: Parse error.
+
+9: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/composite4_z/composite4.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/composite4_z/composite4.c
+0 errors found (145 statements verified)
+Linking...
+Program linked successfully.
+
+10: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/composite5_z/composite5.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/composite5_z/composite5.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/composite5_z/composite5.c(4,14-28): Parse error: No such file 'ghostlist.gh'.
+
+11: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/concurrent_cell_z/concurrent_cell.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/concurrent_cell_z/concurrent_cell.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/concurrent_cell_z/concurrent_cell.c(73,1-10): Predicate family redeclaration does not match original declaration at '/opt/verifast/bin/prelude.h(13,1-10)'.
+
+12: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/counter_with_pred_auto_a/counter_with_pred_auto.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/counter_with_pred_auto_a/counter_with_pred_auto.c
+0 errors found (19 statements verified)
+Linking...
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/counter_with_pred_auto_a/counter_with_pred_auto.vfmanifest': unsatisfied requirement './stdlib.h#abort'.
+1 link errors
+
+13: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/counter_with_pred_z/counter_with_pred.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/counter_with_pred_z/counter_with_pred.c
+0 errors found (30 statements verified)
+Linking...
+Program linked successfully.
+
+14: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/deposit_m/deposit.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/deposit_m/deposit.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/deposit_m/deposit.c(23,24-26): Potential arithmetic underflow. (Cannot prove INT_MIN <= (theBalance + amount).)
+
+15: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/dispose_m/dispose.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/dispose_m/dispose.c
+0 errors found (35 statements verified)
+Linking...
+Program linked successfully.
+
+16: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/doubly_linked_list_z/doubly_linked_list.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/doubly_linked_list_z/doubly_linked_list.c
+0 errors found (42 statements verified)
+Linking...
+Program does not implement a function 'main' that implements function type 'main' or 'main_full' declared in prelude.h. Use the '-shared' option to suppress this error.
+1 link errors
+
+17: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/dyncode_z/dyncode.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/dyncode_z/dyncode.c
+0 errors found (18 statements verified)
+Linking...
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/dyncode_z/dyncode.vfmanifest': unsatisfied requirement 'CRT/prelude.h#assume'.
+1 link errors
+
+18: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/enums_m/enums.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/enums_m/enums.c
+0 errors found (9 statements verified)
+Linking...
+Program linked successfully.
+
+19: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/equalsmap_z/equalsmap.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/equalsmap_z/equalsmap.c
+0 errors found (78 statements verified)
+Linking...
+Program linked successfully.
+
+20: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/filter_m/filter.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/filter_m/filter.c
+0 errors found (54 statements verified)
+Linking...
+Program linked successfully.
+
+21: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/fractions-counting_z/fractions-counting.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/fractions-counting_z/fractions-counting.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/fractions-counting_z/fractions-counting.c(61,11-12): Potential arithmetic overflow. (Cannot prove (n + 1) <= INT_MAX.)
+
+22: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/globals1_a/globals.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/globals1_a/globals.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/globals1_a/globals.c(20,5-6): Cannot prove consistency with C's effective types rules (Cannot prove has_type(c, pointer_typeid(counter_type_info)).)
+
+23: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/globals2_aj/globals.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/globals2_aj/globals.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/globals2_aj/globals.c(18,5-6): Cannot prove consistency with C's effective types rules (Cannot prove has_type(c, pointer_typeid(counter_type_info)).)
+
+24: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/inverse_z/inverse.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/inverse_z/inverse.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/inverse_z/inverse.c(275,22-23): Pointer may be out of bounds (Cannot prove pointer_within_limits(ptr_add_(A, i, int_typeid)).)
+
+25: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/iter_with_auto_z/iter_with_auto.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/iter_with_auto_z/iter_with_auto.c
+0 errors found (200 statements verified)
+Linking...
+Program linked successfully.
+
+26: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/lists_a/lists.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/lists_a/lists.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/lists_a/lists.c(78,12-13): Cannot prove compliance with C's effective types rules (Cannot prove has_type(pnext, void_ptr_typeid).)
+
+27: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/map_a/map.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/map_a/map.c
+0 errors found (60 statements verified)
+Linking...
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/map_a/map.vfmanifest': unsatisfied requirement './stdlib.h#abort'.
+1 link errors
+
+28: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/pred_m/pred.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/pred_m/pred.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/pred_m/pred.c(40,24-26): Potential arithmetic overflow. (Cannot prove (balance + amount) <= INT_MAX.)
+
+29: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/schorr_waite_z/schorr_waite.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/schorr_waite_z/schorr_waite.c
+0 errors found (31 statements verified)
+Linking...
+Program does not implement a function 'main' that implements function type 'main' or 'main_full' declared in prelude.h. Use the '-shared' option to suppress this error.
+1 link errors
+
+30: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/set_z/set.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/set_z/set.c
+0 errors found (51 statements verified)
+Linking...
+Program linked successfully.
+
+31: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/spouse_z/spouse.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/spouse_z/spouse.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/spouse_z/spouse.c(2,10-20): Parse error: No such file 'spouse.h'.
+
+32: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/swap_a/swap.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/swap_a/swap.c
+0 errors found (13 statements verified)
+Linking...
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/swap_a/swap.vfmanifest': unsatisfied requirement './stdlib.h#abort'.
+1 link errors
+
+33: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/typedef_cast_z/typedef_cast.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/typedef_cast_z/typedef_cast.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/typedef_cast_z/typedef_cast.c(9,31-32): Potential arithmetic underflow. (Cannot prove INT_MIN <= (x - y).)
+
+34: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/typedef_m/typedef.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/typedef_m/typedef.c
+0 errors found (5 statements verified)
+Linking...
+Program linked successfully.
+
+35: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/values_m/values.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/values_m/values.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/values_m/values.c(33,38-44): Parse error: Parse error.
+
+36: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/wc_a/wc.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/wc_a/wc.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/wc_a/malloc.h(4,20-5,1): This token and the 396 after it were consumed by the normal preprocessor but not by the context-free preprocessor
+
+37: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/wf_func1_z/wf_func1.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/wf_func1_z/wf_func1.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/wf_func1_z/wf_func1.c(29,19-20): Potential arithmetic overflow. (Cannot prove (sum0 + count0) <= INT_MAX.)
+
+38: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/wf_func2_z/wf_func2.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/wf_func2_z/wf_func2.c
+0 errors found (5 statements verified)
+Linking...
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/mimic-user-behavior-input/wf_func2_z/wf_func2.vfmanifest': unsatisfied requirement 'CRT/prelude.h#fix_unfold'.
+Program does not implement a function 'main' that implements function type 'main' or 'main_full' declared in prelude.h. Use the '-shared' option to suppress this error.
+2 link errors
+

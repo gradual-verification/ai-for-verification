@@ -25,3 +25,9 @@ lemma void u_llong_integer_unique(unsigned long long *p)
 
   @*/
 
+int main()
+//@ requires true;
+//@ ensures true;
+{
+    return 0;
+}

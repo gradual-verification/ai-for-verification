@@ -27,3 +27,10 @@ lemma void multiset_multiplicity_insert(multiset M, int x, int y);
     ensures multiset_multiplicity(multiset_insert(M, x), y) == (x == y ? multiset_multiplicity(M, x) + 1 : multiset_multiplicity(M, y));
 
 @*/
+
+int main()
+//@ requires true;
+//@ ensures true;
+{
+    return 0;
+}

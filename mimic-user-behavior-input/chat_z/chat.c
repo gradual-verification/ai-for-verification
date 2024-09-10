@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include "malloc.h"
 #include "lists.h"
 #include "stringBuffers.h"
 #include "sockets.h"

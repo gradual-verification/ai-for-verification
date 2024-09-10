@@ -17,10 +17,18 @@ struct account *create_account()
 }
 
 void account_deposit(struct account *myAccount, int amount)
-//@ requires account_balance(myAccount, ?theBalance) &*& 0 <= amount;
+//@ requires account_balance(myAccount, ?theBalance) &*& 0 <= amount &*& theBalance + amount <= INT_MAX &*& theBalance + amount >= INT_MIN;
 //@ ensures account_balance(myAccount, theBalance + amount);
 {
     myAccount->balance += amount;
+}
+
+int account_get_balance(struct account *myAccount)
+//@ requires account_balance(myAccount, ?balance);
+//@ ensures account_balance(myAccount, balance) &*& result == balance;
+{
+    int result = myAccount->balance;
+    return result;
 }
 
 void account_set_balance(struct account *myAccount, int newBalance)

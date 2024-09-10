@@ -156,3 +156,10 @@ void reverse(dllist arg)
 	//@ rev_twice(gamma);
 	//@ close dll(arg, rev(alpha));
 }
+
+int main()
+//@ requires true;
+//@ ensures true;
+{
+    return 0;
+}

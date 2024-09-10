@@ -54,7 +54,8 @@ int main()
   int n = 0;
   //@ close tickets(c, 5, id, 0);
   // split of an arbitrary number of children
-  while(b) 
+  // not sure whether there is other way to fix this integer overflow
+  while(b && n < INT_MAX) 
     //@ invariant 0<=n &*& counter(c, 5, id, 1, n) &*& tickets(c, 5, id, n);
   {
     //@ create_ticket(c);

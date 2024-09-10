@@ -163,3 +163,10 @@ void test13(char* c)
 {
 }
 */
+
+int main()
+//@ requires true;
+//@ ensures true;
+{
+    return 0;
+}

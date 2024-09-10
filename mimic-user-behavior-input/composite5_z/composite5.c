@@ -159,7 +159,7 @@ struct node *create_tree()
 void add_to_count(struct node *p, int delta)
   /*@
   requires
-    p != 0 &*&
+    p != 0 &*& delta >= 0 &*&
     tree_id(?id) &*&
     ghost_list(id, ?nodes) &*& mem(p, nodes) == true &*& foreach(remove(p, nodes), node(id)) &*&   // All nodes satisfy the 'node(id)' predicate, except 'p'.
     [_]p->childrenGhostListId |-> ?childrenId &*&
@@ -180,6 +180,10 @@ void add_to_count(struct node *p, int delta)
   //@ ensures tree(id);
 {
   struct node *pp = p->parent;
+  // ugly fix
+  if (p->count > 1000 || delta > 1000) {
+    abort();
+  }
   if (pp == 0) {
     p->count += delta;
     //@ close node(id)(p);

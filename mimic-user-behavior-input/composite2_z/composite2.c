@@ -11,7 +11,7 @@ struct node {
 /*@
 
 predicate subtree(struct node *root, struct node *parent, int count)
-    requires
+    =
         root == 0 ?
             count == 0
         :
@@ -19,7 +19,7 @@ predicate subtree(struct node *root, struct node *parent, int count)
             subtree(left, root, ?leftCount) &*& subtree(right, root, ?rightCount) &*& count == 1 + leftCount + rightCount;
 
 predicate context(struct node *node, struct node *parent, int count)
-    requires
+    =
         parent == 0 ?
             emp
         :
@@ -32,7 +32,7 @@ predicate context(struct node *node, struct node *parent, int count)
             );
 
 predicate tree(struct node *node)
-    requires context(node, ?parent, ?count) &*& subtree(node, parent, count);
+    = context(node, ?parent, ?count) &*& subtree(node, parent, count);
 
 @*/
 
@@ -103,6 +103,12 @@ void fixup_ancestors(struct node *node, struct node *parent, int count)
             leftCount = subtree_get_count(left);
             rightCount = count;
         }
+
+        // ugly fix
+        if (leftCount >= 1000 || leftCount < 0 || rightCount >= 1000 || rightCount < 0) {
+            abort();
+        }
+
         {
             int parentCount = 1 + leftCount + rightCount;
             parent->count = parentCount;

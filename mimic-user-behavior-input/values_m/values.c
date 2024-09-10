@@ -30,7 +30,8 @@ struct stack *create_stack()
     }
     stack->head = 0;
     //@ close nodes(0, ints_nil);
-    //@ close stack(stack, ints_nil);return stack;
+    //@ close stack(stack, ints_nil);
+    return stack;
 }
 void stack_push(struct stack *stack, int value)
 //@ requires stack(stack, ?values);
@@ -55,4 +56,11 @@ void stack_dispose(struct stack *stack)
     //@ open stack(stack, ints_nil);
     //@ open nodes(_, _);
     free(stack);
+}
+
+int main()
+//@ requires true;
+//@ ensures true;
+{
+    return 0;
 }

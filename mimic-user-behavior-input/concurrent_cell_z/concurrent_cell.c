@@ -70,7 +70,7 @@ typedef lemma void increment_only(struct cell* c, int v)();
 @*/
 
 /*@
-predicate exists<t>(t x) = true;
+//predicate exists<t>(t x;) = true;
 
 predicate_ctor lock_invariant(struct cell* c, fixpoint(trace, bool) allowed)() =
   c->x |-> ?v &*& [_]c->id |-> ?id &*& malloc_block_cell(c) &*& exists(?trace) &*& trace_extension(id, trace) &*& execute_trace(trace) == v &*& allowed(trace) == true;
@@ -290,6 +290,6 @@ void only_allow_incrementing(struct cell* c)
   int x2 = get(c);
   //@ assert observed(c, ?trace2);
   //@ prefix_smaller(trace1, trace2);
-  assert x1 <= x2;
+  assert(x1 <= x2);
   //@ leak observed(c, _);
 }

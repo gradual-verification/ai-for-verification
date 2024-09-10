@@ -10,3 +10,10 @@ void foo()
     //@ close bar(10, ?y);
     //@ open bar(10, y);
 }
+
+int main()
+//@ requires true;
+//@ ensures true;
+{
+    return 0;
+}

@@ -17,3 +17,10 @@ void fill(char *buf, int length, char c)
         buf[i] = c;
     }
 }
+
+int main()
+//@ requires true;
+//@ ensures true;
+{
+    return 0;
+}

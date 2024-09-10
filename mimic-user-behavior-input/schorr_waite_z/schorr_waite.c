@@ -58,3 +58,10 @@ void schorr_waite(struct node* root)
   //@ open stack(p);
   //@ close tree(t, true);
 }
+
+int main()
+//@ requires true;
+//@ ensures true;
+{
+    return 0;
+}
