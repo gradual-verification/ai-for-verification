@@ -1,0 +1,276 @@
+1: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/arithmetic_overflow/wf_func1_z/wf_func1.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/arithmetic_overflow/wf_func1_z/wf_func1.c
+0 errors found (8 statements verified)
+Linking...
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/arithmetic_overflow/wf_func1_z/wf_func1.vfmanifest': unsatisfied requirement 'CRT/prelude.h#fix_unfold'.
+1 link errors
+
+2: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/arithmetic_overflow/composite5_z/composite5.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/arithmetic_overflow/composite5_z/composite5.c
+0 errors found (113 statements verified)
+Linking...
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/arithmetic_overflow/composite5_z/composite5.vfmanifest': unsatisfied requirement './composite5.c#foreach2_remove'.
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/arithmetic_overflow/composite5_z/composite5.vfmanifest': unsatisfied requirement './composite5.c#foreach2_unremove'.
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/arithmetic_overflow/composite5_z/composite5.vfmanifest': unsatisfied requirement './composite5.c#remove_commut'.
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/arithmetic_overflow/composite5_z/composite5.vfmanifest': unsatisfied requirement './composite5.c#sum_update2'.
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/arithmetic_overflow/composite5_z/composite5.vfmanifest': unsatisfied requirement './ghostlist.gh#create_ghost_list'.
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/arithmetic_overflow/composite5_z/composite5.vfmanifest': unsatisfied requirement './ghostlist.gh#ghost_list_add'.
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/arithmetic_overflow/composite5_z/composite5.vfmanifest': unsatisfied requirement './ghostlist.gh#ghost_list_member_handle_lemma'.
+7 link errors
+
+3: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/failed_condition/bitops_examples_z/bitops_examples.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/failed_condition/bitops_examples_z/bitops_examples.c
+/opt/verifast/bin/bitops.gh(128,27-28): Cannot prove condition. (Cannot prove x < pow_nat(2, nat_of_int((8 * sizeof_int))).)
+
+4: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/failed_condition/expr_a/expr.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/failed_condition/expr_a/expr.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/failed_condition/expr_a/expr.c(22,5-12): No matching heap chunks: integer(literal, _)
+
+5: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/failed_condition/composite3_z/composite3.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/failed_condition/composite3_z/composite3.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/failed_condition/composite3_z/composite3.c(82,18-25): No matching heap chunks: subtree(node, _, _)
+
+6: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/failed_condition/composite2_z/composite2.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/failed_condition/composite2_z/composite2.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/failed_condition/composite2_z/composite2.c(110,50-52): Cannot prove condition. (Cannot prove 0 <= count0.)
+
+7: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/failed_condition/contains_a/contains.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/failed_condition/contains_a/contains.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/failed_condition/contains_a/contains.c(104,66-68): Cannot prove condition. (Cannot prove true <==> unboxed_bool(@(@(@(eq_func, unit), v1), v2)).)
+
+8: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/no_declaration/concurrent_cell_z/concurrent_cell.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/no_declaration/concurrent_cell_z/concurrent_cell.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/no_declaration/concurrent_cell_z/concurrent_cell.c(192,42-56): No such predicate: is_cas_allowed
+
+9: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_type/chat_z/chat.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_type/chat_z/chat.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_type/chat_z/chat.c(70,16-17): Cannot prove compliance with C's effective types rules (Cannot prove has_type(iter, void_ptr_typeid).)
+
+10: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_type/lists_a/lists.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_type/lists_a/lists.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_type/lists_a/lists.c(78,12-13): Cannot prove compliance with C's effective types rules (Cannot prove has_type(pnext, void_ptr_typeid).)
+
+11: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_overflow/inverse_z/inverse.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_overflow/inverse_z/inverse.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_overflow/inverse_z/inverse.c(275,22-23): Pointer may be out of bounds (Cannot prove pointer_within_limits(ptr_add_(A, i, int_typeid)).)
+
+12: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_overflow/cat_a/cat.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_overflow/cat_a/cat.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_overflow/cat_a/cat.c(16,22-23): Pointer may be out of bounds (Cannot prove pointer_within_limits(ptr_add_(argv0, 1, pointer_typeid(char_typeid))).)
+
+13: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_overflow/wc_a/wc.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_overflow/wc_a/wc.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_overflow/wc_a/wc.c(28,30-31): Pointer may be out of bounds (Cannot prove pointer_within_limits(ptr_add(string0, 1)).)
+
+14: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_overflow/cp_a/cp.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_overflow/cp_a/cp.c
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/unverified/pointer_overflow/cp_a/cp.c(16,24-25): Pointer may be out of bounds (Cannot prove pointer_within_limits(ptr_add_(argv0, 1, pointer_typeid(char_typeid))).)
+
+15: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/automation_aborted_z/automation.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/automation_aborted_z/automation.c
+0 errors found (9 statements verified)
+Linking...
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/automation_aborted_z/automation.vfmanifest': unsatisfied requirement './automation.c#helper'.
+1 link errors
+
+16: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/fractions-counting_z/fractions-counting.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/fractions-counting_z/fractions-counting.c
+0 errors found (28 statements verified)
+Linking...
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/fractions-counting_z/fractions-counting.vfmanifest': unsatisfied requirement './fractions-counting.c#create_counter'.
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/fractions-counting_z/fractions-counting.vfmanifest': unsatisfied requirement './fractions-counting.c#create_ticket'.
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/fractions-counting_z/fractions-counting.vfmanifest': unsatisfied requirement './fractions-counting.c#dispose_counter'.
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/fractions-counting_z/fractions-counting.vfmanifest': unsatisfied requirement './fractions-counting.c#dispose_ticket'.
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/fractions-counting_z/fractions-counting.vfmanifest': unsatisfied requirement './fractions-counting.c#random'.
+5 link errors
+
+17: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/dyncode_z/dyncode.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/dyncode_z/dyncode.c
+0 errors found (18 statements verified)
+Linking...
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/dyncode_z/dyncode.vfmanifest': unsatisfied requirement 'CRT/prelude.h#assume'.
+1 link errors
+
+18: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/multiset_abstract_type_z/multiset_abstract_type.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/multiset_abstract_type_z/multiset_abstract_type.c
+0 errors found (0 statements verified)
+Linking...
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/multiset_abstract_type_z/multiset_abstract_type.vfmanifest': unsatisfied requirement './multiset_abstract_type.c#multiset_multiplicity_empty'.
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/multiset_abstract_type_z/multiset_abstract_type.vfmanifest': unsatisfied requirement './multiset_abstract_type.c#multiset_size_empty'.
+2 link errors
+
+19: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/wf_func2_z/wf_func2.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/wf_func2_z/wf_func2.c
+0 errors found (5 statements verified)
+Linking...
+Module '/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/unlinked/wf_func2_z/wf_func2.vfmanifest': unsatisfied requirement 'CRT/prelude.h#fix_unfold'.
+1 link errors
+
+20: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/arraylist_z/arraylist.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/arraylist_z/arraylist.c
+0 errors found (64 statements verified)
+Linking...
+Program linked successfully.
+
+21: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/iter_with_auto_z/iter_with_auto.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/iter_with_auto_z/iter_with_auto.c
+0 errors found (200 statements verified)
+Linking...
+Program linked successfully.
+
+22: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/schorr_waite_z/schorr_waite.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/schorr_waite_z/schorr_waite.c
+0 errors found (31 statements verified)
+Linking...
+Program linked successfully.
+
+23: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/counter_with_pred_z/counter_with_pred.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/counter_with_pred_z/counter_with_pred.c
+0 errors found (30 statements verified)
+Linking...
+Program linked successfully.
+
+24: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/deposit_m/deposit.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/deposit_m/deposit.c
+0 errors found (14 statements verified)
+Linking...
+Program linked successfully.
+
+25: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/set_z/set.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/set_z/set.c
+0 errors found (51 statements verified)
+Linking...
+Program linked successfully.
+
+26: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/pred_m/pred.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/pred_m/pred.c
+0 errors found (29 statements verified)
+Linking...
+Program linked successfully.
+
+27: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/counter_with_pred_auto_a/counter_with_pred_auto.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/counter_with_pred_auto_a/counter_with_pred_auto.c
+0 errors found (19 statements verified)
+Linking...
+Program linked successfully.
+
+28: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/typedef_m/typedef.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/typedef_m/typedef.c
+0 errors found (5 statements verified)
+Linking...
+Program linked successfully.
+
+29: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/values_m/values.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/values_m/values.c
+0 errors found (18 statements verified)
+Linking...
+Program linked successfully.
+
+30: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/globals2_aj/globals.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/globals2_aj/globals.c
+0 errors found (15 statements verified)
+Linking...
+Program linked successfully.
+
+31: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/heap_block/deposit_m/deposit.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/heap_block/deposit_m/deposit.c
+0 errors found (14 statements verified)
+Linking...
+Program linked successfully.
+
+32: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/heap_block/account_m/account.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/heap_block/account_m/account.c
+0 errors found (9 statements verified)
+Linking...
+Program linked successfully.
+
+33: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/spouse_z/spouse.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/spouse_z/spouse.c
+0 errors found (45 statements verified)
+Linking...
+Program linked successfully.
+
+34: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/closetest_z/closetest.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/closetest_z/closetest.c
+0 errors found (2 statements verified)
+Linking...
+Program linked successfully.
+
+35: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/array_of_struct_z/array_of_struct.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/array_of_struct_z/array_of_struct.c
+0 errors found (40 statements verified)
+Linking...
+Program linked successfully.
+
+36: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/equalsmap_z/equalsmap.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/equalsmap_z/equalsmap.c
+0 errors found (78 statements verified)
+Linking...
+Program linked successfully.
+
+37: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/typedef_cast_z/typedef_cast.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/typedef_cast_z/typedef_cast.c
+0 errors found (5 statements verified)
+Linking...
+Program linked successfully.
+
+38: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/map_a/map.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/map_a/map.c
+0 errors found (60 statements verified)
+Linking...
+Program linked successfully.
+
+39: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/composite4_z/composite4.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/composite4_z/composite4.c
+0 errors found (145 statements verified)
+Linking...
+Program linked successfully.
+
+40: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/enums_m/enums.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/enums_m/enums.c
+0 errors found (9 statements verified)
+Linking...
+Program linked successfully.
+
+41: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/filter_m/filter.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/filter_m/filter.c
+0 errors found (54 statements verified)
+Linking...
+Program linked successfully.
+
+42: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/doubly_linked_list_z/doubly_linked_list.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/doubly_linked_list_z/doubly_linked_list.c
+0 errors found (42 statements verified)
+Linking...
+Program linked successfully.
+
+43: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/uniqueness_z/uniqueness.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/uniqueness_z/uniqueness.c
+0 errors found (6 statements verified)
+Linking...
+Program linked successfully.
+
+44: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/swap_a/swap.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/swap_a/swap.c
+0 errors found (13 statements verified)
+Linking...
+Program linked successfully.
+
+45: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/globals1_a/globals.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/globals1_a/globals.c
+0 errors found (19 statements verified)
+Linking...
+Program linked successfully.
+
+46: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/dispose_m/dispose.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/dispose_m/dispose.c
+0 errors found (35 statements verified)
+Linking...
+Program linked successfully.
+
+47: Running VeriFast on /home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/account_m/account.c...
+/home/fanweneddie/Desktop/purdue/research/GV/LLM/ai-for-verification/input-output-pairs/verified/linked/account_m/account.c
+0 errors found (9 statements verified)
+Linking...
+Program linked successfully.
+
