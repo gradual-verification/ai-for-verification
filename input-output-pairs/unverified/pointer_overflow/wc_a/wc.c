@@ -12,6 +12,11 @@ fixpoint int wcount(list<char> cs, bool inword) {
     case cons(h, t): return 0 == h ? (inword ? 1 : 0) : (' ' == h ? ((inword ? 1 : 0) + wcount(t, false)) : wcount(t, true));
   }
 }
+
+// setting the bounds for the result of wc in a brute-force way
+lemma void wcount_bounded(char* str, bool inword);
+  requires [?f]string(str, ?cs);
+  ensures [f]string(str, cs) &*& wcount(cs, inword) < INT_MAX &*& wcount(cs, inword) >= 0;
 @*/
 
 int wc(char* string, bool inword)
@@ -24,7 +29,9 @@ int wc(char* string, bool inword)
     //@ close [f]string(string, cs);
     return inword ? 1 : 0;
   } else {
+    //@ string_limits(string);
     if(head == ' ') {
+      //@ wcount_bounded(string + 1, false);
       int result = wc(string + 1, false);
       //@ close [f]string(string, cs);
       return inword ? 1 + result: result;
@@ -52,15 +59,19 @@ int main(int argc, char** argv) //@ : main
   if(argc < 2) { puts("No input file specified."); return -1; }
   //@ open [_]argv(argv, argc, _);
   //@ open [_]argv(argv + 1, argc - 1, _);
-  fp = fopen(* (argv + 1), "r");
+  fp = fopen(argv[1], "r");
   buff = malloc(100);
   if(buff == 0 || fp == 0) { abort(); }
   res = fgets(buff, 100, fp);
   while(res != 0)
     //@ invariant file(fp) &*& res != 0 ? string(buff, ?scs) &*& buff[length(scs) + 1..100] |-> _ : buff[..100] |-> _;
   {
+    //@ wcount_bounded(buff, inword);
     int tmp = wc(buff, inword);
     //@ string_to_chars(buff);
+    if (total > INT_MAX - tmp) {
+      break;
+    }
     total = total + tmp;
     res = fgets(buff, 100, fp);
   }

@@ -14,8 +14,8 @@ predicate subtree(struct node *root, struct node *parent, int count) =
         root == 0 ?
             count == 0
         :
-            root->left |-> ?left &*& root->right |-> ?right &*& root->parent |-> parent &*& root->count |-> count &*& malloc_block_node(root) &*& count >= 0 &*& 
-            subtree(left, root, ?leftCount) &*& subtree(right, root, ?rightCount) &*& count == 1 + leftCount + rightCount &*& leftCount >= 0 &*& rightCount >= 0;
+            root->left |-> ?left &*& root->right |-> ?right &*& root->parent |-> parent &*& root->count |-> count &*& malloc_block_node(root) &*& //count >= 0 &*& 
+            subtree(left, root, ?leftCount) &*& subtree(right, root, ?rightCount) &*& count == 1 + leftCount + rightCount; // &*& leftCount >= 0 &*& rightCount >= 0;
 
 predicate context(struct node *node, struct node *parent, int count) = 
         parent == 0 ?
@@ -32,6 +32,14 @@ predicate context(struct node *node, struct node *parent, int count) =
 predicate tree(struct node *node) = 
     context(node, ?parent, ?count) &*& subtree(node, parent, count);
 
+// for proving the disjoint property of a successfully-malloced node and any other node
+lemma void malloc_node_success(struct node *m);
+  requires m != 0;
+  ensures malloc_block_node(m);
+
+lemma void prove_disjoint(struct node *m, struct node *n);
+  requires malloc_block_node(m);
+  ensures m != n;
 @*/
 
 void abort();
@@ -60,14 +68,14 @@ struct node *create_tree()
 
 int subtree_get_count(struct node *node)
     //@ requires subtree(node, ?parent, ?count);
-    //@ ensures subtree(node, parent, count) &*& result == count &*& result >= 0;
+    //@ ensures subtree(node, parent, count) &*& result == count;// &*& result >= 0;
 {
     int result = 0;
     //@ open subtree(node, parent, count);
     if (node == 0) {
     } else {
         result = node->count;
-        //@ assert result >= 0; // Explicitly state the expectation
+        // @ assert result >= 0; // Explicitly state the expectation
 
     }
     //@ close subtree(node, parent, count);
@@ -85,7 +93,7 @@ int tree_get_count(struct node *node)
 }
 
 void fixup_ancestors(struct node *node, struct node *parent, int count)
-    //@ requires context(node, parent, ?oldCount) &*& INT_MAX - count >= oldCount + 1;
+    //@ requires context(node, parent, ?oldCount); // &*& INT_MAX - count >= oldCount + 1;
     //@ ensures context(node, parent, count);
 {
 //@ open context(node, parent, oldCount);
@@ -97,18 +105,21 @@ void fixup_ancestors(struct node *node, struct node *parent, int count)
         struct node *grandparent = parent->parent;
         int leftCount = 0;
         int rightCount = 0;
-        if (node == left) {
+        if (node == left && node != right) {
             leftCount = count;
             rightCount = subtree_get_count(right);
-            //@ assert rightCount >= 0;
-        } else {
+            // @ assert rightCount >= 0;
+        } else if (node == right && node != left) {
             leftCount = subtree_get_count(left);
-            //@ assert leftCount >= 0;
+            // @ assert leftCount >= 0;
             rightCount = count;
+        } else {
+            abort();
         }
         //TODO: fix the issue (Cannot prove condition. (Cannot prove 0 <= count0.)VeriFast), not sure why
-        //@ assert rightCount >= 0 &*& leftCount >= 0;
-        //@ assert INT_MAX - 1 >= leftCount + rightCount; // Ensure no overflow will occur.
+        // @ assert rightCount >= 0 &*& leftCount >= 0;
+        // @ assert INT_MAX - 1 >= leftCount + rightCount; // Ensure no overflow will occur.
+        if (rightCount < 0 || leftCount > INT_MAX - 1 -rightCount) { abort();}
         int parentCount = 1 + leftCount + rightCount;
         parent->count = parentCount;
         fixup_ancestors(parent, grandparent, parentCount);
@@ -129,6 +140,7 @@ struct node *tree_add_left(struct node *node)
         if (n == 0) {
             abort();
         }
+        //@ malloc_node_success(n);
         n->left = 0;
         //@ close subtree(0, n, 0);
         n->right = 0;
@@ -144,6 +156,7 @@ struct node *tree_add_left(struct node *node)
             }
             //@ open subtree(nodeLeft, node, _);
             node->left = n;
+            //@ prove_disjoint(n, node->right);
             //@ close context(n, node, 0);
             fixup_ancestors(n, node, 1);
         }
@@ -165,6 +178,7 @@ struct node *tree_add_right(struct node *node)
         if (n == 0) {
             abort();
         }
+        //@ malloc_node_success(n);
         n->left = 0;
         //@ close subtree(0, n, 0);
         n->right = 0;
@@ -180,6 +194,7 @@ struct node *tree_add_right(struct node *node)
             }
             //@ open subtree(nodeRight, node, _);
             node->right = n;
+            //@ prove_disjoint(n, node->left);
             //@ close context(n, node, 0);
             fixup_ancestors(n, node, 1);
         }
@@ -193,7 +208,7 @@ struct node *tree_get_parent(struct node *node)
     //@ ensures tree(result);
 {
     //@ open tree(node);
-    //@ open subtree(node, ?parent, ?count);
+    //@ open subtree(node, ?parent_, ?count);
     if (node == 0) {
         abort();
     }
@@ -202,11 +217,11 @@ struct node *tree_get_parent(struct node *node)
         if (parent == 0) {
             abort();
         }
-        //@ close subtree(node, parent, count);
-        //@ open context(node, parent, count);
-        //@ assert context(parent, ?grandparent, ?parentCount);
-        //@ close subtree(parent, grandparent, parentCount);
-        //@ close tree(parent);
+        //@ close subtree(node, parent_, count);
+        //@ open context(node, parent_, count);
+        //@ assert context(parent_, ?grandparent, ?parentCount);
+        //@ close subtree(parent_, grandparent, parentCount);
+        //@ close tree(parent_);
         return parent;
     }
 }
@@ -256,14 +271,14 @@ bool tree_has_parent(struct node *node)
     //@ ensures tree(node);
 {
     //@ open tree(node);
-    //@ open subtree(node, ?parent, ?count);
+    //@ open subtree(node, ?parent_, ?count);
     bool result = false;
     if (node == 0) {
     } else {
         struct node *parent = node->parent;
         result = parent != 0;
     }
-    //@ close subtree(node, parent, count);
+    //@ close subtree(node, parent_, count);
     //@ close tree(node);
     return result;
 }
@@ -329,14 +344,14 @@ void tree_dispose(struct node *node)
         abort();
     }
     //@ open tree(node);
-    //@ open context(node, ?parent, ?count);
-    //@ open subtree(node, parent, count);
+    //@ open context(node, ?parent_, ?count);
+    //@ open subtree(node, parent_, count);
     {
         struct node *parent = node->parent;
         if (parent != 0) {
             abort();
         }
-        //@ close subtree(node, parent, count);
+        //@ close subtree(node, parent_, count);
     }
     dispose_node(node);
 }

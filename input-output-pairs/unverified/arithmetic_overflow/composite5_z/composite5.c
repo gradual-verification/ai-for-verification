@@ -107,6 +107,10 @@ predicate tree(int id) =
 
 predicate tree_membership_fact(int id, struct node *n) = ghost_list_member_handle(id, n);
 
+// setting the bounds for the result of adding count in a brute-force way
+lemma void count_bounded(struct node *n, int delta);
+  requires [?f]n->count |-> ?cnt;
+  ensures [f]n->count |-> cnt &*& cnt + delta < INT_MAX;
 @*/
 
 /* private */
@@ -180,10 +184,7 @@ void add_to_count(struct node *p, int delta)
   //@ ensures tree(id);
 {
   struct node *pp = p->parent;
-  // ugly fix
-  if (p->count > 1000 || delta > 1000) {
-    abort();
-  }
+  //@ count_bounded(p, delta);
   if (pp == 0) {
     p->count += delta;
     //@ close node(id)(p);

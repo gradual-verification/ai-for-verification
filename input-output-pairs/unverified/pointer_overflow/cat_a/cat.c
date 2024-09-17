@@ -13,7 +13,7 @@ int main(int argc, char** argv) //@ : main
   if(argc < 2) { fputs("Enter a file name.", stderr); return -1; }
   //@ open [_]argv(argv, argc, _);
   //@ open [_]argv(argv + 1, argc - 1, _);
-  fp = fopen(* (argv + 1), "r");
+  fp = fopen(argv[1], "r");
   buffer = malloc(sizeof(char) * 100);
   res = 0;
   if(fp == 0 || buffer == 0) { abort(); }

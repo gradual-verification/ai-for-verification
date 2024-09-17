@@ -114,14 +114,17 @@ void fixup_ancestors(struct node *node, struct node *parent, int count)
         struct node *grandparent = parent->parent;
         int leftCount = 0;
         int rightCount = 0;
-        if (node == left) {
+        if (node == left && node != right) {
             leftCount = count;
             rightCount = subtree_get_count(right);
-        } else {
+        } else if (node == right && node != left) {
             leftCount = subtree_get_count(left);
             rightCount = count;
+        } else {
+            abort();
         }
         {
+            if (rightCount < 0 || leftCount > INT_MAX - 1 -rightCount) { abort();}
             int parentCount = 1 + leftCount + rightCount;
             parent->count = parentCount;
             fixup_ancestors(parent, grandparent, parentCount);
@@ -233,7 +236,7 @@ struct node *tree_get_parent(struct node *node)
     struct node *parent = node->parent;
     //@ close subtree(node, parent, subtreeNodes);
     //@ open context(node, parent, tree_count(subtreeNodes), contextNodes);
-    //@ assert context(parent, ?grandparent, ?parentCount, ?parentContextNodes);
+    //@ assert context(parent, ?grandparent, ?parentCount, ?parentContextNodes_);
     /*@ switch (contextNodes) {
             case root:
             case left_context(parentContextNodes, parent0, rightNodes):
@@ -243,7 +246,7 @@ struct node *tree_get_parent(struct node *node)
         }
     @*/
     //@ assert subtree(parent, grandparent, ?parentNodes);
-    //@ close tree(parent, parentContextNodes, parentNodes);
+    //@ close tree(parent, parentContextNodes_, parentNodes);
     return parent;
 }
 
@@ -304,11 +307,11 @@ bool tree_has_parent(struct node *node)
     //@ ensures tree(node, contextNodes, subtreeNodes) &*& result == (contextNodes != root);
 {
     //@ open tree(node, contextNodes, subtreeNodes);
-    //@ open subtree(node, ?parent, subtreeNodes);
+    //@ open subtree(node, ?parent_, subtreeNodes);
     struct node *parent = node->parent;
-    //@ close subtree(node, parent, subtreeNodes);
-    //@ open context(node, parent, ?count, contextNodes);
-    //@ close context(node, parent, count, contextNodes);
+    //@ close subtree(node, parent_, subtreeNodes);
+    //@ open context(node, parent_, ?count, contextNodes);
+    //@ close context(node, parent_, count, contextNodes);
     //@ close tree(node, contextNodes, subtreeNodes);
     return parent != 0;
 }

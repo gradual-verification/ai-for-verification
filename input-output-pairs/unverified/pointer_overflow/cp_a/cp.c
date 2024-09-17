@@ -12,9 +12,8 @@ int main(int argc, char** argv) //@ : main
   //@ open [_]argv(argv, argc, _);
   //@ open [_]argv(argv + 1, argc - 1, _);
   //@ open [_]argv(argv + 2, argc - 2, _);
-  //TODO: need to fix the error below
-  from = fopen(* (argv + 1), "r");
-  to = fopen(* (argv + 2), "w");
+  from = fopen(argv[1], "r");
+  to = fopen(argv[2], "w");
   buffer = malloc(100);
   if(buffer == 0 || from == 0 || to == 0) { abort(); }
   nb_read = fread(buffer, 1, 100, from);

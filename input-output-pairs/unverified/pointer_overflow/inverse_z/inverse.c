@@ -272,12 +272,12 @@ void invert(int *A, int N, int *B)
     {
         //@ ints_split(A, i);
         //@ open ints(A + i, N - i, ?as1);
-        int ai = *(A + i);
+        int ai = A[i];
         //@ close ints(A + i, N - i, as1);
         //@ ints_unseparate_same(A, as);
         //@ forall_drop(as, (between)(unit, 0, N - 1), i);
         //@ ints_split(B, ai);
-        *(B + ai) = i;
+        B[ai] = i;
         //@ ints_unseparate(B, ai, bs);
         //@ take_plus_one(i, as);
         //@ with_index_append(0, take(i, as), cons(nth(i, as), nil));
@@ -291,4 +291,11 @@ void invert(int *A, int N, int *B)
     //@ assert ints(B, N, ?bs);
     //@ int_of_nat_of_int(N);
     //@ is_inverse_symm(as, nat_of_int(N), bs, 0);
+}
+
+int main()
+//@ requires true;
+//@ ensures true;
+{
+    return 0;
 }
