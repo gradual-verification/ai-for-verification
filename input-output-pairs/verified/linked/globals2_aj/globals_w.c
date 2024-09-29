@@ -9,8 +9,8 @@ struct counter {
 static struct counter *c;
 
 void m()
-//@ requires x == 7 &*& *(&c) |-> ?ctr &*& counter_f(ctr, ?v);
-//@ ensures x == 8 &*& *(&c) |-> ctr &*& counter_f(ctr, v+1);
+//@ requires x |-> 7 &*& c |-> ?ctr &*& counter_f(ctr, ?v);
+//@ ensures x |-> 8 &*& c |-> ctr &*& counter_f(ctr, v + 1);
 {
     int y = x;
     x = y + 1;
@@ -18,8 +18,8 @@ void m()
 }
 
 int main() //@ : main_full(globals)
-    //@ requires module(globals, true);
-    //@ ensures true;
+//@ requires module(globals, true);
+//@ ensures true;
 {
     x = 7;
     struct counter *ctr = malloc(sizeof(struct counter));

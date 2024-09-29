@@ -1,13 +1,16 @@
 #include "stdlib.h"
+
 struct account
 {
     int limit;
     int balance;
 };
+
 /*@
 predicate account_pred(struct account *myAccount, int theLimit, int theBalance) =
 myAccount->limit |-> theLimit &*& myAccount->balance |-> theBalance;
 @*/
+
 struct account *create_account(int limit)
 //@ requires limit <= 0;
 //@ ensures account_pred(result, limit, 0);
@@ -21,6 +24,7 @@ struct account *create_account(int limit)
     myAccount->balance = 0;
     return myAccount;
 }
+
 int account_get_balance(struct account *myAccount)
 //@ requires account_pred(myAccount, ?limit, ?balance);
 //@ ensures account_pred(myAccount, limit, balance) &*& result == balance;
@@ -28,12 +32,14 @@ int account_get_balance(struct account *myAccount)
     int result = myAccount->balance;
     return result;
 }
+
 void account_deposit(struct account *myAccount, int amount)
 //@ requires account_pred(myAccount, ?limit, ?balance) &*& 0 <= amount;
 //@ ensures account_pred(myAccount, limit, balance + amount);
 {
     myAccount->balance += amount;
 }
+
 int account_withdraw(struct account *myAccount, int amount)
 //@ requires account_pred(myAccount, ?limit, ?balance) &*& 0 <= amount;
 /*@ ensures account_pred(myAccount, limit, balance - result)
@@ -43,12 +49,14 @@ int account_withdraw(struct account *myAccount, int amount)
     myAccount->balance -= result;
     return result;
 }
+
 void account_dispose(struct account *myAccount)
 //@ requires account_pred(myAccount, _, _);
 //@ ensures true;
 {
     free(myAccount);
 }
+
 int main()
 //@ requires true;
 //@ ensures true;

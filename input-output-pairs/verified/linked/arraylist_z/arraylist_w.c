@@ -15,16 +15,6 @@ predicate arraylist(struct arraylist *a; list<void*> vs) =
    &*& data[0..size] |-> vs &*& data[size..capacity] |-> _;
 @*/
 
-
-
-//???? 
-//? create the connection between data and a->data
-//_means all other members, we don't care what the value is
-
-
-
-
-
 struct arraylist *create_arraylist() 
   //@ requires true;
   //@ ensures arraylist(result, nil);
@@ -40,29 +30,22 @@ struct arraylist *create_arraylist()
   return a; 
 }
 
-
-
-
 void *list_get(struct arraylist *a, int i)
-  //@ requires a != NULL &*& i >= 0 &*& i<a->size -1;
- //@ ensures arraylist(a, vs) &*& result == nth(i, vs);
+//@ requires arraylist(a, ?vs) &*& i >= 0 &*& i <= a->size - 1;
+//@ ensures arraylist(a, vs) &*& result == nth(i, vs);
 {
   return a->data[i];
 }
 
-
-
 int list_length(struct arraylist *a)
-  //@ requires a != NULL;
+//@ requires arraylist(a, ?vs);
 //@ ensures arraylist(a, vs) &*& result == length(vs);
 {
   return a->size;
 }
 
-
-
 void list_add(struct arraylist *a, void *v)
- //@ requires a != NULL &*& v!=NULL
+//@ requires arraylist(a, ?vs);
 //@ ensures arraylist(a, append(vs, cons(v, nil)));
 {
   int size = 0;
@@ -71,46 +54,33 @@ void list_add(struct arraylist *a, void *v)
     data = a->data;
     size = a->size;
     int capacity = a->capacity;
-
     if (SIZE_MAX / sizeof(void *) < (size_t)capacity * 2 + 1) abort();
-  
     void** newData = malloc(((size_t)capacity * 2 + 1) * sizeof(void*));
     if(newData == 0) abort();
-  
     memcpy(newData, data, (size_t)size * sizeof(void*));
- 
     a->data = newData;
- 
     if (INT_MAX / 2 - 1 < capacity) abort();
     a->capacity = capacity * 2 + 1;
-   
     free(data);
   }
   size = a->size;
   data = a->data;
   data[size] = v;
   a->size += 1;
-
 }
 
-
-
 void list_remove_nth(struct arraylist *a, int n)
-
-  //@ requires a != NULL &*& n>=0&*& n<=a->size-1;
- //@ ensures arraylist(a, append(take(n, vs), tail(drop(n, vs))));
+//@ requires arraylist(a, ?vs) &*& n >= 0 &*& n <= a->size - 1;
+//@ ensures arraylist(a, append(take(n, vs), tail(drop(n, vs))));
 {
   void** data = a->data;
   int size = a->size;
- 
   memmove(data + n, data + n + 1, (unsigned int) (size - n - 1) * sizeof(void *));
- 
   a->size = a->size - 1;
-
 }
 
 void list_dispose(struct arraylist* a)
-  //@ requires a != NULL;
+//@ requires arraylist(a, ?vs);
 //@ ensures true;
 {
   void** data = a->data;
@@ -120,11 +90,9 @@ void list_dispose(struct arraylist* a)
   free(a);
 }
 
-
-
 int main()
-  //@ requires true;
-  //@ ensures true;
+//@ requires true;
+//@ ensures true;
 {
   struct arraylist* a = create_arraylist();
   void* tmp = 0;

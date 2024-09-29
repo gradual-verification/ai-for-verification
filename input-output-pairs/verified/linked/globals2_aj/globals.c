@@ -8,11 +8,9 @@ struct counter {
 
 static struct counter *c;
 
-// uses heap chunk counter_f for verification which is not a predicate, globals1_a contains the predicate version
-// see https://github.com/verifast/verifast/commit/f8f060b2ac4dd2bb6556b334467f55fe8b3ce031
 void m()
-    //@ requires x |-> 7 &*& c |-> ?ctr &*& counter_f(ctr, ?v) &*& v >= INT_MIN &*& v + 1 <= INT_MAX; // added int bound assumptions due to VeriFast needing it to verify this example
-    //@ ensures x |-> 8 &*& c |-> ctr &*& counter_f(ctr, v + 1);
+//@ requires x |-> 7 &*& c |-> ?ctr &*& counter_f(ctr, ?v) &*& v >= INT_MIN &*& v + 1 <= INT_MAX;
+//@ ensures x |-> 8 &*& c |-> ctr &*& counter_f(ctr, v + 1);
 {
     int y = x;
     x = y + 1;
@@ -20,8 +18,8 @@ void m()
 }
 
 int main() //@ : main_full(globals)
-    //@ requires module(globals, true);
-    //@ ensures true;
+//@ requires module(globals, true);
+//@ ensures true;
 {
     //@ open_module();
     x = 7;

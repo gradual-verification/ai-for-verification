@@ -2,11 +2,14 @@
 #include "malloc.h"
 #include "stdlib.h"
 
-/* Description
-  Behavior: The main function is the entry point of the program. It checks if a file name is provided as a command-line argument, reads the contents of the file, and prints them to the standard output (stdout).
-    - Parameters: 
-      - `argc`: Number of command-line arguments passed to the program.
-      - `argv`: Array of command-line arguments provided to the program.
+/***
+ * Description:
+The main function is the entry point of the program. 
+It checks if a file name is provided as a command-line argument, reads the contents of the file, 
+and prints them to the standard output (stdout).
+  
+@param argc - the number of command-line arguments passed to the program.
+@param argv - the array of command-line arguments provided to the program.
 */
 int main(int argc, char** argv)
 {

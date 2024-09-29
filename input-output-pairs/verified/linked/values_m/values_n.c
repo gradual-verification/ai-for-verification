@@ -1,16 +1,19 @@
 #include "stdlib.h"
+
 struct node
 {
     struct node *next;
     int value;
 };
+
 struct stack
 {
     struct node *head;
 };
+
 /***
  * Description:
-The function creates a stack.
+The create_stack function creates a stack.
 
 @param none
 
@@ -30,17 +33,16 @@ struct stack *create_stack()
 
 /***
  * Description:
-This function pushes a new integer value onto the stack.
+The stack_push function pushes a new integer value onto the stack.
 
 @param stack - A pointer to a stack
 @param value - The integer value to be added on top on the stack
 
-It takes a struct stack pointer and an integer valueas parameters.
+It takes a struct stack pointer and an integer values parameters.
 It creates a new node to hold the value and links it to the current
 head of the stack. Then, it updates the head of the stack to
-point to the newly added node. The function ensuresthat the new value
+point to the newly added node. The function ensures that the new value
 is successfully added to the stack.
-
 */
 void stack_push(struct stack *stack, int value)
 {
@@ -56,9 +58,9 @@ void stack_push(struct stack *stack, int value)
 
 /***
  * Description:
-This function deletes a stack.
+The stack_dispose function deletes an empty stack.
 
-@param none
+@param stack- A pointer to a stack whose values are empty
 
 The function disposes of the stack by freeing the memory
 allocated for the struct stack. It takes a struct stack
@@ -68,6 +70,10 @@ needed.
 */
 void stack_dispose(struct stack *stack)
 {
-
     free(stack);
+}
+
+int main()
+{
+    return 0;
 }

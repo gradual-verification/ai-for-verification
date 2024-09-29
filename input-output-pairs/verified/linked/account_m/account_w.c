@@ -1,8 +1,10 @@
 #include "stdlib.h"
+
 struct account
 {
     int balance;
 };
+
 struct account *create_account()
 //@ requires true;
 //@ ensures account_balance(result, 0);
@@ -15,18 +17,21 @@ struct account *create_account()
     myAccount->balance = 0;
     return myAccount;
 }
+
 void account_set_balance(struct account *myAccount, int newBalance)
 //@ requires account_balance(myAccount, _);
 //@ ensures account_balance(myAccount, newBalance);
 {
     myAccount->balance = newBalance;
 }
+
 void account_dispose(struct account *myAccount)
 //@ requires account_balance(myAccount, _);
 //@ ensures true;
 {
     free(myAccount);
 }
+
 int main()
 //@ requires true;
 //@ ensures true;

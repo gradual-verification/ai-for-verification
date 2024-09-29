@@ -8,7 +8,6 @@ struct node {
 
 struct set {
   struct node* head;
-  
 };
 
 /*@
@@ -20,12 +19,11 @@ predicate lseg(struct node* first, struct node* last, list<void*> vs) =
 
 predicate set(struct set* set, int size, fixpoint(void*, bool) elements) =
   set->head |-> ?head &*& malloc_block_set(set) &*& lseg(head, 0, ?vs) &*& size == length(vs) &*& list_as_set(vs) == elements;
-
 @*/
 
 struct set* create_set()
-  //@ requires true;
-  //@ ensures result == 0 ? true : set(result, 0, (empty_set));
+//@ requires true;
+//@ ensures result == 0 ? true : set(result, 0, (empty_set));
 {
   struct set* set = malloc(sizeof(struct set));
   if(set == 0) return 0;
@@ -36,8 +34,8 @@ struct set* create_set()
 }
 
 void set_add(struct set* set, void* x)
-  //@ requires set(set, ?size, ?elems) &*& elems(x) == false;
-  //@ ensures set(set, size + 1, fupdate(elems, x, true));
+//@ requires set(set, ?size, ?elems) &*& elems(x) == false;
+//@ ensures set(set, size + 1, fupdate(elems, x, true));
 {
   //@ open set(set, size, elems);
   //@ assert lseg(?head, 0, ?vs);
@@ -51,8 +49,8 @@ void set_add(struct set* set, void* x)
 }
 
 bool set_contains(struct set* set, void* x)
-  //@ requires set(set, ?size, ?elems);
-  //@ ensures set(set, size, elems) &*& result ? exists<void *>(?elem) &*& elems(elem) == true &*& (uintptr_t)x == (uintptr_t)elem : !elems(x);
+//@ requires set(set, ?size, ?elems);
+//@ ensures set(set, size, elems) &*& result ? exists<void *>(?elem) &*& elems(elem) == true &*& (uintptr_t)x == (uintptr_t)elem : !elems(x);
 {
   //@ open set(set, size, elems);
   struct node* curr = set->head;
@@ -61,8 +59,8 @@ bool set_contains(struct set* set, void* x)
   //@ close lseg(curr, 0, vss);
   //@ void *elem = 0;
   while(curr != 0 && ! found) 
-    //@ requires lseg(curr, 0, ?vs) &*& curr == 0 ? vs == nil : true;
-    //@ ensures lseg(old_curr, 0, vs) &*& old_found ? found && elem == old_elem : found ? (uintptr_t)elem == (uintptr_t)x && (list_as_set(vs))(elem) : !(list_as_set(vs))(x);
+  //@ requires lseg(curr, 0, ?vs) &*& curr == 0 ? vs == nil : true;
+  //@ ensures lseg(old_curr, 0, vs) &*& old_found ? found && elem == old_elem : found ? (uintptr_t)elem == (uintptr_t)x && (list_as_set(vs))(elem) : !(list_as_set(vs))(x);
   {
     //@ open lseg(curr, 0, vs);
     //@ assert lseg(_, 0, ?tail);
@@ -82,8 +80,8 @@ bool set_contains(struct set* set, void* x)
 }
 
 void set_dispose(struct set* set)
-  //@ requires set(set, ?size, ?elems);
-  //@ ensures true;
+//@ requires set(set, ?size, ?elems);
+//@ ensures true;
 {
   //@ open set(set, size, elems);
   struct node* curr = set->head;
@@ -100,8 +98,8 @@ void set_dispose(struct set* set)
 }
 
 int main() //@ : main
-  //@ requires true;
-  //@ ensures true;
+//@ requires true;
+//@ ensures true;
 {
   struct set* set = create_set();
   if(set == 0) return 0;

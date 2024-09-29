@@ -2,12 +2,9 @@
 #include "malloc.h"
 #include "stdlib.h"
 
-/*
-Prints the contents of given file to stdout.
-*/
 int main(int argc, char** argv) //@ : main
-  //@ requires 0 <= argc &*& [_]char_array(argv, argc);
-  //@ ensures true;
+//@ requires 0 <= argc &*& [_]argv(argv, argc, _);
+//@ ensures true;
 {
   struct file* fp = 0; char* buffer = 0; char* res = 0;
   if(argc < 2) { puts("Enter a file name."); return -1; }

@@ -10,10 +10,9 @@ static struct counter *c;
 
 //@ predicate counter(struct counter* c, int v) = c->f |-> v;
 
-// see https://github.com/verifast/verifast/commit/f8f060b2ac4dd2bb6556b334467f55fe8b3ce031
 void m()
-    //@ requires integer(&x, 7) &*& c |-> ?ctr &*& counter(ctr, ?v) &*& INT_MIN <= v &*& v + 1 <= INT_MAX; // added int bound assumptions due to VeriFast needing it to verify this example
-    //@ ensures integer(&x, 8) &*& c |-> ctr &*& counter(ctr, v + 1);
+//@ requires integer(&x, 7) &*& c |-> ?ctr &*& counter(ctr, ?v) &*& v + 1 <= INT_MAX;
+//@ ensures integer(&x, 8) &*& c |-> ctr &*& counter(ctr, v + 1);
 {
     int y = x;
     x = y + 1;
@@ -23,8 +22,8 @@ void m()
 }
 
 int main() //@ : main_full(globals)
-    //@ requires module(globals, true);
-    //@ ensures true;
+//@ requires module(globals, true);
+//@ ensures true;
 {
     //@ open_module();
     x = 7;

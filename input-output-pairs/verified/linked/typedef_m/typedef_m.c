@@ -1,8 +1,8 @@
 typedef int my_int;
 
 int main()
-    //@ requires true;
-    //@ ensures true;
+//@ requires true;
+//@ ensures true;
 {
     my_int x = 5;
     int y = x;

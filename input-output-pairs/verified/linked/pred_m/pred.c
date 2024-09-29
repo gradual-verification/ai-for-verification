@@ -1,14 +1,17 @@
 #include "stdlib.h"
+
 struct account
 {
     int limit;
     int balance;
 };
+
 /*@
 predicate account_pred(struct account *myAccount, int theLimit, int theBalance) =
 myAccount->limit |-> theLimit &*& myAccount->balance |-> theBalance
 &*& malloc_block_account(myAccount);
 @*/
+
 struct account *create_account(int limit)
 //@ requires limit <= 0;
 //@ ensures account_pred(result, limit, 0);
@@ -23,6 +26,7 @@ struct account *create_account(int limit)
     //@ close account_pred(myAccount, limit, 0);
     return myAccount;
 }
+
 int account_get_balance(struct account *myAccount)
 //@ requires account_pred(myAccount, ?limit, ?balance);
 //@ ensures account_pred(myAccount, limit, balance) &*& result == balance;
@@ -32,6 +36,7 @@ int account_get_balance(struct account *myAccount)
     //@ close account_pred(myAccount, limit, balance);
     return result;
 }
+
 void account_deposit(struct account *myAccount, int amount)
 //@ requires account_pred(myAccount, ?limit, ?balance) &*& 0 <= amount &*& balance + amount <= INT_MAX;
 //@ ensures account_pred(myAccount, limit, balance + amount);
@@ -40,8 +45,10 @@ void account_deposit(struct account *myAccount, int amount)
     myAccount->balance += amount;
     //@ close account_pred(myAccount, limit, balance + amount);
 }
+
 int account_withdraw(struct account *myAccount, int amount)
-//@ requires account_pred(myAccount, ?limit, ?balance) &*& 0 <= amount &*& balance - amount >= INT_MIN &*& balance - limit >= INT_MIN;
+/*@ requires account_pred(myAccount, ?limit, ?balance) &*& 0 <= amount 
+&*& balance - amount >= INT_MIN &*& balance - limit >= INT_MIN; @*/
 /*@ ensures account_pred(myAccount, limit, balance - result)
 &*& result == (balance - amount < limit ? balance - limit : amount); @*/
 {
@@ -51,6 +58,7 @@ int account_withdraw(struct account *myAccount, int amount)
     //@ close account_pred(myAccount, limit, balance - result);
     return result;
 }
+
 void account_dispose(struct account *myAccount)
 //@ requires account_pred(myAccount, _, _);
 //@ ensures true;
@@ -58,6 +66,7 @@ void account_dispose(struct account *myAccount)
     //@ open account_pred(myAccount, _, _);
     free(myAccount);
 }
+
 int main()
 //@ requires true;
 //@ ensures true;

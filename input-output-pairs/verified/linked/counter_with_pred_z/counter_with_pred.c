@@ -10,8 +10,8 @@ predicate Counter(struct Counter* c, int v) =
 @*/
 
 struct Counter* init(int v)
-  //@ requires emp;
-  //@ ensures Counter(result, v);
+//@ requires emp;
+//@ ensures Counter(result, v);
 {
   struct Counter* c = malloc(sizeof(struct Counter));
   if (c == 0) {
@@ -23,10 +23,9 @@ struct Counter* init(int v)
   return c;
 }
 
-
 void increment(struct Counter* c)
-  //@ requires Counter(c, ?v) &*& v < INT_MAX;
-  //@ ensures Counter(c, v+1);
+//@ requires Counter(c, ?v) &*& v < INT_MAX;
+//@ ensures Counter(c, v+1);
 {
   //@ open Counter(c, v);
   int tmp = c->value;
@@ -34,20 +33,17 @@ void increment(struct Counter* c)
   //@ close Counter(c, v+1);
 }
 
-
 void dispose(struct Counter* c)
-  //@ requires Counter(c, _);
-  //@ ensures emp;
+//@ requires Counter(c, _);
+//@ ensures emp;
 {
   //@ open Counter(c, _);
   free(c);
 }
 
-
-
 void swap(struct Counter* c1, struct Counter* c2)
-  //@ requires Counter(c1, ?v1) &*& Counter(c2, ?v2);
-  //@ ensures Counter(c1, v2) &*& Counter(c2, v1); 
+//@ requires Counter(c1, ?v1) &*& Counter(c2, ?v2);
+//@ ensures Counter(c1, v2) &*& Counter(c2, v1); 
 {
   //@ open Counter(c1, v1); 
   //@ open Counter(c2, v2);
@@ -60,8 +56,8 @@ void swap(struct Counter* c1, struct Counter* c2)
 }
 
 int get(struct Counter* c)
-  //@ requires Counter(c, ?v);
-  //@ ensures Counter(c, v) &*& result==v; 
+//@ requires Counter(c, ?v);
+//@ ensures Counter(c, v) &*& result==v; 
 {
   //@ open Counter(c, v);
   int tmp = c->value;
@@ -70,8 +66,8 @@ int get(struct Counter* c)
 }
 
 int main() //@ : main
-  //@ requires emp;
-  //@ ensures emp;
+//@ requires emp;
+//@ ensures emp;
 {
   struct Counter* c1 = init(0); struct Counter* c2 = init(5);
 

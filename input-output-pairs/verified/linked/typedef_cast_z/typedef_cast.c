@@ -3,8 +3,8 @@
 typedef short my_short;
 
 void foo(int16_t x, my_short y)
-    //@ requires x - y >= -32768 &*& x - y <= 32767;
-    //@ ensures true;
+//@ requires x - y >= SHRT_MIN &*& x - y <= SHRT_MAX;
+//@ ensures true;
 {
     my_short z = (my_short)(x - y);
     z = (int16_t)(x - y);

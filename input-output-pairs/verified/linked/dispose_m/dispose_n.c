@@ -1,102 +1,96 @@
 #include "stdlib.h"
+
 struct node
 {
     struct node *next;
     int value;
 };
-struct stack
+
+struct container
 {
     struct node *head;
 };
+
 /***
  * Description:
-The `create_stack` function is a constructor for a stack data structure.
+The create_container function is a constructor for a container data structure.
 
 @param none
 
-The function creates a new stack object by allocating memory for a `struct stack` 
-and sets its `head` pointer to `NULL`. The function takes no parameters and 
-returns the newly created stack.
+The function creates a new container object by allocating memory for a struct container 
+and sets its head pointer to NULL. The function takes no parameters and 
+returns the newly created container.
 */
-struct stack *create_stack()
+struct container *create_container()
 {
-    struct stack *stack = malloc(sizeof(struct stack));
-    if (stack == 0)
+    struct container *container = malloc(sizeof(struct container));
+    if (container == 0)
     {
         abort();
     }
-    stack->head = 0;
-    
-    
-    return stack;
+    container->head = 0;
+    return container;
 }
+
 /***
  * Description:
-The `stack_push` function adds an element to the top of the 
-stack. 
+The container_add function adds an element to the container. 
 
-@param stack - pointer to the stack
-@param value - integer value to be pushed to the stack
+@param container - pointer to the container
+@param value - integer value to be added to the container
 
 The function dynamically allocates memory for a new node, 
-assigns the value to the node, and updates the `head` pointer 
-of the stack to point to the new node. The number of elements 
-in the stack is incremented by one.
+assigns the value to the node, and updates the head pointer 
+of the container to point to the new node. The number of elements 
+in the container is incremented by one.
 */
-void stack_push(struct stack *stack, int value)
+void container_add(struct container *container, int value)
 {
-    
     struct node *n = malloc(sizeof(struct node));
     if (n == 0)
     {
         abort();
     }
-    n->next = stack->head;
+    n->next = container->head;
     n->value = value;
-    stack->head = n;
-    
-    
+    container->head = n;
 }
 
 /***
  * Description:
-The `stack_pop` function removes and returns the top element 
-from the stack.
+The container_remove function removes an element 
+from the non-empty container.
 
-@param stack - pointer to the stack
+@param container - pointer to the non-empty container
 
-The function takes a pointer to the stack as a parameter and 
+The function takes a pointer to the container as a parameter and 
 retrieves the value of the top node. It then updates the 
-`head` pointer of the stack to the next node, frees the 
+head pointer of the container to the next node, frees the 
 memory of the popped node, and returns the value.
 */
-int stack_pop(struct stack *stack)
+int container_remove(struct container *container)
 {
-    
-    struct node *head = stack->head;
-    
+    struct node *head = container->head;
     int result = head->value;
-    stack->head = head->next;
+    container->head = head->next;
     free(head);
-    
     return result;
 }
 
 /***
  * Description:
-The `nodes_dispose` function recursively deallocates memory 
+The nodes_dispose function recursively deallocates memory 
 for all nodes in a linked list starting from a given node. 
 
 @param n - pointer to the node to be disposed.
 
 The function takes a pointer to a node as a parameter and traverses 
-the linked list by recursively calling itself on the `next` 
+the linked list by recursively calling itself on the next 
 node until reaching the end of the list. The function frees 
 the memory of each node as it unwinds the recursion.
 */
 void nodes_dispose(struct node *n)
 {
-    
     if (n != 0)
     {
         nodes_dispose(n->next);
@@ -106,30 +100,34 @@ void nodes_dispose(struct node *n)
 
 /***
  * Description:
-The `stack_dispose` function frees the memory of an entire 
-stack including all the nodes in its linked list. 
+The container_dispose function frees the memory of an entire 
+container including all the nodes in its linked list. 
 
-@param stack - pointer to the stack to be deleted.
+@param container - pointer to the container to be deleted.
 
-It takes a pointer to the stack as a parameter and calls 
-`nodes_dispose` on the `head` of the stack to deallocate 
+It takes a pointer to the container as a parameter and calls 
+nodes_dispose on the head of the container to deallocate 
 memory for all nodes. Finally, it frees the memory of the 
-stack itself.
+container itself.
 */
-void stack_dispose(struct stack *stack)
+void container_dispose(struct container *container)
 {
-    
-    nodes_dispose(stack->head);
-    free(stack);
+    nodes_dispose(container->head);
+    free(container);
 }
 
+/***
+ * Description:
+The main function creates a container, adds twice and removes twice,
+and finally dispose the container.
+*/
 int main()
 {
-    struct stack *s = create_stack();
-    stack_push(s, 10);
-    stack_push(s, 20);
-    stack_pop(s);
-    stack_pop(s);
-    stack_dispose(s);
+    struct container *s = create_container();
+    container_add(s, 10);
+    container_add(s, 20);
+    container_remove(s);
+    container_remove(s);
+    container_dispose(s);
     return 0;
 }

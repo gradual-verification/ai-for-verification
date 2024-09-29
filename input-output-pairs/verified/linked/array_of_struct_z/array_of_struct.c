@@ -8,7 +8,6 @@ struct student {
 };
 
 /*@
-
 predicate students(struct student *students, int count;) =
     count == 0 ?
         emp
@@ -16,14 +15,11 @@ predicate students(struct student *students, int count;) =
         students->name[..100] |-> ?cs &*& mem('\0', cs) == true &*& students->age |-> _ &*&
         struct_student_padding(students) &*&
         students(students + 1, count - 1);
-
 @*/
 
-
-
 struct student *read_students(int *count)
-    //@ requires *count |-> _;
-    //@ ensures *count |-> ?nb &*& students(result, nb) &*& malloc_block_chars((void *)result, nb * sizeof(struct student));
+//@ requires *count |-> _;
+//@ ensures *count |-> ?nb &*& students(result, nb) &*& malloc_block_chars((void *)result, nb * sizeof(struct student));
 {
     printf("How many students?\n");
     scanf(" %d", count);
@@ -36,8 +32,8 @@ struct student *read_students(int *count)
     struct student *result = malloc(*count * sizeof(struct student));
     if (result == 0) abort();
     for (int i = 0; i < *count; i++)
-        //@ requires *count |-> nb &*& i <= nb &*& chars_((void *)(result + i), (nb - i) * sizeof(struct student), _);
-        //@ ensures *count |-> nb &*& students(result + old_i, nb - old_i);
+    //@ requires *count |-> nb &*& i <= nb &*& chars_((void *)(result + i), (nb - i) * sizeof(struct student), _);
+    //@ ensures *count |-> nb &*& students(result + old_i, nb - old_i);
     {
         //@ mul_mono_l(1, nb - i, sizeof(struct student));
         //@ chars__split((void *)(result + i), sizeof(struct student));
@@ -56,8 +52,8 @@ struct point {
 };
 
 int main() //@ : main
-    //@ requires true;
-    //@ ensures true;
+//@ requires true;
+//@ ensures true;
 {
     if (SIZE_MAX / 2 < sizeof(struct point)) abort();
     //@ div_rem_nonneg(SIZE_MAX, 2);

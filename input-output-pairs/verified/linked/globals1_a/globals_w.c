@@ -8,12 +8,11 @@ struct counter {
 
 static struct counter *c;
 
-//no counter_f defined, defined my own one
 //@ predicate counter(struct counter* c, int v) = c->f |-> v;
 
 void m()
-//@ requires x == 7 &*& *(&c) |-> ?ctr &*& counter(ctr, ?v); // have to leave pointer/extra sep arrow in here even in weak version since global variable c can't be used in counter(c, ?v) directly
-//@ ensures x == 8 &*& *(&c) |-> ctr &*& counter(ctr, v+1);  // pointer(&c, ?ctr) is equivalent to saying *(&c) |-> ?ctr with a few extra contrains
+//@ requires x |-> 7 &*& c |-> ?ctr &*& counter(ctr, ?v); 
+//@ ensures x |-> 8 &*& c |-> ctr &*& counter(ctr, v + 1);
 {
     int y = x;
     x = y + 1;
@@ -21,8 +20,8 @@ void m()
 }
 
 int main() //@ : main_full(globals)
-    //@ requires module(globals, true);
-    //@ ensures true;
+//@ requires module(globals, true);
+//@ ensures true;
 {
     x = 7;
     struct counter *ctr = malloc(sizeof(struct counter));

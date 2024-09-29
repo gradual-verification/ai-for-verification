@@ -4,6 +4,13 @@ struct Counter {
   int value;
 };
 
+/*** 
+ * Description:
+The init function initializes a new Counter structure with the given initial value.
+It uses the malloc to allocate the memory for that, if it fails to malloc, the program will terminate.
+
+@param v - the initial value in the Counter struct.
+*/
 struct Counter* init(int v)
 {
   struct Counter* c = malloc(sizeof(struct Counter));
@@ -14,9 +21,13 @@ struct Counter* init(int v)
   return c;
 }
 
-/* Description
-  - Behavior: Retrieves the current value from the `Counter` struct pointed to by `c`, increments it by 1, and updates the value in the struct.
-  - Parameter: `struct Counter* c` - Pointer to the `Counter` struct to be incremented.
+/***
+ * Description:
+The increment function retrieves the current value from the Counter struct pointed to by c, 
+increments it by 1, and updates the value in the struct. 
+It requires that the incremented value doesn't overflow.
+
+@param c - the pointer to the Counter struct to be incremented.
 */
 void increment(struct Counter* c)
 {
@@ -24,20 +35,23 @@ void increment(struct Counter* c)
   c->value = tmp + 1;
 }
 
-/* Description
-  - Behavior: Frees the memory allocated for the `Counter` struct pointed to by `c`.
-  - Parameter: `struct Counter* c` - Pointer to the `Counter` struct to be disposed of.
+/***
+ * Description:
+The dispose function frees the memory allocated for the Counter struct pointed to by c.
+
+@param c - the pointer to the Counter struct to be disposed of.
 */
 void dispose(struct Counter* c)
 {
   free(c);
 }
 
-/* Description
-  - Behavior: Swaps the values stored in the `Counter` structs pointed to by `c1` and `c2`.
-  - Parameters: 
-    - `struct Counter* c1` - Pointer to the first `Counter` struct.
-    - `struct Counter* c2` - Pointer to the second `Counter` struct.
+/*** 
+ * Description:
+The swap function swaps the values stored in the Counter structs pointed to by c1 and c2.
+
+@param c1 - the pointer to the first Counter struct.
+@param c2 - the pointer to the second Counter struct.
 */
 void swap(struct Counter* c1, struct Counter* c2)
 {
@@ -47,17 +61,22 @@ void swap(struct Counter* c1, struct Counter* c2)
   c1->value = tmp2;
 }
 
-/* Description
-  - Behavior: Retrieves and returns the value stored in the `Counter` struct pointed to by `c`.
-  - Parameter: `struct Counter* c` - Pointer to the `Counter` struct to retrieve the value from.
+/***
+ * Description:
+The get function retrieves and returns the value stored in the Counter struct pointed to by c.
+
+@param c - the pointer to the Counter struct to retrieve the value from.
 */
 int get(struct Counter* c)
 {
   return c->value;
 }
 
-/* Description
-- Behavior: Initializes two `Counter` structs with initial values, increments one of them, swaps the values between them, and then retrieves the value from one of the structs to assert against a known value.
+/***
+ * Description:
+The main function initializes two Counter structs with initial values, 
+increments one of them, swaps the values between them, 
+and then retrieves the value from one of the structs to assert against a known value.
 */
 int main()
 {

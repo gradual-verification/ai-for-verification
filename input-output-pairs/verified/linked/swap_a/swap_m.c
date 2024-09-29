@@ -1,10 +1,9 @@
-//look into tutorial if recommended using integer(a, ?x)
 #include "stdlib.h"
 #include <stdbool.h>
 
 void swap(int *a, int *b)
-    //@ requires integer(a, ?x) &*& integer(b, ?y);
-    //@ ensures integer(a, y) &*& integer(b, x);
+//@ requires integer(a, ?x) &*& integer(b, ?y);
+//@ ensures integer(a, y) &*& integer(b, x);
 {
     int tmp = *a;
     *a = *b;
@@ -17,15 +16,15 @@ struct point {
 };
 
 void point_mirror(struct point *p)
-    //@ requires p->x |-> ?x &*& p->y |-> ?y;
-    //@ ensures p->x |-> y &*& p->y |-> x;
+//@ requires p->x |-> ?x &*& p->y |-> ?y;
+//@ ensures p->x |-> y &*& p->y |-> x;
 {
     swap(&p->x, &p->y);
 }
 
 int main() //@ : main
-    //@ requires true;
-    //@ ensures true;
+//@ requires true;
+//@ ensures true;
 {
     struct point *p = malloc(sizeof(struct point));
     if (p == 0) { abort(); }

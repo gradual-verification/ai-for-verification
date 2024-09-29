@@ -1,4 +1,5 @@
 #include "stdlib.h"
+
 struct account
 {
     int limit;
@@ -7,9 +8,9 @@ struct account
 
 /***
  * Description:
-The function `create_account` creates a new account with the specified limit.
+The create_account function creates a new account with the specified limit.
 
-@param limit - represents the limit of the new account.
+@param limit - represents the limit of the new account, which should be no greater than 0.
 
 The function allocates memory for a new account struct, sets
 the limit to the provided value, initializes the balance to 0,
@@ -24,13 +25,12 @@ struct account *create_account(int limit)
     }
     myAccount->limit = limit;
     myAccount->balance = 0;
-
     return myAccount;
 }
 
 /***
  * Description:
-The function `account_get_balance` retrieves the balance of
+The account_get_balance function retrieves the balance of
 the given account.
 
 @param myAccount - pointer to an existing account.
@@ -40,21 +40,20 @@ and does not modify any data.
 */
 int account_get_balance(struct account *myAccount)
 {
-
     int result = myAccount->balance;
-
     return result;
 }
 
 /***
  * Description:
-The function `account_deposit` adds a specified amount
+The account_deposit function adds a specified amount
 to the balance of the given account.
 
 @param myAccount - pointer to an existing account.
 @param amount - amount to be deposited
 
-The function increases the account's balance by the specified amount.
+The function increases the account's balance by the specified amount, 
+and it need to make sure the increased balance doesn't overflow.
 */
 void account_deposit(struct account *myAccount, int amount)
 {
@@ -63,15 +62,15 @@ void account_deposit(struct account *myAccount, int amount)
 
 /***
  * Description:
-The function `account_withdraw` withdraws a specified amount
+The account_withdraw function withdraws a specified amount
 from the account's balance.
 
 @param myAccount - pointer to an existing account.
 @param amount - amount to be withdrawn
 
 The function calculates the actual amount to withdraw based on
-the account's current balance and limit, updates the balance
-accordingly, and then returns the withdrawn amount.
+the account's current balance and limit such that the new balance is no less than limit.
+It then updates the balance accordingly, and finally returns the withdrawn amount.
 */
 int account_withdraw(struct account *myAccount, int amount)
 {
@@ -82,19 +81,24 @@ int account_withdraw(struct account *myAccount, int amount)
 
 /***
  * Description:
-The function `account_dispose` releases the memory allocated for the given account.
+The account_dispose function releases the memory allocated for the given account.
 
 @param myAccount - pointer to an existing account to be deleted.
 
 The function frees the memory associated with the account,
 allowing it to be deallocated.
-
 */
 void account_dispose(struct account *myAccount)
 {
-
     free(myAccount);
 }
+
+/***
+ * Description:
+The main function first creates an account with a negative limit, 
+then does some deposits and withdraws and validates the balance is correct,
+and finally dispose the account.
+*/
 int main()
 {
     struct account *myAccount = create_account(-100);

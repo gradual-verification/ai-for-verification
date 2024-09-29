@@ -1,82 +1,92 @@
 #include "stdlib.h"
+
 struct node
 {
     struct node *next;
     int value;
 };
-struct stack
+
+struct container
 {
     struct node *head;
 };
 
-/**
- * Creates an empty stack.
- * 
- * @return A pointer to the newly created stack.
- * 
- * This function allocates memory for a new stack and initializes its head to NULL.
- * If memory allocation fails, the program aborts.
- */
-struct stack *create_stack()
+/***
+ * Description:
+The create_container function creates an empty container.
+ 
+@return - A pointer to the newly created container.
+
+This function allocates memory for a new container and initializes its head to NULL.
+If memory allocation fails, the program aborts.
+*/
+struct container *create_container()
 {
-    struct stack *stack = malloc(sizeof(struct stack));
-    if (stack == 0)
+    struct container *container = malloc(sizeof(struct container));
+    if (container == 0)
     {
         abort();
     }
-    stack->head = 0;
-    return stack;
+    container->head = 0;
+    return container;
 }
-/**
- * Pushes a value onto the stack.
- * 
- * @param stack A pointer to the stack.
- * @param value The integer value to push onto the stack.
- * 
- * This function allocates a new node, assigns the given value to it,
- * and sets the new node as the head of the stack.
- * If memory allocation fails, the program aborts.
- */
-void stack_push(struct stack *stack, int value)
+
+/***
+ * Description:
+The container_add function pushes a value onto the container.
+
+@param container - A pointer to the container.
+@param value - The integer value to push onto the container.
+
+This function allocates a new node, assigns the given value to it,
+and sets the new node as the head of the container.
+If memory allocation fails, the program aborts.
+*/
+void container_add(struct container *container, int value)
 {
     struct node *n = malloc(sizeof(struct node));
     if (n == 0)
     {
         abort();
     }
-    n->next = stack->head;
+    n->next = container->head;
     n->value = value;
-    stack->head = n;
+    container->head = n;
 }
-/**
- * Pops a value from the stack.
- * 
- * @param stack A pointer to the stack.
- * @return The integer value popped from the stack.
- * 
- * This function removes the head node from the stack, retrieves its value,
- * and frees the memory allocated to the head node. The stack must not be empty.
- */
-int stack_pop(struct stack *stack)
+
+/***
+ * Description:
+The container_remove function pops a value from the container.
+
+@param container - A pointer to the container.
+@return - The integer value popped from the container.
+
+This function removes the head node from the container, retrieves its value,
+and frees the memory allocated to the head node. The container must not be empty.
+*/
+int container_remove(struct container *container)
 {
-    struct node *head = stack->head;
+    struct node *head = container->head;
     int result = head->value;
-    stack->head = head->next;
+    container->head = head->next;
     free(head);
     return result;
 }
+
 typedef bool int_predicate(int x);
-/**
- * Filters nodes based on a predicate.
- * 
- * @param n A pointer to the node.
- * @param p A predicate function to determine whether to keep a node.
- * @return A pointer to the head of the filtered nodes list.
- * 
- * This function recursively filters the linked list of nodes, keeping only those
- * nodes for which the predicate function returns true. It frees the memory of the nodes
- * that do not satisfy the predicate.
- */
+
+/***
+ * Description:
+The nodes_filter function filters nodes based on a predicate.
+
+@param n - A pointer to the node.
+@param p - A predicate function to determine whether to keep a node.
+@return - A pointer to the head of the filtered nodes list.
+
+This function recursively filters the linked list of nodes, keeping only those
+nodes for which the predicate function returns true. It frees the memory of the nodes
+that do not satisfy the predicate.
+*/
 struct node *nodes_filter(struct node *n, int_predicate *p)
 {
     if (n == 0)
@@ -101,27 +111,31 @@ struct node *nodes_filter(struct node *n, int_predicate *p)
         }
     }
 }
-/**
- * Filters the stack based on a predicate.
- * 
- * @param stack A pointer to the stack.
- * @param p A predicate function to determine whether to keep a node.
- * 
- * This function filters the nodes in the stack using the given predicate function.
- * It updates the stack to contain only the nodes that satisfy the predicate.
- */
-void stack_filter(struct stack *stack, int_predicate *p)
+
+/***
+ * Description:
+The container_filter function filters the container based on a predicate.
+
+@param container - A pointer to the container.
+@param p - A predicate function to determine whether to keep a node.
+
+This function filters the nodes in the container using the given predicate function.
+It updates the container to contain only the nodes that satisfy the predicate.
+*/
+void container_filter(struct container *container, int_predicate *p)
 {
-    struct node *head = nodes_filter(stack->head, p);
-    stack->head = head;
+    struct node *head = nodes_filter(container->head, p);
+    container->head = head;
 }
-/**
- * Disposes of all nodes in a linked list.
- * 
- * @param n A pointer to the head node.
- * 
- * This function recursively frees all nodes in the linked list.
- */
+
+/***
+ * Description:
+The nodes_dispose function disposes of all nodes in a linked list.
+
+@param n - A pointer to the head node.
+ 
+This function recursively frees all nodes in the linked list.
+*/
 void nodes_dispose(struct node *n)
 {
     if (n != 0)
@@ -130,38 +144,48 @@ void nodes_dispose(struct node *n)
         free(n);
     }
 }
-/**
- * Disposes of a stack.
- * 
- * @param stack A pointer to the stack.
- * 
- * This function frees all nodes in the stack and then frees the stack itself.
- */
-void stack_dispose(struct stack *stack)
+
+/***
+ * Description:
+The container_dispose function disposes of a container.
+
+@param container - A pointer to the container.
+
+This function frees all nodes in the container and then frees the container itself.
+*/
+void container_dispose(struct container *container)
 {
-    nodes_dispose(stack->head);
-    free(stack);
+    nodes_dispose(container->head);
+    free(container);
 }
-/**
- * Filters the stack based on a predicate.
- * 
- * @param stack A pointer to the stack.
- * @param p A predicate function to determine whether to keep a node.
- * 
- * This function filters the nodes in the stack using the given predicate function.
- * It updates the stack to contain only the nodes that satisfy the predicate.
- */
+
+/***
+ * Description:
+The neq_20 function filters the container based on a predicate.
+
+@param container - A pointer to the container.
+@param p - A predicate function to determine whether to keep a node.
+ 
+This function filters the nodes in the container using the given predicate function.
+It updates the container to contain only the nodes that satisfy the predicate.
+*/
 bool neq_20(int x) //@ : int_predicate
 {
     return x != 20;
 }
+
+/***
+ * Description:
+The main function creates a container, pushes some integers into it, 
+filters out some integers from the container and finally disposes the container.
+*/
 int main()
 {
-    struct stack *s = create_stack();
-    stack_push(s, 10);
-    stack_push(s, 20);
-    stack_push(s, 30);
-    stack_filter(s, neq_20);
-    stack_dispose(s);
+    struct container *s = create_container();
+    container_push(s, 10);
+    container_push(s, 20);
+    container_push(s, 30);
+    container_filter(s, neq_20);
+    container_dispose(s);
     return 0;
 }

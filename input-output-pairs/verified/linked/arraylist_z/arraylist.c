@@ -1,5 +1,3 @@
-
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,14 +15,9 @@ predicate arraylist(struct arraylist *a; list<void*> vs) =
   malloc_block_pointers(data, capacity) &*& data[0..size] |-> vs &*& data[size..capacity] |-> _;
 @*/
 
-
-
-
 struct arraylist *create_arraylist() 
-  //@ requires true;
-  //@ ensures arraylist(result, nil);
-
-  
+//@ requires true;
+//@ ensures arraylist(result, nil);
 {
   struct arraylist *a = malloc(sizeof(struct arraylist));
   void *data = 0;
@@ -37,26 +30,23 @@ struct arraylist *create_arraylist()
   return a; 
 }
 
-
 void *list_get(struct arraylist *a, int i)
-  //@ requires arraylist(a, ?vs) &*& 0 <= i &*& i < length(vs);
-  //@ ensures arraylist(a, vs) &*& result == nth(i, vs);
+//@ requires arraylist(a, ?vs) &*& 0 <= i &*& i < length(vs);
+//@ ensures arraylist(a, vs) &*& result == nth(i, vs);
 {
   return a->data[i];
 }
-//what is the ?vs mark?
 
 int list_length(struct arraylist *a)
-  //@ requires arraylist(a, ?vs);
-  //@ ensures arraylist(a, vs) &*& result == length(vs);
+//@ requires arraylist(a, ?vs);
+//@ ensures arraylist(a, vs) &*& result == length(vs);
 {
   return a->size;
 }
 
-
 void list_add(struct arraylist *a, void *v)
-  //@ requires arraylist(a, ?vs);
-  //@ ensures arraylist(a, append(vs, cons(v, nil)));
+//@ requires arraylist(a, ?vs);
+//@ ensures arraylist(a, append(vs, cons(v, nil)));
 {
   int size = 0;
   void** data = 0;
@@ -66,10 +56,7 @@ void list_add(struct arraylist *a, void *v)
     int capacity = a->capacity;
     //@ assert capacity == size;
     if (SIZE_MAX / sizeof(void *) < (size_t)capacity * 2 + 1) abort();
-    //@ mul_mono_l(0, sizeof(void *), capacity * 2 + 1); //how can I know where is the mul_mono_l()? I did not find where they define the mul_mono_l(), It has some lemma? Do I need to write the natural language specification for that?
-    //
-   
-   
+    //@ mul_mono_l(0, sizeof(void *), capacity * 2 + 1);
     //@ div_rem_nonneg(SIZE_MAX, sizeof(void *));
     //@ mul_mono_l(capacity * 2 + 1, SIZE_MAX / sizeof(void *), sizeof(void *));
     void** newData = malloc(((size_t)capacity * 2 + 1) * sizeof(void*));
@@ -92,11 +79,9 @@ void list_add(struct arraylist *a, void *v)
   //@ close pointers(data + size, 1, _);
 }
 
-
-
 void list_remove_nth(struct arraylist *a, int n)
-  //@ requires arraylist(a, ?vs) &*& 0 <= n &*& n < length(vs);
-  //@ ensures arraylist(a, append(take(n, vs), tail(drop(n, vs))));
+//@ requires arraylist(a, ?vs) &*& 0 <= n &*& n < length(vs);
+//@ ensures arraylist(a, append(take(n, vs), tail(drop(n, vs))));
 {
   void** data = a->data;
   int size = a->size;
@@ -112,8 +97,8 @@ void list_remove_nth(struct arraylist *a, int n)
 }
 
 void list_dispose(struct arraylist* a)
-  //@ requires arraylist(a, ?vs);
-  //@ ensures true;
+//@ requires arraylist(a, ?vs);
+//@ ensures true;
 {
   void** data = a->data;
   int size = a->size;
@@ -122,11 +107,9 @@ void list_dispose(struct arraylist* a)
   free(a);
 }
 
-
-
 int main()
-  //@ requires true;
-  //@ ensures true;
+//@ requires true;
+//@ ensures true;
 {
   struct arraylist* a = create_arraylist();
   void* tmp = 0;

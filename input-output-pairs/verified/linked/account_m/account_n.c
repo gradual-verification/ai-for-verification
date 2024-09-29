@@ -1,4 +1,5 @@
 #include "stdlib.h"
+
 struct account
 {
     int balance;
@@ -6,15 +7,14 @@ struct account
 
 /***
  * Description:
-The `create_account` function creates a new account by dynamically allocating
-memory for a `struct account` object.
+The create_account function creates a new account by dynamically allocating
+memory for a struct account object.
 
 @param none
 
 The function initializes the balance of the account to zero. If the memory allocation
 fails, the function aborts. It finally returns a pointer to the newly created account.
 */
-
 struct account *create_account()
 {
     struct account *myAccount = malloc(sizeof(struct account));
@@ -28,7 +28,7 @@ struct account *create_account()
 
 /***
  * Description:
-The `account_set_balance` function updates the balance of the given account
+The account_set_balance function updates the balance of the given account
 to the specified new balance.
 
 @param myAccount - the account to be updated.
@@ -44,7 +44,7 @@ void account_set_balance(struct account *myAccount, int newBalance)
 
 /***
  * Description:
-The `account_dispose` function frees the memory allocated for the given account.
+The account_dispose function frees the memory allocated for the given account.
 
 @param myAccount - the account to be deleted.
 
@@ -54,6 +54,11 @@ void account_dispose(struct account *myAccount)
 {
     free(myAccount);
 }
+
+/***
+ * Description:
+The main function first creates an account, then set its balance and finally dispose that account.
+*/
 int main()
 {
     struct account *myAccount = create_account();

@@ -4,14 +4,17 @@ enum large_numbers { large_number = 30000, another_large_number, yaln = -0x7fff 
 
 enum day next_day(enum day d)
 //@ requires 0 <= d && d < 7;
-//@ ensures 0 <= result && result < 7;
+//@ ensures d == 6 ? result == 0 : result == d + 1;
 {
+  if (d == 6) {
+  } else {
+  }
   return (d + 1) % 7;
 }
 
 int main() //@ : main
-  //@ requires true;
-  //@ ensures true;
+//@ requires true;
+//@ ensures true;
 {
   enum day d = monday;
   d = 35;

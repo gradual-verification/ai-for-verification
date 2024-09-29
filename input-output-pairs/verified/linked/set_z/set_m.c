@@ -8,7 +8,6 @@ struct node {
 
 struct set {
   struct node* head;
-  
 };
 
 /*@
@@ -20,12 +19,11 @@ predicate lseg(struct node* first, struct node* last, list<void*> vs) =
 
 predicate set(struct set* set, int size, fixpoint(void*, bool) elements) =
   set->head |-> ?head &*& malloc_block_set(set) &*& lseg(head, 0, ?vs) &*& size == length(vs) &*& list_as_set(vs) == elements;
-
 @*/
 
 struct set* create_set()
-  //@ requires true;
-  //@ ensures result == 0 ? true : set(result, 0, (empty_set));
+//@ requires true;
+//@ ensures result == 0 ? true : set(result, 0, (empty_set));
 {
   struct set* set = malloc(sizeof(struct set));
   if(set == 0) return 0;
@@ -34,62 +32,49 @@ struct set* create_set()
 }
 
 void set_add(struct set* set, void* x)
-  //@ requires set(set, ?size, ?elems) &*& elems(x) == false;
-  //@ ensures set(set, size + 1, fupdate(elems, x, true));
+//@ requires set(set, ?size, ?elems) &*& elems(x) == false;
+//@ ensures set(set, size + 1, fupdate(elems, x, true));
 {
-
   struct node* n = malloc(sizeof(struct node));
   if(n == 0) abort();
   n->next = set->head;
   n->val = x;
   set->head = n;
- 
 }
 
 bool set_contains(struct set* set, void* x)
-  //@ requires set(set, ?size, ?elems);
-  //@ ensures set(set, size, elems) &*& result ? exists<void *>(?elem) &*& elems(elem) == true &*& (uintptr_t)x == (uintptr_t)elem : !elems(x);
+//@ requires set(set, ?size, ?elems);
+//@ ensures set(set, size, elems) &*& result ? exists<void *>(?elem) &*& elems(elem) == true &*& (uintptr_t)x == (uintptr_t)elem : !elems(x);
 {
-
   struct node* curr = set->head;
   bool found = false;
- 
   while(curr != 0 && ! found) 
-    
   {
-    
     if(curr->val == x) {
-      
       found = true;
     }
     curr = curr->next;
-  
   }
-
   return found;
 }
 
 void set_dispose(struct set* set)
-  //@ requires set(set, ?size, ?elems);
-  //@ ensures true;
+//@ requires set(set, ?size, ?elems);
+//@ ensures true;
 {
-
   struct node* curr = set->head;
   while(curr != 0) 
-
   {
- 
     struct node* nxt = curr->next;
     free(curr);
     curr = nxt;
   }
-
   free(set);
 }
 
 int main() //@ : main
-  //@ requires true;
-  //@ ensures true;
+//@ requires true;
+//@ ensures true;
 {
   struct set* set = create_set();
   if(set == 0) return 0;

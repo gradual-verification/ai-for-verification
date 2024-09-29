@@ -1,8 +1,10 @@
 #include "stdlib.h"
+
 struct account
 {
     int balance;
 };
+
 struct account *create_account()
 //@ requires true;
 //@ ensures account_balance(result, 0) &*& malloc_block_account(result);
@@ -17,7 +19,8 @@ struct account *create_account()
 }
 
 void account_deposit(struct account *myAccount, int amount)
-//@ requires account_balance(myAccount, ?theBalance) &*& 0 <= amount &*& theBalance + amount <= INT_MAX &*& theBalance + amount >= INT_MIN;
+/*@ requires account_balance(myAccount, ?theBalance) &*& 0 <= amount 
+&*& theBalance + amount <= INT_MAX &*& theBalance + amount >= INT_MIN; @*/
 //@ ensures account_balance(myAccount, theBalance + amount);
 {
     myAccount->balance += amount;
@@ -37,12 +40,14 @@ void account_set_balance(struct account *myAccount, int newBalance)
 {
     myAccount->balance = newBalance;
 }
+
 void account_dispose(struct account *myAccount)
 //@ requires account_balance(myAccount, _) &*& malloc_block_account(myAccount);
 //@ ensures true;
 {
     free(myAccount);
 }
+
 int main()
 //@ requires true;
 //@ ensures true;

@@ -1,9 +1,11 @@
 #include "stdlib.h"
+
 struct node
 {
     struct node *next;
     int value;
 };
+
 struct stack
 {
     struct node *head;
@@ -22,6 +24,7 @@ predicate nodes(struct node *node, ints values) =
 predicate stack(struct stack *stack, ints values) =
     stack->head |-> ?head &*& nodes(head, values);
 @*/
+
 struct stack *create_stack()
 //@ requires true;
 //@ ensures stack(result, ints_nil);
@@ -33,6 +36,7 @@ struct stack *create_stack()
     }
     stack->head = 0;
 }
+
 void stack_push(struct stack *stack, int value)
 //@ requires stack(stack, ?values);
 //@ ensures stack(stack, ints_cons(value, values));
@@ -46,9 +50,17 @@ void stack_push(struct stack *stack, int value)
     n->value = value;
     stack->head = n;
 }
+
 void stack_dispose(struct stack *stack)
 //@ requires stack(stack, ints_nil);
 //@ ensures true;
 {   
     free(stack);
+}
+
+int main()
+//@ requires true;
+//@ ensures true;
+{
+    return 0;
 }

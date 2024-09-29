@@ -8,8 +8,10 @@ struct counter {
 
 static struct counter *c;
 
-/* Description
-    - Behavior: This function updates the value of a global variable `x` and also increments the value of a field `f` within a global structure `c`.
+/*** 
+ * Description:
+The m function updates the value of a global variable x and also increments the value of a field f within a global structure c.
+It needs to make sure that the new value of f doesn't overflow or underflow.
 */
 void m()
 {
@@ -18,8 +20,11 @@ void m()
     c->f = c->f + 1;
 }
 
-/* Description
-    - Behavior: This function serves as the entry point of the program and allocates memory for a global structure, initializes its field `f`, assigns this structure to a global pointer `c`, calls the `m()` function, and performs validation on the updated value of field `f`.
+/***
+ * Description:
+The main function serves as the entry point of the program and allocates memory for a global structure, 
+initializes its field f, assigns this structure to a global pointer c, 
+calls the m() function, and performs validation on the updated value of field f.
 */
 int main()
 {

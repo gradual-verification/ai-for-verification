@@ -2,8 +2,8 @@
 #include <stdbool.h>
 
 void swap(int *a, int *b)
-    //@ requires a |-> ?x &*& b |-> ?y;
-    //@ ensures a |-> ?y &*& b |-> ?x;
+//@ requires *a |-> ?x &*& *b |-> ?y;
+//@ ensures *a |-> y &*& *b |-> x;
 {
     int tmp = *a;
     *a = *b;
@@ -16,15 +16,15 @@ struct point {
 };
 
 void point_mirror(struct point *p)
-    //@ requires p->x |-> ?x &*& p->y |-> ?y;
-    //@ ensures p->x |-> y &*& p->y |-> x;
+//@ requires p->x |-> ?x &*& p->y |-> ?y;
+//@ ensures p->x |-> y &*& p->y |-> x;
 {
     swap(&p->x, &p->y);
 }
 
 int main() //@ : main
-    //@ requires true;
-    //@ ensures true;
+//@ requires true;
+//@ ensures true;
 {
     struct point *p = malloc(sizeof(struct point));
     if (p == 0) { abort(); }
