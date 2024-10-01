@@ -20,6 +20,7 @@ This repository contains work in-progress and results from exploring how LLMs an
 * [VeriFast Github](https://github.com/verifast/verifast)
 * [List of Research Papers on VeriFast](https://people.cs.kuleuven.be/~bart.jacobs/verifast/)
 * [Aggregation of VeriFast Papers in this Repo](https://github.com/gradual-verification/ai-for-verification/tree/main/relavant-paper-folder/verifast_paper)
+* [Building VeriFast from source code](https://docs.google.com/document/d/1BWO2cP4XgsOM846n6wuYE7OAnDMPt4Kqn-70fCJ5nEU/edit)
 
 ### Viper
 * [Viper Website](https://www.pm.inf.ethz.ch/research/viper.html)
