@@ -36,7 +36,7 @@ struct container *create_container()
     return container;
 }
 
-void container_push(struct container *container, int value)
+void container_add(struct container *container, int value)
 //@ requires container(container, ?count);
 //@ ensures container(container, count + 1);
 {
@@ -50,7 +50,7 @@ void container_push(struct container *container, int value)
     container->head = n;
 }
 
-int container_pop(struct container *container)
+int container_remove(struct container *container)
 //@ requires container(container, ?count) &*& 0 < count;
 //@ ensures container(container, count - 1);
 {
@@ -131,9 +131,9 @@ int main()
 //@ ensures true;
 {
     struct container *s = create_container();
-    container_push(s, 10);
-    container_push(s, 20);
-    container_push(s, 30);
+    container_add(s, 10);
+    container_add(s, 20);
+    container_add(s, 30);
     container_filter(s, neq_20);
     container_dispose(s);
     return 0;

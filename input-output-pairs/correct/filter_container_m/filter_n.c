@@ -33,7 +33,7 @@ struct container *create_container()
 
 /***
  * Description:
-The container_add function pushes a value onto the container.
+The container_add function adds a value onto the container.
 
 @param container - A pointer to the container.
 @param value - The integer value to push onto the container.
@@ -56,7 +56,7 @@ void container_add(struct container *container, int value)
 
 /***
  * Description:
-The container_remove function pops a value from the container.
+The container_remove function removes a value from the container.
 
 @param container - A pointer to the container.
 @return - The integer value popped from the container.
@@ -182,9 +182,9 @@ filters out some integers from the container and finally disposes the container.
 int main()
 {
     struct container *s = create_container();
-    container_push(s, 10);
-    container_push(s, 20);
-    container_push(s, 30);
+    container_add(s, 10);
+    container_add(s, 20);
+    container_add(s, 30);
     container_filter(s, neq_20);
     container_dispose(s);
     return 0;

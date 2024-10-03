@@ -7,7 +7,7 @@ typedef short my_short;
 showcasing the conversion between int16_t and a user-defined type my_short.
 
 @param x - An integer of type int16_t.
-@param y - An integer of type my_short. Note that x - y should be within the range of short type.
+@param y - An integer of type my_short.
 */
 void foo(int16_t x, my_short y)
 {

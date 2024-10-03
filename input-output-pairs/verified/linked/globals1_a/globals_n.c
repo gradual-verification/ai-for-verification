@@ -11,7 +11,6 @@ static struct counter *c;
 /*** 
  * Description:
 The m function updates the value of a global variable x and also increments the value of a field f within a global structure c.
-It needs to make sure that the new value of f doesn't overflow or underflow.
 */
 void m()
 {

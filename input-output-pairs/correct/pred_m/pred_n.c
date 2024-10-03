@@ -52,8 +52,7 @@ to the balance of the given account.
 @param myAccount - pointer to an existing account.
 @param amount - amount to be deposited
 
-The function increases the account's balance by the specified amount, 
-and it need to make sure the increased balance doesn't overflow.
+The function increases the account's balance by the specified amount.
 */
 void account_deposit(struct account *myAccount, int amount)
 {

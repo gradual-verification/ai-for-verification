@@ -27,7 +27,7 @@ struct Counter* init(int v)
 The increment function increments the value of the Counter structure by one.
 
 @param c - a pointer to the Counter structure to be incremented.
-@requires - the Counter structure pointed to by c must be initialized, and the incremented value shouldn't overflow.
+@requires - the Counter structure pointed to by c must be initialized.
 @ensures - the value of the Counter structure pointed to by c is incremented by one.
 */
 void increment(struct Counter* c)

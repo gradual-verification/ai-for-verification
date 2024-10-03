@@ -37,7 +37,6 @@ amount into an existing account.
 
 The function adds the deposited amount to the account balance and 
 updates the account balance accordingly.
-It also needs to require that the new balance doesn't underflow or overflow.
 */
 void account_deposit(struct account *myAccount, int amount)
 {

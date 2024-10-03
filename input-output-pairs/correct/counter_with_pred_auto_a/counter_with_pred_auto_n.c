@@ -25,7 +25,6 @@ struct Counter* init(int v)
  * Description:
 The increment function retrieves the current value from the Counter struct pointed to by c, 
 increments it by 1, and updates the value in the struct. 
-It requires that the incremented value doesn't overflow.
 
 @param c - the pointer to the Counter struct to be incremented.
 */
