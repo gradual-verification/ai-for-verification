@@ -19,7 +19,8 @@ fixpoint int tree_count(tree nodes) {
     }
 }
 
-predicate subtree(struct node *root, struct node *parent, tree nodes) =
+predicate subtree(struct node *root, struct node *parent, tree nodes)
+    =
         switch (nodes) {
             case empty: return root == 0;
             case tree(root0, leftNodes, rightNodes):
@@ -31,25 +32,26 @@ predicate subtree(struct node *root, struct node *parent, tree nodes) =
 
 inductive context = root | left_context(context, struct node *, tree) | right_context(context, struct node *, tree);
 
-predicate context(struct node *node, struct node *parent, int count, context nodes) = 
-    switch (nodes) {
-        case root: return parent == 0;
-        case left_context(parentContextNodes, parent0, rightNodes):
-            return
-                parent == parent0 &*& parent != 0 &*&
-                parent->left |-> node &*& parent->right |-> ?right &*& parent->parent |-> ?grandparent &*& parent->count |-> ?parentCount &*& malloc_block_node(parent) &*&
-                context(parent, grandparent, parentCount, parentContextNodes) &*& subtree(right, parent, rightNodes) &*&
-                parentCount == 1 + count + tree_count(rightNodes);
-        case right_context(parentContextNodes, parent0, leftNodes):
-            return
-                parent == parent0 &*& parent != 0 &*&
-                parent->left |-> ?left &*& parent->right |-> node &*& parent->parent |-> ?grandparent &*& parent->count |-> ?parentCount &*& malloc_block_node(parent) &*&
-                context(parent, grandparent, parentCount, parentContextNodes) &*& subtree(left, parent, leftNodes) &*&
-                parentCount == 1 + tree_count(leftNodes) + count;
-    };
+predicate context(struct node *node, struct node *parent, int count, context nodes)
+    =
+        switch (nodes) {
+            case root: return parent == 0;
+            case left_context(parentContextNodes, parent0, rightNodes):
+                return
+                    parent == parent0 &*& parent != 0 &*&
+                    parent->left |-> node &*& parent->right |-> ?right &*& parent->parent |-> ?grandparent &*& parent->count |-> ?parentCount &*& malloc_block_node(parent) &*&
+                    context(parent, grandparent, parentCount, parentContextNodes) &*& subtree(right, parent, rightNodes) &*&
+                    parentCount == 1 + count + tree_count(rightNodes);
+            case right_context(parentContextNodes, parent0, leftNodes):
+                return
+                    parent == parent0 &*& parent != 0 &*&
+                    parent->left |-> ?left &*& parent->right |-> node &*& parent->parent |-> ?grandparent &*& parent->count |-> ?parentCount &*& malloc_block_node(parent) &*&
+                    context(parent, grandparent, parentCount, parentContextNodes) &*& subtree(left, parent, leftNodes) &*&
+                    parentCount == 1 + tree_count(leftNodes) + count;
+        };
 
-predicate tree(struct node *node, context contextNodes, tree subtreeNodes) = 
-    context(node, ?parent, tree_count(subtreeNodes), contextNodes) &*& subtree(node, parent, subtreeNodes);
+predicate tree(struct node *node, context contextNodes, tree subtreeNodes)
+    = context(node, ?parent, tree_count(subtreeNodes), contextNodes) &*& subtree(node, parent, subtreeNodes);
 
 @*/
 
@@ -78,7 +80,6 @@ struct node *create_tree()
 }
 
 int subtree_get_count(struct node *node)
-    //TODO: need to fix the error below, the error is No matching heap chunks: subtree(node, _, _)VeriFast
     //@ requires subtree(node, ?parent, ?nodes);
     //@ ensures subtree(node, parent, nodes) &*& result == tree_count(nodes);
 {
@@ -114,17 +115,14 @@ void fixup_ancestors(struct node *node, struct node *parent, int count)
         struct node *grandparent = parent->parent;
         int leftCount = 0;
         int rightCount = 0;
-        if (node == left && node != right) {
+        if (node == left) {
             leftCount = count;
             rightCount = subtree_get_count(right);
-        } else if (node == right && node != left) {
+        } else {
             leftCount = subtree_get_count(left);
             rightCount = count;
-        } else {
-            abort();
         }
         {
-            if (rightCount < 0 || leftCount > INT_MAX - 1 -rightCount) { abort();}
             int parentCount = 1 + leftCount + rightCount;
             parent->count = parentCount;
             fixup_ancestors(parent, grandparent, parentCount);
@@ -236,7 +234,7 @@ struct node *tree_get_parent(struct node *node)
     struct node *parent = node->parent;
     //@ close subtree(node, parent, subtreeNodes);
     //@ open context(node, parent, tree_count(subtreeNodes), contextNodes);
-    //@ assert context(parent, ?grandparent, ?parentCount, ?parentContextNodes_);
+    //@ assert context(parent, ?grandparent, ?parentCount, ?parentContextNodes);
     /*@ switch (contextNodes) {
             case root:
             case left_context(parentContextNodes, parent0, rightNodes):
@@ -246,7 +244,7 @@ struct node *tree_get_parent(struct node *node)
         }
     @*/
     //@ assert subtree(parent, grandparent, ?parentNodes);
-    //@ close tree(parent, parentContextNodes_, parentNodes);
+    //@ close tree(parent, parentContextNodes, parentNodes);
     return parent;
 }
 
@@ -307,11 +305,11 @@ bool tree_has_parent(struct node *node)
     //@ ensures tree(node, contextNodes, subtreeNodes) &*& result == (contextNodes != root);
 {
     //@ open tree(node, contextNodes, subtreeNodes);
-    //@ open subtree(node, ?parent_, subtreeNodes);
+    //@ open subtree(node, ?parent, subtreeNodes);
     struct node *parent = node->parent;
-    //@ close subtree(node, parent_, subtreeNodes);
-    //@ open context(node, parent_, ?count, contextNodes);
-    //@ close context(node, parent_, count, contextNodes);
+    //@ close subtree(node, parent, subtreeNodes);
+    //@ open context(node, parent, ?count, contextNodes);
+    //@ close context(node, parent, count, contextNodes);
     //@ close tree(node, contextNodes, subtreeNodes);
     return parent != 0;
 }
