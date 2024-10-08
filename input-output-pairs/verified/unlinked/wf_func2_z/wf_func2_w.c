@@ -1,4 +1,8 @@
-
+/*@
+fixpoint_auto list<t> n_times<t>(t x, int count) {
+    return count == 0 ? nil : cons(x, n_times(x, count - 1));
+}
+@*/
 
 void fill(char *buf, int length, char c)
 //@ requires buf[..length] |-> _;
@@ -8,4 +12,11 @@ void fill(char *buf, int length, char c)
     {
         buf[i] = c;
     }
+}
+
+int main()
+//@ requires true;
+//@ ensures true;
+{
+    return 0;
 }

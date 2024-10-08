@@ -18,15 +18,15 @@ predicate map(struct node *n; list<pair<void *, void *> > entries) =
 @*/
 
 struct node *map_nil()
-//requires true;
-//ensures true;
+    //@ requires true;
+    //@ ensures true;
 {
     return 0;
 }
 
 struct node *map_cons(void *key, void *value, struct node *tail)
-//requires key!=NULL&*& value!=NULL&*& tail!=NULL;
-//ensures n!=NULL;
+    //@ requires key!=NULL&*& value!=NULL&*& tail!=NULL;
+    //@ ensures n!=NULL;
 {
     struct node *n = malloc(sizeof(struct node));
     if (n == 0) abort();
@@ -37,8 +37,8 @@ struct node *map_cons(void *key, void *value, struct node *tail)
 }
 
 void map_dispose(struct node *map)
-//requires map!=NULL;
-//ensures true;
+    //@ requires map!=NULL;
+    //@ ensures true;
 {
     //@ open map(map, _);
     if (map != 0) {

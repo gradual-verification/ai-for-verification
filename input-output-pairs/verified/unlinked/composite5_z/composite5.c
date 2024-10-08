@@ -56,25 +56,10 @@ lemma void neq_mem_remove<t>(t x1, t x2, list<t> xs)
   }
 }
 
-lemma void neq_mem_remove2<t>(t x1, t x2, list<t> xs);
-  requires mem(x1, xs) == true;
-  ensures mem(x1, remove(x2, xs)) == true;
-
 lemma void remove_commut<t>(t x1, t x2, list<t> xs);
   requires true;
   ensures remove(x1, remove(x2, xs)) == remove(x2, remove(x1, xs));
 
-lemma void foreach_unremove_update1<t>(t x, list<t> xs, predicate(t) p_weak);
-    requires foreach(remove(x, xs), ?p) &*& mem(x, xs) == true &*& p_weak(x);
-    ensures foreach(xs, p_weak);
-
-lemma void foreach_unremove_update2<t>(t x, list<t> xs, predicate(t) p_strong);
-    requires foreach(remove(x, xs), ?p) &*& mem(x, xs) == true &*& p_strong(x);
-    ensures foreach(xs, p);
-
-lemma void malloc_node_success(struct node *m, struct node *n);
-  requires m != 0;
-  ensures m->firstChild |-> ?fc &*& fc == n;
 @*/
 
 struct node {
@@ -100,14 +85,14 @@ predicate_ctor child(int id, struct node *parent)(struct node *c, int count) =
   [_]ghost_list_member_handle(id, c) &*&   // My child is in the tree.
   [1/2]c->parent |-> parent;   // I am my child's parent.
 
-predicate_ctor node(int id, int delta)(struct node *n) =
+predicate_ctor node(int id)(struct node *n) =
   n != 0 &*&
   [_]n->childrenGhostListId |-> ?childrenId &*&
   n->firstChild |-> ?firstChild &*&
   children(firstChild, ?children) &*&
   ghost_list(childrenId, children) &*&
   foreach2(children, ?childrenCounts, child(id, n)) &*&
-  [1/2]n->count |-> ?cnt &*& cnt == 1 + sum(childrenCounts) &*& cnt + delta <= INT_MAX &*&
+  [1/2]n->count |-> 1 + sum(childrenCounts) &*&
   [1/2]n->parent |-> ?parent &*&
   parent == 0 ?
     [1/2]n->parent |-> 0 &*& n->nextSibling |-> _ &*& [1/2]n->count |-> _
@@ -117,21 +102,15 @@ predicate_ctor node(int id, int delta)(struct node *n) =
     [_]parent->childrenGhostListId |-> ?parentChildrenId &*&
     [_]ghost_list_member_handle(parentChildrenId, n);   // I am in my parent's list of children.
 
-predicate tree(int id, int delta) =
-  ghost_list<struct node *>(id, ?children) &*& foreach(children, node(id, delta));
-
-//predicate predsAreNode(int id, struct node *n, int delta) =
-//  n == 0 ?
-//    true
-//  :
-//    node(id, delta)(n) &*& predsAreNode(id, n->parent, delta);
+predicate tree(int id) =
+  ghost_list<struct node *>(id, ?children) &*& foreach(children, node(id));
 
 predicate tree_membership_fact(int id, struct node *n) = ghost_list_member_handle(id, n);
 
 // setting the bounds for the result of adding count in a brute-force way
 lemma void count_bounded(struct node *n, int delta);
   requires [?f]n->count |-> ?cnt;
-  ensures [f]n->count |-> cnt &*& cnt + delta < INT_MAX;
+  ensures [f]n->count |-> cnt &*& cnt + delta <= INT_MAX &*& cnt + delta >= INT_MIN;
 @*/
 
 /* private */
@@ -162,17 +141,17 @@ struct node *create_node(struct node *p, struct node *next)
 
 struct node *create_tree()
   //@ requires emp;
-  //@ ensures tree(?id, 1) &*& [_]tree_membership_fact(id, result);
+  //@ ensures tree(?id) &*& [_]tree_membership_fact(id, result);
 {
   struct node *n = create_node(0, 0);
   //@ int id = create_ghost_list();
   //@ ghost_list_add(id, n);
   //@ close children(0, nil);
   //@ close foreach2(nil, nil, child(id, n));
-  //@ close node(id, 1)(n);
-  //@ close foreach(nil, node(id, 1));
-  //@ close foreach(cons(n, nil), node(id, 1));
-  //@ close tree(id, 1);
+  //@ close node(id)(n);
+  //@ close foreach(nil, node(id));
+  //@ close foreach(cons(n, nil), node(id));
+  //@ close tree(id);
   //@ close tree_membership_fact(id, n);
   //@ leak tree_membership_fact(id, n);
   return n;
@@ -181,23 +160,19 @@ struct node *create_tree()
 //@ predicate tree_id(int id) = true;
 
 /* private */
-void add_to_count(struct node *p, struct node *first_child, int delta)
+void add_to_count(struct node *p, int delta)
   /*@
   requires
-    p != 0 &*& delta >= 0 &*&
+    p != 0 &*&
     tree_id(?id) &*&
-    ghost_list(id, ?nodes) &*& // All nodes satisfy the 'node(id)' predicate, except 'p'.
+    ghost_list(id, ?nodes) &*& mem(p, nodes) == true &*& foreach(remove(p, nodes), node(id)) &*&   // All nodes satisfy the 'node(id)' predicate, except 'p'.
     [_]p->childrenGhostListId |-> ?childrenId &*&
-    p->firstChild |-> ?firstChild &*& firstChild == first_child &*& node(id, 0)(firstChild) &*&
-    mem(firstChild, nodes) == true &*& mem(p, remove(firstChild, nodes)) == true &*& //mem(p, nodes) == true &*&
-    foreach(remove(p, remove(firstChild, nodes)), node(id, delta)) &*&
+    p->firstChild |-> ?firstChild &*&
     children(firstChild, ?children) &*&
     ghost_list(childrenId, children) &*&
     foreach2(children, ?childrenCounts, child(id, p)) &*&
-    [1/2]p->count |-> ?cnt &*& cnt == 1 + sum(childrenCounts) - delta &*& cnt + delta <= INT_MAX &*& // Here's the rub.
+    [1/2]p->count |-> 1 + sum(childrenCounts) - delta &*& // Here's the rub.
     [1/2]p->parent |-> ?parent &*&
-    //mem(parent, remove(firstChild, nodes)) == true &*&
-    //mem(parent, remove(p, remove(firstChild, nodes))) == true &*&
     parent == 0 ?
       [1/2]p->parent |-> 0 &*& p->nextSibling |-> _ &*& [1/2]p->count |-> _
     :
@@ -206,24 +181,21 @@ void add_to_count(struct node *p, struct node *first_child, int delta)
       [_]parent->childrenGhostListId |-> ?parentChildrenId &*&
       [_]ghost_list_member_handle(parentChildrenId, p);
   @*/
-  //@ ensures tree(id, 0);
+  //@ ensures tree(id);
 {
   struct node *pp = p->parent;
-  // @ count_bounded(p, delta);
+  //@ count_bounded(p, delta);
   if (pp == 0) {
     p->count += delta;
-    //@ close node(id, 0)(p);
-    //@ foreach_unremove_update1(p, remove(firstChild, nodes), node(id, 0));
-    //@ foreach_unremove(firstChild, nodes);
-    //@ close tree(id, 0);
+    //@ close node(id)(p);
+    //@ foreach_unremove(p, nodes);
+    //@ close tree(id);
     //@ open tree_id(id);
   } else {
-    //@ malloc_node_success(pp, p);
     //@ ghost_list_member_handle_lemma(id, parent);
-    //@ neq_mem_remove2(parent, firstChild, nodes);
-    //@ neq_mem_remove(parent, p, remove(firstChild, nodes));
-    //@ foreach_remove(parent, remove(p, remove(firstChild, nodes)));
-    //@ open node(id, delta)(parent);
+    //@ neq_mem_remove(parent, p, nodes);
+    //@ foreach_remove(parent, remove(p, nodes));
+    //@ open node(id)(parent);
     //@ assert [_]parent->childrenGhostListId |-> ?parentChildrenGhostListId;
     //@ ghost_list_member_handle_lemma(parentChildrenGhostListId, p);
     //@ assert ghost_list(parentChildrenGhostListId, ?parentChildren);
@@ -231,29 +203,28 @@ void add_to_count(struct node *p, struct node *first_child, int delta)
     //@ foreach2_remove(parentChildren, p);
     //@ open child(id, parent)(p, _);
     p->count += delta;
-    //@ close node(id, 0)(p);
-    //@ remove_commut(parent, p, remove(firstChild, nodes));
-    //@ neq_mem_remove(p, parent, remove(firstChild, nodes));
-    // @ foreach_unremove_update1(p, remove(parent, remove(firstChild, nodes)), node(id, 0));
+    //@ close node(id)(p);
+    //@ remove_commut(parent, p, nodes);
+    //@ neq_mem_remove(p, parent, nodes);
+    //@ foreach_unremove(p, remove(parent, nodes));
     //@ assert [_]p->count |-> ?count;
     //@ close child(id, parent)(p, count);
     //@ foreach2_unremove(parentChildren, parentChildrenCounts, p, count);
     //@ sum_update2(p, count, parentChildren, parentChildrenCounts);
-
-    add_to_count(pp, p, delta);
+    add_to_count(pp, delta);
   }
 }
 
 struct node *tree_add(struct node *node)
-  //@ requires tree(?id, 1) &*& [_]tree_membership_fact(id, node);
-  //@ ensures tree(id, 0) &*& [_]tree_membership_fact(id, result);
+  //@ requires tree(?id) &*& [_]tree_membership_fact(id, node);
+  //@ ensures tree(id) &*& [_]tree_membership_fact(id, result);
 {
-  //@ open tree(_, 1);
+  //@ open tree(_);
   //@ open tree_membership_fact(_, _);
   //@ ghost_list_member_handle_lemma(id, node);
   //@ assert ghost_list(id, ?nodes);
   //@ foreach_remove(node, nodes);
-  //@ open node(id, 1)(node);
+  //@ open node(id)(node);
   struct node *n = create_node(node, node->firstChild);
   node->firstChild = n;
   //@ close tree_id(id);
@@ -266,36 +237,36 @@ struct node *tree_add(struct node *node)
   //@ close child(id, node)(n, 1);
   //@ close children(0, nil);
   //@ close foreach2(nil, nil, child(id, n));
-  //@ close node(id, 0)(n);
-  // @ close foreach(cons(n, remove(node, nodes)), node(id, 1));
+  //@ close node(id)(n);
+  //@ close foreach(cons(n, remove(node, nodes)), node(id));
   //@ assert foreach2<struct node *, int>(?children, ?childrenCounts, child(id, node));
   //@ close foreach2(cons(n, children), cons(1, childrenCounts), child(id, node));
-  add_to_count(node, n, 1);
+  add_to_count(node, 1);
   //@ assert [?f]ghost_list_member_handle(id, n);
   //@ close [f]tree_membership_fact(id, n);
   return n;
 }
-
+/*
 struct node *tree_get_parent(struct node *node)
-  //@ requires tree(?id, 0) &*& [_]tree_membership_fact(id, node);
-  //@ ensures tree(id, 0) &*& (result == 0 ? true : [_]tree_membership_fact(id, result));
+  //@ requires tree(?id) &*& [_]tree_membership_fact(id, node);
+  //@ ensures tree(id) &*& (result == 0 ? true : [_]tree_membership_fact(id, result));
 {
-  //@ open tree(id, 0);
+  //@ open tree(id);
   //@ open tree_membership_fact(id, node);
   //@ ghost_list_member_handle_lemma(id, node);
   //@ assert ghost_list(id, ?nodes);
   //@ foreach_remove(node, nodes);
-  //@ open node(id, 0)(node);
+  //@ open node(id)(node);
   struct node *p = node->parent;
-  //@ close node(id, 0)(node);
+  //@ close node(id)(node);
   //@ foreach_unremove(node, nodes);
-  //@ close tree(id, 0);
-  /*@
+  //@ close tree(id);
+  / * @
   if (p != 0) {
     assert [?f]ghost_list_member_handle(id, p);
     close [f]tree_membership_fact(id, p);
   }
-  @*/
+  @ * /
   return p;
 }
 
@@ -313,7 +284,7 @@ int main0()
   if (node == 0) abort();
   node = tree_get_parent(node);
   if (node == 0) abort();
-  //@ leak tree(_, _);
+  //@ leak tree(_);
   return 0;
 }
 
@@ -327,6 +298,7 @@ int main() //@ : main
     struct node *leftRightParent = tree_get_parent(leftRight);
     struct node *leftLeft = tree_add(left);
     struct node *leftRightRight = tree_add(leftRight);
-    //@ leak tree(_, _);
+    //@ leak tree(_);
     return 0;
 }
+*/

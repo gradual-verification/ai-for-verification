@@ -115,7 +115,6 @@ lemma_auto void is_suffix_of_refl<t>(list<t> xs)
 }
 
 @*/
-
 bool map_contains_key(struct node *map, void *key, equalsFuncType *equalsFunc)
     //@ requires [_]is_equalsFuncType(equalsFunc, ?keys, key, ?eqKeys, ?p) &*& p() &*& map(map, ?entries) &*& is_suffix_of(map((fst), entries), keys) == true;
     //@ ensures p() &*& map(map, entries) &*& result == exists(map((fst), entries), (contains)(eqKeys));

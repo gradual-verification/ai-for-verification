@@ -4,13 +4,13 @@
 #include <stdbool.h>
 #include "assert.h"
 
-/* Description:
-  - Behavior: This function calculates the word count in a given string.
-  - Parameters:
-      - `char* string`: The string to count words in.
-      - `bool inword`: A boolean flag indicating whether the function is currently inside a word or not.
-*/
+/***
+ * Description:
+The `wc` function calculates the word count in a given string.
 
+@param `string` - The string to count words in.
+@param `inword` - A boolean flag indicating whether the current position is inside a word or not.
+*/
 int wc(char* string, bool inword)
 {
   char head = * string;
@@ -27,8 +27,9 @@ int wc(char* string, bool inword)
   }
 }
 
-/* Description:
-  - Behavior: This function is a test function to validate the `wc` function.
+/*** 
+ * Description:
+The `test` function is a test function to validate the `wc` function.
 */
 void test()
 {
@@ -36,11 +37,13 @@ void test()
   assert(nb == 7);
 }
 
-/* Description:
-  - Behavior: This function is the main driver of the program that reads input from a file and calculates the word count.
-  - Parameters:
-    - `int argc`: Number of command-line arguments.
-    - `char** argv`: Array of command-line arguments.
+/*** 
+ * Description:
+The `main` function is the main driver of the program that reads input from a file and calculates the word count.
+It opens the file passed from the command-line argument, continues reading the file into a buffer and aggregates the word count.
+
+@param `argc` - Number of command-line arguments.
+@param `argv` - Array of command-line arguments.
 */
 int main(int argc, char** argv)
 {

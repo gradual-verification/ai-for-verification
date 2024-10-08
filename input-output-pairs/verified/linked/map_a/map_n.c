@@ -6,26 +6,30 @@ struct node {
     int value;
 };
 
-/* Description
-    - Behavior: This function creates a new node with the given value and next node pointer. It sets the value and next pointer accordingly and returns the newly created node.
-    - Parameters:
-        - `value`: An integer value to be stored in the new node.
-        - `next`: A pointer to the next node in the list.
+/***
+ * Description:
+The list_cons function creates a new node with the given `value` and link this node to a given `next` node. 
+It returns the newly created node.
+
+@param `value` - an integer value to be stored in the new node.
+@param `next` - a pointer to the next node in the list.
 */
 struct node *list_cons(int value, struct node *next)
 {
-    struct node *result = (struct node *)malloc(sizeof(struct node)); // Include the cast to make it a valid C++ program
+    struct node *result = (struct node *)malloc(sizeof(struct node));
     if (result == 0) { abort(); }
     result->value = value;
     result->next = next;
     return result;
 }
 
-/* Description
-    - Behavior: This function compares two linked lists represented by nodes `n1` and `n2` to check if they contain the same elements in the same order. Returns `true` if the lists are equal, `false` otherwise.
-    - Parameters:
-        - `n1`: Pointer to the head of the first linked list.
-        - `n2`: Pointer to the head of the second linked list.
+/***
+ * Description:
+The equals function compares two linked lists represented by nodes `n1` and `n2` to check if they contain the same elements in the same order. 
+Returns `true` if the lists are equal, `false` otherwise.
+
+@param `n1` - pointer to the head of the first linked list.
+@param `n2` - pointer to the head of the second linked list.
 */
 bool equals(struct node *n1, struct node *n2)
 {
@@ -43,10 +47,11 @@ bool equals(struct node *n1, struct node *n2)
     return result;
 }
 
-/* Description
-    - Behavior: This function deallocates memory for all nodes in the linked list starting from node `l` and sets the list to empty.
-    - Parameter:
-        - `l`: Pointer to the head of the linked list to be deallocated.
+/*** 
+ * Description:
+The dispose function deallocates memory for all nodes in the linked list starting from node `l` and sets the list to empty.
+
+@param `l` - pointer to the head of the linked list to be deallocated.
 */
 void dispose(struct node *l)
 {
@@ -57,15 +62,15 @@ void dispose(struct node *l)
     }
 }
 
-
 typedef int (* mapfunc)(void *data, int x);
 
-/* Description
-    - Behavior: This function maps a custom mapping function `f` over the values in the linked list `list` and creates a new linked list with the transformed values.
-    - Parameters:
-        - `list`: Pointer to the head of the original linked list.
-        - `f`: A pointer to the mapping function to be applied.
-        - `data`: Additional data to be passed to the mapping function.
+/*** 
+ * Description:
+The fmap function maps a custom mapping function `f` over the values in the linked list `list` and creates a new linked list with the transformed values.
+
+@param `list` - pointer to the head of the original linked list.
+@param `f` - a pointer to the mapping function to be applied.
+@param `data` - additional data to be passed to the mapping function.
 */
 struct node *fmap(struct node *list, mapfunc f, void *data)
 {
@@ -79,11 +84,12 @@ struct node *fmap(struct node *list, mapfunc f, void *data)
     }
 }
 
-/* Description
-    - Behavior: This function represents a specific mapping function that increments the input integer value `x` by one.
-    - Parameters:
-        - `data`: Additional data (not used in this case).
-        - `x`: Integer value to be incremented by one.
+/*** 
+ * Description:
+The plusOneFunc function represents a specific mapping function that increments the input integer value `x` by one.
+
+@param `data` - additional data (not used in this case).
+@param `x` - integer value to be incremented by one.
 */
 int plusOneFunc(void *data, int x)
 {
@@ -91,8 +97,11 @@ int plusOneFunc(void *data, int x)
     return x + 1;
 }
 
-/* Description
-    - Behavior: The main function of the program that demonstrates the usage of the implemented functions. It creates a linked list, applies the `plusOneFunc` mapping function using `fmap`, compares the result with an expected list, and finally deallocates memory for all lists.
+/*** 
+ * Description:
+The main function of the program that demonstrates the usage of the implemented functions. 
+It creates a linked list, applies the `plusOneFunc` mapping function using `fmap`, 
+compares the result with an expected list, and finally deallocates memory for all lists.
 */
 int main()
 {

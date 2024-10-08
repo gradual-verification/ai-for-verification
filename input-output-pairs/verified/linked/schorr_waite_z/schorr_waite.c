@@ -3,7 +3,6 @@ struct node {
   bool c; // which child is explored
   struct node* l;
   struct node* r;
-  
 };
 
 /*@
@@ -12,7 +11,6 @@ predicate tree(struct node* t, bool marked) =
   
 predicate stack(struct node* t) =
   t == 0 ? true : t->m |-> true &*& t->c |-> ?c &*& t->l |-> ?l &*& t->r |-> ?r &*& (c == false ? stack(l) &*& tree(r, false) : stack(r) &*& tree(l, true));
-
 @*/
 
 void schorr_waite(struct node* root) 

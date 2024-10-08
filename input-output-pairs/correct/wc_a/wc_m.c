@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include "assert.h"
 
-
 /*@
 fixpoint int wcount(list<char> cs, bool inword) {
   switch(cs) {
@@ -15,8 +14,8 @@ fixpoint int wcount(list<char> cs, bool inword) {
 @*/
 
 int wc(char* string, bool inword)
-  //@ requires [?f]string(string, ?cs);
-  //@ ensures [f]string(string, cs) &*& result == wcount(cs, inword);
+//@ requires [?f]string(string, ?cs);
+//@ ensures [f]string(string, cs) &*& result == wcount(cs, inword);
 {
   char head = * string;
   if(head == 0) {
@@ -33,16 +32,16 @@ int wc(char* string, bool inword)
 }
 
 void test() 
-  //@ requires true;
-  //@ ensures true;
+//@ requires true;
+//@ ensures true;
 {
   int nb = wc("This line of text contains 8 words.", false);
   assert(nb == 7);
 }
 
 int main(int argc, char** argv) //@ : main
-  //@ requires 0 <= argc &*& [_]argv(argv, argc, _);
-  //@ ensures true;
+//@ requires 0 <= argc &*& [_]argv(argv, argc, _);
+//@ ensures true;
 {
   bool inword = false; struct file* fp = 0; char* buff = 0; int total = 0; char* res = 0;
   if(argc < 2) { puts("No input file specified."); return -1; }
@@ -53,6 +52,9 @@ int main(int argc, char** argv) //@ : main
   while(res != 0)
   {
     int tmp = wc(buff, inword);
+    if (total > INT_MAX - tmp) {
+      break;
+    }
     total = total + tmp;
     res = fgets(buff, 100, fp);
   }

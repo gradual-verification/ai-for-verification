@@ -7,17 +7,15 @@ struct node {
 };
 
 /*@
-
 predicate list(struct node *l, list<int> xs) =
     l == 0 ? xs == nil : l->value |-> ?value &*& l->next |-> ?next &*& list(next, ?tail) &*& xs == cons(value, tail);
-
 @*/
 
 struct node *list_cons(int value, struct node *next)
-    //@ requires list(next, ?tail);
-    //@ ensures list(result, cons(value, tail));
+//@ requires list(next, ?tail);
+//@ ensures list(result, cons(value, tail));
 {
-    struct node *result = (struct node *)malloc(sizeof(struct node)); // Include the cast to make it a valid C++ program
+    struct node *result = (struct node *)malloc(sizeof(struct node));
     if (result == 0) { abort(); }
     result->value = value;
     result->next = next;
@@ -25,8 +23,8 @@ struct node *list_cons(int value, struct node *next)
 }
 
 bool equals(struct node *n1, struct node *n2)
-    //@ requires list(n1, ?xs1) &*& list(n2, ?xs2);
-    //@ ensures list(n1, xs1) &*& list(n2, xs2) &*& result ? xs1 == xs2 : xs1 != xs2;
+//@ requires list(n1, ?xs1) &*& list(n2, ?xs2);
+//@ ensures list(n1, xs1) &*& list(n2, xs2) &*& result ? xs1 == xs2 : xs1 != xs2;
 {
     bool result = false;
     if (n1 == 0)
@@ -43,8 +41,8 @@ bool equals(struct node *n1, struct node *n2)
 }
 
 void dispose(struct node *l)
-    //@ requires list(l, _);
-    //@ ensures true;
+//@ requires list(l, _);
+//@ ensures true;
 {
     if (l != 0) {
         struct node *next = l->next;
@@ -54,18 +52,16 @@ void dispose(struct node *l)
 }
 
 /*@
-
 predicate_family mapfunc(void *mapfunc)(void *data, list<int> in, list<int> out, any info);
-
 @*/
 
 typedef int (* mapfunc)(void *data, int x);
-    //@ requires mapfunc(this)(data, ?in, ?out, ?info) &*& in != nil &*& x == head(in);
-    //@ ensures mapfunc(this)(data, tail(in), append(out, cons(result, nil)), info);
+//@ requires mapfunc(this)(data, ?in, ?out, ?info) &*& in != nil &*& x == head(in);
+//@ ensures mapfunc(this)(data, tail(in), append(out, cons(result, nil)), info);
 
 struct node *fmap(struct node *list, mapfunc f, void *data)
-    //@ requires list(list, ?xs) &*& is_mapfunc(f) == true &*& mapfunc(f)(data, xs, ?out, ?info);
-    //@ ensures list(list, xs) &*& list(result, ?ys) &*& mapfunc(f)(data, nil, append(out, ys), info);
+//@ requires list(list, ?xs) &*& is_mapfunc(f) == true &*& mapfunc(f)(data, xs, ?out, ?info);
+//@ ensures list(list, xs) &*& list(result, ?ys) &*& mapfunc(f)(data, nil, append(out, ys), info);
 {
     if (list == 0) {
         return 0;
@@ -78,28 +74,26 @@ struct node *fmap(struct node *list, mapfunc f, void *data)
 }
 
 /*@
-
 fixpoint int plusOne(int x) {
     return x + 1;
 }
 
 predicate_family_instance mapfunc(plusOneFunc)(void *data, list<int> in, list<int> out, list<int> info) =
     map(plusOne, info) == append(out, map(plusOne, in));
-
 @*/
 
 
 int plusOneFunc(void *data, int x) //@ : mapfunc
-    //@ requires mapfunc(plusOneFunc)(data, ?in, ?out, ?info) &*& in != nil &*& x == head(in);
-    //@ ensures mapfunc(plusOneFunc)(data, tail(in), append(out, cons(result, nil)), info);
+//@ requires mapfunc(plusOneFunc)(data, ?in, ?out, ?info) &*& in != nil &*& x == head(in);
+//@ ensures mapfunc(plusOneFunc)(data, tail(in), append(out, cons(result, nil)), info);
 {
     if (x == INT_MAX) abort();
     return x + 1;
 }
 
 int main() //@ : main
-    //@ requires true;
-    //@ ensures true;
+//@ requires true;
+//@ ensures true;
 {
     struct node *l = 0;
     l = list_cons(3, l);
