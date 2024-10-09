@@ -11,8 +11,8 @@ static struct counter *c;
 //@ predicate counter(struct counter* c, int v) = c->f |-> v;
 
 void m()
-//@ requires x |-> 7 &*& c |-> ?ctr &*& counter(ctr, ?v); 
-//@ ensures x |-> 8 &*& c |-> ctr &*& counter(ctr, v + 1);
+//@ requires integer(&x, 7) &*& c |-> ?ctr &*& counter(ctr, ?v);
+//@ ensures integer(&x, 8) &*& c |-> ctr &*& counter(ctr, v + 1);
 {
     int y = x;
     x = y + 1;
