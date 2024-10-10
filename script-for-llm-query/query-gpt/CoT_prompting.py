@@ -8,15 +8,20 @@ from openai import OpenAI
 #### DEFAULT SETTINGS, change it to your own setting ###
 # APT_KEY is in environmental variable
 # the question that you want to ask ChatGPT
-GPT_PROMPT = f"You are an expert Verifast programmer, your task is that for the C code below, modify it to include a formal code verification in Verifast that verifies correctly. \
-                Please just show one code block with the complete code and specification to be verified, in the format of ```c CODE and SPEC ```."
+# Chain of Thoughts (CoT) may break down the prompt into several steps
+GPT_PROMPTs = [f"You are a Verifast expert programmer, do not delete the orginal code and just add accurate Verifast specifications to the C code below according to every function's description.",
+               f"1. add the precondition and postcondition set to true to the main function, remove any other specifications added inside the main function",
+               f"2. rewrite the code such that for every function and the main function, the precondition and the post condition is only between the function declaration and its contents",
+               f"3. the preconditions and postconditions should be preceded by '//@' for all functions.",
+               f"Please just show one code block with the complete code and specification to be verified, in the format of ```c CODE and SPEC ```."]
+GPT_PROMPT = "\n".join(GPT_PROMPTs)
 # chatgpt model, all models are listed here https://platform.openai.com/docs/models
 # options: gpt-3.5-turbo, gpt-4o
-GPT_MODEL = 'gpt-4o'
+GPT_MODEL = 'gpt-3.5-turbo'
 # the code folder path that you want to ask CHATGPT for generating specification
-TEST_FOLDER_PATH = '../../input-output-pairs/correct/'
+TEST_FOLDER_PATH = '../../input-output-pairs/try/'
 # the result folder path that stores the output of CHATGPT for analysis
-RESULT_FOLDER_PATH = f'../../input-output-pairs/result_basic_{GPT_MODEL}/'
+RESULT_FOLDER_PATH = f'../../input-output-pairs/result_CoT_{GPT_MODEL}/'
 
 
 # Function definitions here (read_files_and_count_lines, analyze_code, etc.)
