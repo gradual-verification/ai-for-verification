@@ -20,9 +20,6 @@ void fill(char *buf, int length, char c)
     }
 }
 
-//@ requires buf[..length] |-> _;
-//@ ensures buf[..length] |-> n_times(c, length);
-
 int main()
 {
     return 0;

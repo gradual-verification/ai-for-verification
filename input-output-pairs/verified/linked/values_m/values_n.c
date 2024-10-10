@@ -29,6 +29,7 @@ struct stack *create_stack()
         abort();
     }
     stack->head = 0;
+    return stack;
 }
 
 /***

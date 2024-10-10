@@ -26,8 +26,6 @@ void invert(int *A, int N, int *B)
 }
 
 int main()
-//@ requires true;
-//@ ensures true;
 {
     return 0;
 }

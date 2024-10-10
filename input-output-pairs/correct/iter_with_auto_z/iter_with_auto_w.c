@@ -192,7 +192,7 @@ predicate llist_with_node(struct llist *list, list<int> v0, struct node *n, list
   list->first |-> ?f &*& list->last |-> ?l &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& v0 == append(v1, vn);
 
 predicate iter(struct iter *i, real frac, struct llist *l, list<int> v0, list<int> v) =
-  i->current |-> ?n &*& [frac]llist_with_node(l, v0, n, v)
+  i->current |-> ?n &*& [frac]llist_with_node(l, v0, n, v);
 @*/
 
 struct iter *llist_create_iter(struct llist *l)

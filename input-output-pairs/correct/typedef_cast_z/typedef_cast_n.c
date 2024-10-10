@@ -19,8 +19,6 @@ void foo(int16_t x, my_short y)
 }
 
 int main()
-//@ requires true;
-//@ ensures true;
 {
     return 0;
 }

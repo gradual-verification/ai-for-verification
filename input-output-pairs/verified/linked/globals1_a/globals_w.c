@@ -11,16 +11,16 @@ static struct counter *c;
 //@ predicate counter(struct counter* c, int v) = c->f |-> v;
 
 void m()
-//@ requires integer(&x, 7) &*& c |-> ?ctr &*& counter(ctr, ?v);
-//@ ensures integer(&x, 8) &*& c |-> ctr &*& counter(ctr, v + 1);
+//@ requires x |-> 7 &*& c |-> ?ctr &*& counter(ctr, ?v); 
+//@ ensures x |-> 8 &*& c |-> ctr &*& counter(ctr, v + 1);
 {
     int y = x;
     x = y + 1;
     c->f = c->f + 1;
 }
 
-int main() //@ : main_full(globals)
-//@ requires module(globals, true);
+int main() //@ : main_full(globals_w)
+//@ requires module(globals_w, true);
 //@ ensures true;
 {
     x = 7;

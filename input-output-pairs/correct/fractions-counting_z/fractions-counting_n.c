@@ -33,10 +33,7 @@ The create_counter function creates a `counter` predicate for a `struct C` objec
 In this function, A `counter` predicate created, showing that there is no ticket.
 */
 void create_counter(struct C* c)
-//@ requires c->x |-> ?x &*& malloc_block_C(c);
-//@ ensures counter(c, x, 0);
 {
-  //@ close counter(c, x, 0);
 }
 
 /***
@@ -47,13 +44,7 @@ The create_ticket function creates a new ticket by modifying the `counter` and `
 In this function, the `counter` and `tickets` predicates are updated, showing that the number of tickets is incremented.
 */
 void create_ticket(struct C* c)
-//@ requires counter(c, ?x, ?nbTickets) &*& tickets(c, x, nbTickets);
-//@ ensures counter(c, x, nbTickets + 1) &*& tickets(c, x, nbTickets + 1);
 {
-  //@ open counter(c, x, nbTickets);
-  //@ open tickets(c, x, nbTickets);
-  //@ close counter(c, x, nbTickets + 1);
-  //@ close tickets(c, x, nbTickets + 1);
 }
 
 /***
@@ -65,13 +56,7 @@ The dispose_ticket function disposes a ticket by modifying the `counter` and `ti
 In this function, the `counter` and `tickets` predicates are updated, showing that the number of tickets is decremented.
 */
 void dispose_ticket(struct C* c)
-//@ requires counter(c, ?x, ?nbTickets) &*& tickets(c, x, nbTickets) &*& nbTickets > 0;
-//@ ensures counter(c, x, nbTickets - 1) &*& tickets(c, x, nbTickets - 1);
 {
-  //@ open counter(c, x, nbTickets);
-  //@ open tickets(c, x, nbTickets);
-  //@ close counter(c, x, nbTickets - 1);
-  //@ close tickets(c, x, nbTickets - 1);
 }
 
 /***
@@ -84,10 +69,7 @@ which shows that the tickets must be disposed before the counter is disposed.
 In this function, the `counter` predicate is consumed and the predicate for `Struct C` is produced.
 */
 void dispose_counter(struct C* c)
-//@ requires counter(c, ?x, 0);
-//@ ensures [1.0]c->x |-> x &*& malloc_block_C(c);
 {
-  //@ open counter(c, x, 0);
 }
 
 /***

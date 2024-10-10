@@ -41,8 +41,8 @@ struct point {
 };
 
 int main() 
-//@require true;
-//@ensures true;
+//@ requires true;
+//@ ensures true;
 {
     if (SIZE_MAX / 2 < sizeof(struct point)) abort();
     struct point *points = malloc(2 * sizeof(struct point));

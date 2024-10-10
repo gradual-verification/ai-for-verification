@@ -35,6 +35,7 @@ struct stack *create_stack()
         abort();
     }
     stack->head = 0;
+    return stack;
 }
 
 void stack_push(struct stack *stack, int value)

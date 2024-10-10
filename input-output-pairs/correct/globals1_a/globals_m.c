@@ -18,8 +18,8 @@ void m()
     c->f = c->f + 1;
 }
 
-int main() //@ : main_full(globals)
-//@ requires module(globals, true);
+int main() //@ : main_full(globals_m)
+//@ requires module(globals_m, true);
 //@ ensures true;
 {
     x = 7;

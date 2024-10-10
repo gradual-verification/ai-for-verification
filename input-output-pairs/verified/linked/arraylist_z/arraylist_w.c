@@ -12,7 +12,7 @@ struct arraylist {
 /*@
 predicate arraylist(struct arraylist *a; list<void*> vs) =
   a->data |-> ?data &*& a->size |-> ?size &*& a->capacity |-> ?capacity  &*&
-   &*& data[0..size] |-> vs &*& data[size..capacity] |-> _;
+  data[0..size] |-> vs &*& data[size..capacity] |-> _;
 @*/
 
 struct arraylist *create_arraylist() 
@@ -31,7 +31,7 @@ struct arraylist *create_arraylist()
 }
 
 void *list_get(struct arraylist *a, int i)
-//@ requires arraylist(a, ?vs) &*& i >= 0 &*& i <= a->size - 1;
+//@ requires arraylist(a, ?vs) &*& i >= 0 &*& i < length(vs);
 //@ ensures arraylist(a, vs) &*& result == nth(i, vs);
 {
   return a->data[i];
@@ -70,7 +70,7 @@ void list_add(struct arraylist *a, void *v)
 }
 
 void list_remove_nth(struct arraylist *a, int n)
-//@ requires arraylist(a, ?vs) &*& n >= 0 &*& n <= a->size - 1;
+//@ requires arraylist(a, ?vs) &*& n >= 0 &*& n < length(vs);
 //@ ensures arraylist(a, append(take(n, vs), tail(drop(n, vs))));
 {
   void** data = a->data;
