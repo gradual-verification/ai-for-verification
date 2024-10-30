@@ -20,7 +20,7 @@ count == 0
 &*& node->next |-> ?next &*& node->value |-> ?value &*& nodes(next, count - 1);
 
 predicate stack(struct stack *stack, int count) =
-stack->head |-> ?head &*& 0 <= count &*& nodes(head, count);
+stack->head |-> ?head &*& nodes(head, count);
 @*/
 
 struct stack *create_stack()

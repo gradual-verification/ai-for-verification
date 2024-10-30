@@ -35,3 +35,12 @@ void reverse(dllist arg)
 	arg->head = temp2;
 	arg->tail = temp1;
 }
+
+/***
+ * Description:
+The default main function, doing nothing.
+*/
+int main()
+{
+    return 0;
+}

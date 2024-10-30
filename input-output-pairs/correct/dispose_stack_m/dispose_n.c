@@ -65,16 +65,15 @@ from the non-empty stack.
 
 The function takes a pointer to the stack as a parameter and 
 retrieves the value of the top node. It then updates the 
-head pointer of the stack to the next node, frees the 
-memory of the popped node, and returns the value.
+head pointer of the stack to the next node and frees the 
+memory of the popped node.
 */
-int stack_pop(struct stack *stack)
+void stack_pop(struct stack *stack)
 {
     struct node *head = stack->head;
     int result = head->value;
     stack->head = head->next;
     free(head);
-    return result;
 }
 
 /***

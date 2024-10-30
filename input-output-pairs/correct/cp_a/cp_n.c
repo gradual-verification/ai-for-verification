@@ -16,8 +16,8 @@ int main(int argc, char** argv)
 {
   struct file* from = 0; struct file* to = 0; char* buffer = 0; int nb_read = 0;
   if(argc < 3) { puts("Not enough parameters."); return -1; }
-  from = fopen(* (argv + 1), "r");
-  to = fopen(* (argv + 2), "w");
+  from = fopen(argv[1], "r");
+  to = fopen(argv[2], "w");
   buffer = malloc(100);
   if(buffer == 0 || from == 0 || to == 0) { abort(); }
   nb_read = fread(buffer, 1, 100, from);

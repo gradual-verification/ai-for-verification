@@ -65,16 +65,15 @@ from the non-empty container.
 
 The function takes a pointer to the container as a parameter and 
 retrieves the value of the top node. It then updates the 
-head pointer of the container to the next node, frees the 
-memory of the popped node, and returns the value.
+head pointer of the container to the next node, and frees the 
+memory of the popped node.
 */
-int container_remove(struct container *container)
+void container_remove(struct container *container)
 {
     struct node *head = container->head;
     int result = head->value;
     container->head = head->next;
     free(head);
-    return result;
 }
 
 /***
