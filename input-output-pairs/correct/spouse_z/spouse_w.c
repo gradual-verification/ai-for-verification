@@ -44,7 +44,7 @@ void divorce(struct person* this)
 }
 
 void die(struct person *this)
-//@ requires person(this, ?other);
+//@ requires person(this, ?other) &*& (other == 0 ? true : person(other, this));
 //@ ensures other == 0 ? true : person(other, 0);
 {
   if(this->spouse != 0) {

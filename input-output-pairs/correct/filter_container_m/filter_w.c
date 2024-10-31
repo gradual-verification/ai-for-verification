@@ -20,7 +20,7 @@ count == 0
 nodes(next, count - 1);
 
 predicate container(struct container *container, int count) =
-container->head |-> ?head &*& 0 <= count &*& nodes(head, count);
+container->head |-> ?head &*& nodes(head, count);
 @*/
 
 struct container *create_container()

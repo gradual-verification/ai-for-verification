@@ -6,28 +6,22 @@ struct node
     int value;
 };
 
-/*@
-predicate nodes(struct node *node, int count) =
-    node == 0 ?
-        count == 0
-    :
-    0 < count &*& 
-    node->next |-> ?next &*& 
-    node->value |-> _ &*& 
-    malloc_block_node(node) &*&  // Ensure the node memory is valid
-    nodes(next, count - 1);
-
-predicate container(struct container *container, int count) =
-    container->head |-> ?head &*& 
-    0 <= count &*& 
-    malloc_block_container(container) &*& // Ensure the container memory is valid
-    nodes(head, count);
-@*/
-
 struct container
 {
     struct node *head;
 };
+
+/*@
+predicate nodes(struct node *node, int count) =
+node == 0 ?
+count == 0
+:
+0 < count &*& node->next |-> ?next &*& node->value |-> ?value &*&
+nodes(next, count - 1);
+
+predicate container(struct container *container, int count) =
+container->head |-> ?head &*& nodes(head, count);
+@*/
 
 struct container *create_container()
 //@ requires true;
@@ -39,6 +33,8 @@ struct container *create_container()
         abort();
     }
     container->head = 0;
+    //@ close nodes(0, 0);
+    //@ close container(container, 0);
     return container;
 }
 
@@ -53,7 +49,11 @@ void container_add(struct container *container, int value)
     }
     n->next = container->head;
     n->value = value;
+    //@ open container(container, count);
+    //@ open nodes(container->head, count);
     container->head = n;
+    //@ close nodes(n, count + 1);
+    //@ close container(container, count + 1);
 }
 
 int container_remove(struct container *container)
@@ -62,8 +62,12 @@ int container_remove(struct container *container)
 {
     struct node *head = container->head;
     int result = head->value;
+    //@ open container(container, count);
+    //@ open nodes(head, count);
     container->head = head->next;
     free(head);
+    //@ close nodes(container->head, count - 1);
+    //@ close container(container, count - 1);
     return result;
 }
 
@@ -77,22 +81,27 @@ struct node *nodes_filter(struct node *n, int_predicate *p)
 {
     if (n == 0)
     {
+        //@ close nodes(0, 0);
         return 0;
     }
     else
     {
         bool keep = p(n->value);
+        struct node *next;
+        //@ open nodes(n, count);
         if (keep)
         {
-            struct node *next = nodes_filter(n->next, p);
+            next = nodes_filter(n->next, p);
             n->next = next;
+            //@ close nodes(n, _);
             return n;
         }
         else
         {
-            struct node *next = n->next;
+            next = n->next;
             free(n);
             struct node *result = nodes_filter(next, p);
+            //@ close nodes(result, _);
             return result;
         }
     }
@@ -102,8 +111,10 @@ void container_filter(struct container *container, int_predicate *p)
 //@ requires container(container, ?count) &*& is_int_predicate(p) == true;
 //@ ensures container(container, ?new_count) &*& new_count <= count;
 {
+    //@ open container(container, count);
     struct node *head = nodes_filter(container->head, p);
     container->head = head;
+    //@ close container(container, _);
 }
 
 void nodes_dispose(struct node *n)
@@ -112,6 +123,7 @@ void nodes_dispose(struct node *n)
 {
     if (n != 0)
     {
+        //@ open nodes(n, _);
         nodes_dispose(n->next);
         free(n);
     }
@@ -121,6 +133,7 @@ void container_dispose(struct container *container)
 //@ requires container(container, _);
 //@ ensures true;
 {
+    //@ open container(container, _);
     nodes_dispose(container->head);
     free(container);
 }
