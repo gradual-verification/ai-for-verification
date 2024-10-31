@@ -16,10 +16,10 @@ GPT_PROMPTs = [f"You are a Verifast expert programmer, do not delete the orginal
                f"Please just show one code block with the complete code and specification to be verified, in the format of ```c CODE and SPEC ```."]
 GPT_PROMPT = "\n".join(GPT_PROMPTs)
 # chatgpt model, all models are listed here https://platform.openai.com/docs/models
-# options: gpt-3.5-turbo, gpt-4o
-GPT_MODEL = 'gpt-3.5-turbo'
+# options: gpt-3.5-turbo, gpt-4o, o1-preview
+GPT_MODEL = 'o1-preview'
 # the code folder path that you want to ask CHATGPT for generating specification
-TEST_FOLDER_PATH = '../../input-output-pairs/try/'
+TEST_FOLDER_PATH = '../../input-output-pairs/correct/'
 # the result folder path that stores the output of CHATGPT for analysis
 RESULT_FOLDER_PATH = f'../../input-output-pairs/result_CoT_{GPT_MODEL}/'
 
@@ -54,7 +54,8 @@ def query_LLM(content, type):
 
     chat_completion = client.chat.completions.create(
         messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
+            # remove it since some models (e.g., o1-preview) don't support system role
+            #{"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": GPT_PROMPT + f"\n\n{content}"}
 
         ],
@@ -104,8 +105,8 @@ def write_output(file_info, base_dir):
     content = file_info['content']
     full_output = file_info['full_output']
     filtered_output = get_verifast_code(full_output)
-    full_output_file = os.path.join(base_dir, sub_dir, f"full_out_{filename}.md")
-    filtered_output_file = os.path.join(base_dir, sub_dir, f"out_{filename}")
+    full_output_file = os.path.join(base_dir, sub_dir, f"full_{filename}.md")
+    filtered_output_file = os.path.join(base_dir, sub_dir, f"{filename}")
 
     # write both the full output and the extracted output
     os.makedirs(os.path.dirname(full_output_file), exist_ok=True)

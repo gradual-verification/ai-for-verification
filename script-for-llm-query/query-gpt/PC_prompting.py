@@ -14,13 +14,13 @@ GPT_PROMPTs = [f"You are a Verifast expert programmer, Please help verify a prog
                f"3. Based on the description: what are the post-conditions?",
                f"4. If the function contains loops, what are the loop invariants?",
                f"5. Extract common predicates that could be used across multiple functions from the following descriptions.",
-               f"6. Generate VeriFast specifications for the function: based on the pre-conditions,post-conditions, loop invariants, and the following common predicates. \
+               f"6. Generate Verifast specifications for the function: based on the pre-conditions,post-conditions, loop invariants, and the following common predicates. \
                Please just show one code block with the complete code and specification to be verified, in the format of ```c CODE and SPEC ```."]
 # chatgpt model, all models are listed here https://platform.openai.com/docs/models
-# options: gpt-3.5-turbo, gpt-4o
-GPT_MODEL = 'gpt-3.5-turbo'
+# options: gpt-3.5-turbo, gpt-4o, o1-preview
+GPT_MODEL = 'gpt-4o'
 # the code folder path that you want to ask CHATGPT for generating specification
-TEST_FOLDER_PATH = '../../input-output-pairs/try/'
+TEST_FOLDER_PATH = '../../input-output-pairs/correct/'
 # the result folder path that stores the output of CHATGPT for analysis
 RESULT_FOLDER_PATH = f'../../input-output-pairs/result_PC_{GPT_MODEL}/'
 
@@ -51,15 +51,14 @@ def read_files_and_count_lines(base_dir):
 
 ### Query the LLM by inputting the content, and (perhaps) choose the prompt by the type,
 ### and return the output from LLM
-def query_LLM(content, type, prompt = None):
-    if prompt is None:
-        prompt = GPT_PROMPT
+def query_LLM(content, type, prompt):
 
     client = OpenAI()
 
     chat_completion = client.chat.completions.create(
         messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
+            # remove it since some models (e.g., o1-preview) don't support system role
+            #{"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt + f"\n\n{content}"}
 
         ],
@@ -109,8 +108,8 @@ def write_output(file_info, base_dir):
     content = file_info['content']
     full_output = file_info['full_output']
     filtered_output = get_verifast_code(full_output)
-    full_output_file = os.path.join(base_dir, sub_dir, f"full_out_{filename}.md")
-    filtered_output_file = os.path.join(base_dir, sub_dir, f"out_{filename}")
+    full_output_file = os.path.join(base_dir, sub_dir, f"full_{filename}.md")
+    filtered_output_file = os.path.join(base_dir, sub_dir, f"{filename}")
 
     # write both the full output and the extracted output
     os.makedirs(os.path.dirname(full_output_file), exist_ok=True)
@@ -141,7 +140,7 @@ def main():
         # also, add the content of the file, to every prompt for context preservation
         for prompt in GPT_PROMPTs:
             llm_output = query_LLM(content, type, prompt)
-            content = llm_output + "\n" + info['content']
+            content = llm_output + "\n\n" + info['content']
 
         # record the output of the last prompt
         info['full_output'] = llm_output
