@@ -22,7 +22,7 @@ struct person *create_person()
 
 /***
  * Description:
-The `marry` function marries two `person` instances by setting their spouse pointers to each other.
+The `marry` function marries two unmarried `person` instances by setting their spouse pointers to each other.
 
 @param `this` - Pointer to the first `person`.
 @param `other` - Pointer to the second `person`.
