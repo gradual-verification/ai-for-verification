@@ -16,7 +16,7 @@ int main(int argc, char** argv) //@ : main
   nb_read = fread(buffer, 1, 100, from);
   while(0 < nb_read)
   {
-    int nb_written = fwrite(buffer, 1, nb_read, to);
+    int nb_written = fwrite(buffer, 1, (uintptr_t) nb_read, to);
     nb_read = fread(buffer, 1, 100, from);
   }
   fclose(from);
