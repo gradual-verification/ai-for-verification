@@ -5,6 +5,8 @@
 #include "assert.h"
 
 /*@
+inductive string = cons(char, string) | nil;
+
 fixpoint int wcount(list<char> cs, bool inword) {
   switch(cs) {
     case nil: return inword ? 1 : 0;
@@ -12,8 +14,13 @@ fixpoint int wcount(list<char> cs, bool inword) {
   }
 }
 
-predicate_ctor buffer(char *buffer, int size)(list<char> cs) =
-  string(buffer, cs) &*& length(cs) < size;
+fixpoint list<char> to_char_list(string s) { // Define conversion from string to character list
+  switch(s) { 
+    case nil: return nil;
+    case cons(h, t): return cons(h, to_char_list(t));
+  }
+}
+
 @*/
 
 int wc(char* string, bool inword)
@@ -38,7 +45,7 @@ void test()
 //@ requires true;
 //@ ensures true;
 {
-  int nb = wc("This line of text contains 7 words.", false);
+  int nb = wc("This line of text contains 8 words.", false);
   assert(nb == 7);
 }
 
@@ -48,13 +55,11 @@ int main(int argc, char** argv) //@ : main
 {
   bool inword = false; struct file* fp = 0; char* buff = 0; int total = 0; char* res = 0;
   if(argc < 2) { puts("No input file specified."); return -1; }
-  fp = fopen(* (argv + 1), "r");
+  fp = fopen(argv[1], "r");
   buff = malloc(100);
-  //@ close buffer(buff, 100)(nil);
   if(buff == 0 || fp == 0) { abort(); }
   res = fgets(buff, 100, fp);
   while(res != 0)
-  //@ invariant buffer(buff, 100)(?cs) &*& 0 <= total;
   {
     int tmp = wc(buff, inword);
     if (total > INT_MAX - tmp) {

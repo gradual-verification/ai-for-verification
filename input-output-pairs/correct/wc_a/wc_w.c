@@ -45,7 +45,7 @@ int main(int argc, char** argv) //@ : main
 {
   bool inword = false; struct file* fp = 0; char* buff = 0; int total = 0; char* res = 0;
   if(argc < 2) { puts("No input file specified."); return -1; }
-  fp = fopen(* (argv + 1), "r");
+  fp = fopen(argv[1], "r");
   buff = malloc(100);
   if(buff == 0 || fp == 0) { abort(); }
   res = fgets(buff, 100, fp);
