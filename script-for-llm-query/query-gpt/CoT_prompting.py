@@ -9,15 +9,32 @@ from openai import OpenAI
 # APT_KEY is in environmental variable
 # the question that you want to ask ChatGPT
 # Chain of Thoughts (CoT) may break down the prompt into several steps
-GPT_PROMPTs = [f"You are a Verifast expert programmer, do not delete the orginal code and just add accurate Verifast specifications to the C code below according to every function's description.",
-               f"1. add the precondition and postcondition set to true to the main function, remove any other specifications added inside the main function",
-               f"2. rewrite the code such that for every function and the main function, the precondition and the post condition is only between the function declaration and its contents",
-               f"3. the preconditions and postconditions should be preceded by '//@' for all functions.",
-               f"Please just show one code block with the complete code and specification to be verified, in the format of ```c CODE and SPEC ```."]
+GPT_PROMPTs = [
+    "You are an expert Verifast programmer. \
+    Your task is to modify the C code below to include a formal code verification in Verifast that verifies correctly by following the steps.",
+
+    "Step 1: Write precondition and postcondition for each function. Following the sub-steps: \
+    1.1 Place the precondition and postcondition only between function declaration and function body; \
+    1.2 Ensure that the precondition and postcondition preserve functional behavior of the function; \
+    1.3 Define the predicates or data types used in the precondition and postcondition; \
+    1.4 Further consider memory safety and integer bound check in precondition, postcondition or predicate;",
+
+    "Step 2: Write loop invariant if the function has a loop. Following the sub-steps: \
+    2.1 Place the loop invariant only between loop head and loop body; \
+    2.2 The loop invariant is the condition that holds at the start of the loop, \
+    is preserved by each iteration of loop, and it is sufficient to prove postcondition and memory safety",
+
+    "Step 3: Add open, close, lemma and leak statements for transforming or ignoring conditions. \
+    To be specific, those statements allow the information in the proved conditions and source code to prove the next condition, \
+    where the conditions include the precondition of a function call, the access to memory location, loop invariant and the postcondition.",
+
+    "Please just show one code block with the complete code and specification to be verified, in the format of ```c CODE and SPEC ```."
+]
+
 GPT_PROMPT = "\n".join(GPT_PROMPTs)
 # chatgpt model, all models are listed here https://platform.openai.com/docs/models
 # options: gpt-3.5-turbo, gpt-4o, o1-preview
-GPT_MODEL = 'o1-preview'
+GPT_MODEL = 'gpt-4o'
 # the code folder path that you want to ask CHATGPT for generating specification
 TEST_FOLDER_PATH = '../../input-output-pairs/correct/'
 # the result folder path that stores the output of CHATGPT for analysis
