@@ -14,19 +14,27 @@ GPT_PROMPTs = [
     Your task is to modify the C code below to include a formal code verification in Verifast that verifies correctly by following the steps.",
 
     "Step 1: Write precondition and postcondition for each function. Following the sub-steps: \
-    1.1 Place the precondition and postcondition only between function declaration and function body; \
-    1.2 Ensure that the precondition and postcondition preserve functional behavior of the function; \
-    1.3 Define the predicates or data types used in the precondition and postcondition; \
-    1.4 Further consider memory safety and integer bound check in precondition, postcondition or predicate;",
+    1.1 Generate a precondition that represents constraints on the input behavior of the function as specified in the input program either in natural language comments before the function or as a precondition between the function declaration and function body. Make sure that any predicates or data types in the generated precondition are declared and defined. \
+    1.2 Place the newly generated precondition between the function declaration and the function body. \
+    1.3 Go back to the newly generated precondition and add additional specifications as needed to verify memory safety of the function. \
+    1.4 Go back to the newly generated precondition and add additional specifications as needed to verify integers stay within their bounds in the function. \
+    1.5 Generate a postcondition that represents constraints on the output behavior of the function as defined in the input program either in natural language comments before the function or as a postcondition between the function declaration and function body. Make sure that any predicates or data types in the generated postcondition are declared and defined. \
+    1.6 Place the newly generated postcondition between the function declaration and the function body after the previously generated precondition. \
+    1.7 Go back to the newly generated postcondition and add additional specifications to verify memory safety after this function is called. \
+    1.8 Go back to the newly generated postcondition and add additional specifications to verify that integers stay within their bounds after this function is called.",
 
     "Step 2: Write loop invariant if the function has a loop. Following the sub-steps: \
-    2.1 Place the loop invariant only between loop head and loop body; \
-    2.2 The loop invariant is the condition that holds at the start of the loop, \
-    is preserved by each iteration of loop, and it is sufficient to prove postcondition and memory safety",
+    2.1 Generate a loop invariant that specifies the properties that hold at each loop iteration. \
+    2.2 Place the newly generated loop invariant between the loop head and loop body. \
+    2.3 Go back to the newly generated loop invariant and add checks to confirm safe memory access in each loop iteration. \
+    2.4 Go back to the newly generated loop invariant and make sure it can prove the conditions after the loop.",
 
-    "Step 3: Add open, close, lemma and leak statements for transforming or ignoring conditions. \
+    "Step 3: Add other auxiliary specifications such as open, close and lemma. \
     To be specific, those statements allow the information in the proved conditions and source code to prove the next condition, \
-    where the conditions include the precondition of a function call, the access to memory location, loop invariant and the postcondition.",
+    where the conditions include the precondition of a function call, the access to memory location, loop invariant and the postcondition. \
+    For example, use `open` statement to unfold a predicate into several conditions in its body; \
+    Use `close` statement to fold several conditions into a whole predicate; \
+    Apply lemmas to transform conditions into equivalent forms for proof.",
 
     "Please just show one code block with the complete code and specification to be verified, in the format of ```c CODE and SPEC ```."
 ]
