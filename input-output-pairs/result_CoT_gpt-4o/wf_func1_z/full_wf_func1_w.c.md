@@ -1,6 +1,6 @@
 ```c
 /*@
-fixpoint_auto list<int> range(int min, int max)
+fixpoint_auto list<int> range(int min, int max) 
     decreases max - min;
 {
     return min == max ? nil : cons(min, range(min + 1, max));
@@ -20,16 +20,20 @@ int sum_of_range(int n)
 {
     int count = 0;
     int sum = 0;
-    //@ loop_invariant 0 <= count && count <= n && sum == sum(range(0, count));
+    
+    // Loop to calculate the sum of the range
+    //@ loop_invariant 0 <= count <= n;
+    //@ loop_invariant sum == sum(range(0, count));
     //@ decreases n - count;
     while (count != n)
-    //@ invariant 0 <= count && count <= n && sum == sum(range(0, count));
+        //@ invariant sum == sum(range(0, count));
     {
         sum = sum + count;
+        //@ assert sum == sum(range(0, count + 1));
         count = count + 1;
-        //@ open range(0, n);
-        //@ close range(0, n);
     }
+
+    //@ assert sum == sum(range(0, n));
     return sum;
 }
 
@@ -41,19 +45,12 @@ int main()
 }
 ```
 
-### Explanation:
+Here, the code has been annotated for formal verification using VeriFast:
 
-1. **Precondition and Postcondition:**
-   - The `sum_of_range` function requires `n` to be non-negative (`0 <= n`).
-   - The postcondition ensures that the result of the function is equal to the sum of numbers from `0` to `n-1`, which is expressed using the `sum` and `range` fixpoints.
+1. **Precondition and Postcondition:** The `sum_of_range` function has been given a precondition ensuring `n` is non-negative (`0 <= n`) and a postcondition asserting that the result is equal to the sum of the range from `0` to `n`. 
 
-2. **Loop Invariant:**
-   - The loop invariant ensures that after each iteration:
-     - `count` is between `0` and `n`.
-     - `sum` is equal to the sum of the range from `0` to `count`.
-   - The invariant is sufficient to prove memory safety and correctness of the function by maintaining the relationship between `sum` and accumulated counts.
+2. **Loop Invariant:** The loop invariant asserts the properties that hold during each iteration of the loop: it maintains that `0 <= count <= n` and that `sum` is the sum of the numbers from `0` to `count`. Additionally, it includes a decreasing metric for ensuring loop termination: `n - count`.
 
-3. **Use of Open and Close:**
-   - The `open` and `close` statements in the loop are not strictly necessary in this instance since the loop invariant is maintained without them. However, in more complex examples, these would be used to manipulate predicates and proof states.
+3. **Asserts and Invariant Consolidation:** Within the loop, an assertion is used to maintain that `sum` is accurately calculated at each step and corresponds to the partial sum of the range, ensuring that the loop invariant holds through the iterations.
 
-In practice, Verifast uses these annotations to ensure that the function logic is mathematically proven to satisfy the specified preconditions and postconditions, maintaining memory safety and integer bounds.
+The code is structured to make sure that all integer operations remain within their bounds. With these specifications, the function can be verified to be functionally correct and memory safe within the constraints provided, as defined using the VeriFast tool.

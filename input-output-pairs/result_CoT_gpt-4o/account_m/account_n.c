@@ -1,29 +1,18 @@
 #include "stdlib.h"
 
-// Predicate to represent a valid account pointer
-/*@
-predicate valid_account(struct account *acc) = 
-    acc->balance |-> _;
-@*/
-
 struct account
 {
     int balance;
 };
 
-/***
- * Description:
-The create_account function creates a new account by dynamically allocating
-memory for a struct account object.
+/*@
+predicate account(struct account *myAccount; int balance) =
+    myAccount->balance |-> balance;
+@*/
 
-@param none
-
-The function initializes the balance of the account to zero. If the memory allocation
-fails, the function aborts. It finally returns a pointer to the newly created account.
-*/
 /*@
 requires true;
-ensures result != 0 && valid_account(result);
+ensures result != 0 &*& account(result, 0);
 @*/
 struct account *create_account()
 {
@@ -32,53 +21,32 @@ struct account *create_account()
     {
         abort();
     }
+    //@ close account(myAccount, 0);
     myAccount->balance = 0;
-    //@ close valid_account(myAccount);
     return myAccount;
 }
 
-/***
- * Description:
-The account_set_balance function updates the balance of the given account
-to the specified new balance.
-
-@param myAccount - the account to be updated.
-@param newBalance - the new balance to be set.
-
-The function modifies the balance of the passed account to the
-new balance value provided.
-*/
 /*@
-requires valid_account(myAccount);
-ensures valid_account(myAccount) &*& myAccount->balance == newBalance;
+requires account(myAccount, _);
+ensures account(myAccount, newBalance);
 @*/
 void account_set_balance(struct account *myAccount, int newBalance)
 {
+    //@ open account(myAccount, _);
     myAccount->balance = newBalance;
+    //@ close account(myAccount, newBalance);
 }
 
-/***
- * Description:
-The account_dispose function frees the memory allocated for the given account.
-
-@param myAccount - the account to be deleted.
-
-The function frees the memory allocated for the existing account.
-*/
 /*@
-requires valid_account(myAccount);
+requires account(myAccount, _);
 ensures true;
 @*/
 void account_dispose(struct account *myAccount)
 {
-    //@ open valid_account(myAccount);
+    //@ open account(myAccount, _);
     free(myAccount);
 }
 
-/***
- * Description:
-The main function first creates an account, then set its balance and finally dispose that account.
-*/
 /*@
 requires true;
 ensures true;

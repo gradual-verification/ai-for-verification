@@ -117,6 +117,8 @@ void fixup_ancestors(struct node * n, struct node * p, int count)
   //@ ensures context(n, p, count, c) &*& n->left |-> nLeft;
 {
   if (p == 0) {
+    //@ open context(n, _, _, c);
+    //@ close context(n, p, count, c);
   } else {
     struct node *left = p->left;
     struct node *right = p->right;
@@ -206,6 +208,8 @@ struct node *tree_get_parent(struct node *node)
         }; @*/
 {
   struct node *p = node->parent;
+  //@ open tree(node, c, t);
+  //@ close tree(node, c, t);  // No modifications, so re-close
   return p;
 }
 

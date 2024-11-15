@@ -1,4 +1,4 @@
-#include "verifast.h"
+#include <stdlib.h>
 
 typedef struct node {
     int item;
@@ -11,37 +11,18 @@ typedef struct dllist {
     node tail;
 } *dllist;
 
-/*@
-predicate nodes(node n) =
-    n == 0 ? true : nodes(n->next);
+//@ predicate nodes(node n, node end) =
+//@     n == end ? true : n != 0 && n->next |-> ?next &*& n->prev |-> _ &*& malloc_block_node(n) &*& nodes(next, end);
 
-predicate dllist(dllist l) =
-    nodes(l->head) &*& l->tail != 0;
-@*/
-
-/***
- * Description:
- * The `reverse` function reverses the order of nodes in a doubly linked list.
- *
- * @param arg - The doubly linked list to be reversed.
- * @requires - The argument `arg` must be a valid doubly linked list.
- * @ensures - The order of nodes in the doubly linked list pointed to by `arg` is reversed.
- */
-/*@
-requires arg != 0 &*& dllist(arg);
-ensures dllist(arg);
-@*/
 void reverse(dllist arg)
+    //@ requires arg != 0 &*& nodes(arg->head, 0);
+    //@ ensures nodes(arg->head, 0);
 {
     node ptr = arg->head;
     node temp1 = 0;
     node temp2 = 0;
-    
-    /*@
-    while(ptr != 0)
-    invariant nodes(ptr);
-    @*/
-    while (ptr != 0) 
+    while (ptr != 0)
+        //@ invariant nodes(ptr, 0) &*& arg->head |-> ?h &*& arg->tail |-> ?t;
     {
         temp1 = ptr->next;
         temp2 = ptr->prev;

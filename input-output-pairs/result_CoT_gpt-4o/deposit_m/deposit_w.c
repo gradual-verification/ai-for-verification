@@ -1,15 +1,16 @@
 #include "stdlib.h"
 
-// Predicate to represent the account balance
-//@ predicate account_balance(struct account *acc, int balance) = acc->balance |-> balance;
-
-// Definition of the account structure
 struct account
 {
     int balance;
 };
 
-// Function to create a new account
+// Predicate declaration for the account balance
+/*@
+predicate account_balance(struct account *a, int b) =
+    a->balance |-> b;
+@*/
+
 struct account *create_account()
 //@ requires true;
 //@ ensures account_balance(result, 0);
@@ -20,11 +21,9 @@ struct account *create_account()
         abort();
     }
     myAccount->balance = 0;
-    //@ close account_balance(myAccount, 0);
     return myAccount;
 }
 
-// Function to deposit an amount into the account
 void account_deposit(struct account *myAccount, int amount)
 //@ requires account_balance(myAccount, ?theBalance) &*& 0 <= amount;
 //@ ensures account_balance(myAccount, theBalance + amount);
@@ -34,7 +33,6 @@ void account_deposit(struct account *myAccount, int amount)
     //@ close account_balance(myAccount, theBalance + amount);
 }
 
-// Function to get the balance from an account
 int account_get_balance(struct account *myAccount)
 //@ requires account_balance(myAccount, ?balance);
 //@ ensures account_balance(myAccount, balance) &*& result == balance;
@@ -45,7 +43,6 @@ int account_get_balance(struct account *myAccount)
     return result;
 }
 
-// Function to set the balance of an account
 void account_set_balance(struct account *myAccount, int newBalance)
 //@ requires account_balance(myAccount, _);
 //@ ensures account_balance(myAccount, newBalance);
@@ -55,7 +52,6 @@ void account_set_balance(struct account *myAccount, int newBalance)
     //@ close account_balance(myAccount, newBalance);
 }
 
-// Function to dispose of an account
 void account_dispose(struct account *myAccount)
 //@ requires account_balance(myAccount, _);
 //@ ensures true;
@@ -64,7 +60,6 @@ void account_dispose(struct account *myAccount)
     free(myAccount);
 }
 
-// Main function to demonstrate the use of account functions
 int main()
 //@ requires true;
 //@ ensures true;

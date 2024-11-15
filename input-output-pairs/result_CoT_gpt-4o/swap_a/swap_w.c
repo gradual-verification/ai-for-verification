@@ -1,23 +1,13 @@
 #include "stdlib.h"
 #include <stdbool.h>
 
-// Predicate definitions for memory safety checks
-//@ predicate int_ptr(int *p, int value) = *p |-> value;
-//@ predicate struct_point_pred(struct point* p, int x, int y) = p != 0 &*& p->x |-> x &*& p->y |-> y;
-
 void swap(int *a, int *b)
-//@ requires int_ptr(a, ?x) &*& int_ptr(b, ?y);
-//@ ensures int_ptr(a, y) &*& int_ptr(b, x);
+//@ requires integer(a, ?x) &*& integer(b, ?y);
+//@ ensures integer(a, y) &*& integer(b, x);
 {
-    // Open predicate to access memory
-    //@ open int_ptr(a, x);
-    //@ open int_ptr(b, y);
     int tmp = *a;
     *a = *b;
     *b = tmp;
-    // Close predicate after memory operation
-    //@ close int_ptr(a, y);
-    //@ close int_ptr(b, x);
 }
 
 struct point {
@@ -26,14 +16,12 @@ struct point {
 };
 
 void point_mirror(struct point *p)
-//@ requires struct_point_pred(p, ?x, ?y);
-//@ ensures struct_point_pred(p, y, x);
+//@ requires struct_point(p, ?x, ?y);
+//@ ensures struct_point(p, y, x);
 {
-    // Open the struct_point_pred to access fields
-    //@ open struct_point_pred(p, x, y);
+    //@ open struct_point(p, x, y);
     swap(&p->x, &p->y);
-    // Close the struct_point_pred with swapped values
-    //@ close struct_point_pred(p, y, x);
+    //@ close struct_point(p, y, x);
 }
 
 int main() //@ : main
@@ -43,20 +31,22 @@ int main() //@ : main
     struct point *p = malloc(sizeof(struct point));
     if (p == 0) { abort(); }
     
-    // Initialize the point and create a predicate for it
+    //@ close struct_point(p, 0, 0);
     p->x = 3;
     p->y = 10;
-    //@ close struct_point_pred(p, 3, 10);
-    
+    //@ open struct_point(p, _, _);
+    //@ close struct_point(p, p->x, p->y);
+
     point_mirror(p);
     
-    // Open the predicate to check the values
-    //@ open struct_point_pred(p, 10, 3);
+    //@ open struct_point(p, _, _);
     bool b = p->x == 10 && p->y == 3;
     assert(b);
-
-    // Clean up memory
-    //@ close struct_point_pred(p, 10, 3); // Re-close before deallocation
+    
+    //@ open struct_point(p, _, _);
     free(p);
     return 0;
 }
+
+//@ predicate struct_point(struct point *p; int x, int y) = 
+//@     integer(&p->x, x) &*& integer(&p->y, y);

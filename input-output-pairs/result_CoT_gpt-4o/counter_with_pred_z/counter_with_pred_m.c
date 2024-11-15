@@ -1,5 +1,4 @@
 #include "stdlib.h"
-#include "limits.h"
 
 struct Counter {
   int value;
@@ -19,6 +18,7 @@ struct Counter* init(int v)
     abort();
   }
   c->value = v;
+  
   //@ close Counter(c, v);
   return c;
 }
@@ -39,7 +39,6 @@ void dispose(struct Counter* c)
 {
   //@ open Counter(c, _);
   free(c);
-  //@ leak malloc_block_Counter(c); // This ensures we handle the memory properly and VeriFast knows the block is deallocated.
 }
 
 void swap(struct Counter* c1, struct Counter* c2)
@@ -70,16 +69,14 @@ int main() //@ : main
 //@ requires emp;
 //@ ensures emp;
 {
-  struct Counter* c1 = init(0);
+  struct Counter* c1 = init(0); 
   struct Counter* c2 = init(5);
-  
-  increment(c1);
-  swap(c1, c2);
-  
+
+  increment(c1); 
+  swap(c1, c2); 
   int tmp = get(c2);
   
-  dispose(c1);
+  dispose(c1); 
   dispose(c2);
-  
   return 0;
 }

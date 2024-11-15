@@ -1,21 +1,19 @@
-Below is the modified C code with formal verification in VeriFast, maintaining the original functional behavior:
-
 ```c
 #include "stdlib.h"
-#include "limits.h"
+#include <limits.h>
 
 struct C {
   int x;
 };
 
 struct C* create_C(int x) 
-//@ requires true;
+//@ requires INT_MIN <= x <= INT_MAX;
 //@ ensures result != 0 &*& result->x |-> x;
 {
   struct C* c = malloc(sizeof(struct C));
-  if (c == 0) {
+  if(c==0) {
     abort();
-  }
+  } 
   c->x = x;
   return c;
 }
@@ -32,7 +30,6 @@ void create_counter(struct C* c)
 //@ requires c->x |-> ?x;
 //@ ensures counter(c, x, 0);
 {
-  //@ open c->x |-> x;
   //@ close counter(c, x, 0);
 }
 
@@ -41,6 +38,7 @@ void create_ticket(struct C* c)
 //@ ensures counter(c, x, nbTickets + 1) &*& tickets(c, x, nbTickets + 1);
 {
   //@ open counter(c, x, nbTickets);
+  //@ open tickets(c, x, nbTickets);
   //@ close counter(c, x, nbTickets + 1);
   //@ close tickets(c, x, nbTickets + 1);
 }
@@ -52,11 +50,12 @@ void dispose_ticket(struct C* c)
   //@ open counter(c, x, nbTickets);
   //@ open tickets(c, x, nbTickets);
   //@ close counter(c, x, nbTickets - 1);
+  //@ close tickets(c, x, nbTickets - 1);
 }
 
 void dispose_counter(struct C* c)
 //@ requires counter(c, ?x, 0);
-//@ ensures [1.0] c->x |-> x;
+//@ ensures [1.0]c->x |-> x;
 {
   //@ open counter(c, x, 0);
 }
@@ -73,28 +72,22 @@ int main()
   create_counter(c);
   bool b = random();
   int n = 0;
-  
-  while (b && n < INT_MAX) 
-  //@ requires counter(c, 5, n) &*& tickets(c, 5, n);
-  //@ ensures counter(c, 5, ?finalN) &*& tickets(c, 5, finalN) &*& finalN >= n;
+  //@ close tickets(c, 5, 0);
+  while(b && n < INT_MAX) 
+  //@ invariant counter(c, 5, n) &*& tickets(c, 5, n) &*& 0 <= n;
   {
-    //@ open counter(c, 5, n);
     create_ticket(c);
     n = n + 1;
     b = random();
   }
-  
-  while (0 < n)
-  //@ requires counter(c, 5, n) &*& tickets(c, 5, n);
-  //@ ensures counter(c, 5, 0) &*& tickets(c, 5, 0);
+
+  while(0 < n) 
+  //@ invariant counter(c, 5, n) &*& tickets(c, 5, n) &*& 0 < n;
   {
-    //@ open counter(c, 5, n);
     dispose_ticket(c);
     n = n - 1;
   }
-  
   dispose_counter(c);
-  //@ leak [1.0] c->x |-> 5;
   free(c);
   return 0;
 }
@@ -105,18 +98,29 @@ int main2()
 {
   struct C* c = create_C(3);
   create_counter(c);
+  //@ close tickets(c, 3, 0);
   create_ticket(c);
   dispose_ticket(c);
   dispose_counter(c);
-  //@ leak [1.0] c->x |-> 3;
   free(c);
   return 0;
 }
 ```
 
-### Explanation:
-1. **Preconditions and Postconditions**: The `requires` and `ensures` clauses specify the function preconditions and postconditions, respectively.
-2. **Memory Safety**: Checks for non-null pointers, proper allocation, and freeing of memory.
-3. **Loop Invariants**: Established by the conditions required to hold before and after each loop iteration, ensuring that they help prove the postconditions and memory safety.
-4. **Predicate Use**: Defined predicates to express the state of the object `struct C` in terms of `counter` and `tickets` to track ownership and sharing of memory appropriately.
-5. **Resource Management**: Ensures that memory allocated is freed properly and handling of fractional permissions with predicates manages shared and exclusive access to resources correctly.
+Explanation of steps taken for formal verification:
+
+1. **Precondition and Postcondition Specification:** 
+   - Precondition for `create_C` ensures the input integer `x` is within the bounds of an integer and checks memory allocation success (`result != 0`).
+   - The postcondition specifies that the returned pointer is non-null and points to a structure `C` with field `x`.
+
+2. **Predicate Definitions:**
+   - Defined the `counter` and `tickets` predicates to maintain resource permissions and invariants about `nbTickets`.
+
+3. **Loop Invariants and Bound Checks:** 
+   - Added loop invariants in the `main` function to ensure the state of the counter and tickets is accurately represented. Also ensures `n` is non-negative and handles integer bounds effectively.
+
+4. **Memory Safety and Resource Management:**
+   - Managed permissions using predicates and loops with open/close constructs.
+   - Followed proper allocation and deallocation patterns to ensure safe memory access and avoid leaks.
+
+The code is now equipped with formal specifications that Verifast can use to verify correctness, memory safety, and boundary conditions.

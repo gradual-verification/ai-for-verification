@@ -1,5 +1,6 @@
 #include "stdlib.h"
 
+// Definitions of struct node and struct llist
 struct node {
   struct node *next;
   int value;
@@ -24,8 +25,8 @@ predicate llist(struct llist *list; list<int> v) =
 @*/
 
 struct llist *create_llist()
-//@ requires emp;
-//@ ensures llist(result, nil);
+  //@ requires emp;
+  //@ ensures llist(result, nil);
 {
   struct llist *l = malloc(sizeof(struct llist));
   if (l == 0) abort();
@@ -33,34 +34,37 @@ struct llist *create_llist()
   if (n == 0) abort();
   l->first = n;
   l->last = n;
+  //@ close node(n, 0, _);
+  //@ close lseg(n, n, nil);
+  //@ close llist(l, nil);
   return l;
 }
 
 void llist_add(struct llist *list, int x)
-//@ requires llist(list, ?_v);
-//@ ensures llist(list, append(_v, cons(x, nil)));
+  //@ requires llist(list, ?_v);
+  //@ ensures llist(list, append(_v, cons(x, nil)));
 {
   struct node *l = 0;
   struct node *n = calloc(1, sizeof(struct node));
+  if (n == 0) abort();
   //@ open llist(list, _v);
-  if (n == 0) {
-    abort();
-  }
   l = list->last;
   l->next = n;
   l->value = x;
   list->last = n;
+  //@ close node(l, n, x);
+  //@ close node(n, 0, _);
+  //@ close lseg(list->first, n, append(_v, cons(x, nil)));
   //@ close llist(list, append(_v, cons(x, nil)));
 }
 
 void llist_append(struct llist *list1, struct llist *list2)
-//@ requires llist(list1, ?_v1) &*& llist(list2, ?_v2);
-//@ ensures llist(list1, append(_v1, _v2));
+  //@ requires llist(list1, ?_v1) &*& llist(list2, ?_v2);
+  //@ ensures llist(list1, append(_v1, _v2));
 {
   struct node *l1 = list1->last;
   struct node *f2 = list2->first;
   struct node *l2 = list2->last;
-  //@ open llist(list1, _v1);
   //@ open llist(list2, _v2);
   if (f2 == l2) {
     free(l2);
@@ -76,19 +80,21 @@ void llist_append(struct llist *list1, struct llist *list2)
 }
 
 void llist_dispose(struct llist *list)
-//@ requires llist(list, _);
-//@ ensures emp;
+  //@ requires llist(list, _);
+  //@ ensures emp;
 {
   struct node *n = list->first;
   struct node *l = list->last;
   //@ open llist(list, _);
   while (n != l)
-  //@ invariant n != 0 &*& l != 0 &*& node(n, _, _) &*& \exists list<int>(_v0);
+    //@ invariant lseg(n, l, _);
   {
     struct node *next = n->next;
+    //@ open node(n, next, _);
     free(n);
     n = next;
   }
+  //@ open node(l, _, _);
   free(l);
   free(list);
 }
@@ -103,8 +109,8 @@ predicate lseg2(struct node *first, struct node *last, struct node *final, list<
 @*/
 
 int llist_length(struct llist *list)
-//@ requires [?frac]llist(list, ?_v);
-//@ ensures [frac]llist(list, _v) &*& result == length(_v);
+  //@ requires [?frac]llist(list, ?_v);
+  //@ ensures [frac]llist(list, _v) &*& result == length(_v);
 {
   struct node *f = list->first;
   struct node *n = f;
@@ -112,21 +118,20 @@ int llist_length(struct llist *list)
   int c = 0;
   //@ open llist(list, _v);
   while (n != l)
-  /*@ invariant n != 0 &*& l != 0 &*& node(n, _, _) &*& lseg(n, l, _) &*& c >= 0 &*& c <= length(_v);
-     @*/
+    //@ invariant lseg2(f, n, l, take(c, _v)) &*& lseg(n, l, drop(c, _v));
   {
     struct node *next = n->next;
     n = next;
     if (c == INT_MAX) abort();
     c = c + 1;
   }
-  //@ close [frac]llist(list, _v);
+  //@ close llist(list, _v);
   return c;
 }
 
 int llist_lookup(struct llist *list, int index)
-//@ requires llist(list, ?_v) &*& 0 <= index &*& index < length(_v);
-//@ ensures llist(list, _v) &*& result == nth(index, _v);
+  //@ requires llist(list, ?_v) &*& 0 <= index &*& index < length(_v);
+  //@ ensures llist(list, _v) &*& result == nth(index, _v);
 {
   struct node *f = list->first;
   struct node *l = list->last;
@@ -134,8 +139,7 @@ int llist_lookup(struct llist *list, int index)
   int i = 0;
   //@ open llist(list, _v);
   while (i < index)
-  /*@ invariant 0 <= i &*& i <= index &*& node(n, _, nth(i, _v)) &*& lseg(n, l, _v) &*& i < length(_v);
-     @*/
+    //@ invariant lseg2(f, n, l, take(i, _v)) &*& lseg(n, l, drop(i, _v));
   {
     struct node *next = n->next;
     n = next;
@@ -147,22 +151,23 @@ int llist_lookup(struct llist *list, int index)
 }
 
 int llist_removeFirst(struct llist *l)
-//@ requires llist(l, ?v) &*& v != nil;
-//@ ensures llist(l, ?t) &*& v == cons(result, t);
+  //@ requires llist(l, ?v) &*& v != nil;
+  //@ ensures llist(l, ?t) &*& v == cons(result, t);
 {
   struct node *nf = l->first;
   struct node *nfn = nf->next;
   int nfv = nf->value;
-  //@ open llist(l, v);
+  //@ open llist(l, cons(nfv, t));
+  //@ open node(nf, nfn, nfv);
   free(nf);
   l->first = nfn;
-  //@ close llist(l, tail(v));
+  //@ close llist(l, t);
   return nfv;
 }
 
 void main0()
-//@ requires emp;
-//@ ensures emp;
+  //@ requires emp;
+  //@ ensures emp;
 {
   struct llist *l = create_llist();
   llist_add(l, 10);
@@ -177,8 +182,8 @@ void main0()
 }
 
 int main() //@ : main
-//@ requires emp;
-//@ ensures emp;
+  //@ requires emp;
+  //@ ensures emp;
 {
   struct llist *l1 = create_llist();
   struct llist *l2 = create_llist();
@@ -213,26 +218,25 @@ predicate iter(struct iter *i, real frac, struct llist *l, list<int> v0, list<in
 @*/
 
 struct iter *llist_create_iter(struct llist *l)
-//@ requires [?frac]llist(l, ?v);
-//@ ensures [frac/2]llist(l, v) &*& iter(result, frac/2, l, v, v);
+  //@ requires [?frac]llist(l, ?v);
+  //@ ensures [frac/2]llist(l, v) &*& iter(result, frac/2, l, v, v);
 {
   struct iter *i = 0;
   struct node *f = 0;
-  //@ open llist(l, v);
   i = malloc(sizeof(struct iter));
   if (i == 0) {
     abort();
   }
   f = l->first;
   i->current = f;
+  //@ open llist(l, v);
   //@ close iter(i, frac/2, l, v, v);
-  //@ close [frac/2]llist(l, v);
   return i;
 }
 
 int iter_next(struct iter *i)
-//@ requires iter(i, ?f, ?l, ?v0, ?v) &*& switch (v) { case nil: return false; case cons(h, t): return true; };
-//@ ensures switch (v) { case nil: return false; case cons(h, t): return result == h &*& iter(i, f, l, v0, t); };
+  //@ requires iter(i, ?f, ?l, ?v0, ?v) &*& switch (v) { case nil: return false; case cons(h, t): return true; };
+  //@ ensures switch (v) { case nil: return false; case cons(h, t): return result == h &*& iter(i, f, l, v0, t); };
 {
   struct node *c = i->current;
   int value = c->value;
@@ -244,16 +248,16 @@ int iter_next(struct iter *i)
 }
 
 void iter_dispose(struct iter *i)
-//@ requires iter(i, ?f1, ?l, ?v0, ?v) &*& [?f2]llist(l, v0);
-//@ ensures [f1 + f2]llist(l, v0);
+  //@ requires iter(i, ?f1, ?l, ?v0, ?v) &*& [?f2]llist(l, v0);
+  //@ ensures [f1 + f2]llist(l, v0);
 {
   //@ open iter(i, f1, l, v0, v);
   free(i);
 }
 
 int main2()
-//@ requires emp;
-//@ ensures emp;
+  //@ requires emp;
+  //@ ensures emp;
 {
   struct llist *l = create_llist();
   llist_add(l, 5);

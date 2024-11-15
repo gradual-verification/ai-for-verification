@@ -10,8 +10,8 @@ predicate Counter(struct Counter* c, int v) =
 @*/
 
 struct Counter* init(int v)
-//@ requires INT_MIN <= v <= INT_MAX;
-//@ ensures Counter(result, v);
+//@ requires true;
+//@ ensures Counter(result, v) &*& result != 0;
 {
   struct Counter* c = malloc(sizeof(struct Counter));
   if (c == 0) {
@@ -24,13 +24,13 @@ struct Counter* init(int v)
 }
 
 void increment(struct Counter* c)
-//@ requires Counter(c, ?v) &*& v < INT_MAX;
+//@ requires Counter(c, ?v) &*& INT_MIN <= v + 1 &*& v + 1 <= INT_MAX;
 //@ ensures Counter(c, v+1);
 {
   //@ open Counter(c, v);
   int tmp = c->value;
   c->value = tmp + 1;
-  //@ close Counter(c, v+1);
+  //@ close Counter(c, v + 1);
 }
 
 void dispose(struct Counter* c)
@@ -43,7 +43,7 @@ void dispose(struct Counter* c)
 
 void swap(struct Counter* c1, struct Counter* c2)
 //@ requires Counter(c1, ?v1) &*& Counter(c2, ?v2);
-//@ ensures Counter(c1, v2) &*& Counter(c2, v1); 
+//@ ensures Counter(c1, v2) &*& Counter(c2, v1);
 {
   //@ open Counter(c1, v1);
   //@ open Counter(c2, v2);
@@ -57,7 +57,7 @@ void swap(struct Counter* c1, struct Counter* c2)
 
 int get(struct Counter* c)
 //@ requires Counter(c, ?v);
-//@ ensures Counter(c, v) &*& result == v; 
+//@ ensures Counter(c, v) &*& result == v;
 {
   //@ open Counter(c, v);
   int tmp = c->value;
@@ -72,11 +72,11 @@ int main() //@ : main
   struct Counter* c1 = init(0); 
   struct Counter* c2 = init(5);
 
-  increment(c1); 
-  swap(c1, c2); 
+  increment(c1);
+  swap(c1, c2);
   int tmp = get(c2);
   
-  dispose(c1); 
+  dispose(c1);
   dispose(c2);
   return 0;
 }

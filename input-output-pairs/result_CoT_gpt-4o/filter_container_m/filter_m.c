@@ -1,17 +1,15 @@
 #include "stdlib.h"
 
-struct node
-{
+struct node {
     struct node *next;
     int value;
 };
 
-struct container
-{
+struct container {
     struct node *head;
 };
 
-/*@
+/*@ 
 predicate nodes(struct node *node, int count) =
     node == 0 ?
         count == 0
@@ -28,8 +26,7 @@ struct container *create_container()
 //@ ensures container(result, 0);
 {
     struct container *container = malloc(sizeof(struct container));
-    if (container == 0)
-    {
+    if (container == 0) {
         abort();
     }
     container->head = 0;
@@ -41,8 +38,7 @@ void container_add(struct container *container, int value)
 //@ ensures container(container, count + 1);
 {
     struct node *n = malloc(sizeof(struct node));
-    if (n == 0)
-    {
+    if (n == 0) {
         abort();
     }
     n->next = container->head;
@@ -55,6 +51,7 @@ int container_remove(struct container *container)
 //@ ensures container(container, count - 1);
 {
     struct node *head = container->head;
+    //@ open nodes(head, count);
     int result = head->value;
     container->head = head->next;
     free(head);
@@ -69,23 +66,21 @@ struct node *nodes_filter(struct node *n, int_predicate *p)
 //@ requires nodes(n, _) &*& is_int_predicate(p) == true;
 //@ ensures nodes(result, _);
 {
-    if (n == 0)
-    {
+    if (n == 0) {
         return 0;
     }
-    else
-    {
+    else {
         bool keep = p(n->value);
-        if (keep)
-        {
+        if (keep) {
             struct node *next = nodes_filter(n->next, p);
             n->next = next;
+            //@ close nodes(n, _);
             return n;
         }
-        else
-        {
+        else {
             struct node *next = n->next;
             free(n);
+            //@ open nodes(n, _);
             struct node *result = nodes_filter(next, p);
             return result;
         }
@@ -104,20 +99,17 @@ void nodes_dispose(struct node *n)
 //@ requires nodes(n, _);
 //@ ensures true;
 {
-    if (n != 0)
-    {
+    if (n != 0) {
         //@ open nodes(n, _);
         nodes_dispose(n->next);
         free(n);
     }
-    //@ close nodes(0, 0);
 }
 
 void container_dispose(struct container *container)
 //@ requires container(container, _);
 //@ ensures true;
 {
-    //@ open container(container, _);
     nodes_dispose(container->head);
     free(container);
 }

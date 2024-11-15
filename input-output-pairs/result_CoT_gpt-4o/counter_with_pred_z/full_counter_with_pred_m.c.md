@@ -1,8 +1,5 @@
-Here's the complete code with specifications for formal verification using VeriFast, including preconditions, postconditions, and necessary annotations for handling memory and integer safety:
-
 ```c
 #include "stdlib.h"
-#include "limits.h"
 
 struct Counter {
   int value;
@@ -22,6 +19,7 @@ struct Counter* init(int v)
     abort();
   }
   c->value = v;
+  
   //@ close Counter(c, v);
   return c;
 }
@@ -42,7 +40,6 @@ void dispose(struct Counter* c)
 {
   //@ open Counter(c, _);
   free(c);
-  //@ leak malloc_block_Counter(c); // This ensures we handle the memory properly and VeriFast knows the block is deallocated.
 }
 
 void swap(struct Counter* c1, struct Counter* c2)
@@ -73,24 +70,15 @@ int main() //@ : main
 //@ requires emp;
 //@ ensures emp;
 {
-  struct Counter* c1 = init(0);
+  struct Counter* c1 = init(0); 
   struct Counter* c2 = init(5);
-  
-  increment(c1);
-  swap(c1, c2);
-  
+
+  increment(c1); 
+  swap(c1, c2); 
   int tmp = get(c2);
   
-  dispose(c1);
+  dispose(c1); 
   dispose(c2);
-  
   return 0;
 }
 ```
-
-### Explanation
-1. **Predicates and contracts**: The function contracts specify the expected behavior of the functions, using predicates to define the state of the `Counter` objects.
-2. **Memory safety and integer bounds**: The precondition for the `increment` function checks that the value is less than `INT_MAX` to prevent overflow. Memory is managed by opening and closing predicates correctly around memory operations.
-3. **Open/close statements**: These are used to manage the predicates and verify pre- and post-conditions of the functions. `leak` statements can help VeriFast handle conditions where the memory is being freed.
-4. **Verification logic for loops**: This code does not have any loops, so no loop invariants are needed. If loops were present, we would use annotations to ensure invariants hold throughout iterations.
-

@@ -1,71 +1,75 @@
 #include "stdlib.h"
 
-struct account
-{
+/*@
+predicate account(struct account* acc; int balance) =
+    acc->balance |-> balance;
+
+predicate malloc_block_account(struct account *acc) =
+    malloc_block(acc, sizeof(struct account));
+@*/
+
+struct account {
     int balance;
 };
 
-/*@ predicate account(struct account *a; int balance) = 
-    a != 0 &*& a->balance |-> balance; @*/
-
 /*@
-    requires true;
-    ensures account(result, 0);
+requires true;
+ensures account(result, 0) &*& malloc_block_account(result);
 @*/
-struct account *create_account()
-{
+struct account *create_account() {
     struct account *myAccount = malloc(sizeof(struct account));
-    if (myAccount == 0)
-    {
+    if (myAccount == 0) {
         abort();
     }
-    
     myAccount->balance = 0;
+    //@ close account(myAccount, 0);
+    //@ close malloc_block_account(myAccount);
     return myAccount;
 }
 
 /*@
-    requires account(myAccount, ?b) &*& amount >= 0;
-    ensures account(myAccount, b + amount);
+requires account(myAccount, ?balance) &*& myAccount != 0 &*& INT_MIN <= amount &*& amount <= INT_MAX &*& INT_MIN - amount <= balance &*& balance + amount <= INT_MAX;
+ensures account(myAccount, balance + amount);
 @*/
-void account_deposit(struct account *myAccount, int amount)
-{
+void account_deposit(struct account *myAccount, int amount) {
     myAccount->balance += amount;
+    //@ close account(myAccount, myAccount->balance);
 }
 
 /*@
-    requires account(myAccount, ?b);
-    ensures account(myAccount, b) &*& result == b;
+requires account(myAccount, ?balance) &*& myAccount != 0;
+ensures account(myAccount, balance) &*& result == balance;
 @*/
-int account_get_balance(struct account *myAccount)
-{
+int account_get_balance(struct account *myAccount) {
     int result = myAccount->balance;
+    //@ close account(myAccount, myAccount->balance);
     return result;
 }
 
 /*@
-    requires account(myAccount, _);
-    ensures account(myAccount, newBalance);
+requires account(myAccount, ?_) &*& myAccount != 0 &*& INT_MIN <= newBalance &*& newBalance <= INT_MAX;
+ensures account(myAccount, newBalance);
 @*/
-void account_set_balance(struct account *myAccount, int newBalance)
-{
+void account_set_balance(struct account *myAccount, int newBalance) {
     myAccount->balance = newBalance;
+    //@ close account(myAccount, myAccount->balance);
 }
 
 /*@
-    requires account(myAccount, _);
-    ensures true;
+requires account(myAccount, _) &*& malloc_block_account(myAccount) &*& myAccount != 0;
+ensures true;
 @*/
-void account_dispose(struct account *myAccount)
-{
+void account_dispose(struct account *myAccount) {
+    //@ open account(myAccount, _);
+    //@ open malloc_block_account(myAccount);
     free(myAccount);
 }
 
+int main() 
 /*@
-    requires true;
-    ensures true;
+requires true;
+ensures true;
 @*/
-int main()
 {
     struct account *myAccount = create_account();
     account_set_balance(myAccount, 5);

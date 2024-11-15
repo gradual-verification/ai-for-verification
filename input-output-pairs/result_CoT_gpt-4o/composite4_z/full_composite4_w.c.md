@@ -1,5 +1,3 @@
-Here is the complete code with Verifast specifications:
-
 ```c
 #include "malloc.h"
 #include "stdlib.h"
@@ -112,9 +110,7 @@ void fixup_ancestors(struct node *n, struct node *p, int count)
   //@ ensures context(n, p, count, c);
 {
   if (p == 0) {
-    //@ open context(n, p, _, c);
   } else {
-    //@ open context(n, p, _, c);
     struct node *left = p->left;
     struct node *right = p->right;
     struct node *grandparent = p->parent;
@@ -132,7 +128,6 @@ void fixup_ancestors(struct node *n, struct node *p, int count)
       p->count = pcount;
       fixup_ancestors(p, grandparent, pcount);
     }
-    //@ close context(n, p, count, c);
   }
 }
 
@@ -157,7 +152,6 @@ struct node *tree_add_left(struct node *node)
       struct node *nodeLeft = node->left;
       node->left = n;
       fixup_ancestors(n, node, 1);
-      //@ close tree(result, left_context(c, node, empty), tree(result, empty, empty));
   }
   return n;
 }
@@ -183,7 +177,6 @@ struct node *tree_add_right(struct node *node)
     struct node *nodeRight = node->right;
     node->right = n;
     fixup_ancestors(n, node, 1);
-    //@ close tree(result, right_context(contextNodes, node, leftNodes), tree(result, empty, empty));
   }
   return n;
 }
@@ -260,5 +253,3 @@ int main()
   return 0;
 }
 ```
-
-This code now includes all necessary preconditions, postconditions, loop invariants, and necessary open, close, lemma, and leak statements to ensure proper memory handling and correctness checking with Verifast.

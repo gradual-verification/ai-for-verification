@@ -1,8 +1,4 @@
-Here's the modified C code with formal code verification in Verifast, including preconditions, postconditions, loop invariants, and other required elements for verification:
-
 ```c
-#include <limits.h>
-
 /*@
 fixpoint_auto list<int> range(int min, int max)
     decreases max - min;
@@ -27,24 +23,21 @@ fixpoint bool all_non_negative(list<int> xs) {
 
 int sum_of_range(int n)
 //@ requires 0 <= n &*& sum(range(0, n)) <= INT_MAX &*& all_non_negative(range(0, n)) == true;
-//@ ensures result == sum(range(0, n));
+//@ ensures result == sum(range(0, n)) &*& result >= 0;
 {
     int count = 0;
     int sum = 0;
-    //@ open all_non_negative(range(0, n));
-    //@ assert range(0, n) == cons(?fst, ?rest);
-    //@ int limit = sum(range(0, n));
-    //@ all_non_negative(range(1, n));
-    //@ close all_non_negative(range(0, n));
-    
+    //@ close all_non_negative(range(0, 0)); // Base case
     while (count != n)
-    //@ invariant 0 <= count <= n &*& sum == sum(range(0, count)) &*& sum(range(count, n)) + sum == limit &*& sum <= INT_MAX;
+    //@ invariant 0 <= count &*& count <= n &*& sum == sum(range(0, count)) &*& sum >= 0;
     {
-        //@ open all_non_negative(range(0, n));
-        //@ assert range(count, n) == cons(?next, ?remainder);
+        //@ open all_non_negative(range(0, count + 1)); // unfold the range fixedpoint
+        //@ assert all_non_negative(cons(count, range(0, count)));
         sum = sum + count;
-        //@ assert count < n;
-        //@ close all_non_negative(range(0, n));
+        //@ mul_nonneg_le(count, count, n); // show safe memory operations
+        //@ open all_non_negative(range(0, n)); // assert non-negative
+        //@ assert all_non_negative(cons(count, range(0, count)));
+        //@ close all_non_negative(range(0, count + 1)); // fold back
         count = count + 1;
     }
     return sum;
@@ -58,15 +51,20 @@ int main()
 }
 ```
 
-### Explanation
-1. **Precondition and Postcondition**:
-   - **Precondition**: The function `sum_of_range` requires `n` to be non-negative, the sum of the range `[0, n)` should not exceed `INT_MAX`, and all numbers in that range should be non-negative.
-   - **Postcondition**: The function ensures that the result is the sum of the range `[0, n)`.
+### Explanation:
 
-2. **Loop Invariant**:
-   - The loop invariant ensures memory safety by maintaining that `count` is always within the bounds `[0, n]`. The sum `sum` always accumulates the sum of numbers from `0` to `count`. Additionally, we ensure that the sum does not exceed `INT_MAX`.
+1. **Preconditions and Postconditions**:
+   - Preconditions include conditions like \( 0 \leq n \), sum of the range cannot exceed `INT_MAX`, and all numbers in the range must be non-negative.
+   - The postcondition specifies that the resulting sum should match the sum of the range and also must be non-negative.
 
-3. **Open and Close Statements**:
-   - These statements are used to handle the fixpoint operations within the loop and the function, specifically for managing the abstraction of non-negative numbers and ensuring loop invariants.
+2. **Loop Invariants**:
+   - The invariant ensures that the loop maintains valid bounds for `count` and `sum` at each iteration. It also needs to reflect that `sum` is accurately tracking the sum of numbers from `0` to `count`.
 
-This setup allows the Verifast tool to verify the correctness of the program, showing that it preserves all specified behaviors and constraints.
+3. **Safety Checks**:
+   - Open and close statements manage predicates at certain points in the code.
+   - It's important to ensure that the integers are managed safely and that `sum` does not overflow or go negative.
+
+4. **Auxiliary Specifications**:
+   - Used to properly manipulate the predicates within the loop.
+   - This ensures both memory safety and logical correctness according to the loop invariant and pre/postconditions.
+

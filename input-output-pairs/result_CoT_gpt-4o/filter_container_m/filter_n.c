@@ -1,94 +1,60 @@
 #include "stdlib.h"
 
-// Predicate definitions to represent ownership and memory validity
+// Define a predicate to represent a linked list of nodes
+//@ predicate nodes(struct node* node; list<int> values) = node == 0 ? values == nil : malloc_block_node(node) &*& int_in_bounds(node->value) &*& nodes(node->next, ?next_values) &*& values == cons(node->value, next_values);
+
+// Define a predicate for a container
+//@ predicate container(struct container* c, list<int> values) = malloc_block_container(c) &*& nodes(c->head, values);
+
+// Assert that integers are within a specific range
+#define int_min -2147483648
+#define int_max 2147483647
+//@ predicate int_in_bounds(int value) = int_min <= value &*& value <= int_max;
+
 /*@
-predicate node(struct node *n; struct node *next, int value) =
-    n != 0 &*& n->next |-> next &*& n->value |-> value;
-
-predicate nodes(struct node *n) =
-    n == 0 ? true : node(n, ?next, ?value) &*& nodes(next);
-
-predicate container(struct container *c; struct node *head) =
-    c != 0 &*& c->head |-> head &*& nodes(head);
-@*/
-
-struct node
-{
-    struct node *next;
-    int value;
-};
-
-struct container
-{
-    struct node *head;
-};
-
-/***
- * Description:
-The create_container function creates an empty container.
- 
-@return - A pointer to the newly created container.
-
-This function allocates memory for a new container and initializes its head to NULL.
-If memory allocation fails, the program aborts.
-*/
-/*@
-requires true;
-ensures container(result, 0);
+  ensures result != 0;
+  ensures result |-> ?c &*& container(c, nil);
 @*/
 struct container *create_container()
+    //@ requires true;
+    //@ ensures container(result, nil);
 {
-    struct container *container = malloc(sizeof(struct container));
-    if (container == 0)
-    {
+    struct container *c = malloc(sizeof(struct container));
+    if (c == 0) {
         abort();
     }
-    container->head = 0;
-    return container;
+    c->head = 0;
+    //@ close nodes(0, nil);
+    //@ close container(c, nil);
+    return c;
 }
 
-/***
- * Description:
-The container_add function adds a value onto the container.
-
-@param container - A pointer to the container.
-@param value - The integer value to push onto the container.
-
-This function allocates a new node, assigns the given value to it,
-and sets the new node as the head of the container.
-If memory allocation fails, the program aborts.
-*/
 /*@
-requires container(container, ?head);
-ensures container(container, ?newHead) &*& newHead != 0 &*& node(newHead, head, value);
+  requires container(container, ?values) &*& int_in_bounds(value);
+  ensures container(container, cons(value, values));
 @*/
 void container_add(struct container *container, int value)
+    //@ requires container(container, ?values) &*& int_in_bounds(value);
+    //@ ensures container(container, cons(value, values));
 {
     struct node *n = malloc(sizeof(struct node));
-    if (n == 0)
-    {
+    if (n == 0) {
         abort();
     }
     n->next = container->head;
     n->value = value;
     container->head = n;
+    //@ close nodes(n, cons(value, values));
+    //@ close container(container, cons(value, values));
 }
 
-/***
- * Description:
-The container_remove function removes a value from the container.
-
-@param container - A pointer to the container.
-@return - The integer value popped from the container.
-
-This function removes the head node from the container, retrieves its value,
-and frees the memory allocated to the head node. The container must not be empty.
-*/
 /*@
-requires container(container, ?head) &*& head != 0;
-ensures container(container, ?newHead) &*& head->next |-> newHead &*& head->value |-> result;
+  requires container(container, ?values) &*& values != nil;
+  ensures container(container, tail(values)) &*& int_in_bounds(result) &*& result == head(values);
 @*/
 int container_remove(struct container *container)
+    //@ requires container(container, ?values) &*& values != nil;
+    //@ ensures container(container, tail(values)) &*& int_in_bounds(result) &*& result == head(values);
 {
     struct node *head = container->head;
     int result = head->value;
@@ -97,133 +63,85 @@ int container_remove(struct container *container)
     return result;
 }
 
-typedef bool int_predicate(int x);
-
-/***
- * Description:
-The nodes_filter function filters nodes based on a predicate.
-
-@param n - A pointer to the node.
-@param p - A predicate function to determine whether to keep a node.
-@return - A pointer to the head of the filtered nodes list.
-
-This function recursively filters the linked list of nodes, keeping only those
-nodes for which the predicate function returns true. It frees the memory of the nodes
-that do not satisfy the predicate.
-*/
 /*@
-requires nodes(n) &*& is_int_predicate(p);
-ensures nodes(result);
+  requires nodes(n, ?values);
+  ensures nodes(result, filter(values, p));
 @*/
 struct node *nodes_filter(struct node *n, int_predicate *p)
+    //@ requires nodes(n, ?values);
+    //@ ensures nodes(result, filter(values, p));
 {
-    if (n == 0)
-    {
+    if (n == 0) {
+        //@ open nodes(0, values);
         return 0;
-    }
-    else
-    {
+    } else {
+        //@ open nodes(n, values);
         bool keep = p(n->value);
-        if (keep)
-        {
+        if (keep) {
             struct node *next = nodes_filter(n->next, p);
             n->next = next;
+            //@ close nodes(n, cons(n->value, filter(tail(values), p)));
             return n;
-        }
-        else
-        {
+        } else {
             struct node *next = n->next;
             free(n);
             struct node *result = nodes_filter(next, p);
+            //@ close nodes(result, filter(tail(values), p));
             return result;
         }
     }
 }
 
-/***
- * Description:
-The container_filter function filters the container based on a predicate.
-
-@param container - A pointer to the container.
-@param p - A predicate function to determine whether to keep a node.
-
-This function filters the nodes in the container using the given predicate function.
-It updates the container to contain only the nodes that satisfy the predicate.
-*/
 /*@
-requires container(container, ?head) &*& is_int_predicate(p);
-ensures container(container, ?newHead);
+  requires container(container, ?values);
+  ensures container(container, filter(values, p));
 @*/
 void container_filter(struct container *container, int_predicate *p)
+    //@ requires container(container, ?values);
+    //@ ensures container(container, filter(values, p));
 {
     struct node *head = nodes_filter(container->head, p);
     container->head = head;
 }
 
-/***
- * Description:
-The nodes_dispose function disposes of all nodes in a linked list.
-
-@param n - A pointer to the head node.
- 
-This function recursively frees all nodes in the linked list.
-*/
 /*@
-requires nodes(n);
-ensures true;
+  requires nodes(n, _);
+  ensures true;
 @*/
 void nodes_dispose(struct node *n)
+    //@ requires nodes(n, _);
+    //@ ensures true;
 {
-    if (n != 0)
-    {
+    if (n != 0) {
+        //@ open nodes(n, _);
         nodes_dispose(n->next);
         free(n);
     }
 }
 
-/***
- * Description:
-The container_dispose function disposes of a container.
-
-@param container - A pointer to the container.
-
-This function frees all nodes in the container and then frees the container itself.
-*/
 /*@
-requires container(container, ?head);
-ensures true;
+  requires container(container, _);
+  ensures true;
 @*/
 void container_dispose(struct container *container)
+    //@ requires container(container, _);
+    //@ ensures true;
 {
     nodes_dispose(container->head);
     free(container);
 }
 
-/***
- * Description:
-The neq_20 function filters the container based on a predicate.
-
-@param container - A pointer to the container.
-@param p - A predicate function to determine whether to keep a node.
- 
-This function filters the nodes in the container using the given predicate function.
-It updates the container to contain only the nodes that satisfy the predicate.
-*/
-bool neq_20(int x) //@ : int_predicate
+bool neq_20(int x)
+    //@ : int_predicate
+    //@ requires int_in_bounds(x);
+    //@ ensures result == (x != 20);
 {
     return x != 20;
 }
 
-/***
- * Description:
-The main function creates a container, pushes some integers into it, 
-filters out some integers from the container and finally disposes the container.
-*/
-/*@
-requires true;
-ensures true;
-@*/
 int main()
+    //@ requires true;
+    //@ ensures true;
 {
     struct container *s = create_container();
     container_add(s, 10);

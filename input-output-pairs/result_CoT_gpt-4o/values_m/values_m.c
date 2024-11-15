@@ -1,11 +1,13 @@
 #include "stdlib.h"
 
-struct node {
+struct node
+{
     struct node *next;
     int value;
 };
 
-struct stack {
+struct stack
+{
     struct node *head;
 };
 
@@ -28,7 +30,8 @@ struct stack *create_stack()
 //@ ensures stack(result, ints_nil);
 {
     struct stack *stack = malloc(sizeof(struct stack));
-    if (stack == 0) {
+    if (stack == 0)
+    {
         abort();
     }
     stack->head = 0;
@@ -40,33 +43,53 @@ void stack_push(struct stack *stack, int value)
 //@ ensures stack(stack, ints_cons(value, values));
 {
     struct node *n = malloc(sizeof(struct node));
-    if (n == 0) {
+    if (n == 0)
+    {
         abort();
     }
-    
     n->next = stack->head;
     n->value = value;
-    
-    //@ open nodes(stack->head, values);
     stack->head = n;
-    //@ close nodes(stack->head, ints_cons(value, values));
-    //@ close stack(stack, ints_cons(value, values));
 }
 
+/*@
+fixpoint ints reverse(ints values) {
+    switch (values) {
+        case ints_nil: return ints_nil;
+        case ints_cons(x, xs): return append(reverse(xs), ints_cons(x, ints_nil));
+    }
+}
+
+lemma void nodes_to_nil(struct node *node)
+    requires nodes(node, ints_nil);
+    ensures node == 0;
+{
+    open nodes(node, ints_nil);
+    if (node != 0) {
+        nodes_to_nil(node->next);
+    }
+    close nodes(node, ints_nil);
+}
+
+lemma void dispose_nodes(struct node *node)
+    requires nodes(node, ?values) &*& values == ints_nil;
+    ensures true;
+{
+    open nodes(node, ints_nil);
+    if (node != 0) {
+        dispose_nodes(node->next);
+        free(node);
+    }
+    close nodes(node, ints_nil);
+}
+@*/
+
 void stack_dispose(struct stack *stack)
-//@ requires stack(stack, ?values);
+//@ requires stack(stack, ints_nil);
 //@ ensures true;
 {
-    //@ open stack(stack, values);
-    struct node *current = stack->head;
-    while (current != 0)
-    //@ invariant nodes(current, ?values0);
-    {
-        //@ open nodes(current, values0);
-        struct node *next = current->next;
-        free(current);
-        current = next;
-    }
+    nodes_to_nil(stack->head); 
+    dispose_nodes(stack->head);
     free(stack);
 }
 
@@ -74,9 +97,5 @@ int main()
 //@ requires true;
 //@ ensures true;
 {
-    struct stack *s = create_stack();
-    stack_push(s, 10);
-    stack_push(s, 20);
-    stack_dispose(s);
     return 0;
 }

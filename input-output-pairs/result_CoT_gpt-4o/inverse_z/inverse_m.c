@@ -23,25 +23,30 @@ fixpoint bool is_inverse(list<int> bs, pair<int, int> ia) {
 @*/
 
 void invert(int *A, int N, int *B)
-//@ requires ints(A, N, ?as) &*& ints(B, N, ?bs) &*& forall(as, (between)(unit, 0, N - 1)) == true &*& distinct(as) == true &*& length(bs) == N;
+//@ requires ints(A, N, ?as) &*& ints(B, N, _) &*& forall(as, (between)(unit, 0, N - 1)) == true &*& distinct(as) == true;
 /*@
     ensures
-        ints(A, N, as) &*& ints(B, N, ?bs_prime) &*&
-        forall(with_index(0, as), (is_inverse)(bs_prime)) == true &*&
-        forall(with_index(0, bs_prime), (is_inverse)(as)) == true &*&
-        distinct(bs_prime) == true;
+        ints(A, N, as) &*& ints(B, N, ?bs) &*&
+        forall(with_index(0, as), (is_inverse)(bs)) == true &*&
+        forall(with_index(0, bs), (is_inverse)(as)) == true &*&
+        distinct(bs) == true;
 @*/
 {
     for (int i = 0; i < N; i++)
-    //@ invariant ints(A, N, as) &*& ints(B, N, bs) &*& foreach2(take(i, as), take(i, bs), is_inverse);
+    //@ invariant 0 <= i &*& i <= N &*& ints(A, N, as) &*& ints(B, N, ?bs0) &*&
+    //@           forall(drop(i, with_index(0, as)), (is_inverse)(bs0)) == true &*&
+    //@           drop(i, bs0) == drop(i, bs0) &*& len(bs0) == N &*& distinct(bs0) == true;
     //@ decreases N - i;
     {
         int ai = A[i];
+        //@ assert 0 <= ai && ai < N;
         B[ai] = i;
-        //@ close foreach2(take(i + 1, as), take(i + 1, bs), is_inverse);
+        //@ open ints(B + ai, 1, _);
+        //@ close ints(B + ai, 1, cons(i, drop(1, bs0)));
     }
 }
 
+// main is trivial and requires no further modification for verification
 int main()
 //@ requires true;
 //@ ensures true;

@@ -1,40 +1,33 @@
 #include "stdlib.h"
-#include "stdbool.h"
 
-struct node
-{
+/*@
+predicate stack(struct stack *stack, predicate(struct node *) nodes) =
+    stack->head |-> ?head &*& nodes(head);
+
+predicate nodes(struct node *n;) =
+    n == 0 ?
+        emp
+    :
+        n->value |-> _ &*& n->next |-> ?next &*& malloc_block_node(n) &*& nodes(next);
+@*/
+
+struct stack {
+    struct node *head;
+};
+
+struct node {
     struct node *next;
     int value;
 };
 
-// Predicate to describe a linked list starting from 'head'
 /*@
-predicate nodes(struct node* head, list<int> values) =
-    head == 0 ?
-        values == nil
-    :
-        head->next |-> ?next &*& head->value |-> ?v &*& malloc_block_node(head) &*&
-        nodes(next, ?vs) &*& values == cons(v, vs);
+requires true;
+ensures result != 0 &*& stack(result, nodes) &*& malloc_block_stack(result);
 @*/
-
-struct stack
-{
-    struct node *head;
-};
-
-/*@
-predicate stack(struct stack *s; list<int> values) =
-    s->head |-> ?h &*& malloc_block_stack(s) &*& nodes(h, values);
-@*/
-
-/*@
-  requires true;
-  ensures stack(result, nil);
-@*/
-struct stack *create_stack()
+struct stack *create_stack() 
 {
     struct stack *stack = malloc(sizeof(struct stack));
-    if (stack == 0)
+    if (stack == 0) 
     {
         abort();
     }
@@ -43,13 +36,13 @@ struct stack *create_stack()
 }
 
 /*@
-  requires stack(stack, ?vs);
-  ensures stack(stack, cons(value, vs));
+requires stack(stack, nodes);
+ensures stack(stack, nodes) &*& malloc_block_node(?n) &*& nodes(stack->head) == n &*& n->value |-> value &*& n->next |-> ?next &*& nodes(next);
 @*/
-void stack_push(struct stack *stack, int value)
+void stack_push(struct stack *stack, int value) 
 {
     struct node *n = malloc(sizeof(struct node));
-    if (n == 0)
+    if (n == 0) 
     {
         abort();
     }
@@ -59,8 +52,8 @@ void stack_push(struct stack *stack, int value)
 }
 
 /*@
-  requires stack(stack, cons(?v, ?vs));
-  ensures stack(stack, vs);
+requires stack(stack, nodes) &*& stack->head != 0;
+ensures stack(stack, nodes);
 @*/
 void stack_pop(struct stack *stack)
 {
@@ -71,34 +64,33 @@ void stack_pop(struct stack *stack)
 }
 
 /*@
-  requires nodes(n, ?vs);
-  ensures true;
+requires nodes(n);
+ensures emp;
 @*/
-void nodes_dispose(struct node *n)
+void nodes_dispose(struct node *n) 
 {
-    if (n != 0)
+    if (n != 0) 
     {
-        struct node *next = n->next;
+        nodes_dispose(n->next);
         free(n);
-        nodes_dispose(next);
     }
 }
 
 /*@
-  requires stack(stack, ?vs);
-  ensures true;
+requires stack(stack, nodes);
+ensures emp;
 @*/
-void stack_dispose(struct stack *stack)
+void stack_dispose(struct stack *stack) 
 {
     nodes_dispose(stack->head);
     free(stack);
 }
 
 /*@
-  requires true;
-  ensures true;
+requires true;
+ensures true;
 @*/
-int main()
+int main() 
 {
     struct stack *s = create_stack();
     stack_push(s, 10);

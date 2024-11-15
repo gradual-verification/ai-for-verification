@@ -1,25 +1,15 @@
 #include "stdlib.h"
-#include "assert.h"
 
+// Define a predicate for struct Counter to be used in specifications
 /*@
 predicate counter(struct Counter* c; int v) =
-  malloc_block_Counter(c) &*& c->value |-> v;
+    c != 0 &*& c->value |-> v;
 @*/
 
-struct Counter {
-    int value;
-};
-
-/***
- * Description:
-The init function initializes a new Counter structure with the given initial value.
-It uses the malloc to allocate the memory for that, if it fails to malloc, the program will terminate.
-
-@param v - the initial value in the Counter struct.
-*/
+// Function to initialize a Counter struct
 /*@
-requires true;
-ensures counter(result, v);
+requires v >= INT_MIN &*& v <= INT_MAX;
+ensures result != 0 &*& counter(result, v);
 @*/
 struct Counter* init(int v)
 {
@@ -32,15 +22,9 @@ struct Counter* init(int v)
     return c;
 }
 
-/***
- * Description:
-The increment function retrieves the current value from the Counter struct pointed to by c,
-increments it by 1, and updates the value in the struct.
-
-@param c - the pointer to the Counter struct to be incremented.
-*/
+// Function to increment the value of the Counter struct
 /*@
-requires counter(c, ?v);
+requires counter(c, ?v) &*& v < INT_MAX;
 ensures counter(c, v + 1);
 @*/
 void increment(struct Counter* c)
@@ -51,12 +35,7 @@ void increment(struct Counter* c)
     //@ close counter(c, tmp + 1);
 }
 
-/***
- * Description:
-The dispose function frees the memory allocated for the Counter struct pointed to by c.
-
-@param c - the pointer to the Counter struct to be disposed of.
-*/
+// Function to dispose of a Counter struct
 /*@
 requires counter(c, _);
 ensures true;
@@ -67,13 +46,7 @@ void dispose(struct Counter* c)
     free(c);
 }
 
-/***
- * Description:
-The swap function swaps the values stored in the Counter structs pointed to by c1 and c2.
-
-@param c1 - the pointer to the first Counter struct.
-@param c2 - the pointer to the second Counter struct.
-*/
+// Function to swap values between two Counter structs
 /*@
 requires counter(c1, ?v1) &*& counter(c2, ?v2);
 ensures counter(c1, v2) &*& counter(c2, v1);
@@ -81,8 +54,8 @@ ensures counter(c1, v2) &*& counter(c2, v1);
 void swap(struct Counter* c1, struct Counter* c2)
 {
     //@ open counter(c1, _);
-    //@ open counter(c2, _);
     int tmp1 = c1->value;
+    //@ open counter(c2, _);
     int tmp2 = c2->value;
     c2->value = tmp1;
     c1->value = tmp2;
@@ -90,12 +63,7 @@ void swap(struct Counter* c1, struct Counter* c2)
     //@ close counter(c2, tmp1);
 }
 
-/***
- * Description:
-The get function retrieves and returns the value stored in the Counter struct pointed to by c.
-
-@param c - the pointer to the Counter struct to retrieve the value from.
-*/
+// Function to get the value from a Counter struct
 /*@
 requires counter(c, ?v);
 ensures counter(c, v) &*& result == v;
@@ -103,21 +71,11 @@ ensures counter(c, v) &*& result == v;
 int get(struct Counter* c)
 {
     //@ open counter(c, _);
-    int result = c->value;
-    //@ close counter(c, result);
-    return result;
+    int v = c->value;
+    //@ close counter(c, v);
+    return v;
 }
 
-/***
- * Description:
-The main function initializes two Counter structs with initial values,
-increments one of them, swaps the values between them,
-and then retrieves the value from one of the structs to assert against a known value.
-*/
-/*@
-requires true;
-ensures true;
-@*/
 int main()
 {
     struct Counter* c1 = init(0);
@@ -127,7 +85,7 @@ int main()
     swap(c1, c2);
     int tmp = get(c2);
     assert(tmp == 1);
-
+  
     dispose(c1);
     dispose(c2);
     return 0;

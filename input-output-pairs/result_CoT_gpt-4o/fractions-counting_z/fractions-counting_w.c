@@ -1,18 +1,18 @@
 #include "stdlib.h"
-#include "limits.h"
+#include <limits.h>
 
 struct C {
   int x;
 };
 
 struct C* create_C(int x) 
-//@ requires true;
+//@ requires INT_MIN <= x <= INT_MAX;
 //@ ensures result != 0 &*& result->x |-> x;
 {
   struct C* c = malloc(sizeof(struct C));
-  if (c == 0) {
+  if(c==0) {
     abort();
-  }
+  } 
   c->x = x;
   return c;
 }
@@ -29,7 +29,6 @@ void create_counter(struct C* c)
 //@ requires c->x |-> ?x;
 //@ ensures counter(c, x, 0);
 {
-  //@ open c->x |-> x;
   //@ close counter(c, x, 0);
 }
 
@@ -38,6 +37,7 @@ void create_ticket(struct C* c)
 //@ ensures counter(c, x, nbTickets + 1) &*& tickets(c, x, nbTickets + 1);
 {
   //@ open counter(c, x, nbTickets);
+  //@ open tickets(c, x, nbTickets);
   //@ close counter(c, x, nbTickets + 1);
   //@ close tickets(c, x, nbTickets + 1);
 }
@@ -49,11 +49,12 @@ void dispose_ticket(struct C* c)
   //@ open counter(c, x, nbTickets);
   //@ open tickets(c, x, nbTickets);
   //@ close counter(c, x, nbTickets - 1);
+  //@ close tickets(c, x, nbTickets - 1);
 }
 
 void dispose_counter(struct C* c)
 //@ requires counter(c, ?x, 0);
-//@ ensures [1.0] c->x |-> x;
+//@ ensures [1.0]c->x |-> x;
 {
   //@ open counter(c, x, 0);
 }
@@ -70,28 +71,22 @@ int main()
   create_counter(c);
   bool b = random();
   int n = 0;
-  
-  while (b && n < INT_MAX) 
-  //@ requires counter(c, 5, n) &*& tickets(c, 5, n);
-  //@ ensures counter(c, 5, ?finalN) &*& tickets(c, 5, finalN) &*& finalN >= n;
+  //@ close tickets(c, 5, 0);
+  while(b && n < INT_MAX) 
+  //@ invariant counter(c, 5, n) &*& tickets(c, 5, n) &*& 0 <= n;
   {
-    //@ open counter(c, 5, n);
     create_ticket(c);
     n = n + 1;
     b = random();
   }
-  
-  while (0 < n)
-  //@ requires counter(c, 5, n) &*& tickets(c, 5, n);
-  //@ ensures counter(c, 5, 0) &*& tickets(c, 5, 0);
+
+  while(0 < n) 
+  //@ invariant counter(c, 5, n) &*& tickets(c, 5, n) &*& 0 < n;
   {
-    //@ open counter(c, 5, n);
     dispose_ticket(c);
     n = n - 1;
   }
-  
   dispose_counter(c);
-  //@ leak [1.0] c->x |-> 5;
   free(c);
   return 0;
 }
@@ -102,10 +97,10 @@ int main2()
 {
   struct C* c = create_C(3);
   create_counter(c);
+  //@ close tickets(c, 3, 0);
   create_ticket(c);
   dispose_ticket(c);
   dispose_counter(c);
-  //@ leak [1.0] c->x |-> 3;
   free(c);
   return 0;
 }

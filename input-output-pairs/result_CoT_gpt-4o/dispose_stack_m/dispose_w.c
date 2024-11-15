@@ -14,7 +14,8 @@ predicate nodes(struct node *node, int count) =
     node == 0 ?
         count == 0
     :
-        0 < count &*& node->next |-> ?next &*& node->value |-> _ &*& nodes(next, count - 1);
+        0 < count
+        &*& node->next |-> ?next &*& node->value |-> ?value &*& nodes(next, count - 1);
 
 predicate stack(struct stack *stack, int count) =
     stack->head |-> ?head &*& nodes(head, count);

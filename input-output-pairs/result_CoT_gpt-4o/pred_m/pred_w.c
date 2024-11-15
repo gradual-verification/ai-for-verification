@@ -12,8 +12,8 @@ predicate account_pred(struct account *myAccount, int theLimit, int theBalance) 
 @*/
 
 struct account *create_account(int limit)
-//@ requires limit <= 0;
-//@ ensures result != 0 &*& account_pred(result, limit, 0);
+//@ requires INT_MIN <= limit &*& limit <= 0;
+//@ ensures account_pred(result, limit, 0);
 {
     struct account *myAccount = malloc(sizeof(struct account));
     if (myAccount == 0)
@@ -42,9 +42,8 @@ void account_deposit(struct account *myAccount, int amount)
 
 int account_withdraw(struct account *myAccount, int amount)
 //@ requires account_pred(myAccount, ?limit, ?balance) &*& 0 <= amount;
-/*@ ensures account_pred(myAccount, limit, balance - result) &*&
-        result == (balance - amount < limit ? balance - limit : amount) &*&
-        (balance - result) >= limit; @*/
+/*@ ensures account_pred(myAccount, limit, balance - result)
+    &*& result == (balance - amount < limit ? balance - limit : amount); @*/
 {
     int result = myAccount->balance - amount < myAccount->limit ? myAccount->balance - myAccount->limit : amount;
     myAccount->balance -= result;

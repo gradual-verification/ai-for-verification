@@ -1,10 +1,9 @@
 #include "stdlib.h"
 
-// Define the predicate to represent an account's balance
-//@ predicate account_balance(struct account *acc, int balance) = acc->balance |-> balance;
+// Predicate to represent an account and its balance
+//@ predicate account_balance(struct account* myAccount, int balance) = myAccount->balance |-> balance;
 
-struct account
-{
+struct account {
     int balance;
 };
 

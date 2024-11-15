@@ -1,6 +1,12 @@
-#include <stdbool.h>
+#include <assert.h>
+#include <limits.h>
 
-enum day {
+// VeriFast definitions
+//@ #include <bitops.gh>
+
+// Enums
+enum day
+{
   monday,
   tuesday,
   wednesday,
@@ -10,63 +16,64 @@ enum day {
   sunday
 };
 
-enum large_numbers {
+enum large_numbers
+{
   large_number = 30000,
   another_large_number,
   yaln = -0x7fff - 1
 };
 
-// Predicate to specify valid enum day
 /*@
-predicate valid_day(enum day d) = 
-  d >= monday && d <= sunday;
+  // Precondition and Postcondition for next_day
+  Requires: valid_day(d);
+  Ensures: valid_day(result);
+  Predicate valid_day(int d) = 0 <= d && d <= 6;
 @*/
 
 /***
  * Description:
-The next_day function calculates the next day given a current day.
-
-@param day d - represents the current day, which is in the range of [0, 6].
-
-The function calculates the next day by adding 1 to 
-the current day, taking the result modulo 7 to handle looping 
-back to Monday after Sunday. Finally, the function returns 
-the next day as an enum day type, ensuring that the result is 
-within the valid range of 0 to 6.
-*/
-
-/*@
-requires valid_day(d);
-ensures valid_day(result);
-@*/
-enum day next_day(enum day d) 
+ * The next_day function calculates the next day given a current day.
+ *
+ * @param day d - represents the current day, which is in the range of [0, 6].
+ *
+ * The function calculates the next day by adding 1 to 
+ * the current day, taking the result modulo 7 to handle looping 
+ * back to Monday after Sunday. Finally, the function returns 
+ * the next day as an enum day type, ensuring that the result is 
+ * within the valid range of 0 to 6.
+ */
+enum day next_day(enum day d)
+  //@ requires valid_day(d);
+  //@ ensures valid_day(result);
 {
-  if (d == 6) {
-    // handle edge case when d is sunday
+  // No actual loop, just condition checks to validate results
+  if (d == sunday) {
+    return monday; // Explicit return for clarity
   } else {
-    // handle other days
+    return (d + 1) % 7;
   }
-  return (d + 1) % 7;
 }
 
+/*@
+  // Main does not have specific requirements, assertions ensure logic
+  Ensures: true;
+@*/
+
 /***
  * Description:
-The main function assigns an integer to a enum day variable, 
-and checks the value of items in enum large_numbers.
-*/
-
-/*@
-requires true;
-ensures true;
-@*/
+ * The main function assigns an integer to a enum day variable, 
+ * and checks the value of items in enum large_numbers.
+ */
 int main()
+  //@ ensures true;
 {
   enum day d = monday;
-
-  // Assigning 35 is outside the valid range [0, 6] for enum day
-  // In a real-world critical system, this should raise an error
-  d = (enum day) 35;
+  
+  // Trying to assign a value outside the enum's range
+  // This demonstrates what happens but would probably be considered invalid usage.
+  d = 35; // Note: usually not advised due to out-of-range issues.
   int x = d;
+
   assert(large_number == 30000);
   assert(another_large_number == 30001);
   assert(yaln + 1 == -0x7fff);

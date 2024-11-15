@@ -2,71 +2,45 @@
 
 static int x;
 
-// Define a struct for counter
 struct counter {
     int f;
 };
 
-// Pointer to the counter struct
 static struct counter *c;
 
-//@ predicate counter(struct counter* c, int v) = c->f |-> v;
+//@ predicate counter(struct counter* c; int v) = c->f |-> v;
 
 void m()
-//@ requires x |-> 7 &*& c |-> ?ctr &*& counter(ctr, ?v); 
-//@ ensures x |-> 8 &*& c |-> ctr &*& counter(ctr, v + 1);
+//@ requires x |-> 7 &*& c |-> ?ctr &*& counter(ctr, ?v) &*& malloc_block_counter(ctr);
+//@ ensures x |-> 8 &*& c |-> ctr &*& counter(ctr, v + 1) &*& malloc_block_counter(ctr);
 {
-    // Open the counter predicate
-    //@ open(counter(ctr, v));
-    
-    int y = x; // Read the global x
-    x = y + 1; // Increment the global x
-    
-    // Increment the field f of the counter struct pointed by c
+    //@ open counter(ctr, v);
+    int y = x;
+    x = y + 1;
     c->f = c->f + 1;
-    
-    // Close the counter predicate
-    //@ close(counter(ctr, v + 1));
+    //@ close counter(ctr, v + 1);
 }
 
-int main() 
-//@ : main_full(globals_w)
+int main() //@ : main_full(globals_w)
 //@ requires module(globals_w, true);
 //@ ensures true;
 {
-    // Initialize x
     x = 7;
-    
-    // Allocate memory for a counter struct
     struct counter *ctr = malloc(sizeof(struct counter));
-    
-    // Check if allocation was successful
     if (ctr == 0) abort();
-
-    // Initialize the field f of the counter struct
-    ctr->f = 42;
     
-    // Set the global counter pointer
-    c = ctr;
-    
-    // Open pointer to ctr
-    //@ open(c |-> _);
-    //@ close c |-> ctr;
-    
-    // Establish the counter predicate for the struct
     //@ close counter(ctr, 42);
-    
-    // Call the function m()
-    m();
+    ctr->f = 42;
+    c = ctr;
+    //@ close counter(ctr, 42);  // Counter initialized according to the predicate
 
-    // Get the field f of the counter struct to assert its value
-    int ctr_f = ctr->f;
+    m();
     
-    // Assert to validate the expected value of f
+    //@ open counter(ctr, 43);
+    int ctr_f = ctr->f;
     assert(ctr_f == 43);
     
-    // Deallocate the counter struct
+    //@ open counter(ctr, 43);
     free(ctr);
-    
     return 0;
 }

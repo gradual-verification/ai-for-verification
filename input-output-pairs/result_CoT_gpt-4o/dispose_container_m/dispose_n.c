@@ -1,38 +1,22 @@
 #include "stdlib.h"
-#include "verifast.h"
 
-// Predicate for linked node list representation
-/*@ 
-predicate nodes(struct node *n;) =
-    n == 0 ?
-        emp
-    :
-        malloc_block_node(n) &*&
-        n->next |-> ?next &*&
-        n->value |-> _ &*&
-        nodes(next);
+// Predicate declarations
+//@ predicate nodes(struct node *n; int size) = n == 0 ? size == 0 : n->next |-> ?next &*& n->value |-> _ &*& malloc_block_node(n) &*& nodes(next, size - 1);
 
-predicate container(struct container *cont;) =
-    malloc_block_container(cont) &*&
-    cont->head |-> ?head &*&
-    nodes(head);
-@*/
+//@ predicate container(struct container *c; int size) = c->head |-> ?head &*& malloc_block_container(c) &*& nodes(head, size);
 
-struct node
-{
-    struct node *next;
-    int value;
-};
-
-struct container
-{
-    struct node *head;
-};
-
-/*@
-  requires true;
-  ensures container(result);
-@*/
+/***
+ * Description:
+ * The create_container function is a constructor for a container data structure.
+ *
+ * @param none
+ *
+ * The function creates a new container object by allocating memory for a struct container 
+ * and sets its head pointer to NULL. The function takes no parameters and 
+ * returns the newly created container.
+ */
+//@ requires true;
+//@ ensures container(result, 0);
 struct container *create_container()
 {
     struct container *container = malloc(sizeof(struct container));
@@ -41,15 +25,28 @@ struct container *create_container()
         abort();
     }
     container->head = 0;
+    //@ close nodes(0, 0);
+    //@ close container(container, 0);
     return container;
 }
 
-/*@
-  requires container(container);
-  ensures container(container);
-@*/
+/***
+ * Description:
+ * The container_add function adds an element to the container. 
+ *
+ * @param container - pointer to the container
+ * @param value - integer value to be added to the container
+ *
+ * The function dynamically allocates memory for a new node, 
+ * assigns the value to the node, and updates the head pointer 
+ * of the container to point to the new node. The number of elements 
+ * in the container is incremented by one.
+ */
+//@ requires container(container, ?n);
+//@ ensures container(container, n + 1);
 void container_add(struct container *container, int value)
 {
+    //@ open container(container, n);
     struct node *n = malloc(sizeof(struct node));
     if (n == 0)
     {
@@ -58,55 +55,92 @@ void container_add(struct container *container, int value)
     n->next = container->head;
     n->value = value;
     container->head = n;
+    //@ close nodes(n, n + 1);
+    //@ close container(container, n + 1);
 }
 
-/*@
-  requires container(container) &*& nodes(container->head);
-  ensures container(container);
-@*/
+/***
+ * Description:
+ * The container_remove function removes an element 
+ * from the non-empty container.
+ *
+ * @param container - pointer to the non-empty container
+ *
+ * The function takes a pointer to the container as a parameter and 
+ * retrieves the value of the top node. It then updates the 
+ * head pointer of the container to the next node, and frees the 
+ * memory of the popped node.
+ */
+//@ requires container(container, ?n) &*& n > 0;
+//@ ensures container(container, n - 1);
 void container_remove(struct container *container)
 {
+    //@ open container(container, n);
     struct node *head = container->head;
-    //@ open nodes(head);
+    //@ open nodes(head, n);
     int result = head->value;
     container->head = head->next;
     free(head);
+    //@ close container(container, n - 1);
 }
 
-/*@
-  requires nodes(n);
-  ensures emp;
-@*/
+/***
+ * Description:
+ * The nodes_dispose function recursively deallocates memory 
+ * for all nodes in a linked list starting from a given node. 
+ *
+ * @param n - pointer to the node to be disposed.
+ *
+ * The function takes a pointer to a node as a parameter and traverses 
+ * the linked list by recursively calling itself on the next 
+ * node until reaching the end of the list. The function frees 
+ * the memory of each node as it unwinds the recursion.
+ */
+//@ requires nodes(n, ?size);
+//@ ensures true;
 void nodes_dispose(struct node *n)
 {
     if (n != 0)
     {
-        //@ open nodes(n);
+        //@ open nodes(n, size);
         nodes_dispose(n->next);
         free(n);
     }
 }
 
-/*@
-  requires container(container);
-  ensures emp;
-@*/
+/***
+ * Description:
+ * The container_dispose function frees the memory of an entire 
+ * container including all the nodes in its linked list. 
+ *
+ * @param container - pointer to the container to be deleted.
+ *
+ * It takes a pointer to the container as a parameter and calls 
+ * nodes_dispose on the head of the container to deallocate 
+ * memory for all nodes. Finally, it frees the memory of the 
+ * container itself.
+ */
+//@ requires container(container, ?size);
+//@ ensures true;
 void container_dispose(struct container *container)
 {
+    //@ open container(container, size);
     nodes_dispose(container->head);
     free(container);
 }
 
-/*@
-  requires true;
-  ensures true;
-@*/
+/***
+ * Description:
+ * The main function creates a container, adds twice and removes twice,
+ * and finally dispose the container.
+ */
+//@ requires true;
+//@ ensures true;
 int main()
 {
     struct container *s = create_container();
     container_add(s, 10);
     container_add(s, 20);
-    // Assumes that an element is available to remove
     container_remove(s);
     container_remove(s);
     container_dispose(s);

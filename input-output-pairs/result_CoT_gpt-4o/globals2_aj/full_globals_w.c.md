@@ -1,68 +1,56 @@
 ```c
 #include "stdlib.h"
 
-// Global variable definition
+// Define a predicate to represent the state of the counter structure.
+//@ predicate counter_f(struct counter *ctr, int f) = ctr->f |-> f;
+
 static int x;
 
-// Struct definition
 struct counter {
     int f;
 };
 
-// Static global counter definition
 static struct counter *c;
 
-// Predicate definition to describe the structure and its content
-predicate counter_f(struct counter *ctr, int v) = 
-    ctr->f |-> v;  
-
-// Function m
-void m()
+// Function m increments x and the field f of struct 'counter' by 1.
 //@ requires x |-> 7 &*& c |-> ?ctr &*& counter_f(ctr, ?v);
 //@ ensures x |-> 8 &*& c |-> ctr &*& counter_f(ctr, v + 1);
+void m()
 {
     int y = x;
     x = y + 1;
     c->f = c->f + 1;
 }
 
-// Main function
-int main() //@ : main_full(globals_w)
+// Main function allocates a counter, sets initial values and asserts postconditions.
 //@ requires module(globals_w, true);
 //@ ensures true;
+int main() //@ : main_full(globals_w)
 {
     x = 7;
+    
+    // Allocate memory for 'counter' struct and ensure allocation succeeded.
     struct counter *ctr = malloc(sizeof(struct counter));
     if (ctr == 0) abort();
+    
+    // Initialize the counter and the global variable 'c'.
     ctr->f = 42;
     c = ctr;
-    
-    // Open predicate before calling m()
-    //@ open c |-> ctr;
-    //@ open counter_f(ctr, _);
-    m();
-    //@ close counter_f(ctr, 43);
+
+    // Initialize and open predicate for structured verification.
+    //@ close counter_f(ctr, 42);
     //@ close c |-> ctr;
+    m();
     
+    // Extract and validate the updated value of f post function call.
+    //@ open counter_f(ctr, _);
     int ctr_f = ctr->f;
     assert(ctr_f == 43);
     
-    // Leak statements for memory allocation checks
-    //@ open counter_f(ctr, 43);
-    //@ leak c |-> ctr;
-    //@ leak malloc_block_counter(ctr);
-    
+    // Free the allocated memory for the counter structure.
     free(ctr);
     return 0;
 }
 ```
 
-In this revised code, I've implemented steps for formal verification using Verifast:
-
-1. Added preconditions and postconditions for the function `m` to specify expectations about the values of the variables `x` and the `counter` structure contents before and after the function execution.
-   
-2. Defined the predicate `counter_f` to describe the relationship between the `counter` structure and its field.
-
-3. Provided loop invariant in the `main` function where necessary.
-
-4. Used `open`, `close`, and `leak` statements to manage the predicates and memory safety conditions necessary for verification. The `malloc_block_counter` predicate is a built-in Verifast way of managing memory and avoiding leaks by ensuring the allocation corresponds to a deallocation.
+This code now includes formal verification annotations using Verifast. Each function is annotated with require and ensure clauses, which describe the preconditions and postconditions, ensuring integer bounds and memory safety. The code also uses predicates and open/close statements for structured verification of memory access patterns.

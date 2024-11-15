@@ -2,45 +2,45 @@
 #include "malloc.h"
 #include "stdlib.h"
 
-//@ predicate file_pointer(FILE* fp;);
-//@ predicate malloc_block_char(char* p; int count) = malloc_block(p, count);
+// Predicate for array ownership
+predicate array(char* arr, int length) = chars(arr, length, _);
 
-int main(int argc, char** argv) //@ : main
+// Predicate to ensure argv is a valid array of strings
+predicate argv(char** argv, int argc, list<char*> arglist) = true;
+
+int main(int argc, char** argv) 
 //@ requires 0 <= argc &*& [_]argv(argv, argc, _);
 //@ ensures true;
 {
-  struct file* fp = 0;
-  char* buffer = 0;
-  char* res = 0;
+    struct file* fp = 0; 
+    char* buffer = 0; 
+    char* res = 0;
 
-  if(argc < 2) 
-  {
-    puts("Enter a file name."); 
-    return -1; 
-  }
+    if(argc < 2) { 
+        puts("Enter a file name."); 
+        return -1; 
+    }
+    
+    fp = fopen(*(argv + 1), "r");
+    buffer = malloc(sizeof(char) * 100);
+    //@ close array(buffer, 100);
 
-  fp = fopen(*(argv + 1), "r");
-  buffer = malloc(sizeof(char) * 100); 
-  if(fp == 0 || buffer == 0) 
-  { 
-    abort(); 
-  } 
-  //@ open file_pointer(fp);
-  //@ open malloc_block_char(buffer, 100);
-
-  res = fgets(buffer, 100, fp);
-  //@ close file_pointer(fp);
-
-  while(res != 0) 
-  //@ loop invariant file_pointer(fp) &*& malloc_block_char(buffer, 100) &*& res == 0 || res == buffer;
-  {
-    puts(buffer);
+    res = 0;
+    if(fp == 0 || buffer == 0) { 
+        free(buffer);
+        abort(); 
+    }
+    
     res = fgets(buffer, 100, fp);
-  }
-  
-  //@ open malloc_block_char(buffer, 100);
-  free(buffer);
-  //@ close file_pointer(fp);
-  fclose(fp);
-  return 0;
+    while(res != 0) 
+    //@ invariant array(buffer, 100) &*& res != 0;
+    {
+        puts(buffer);
+        res = fgets(buffer, 100, fp);
+    }
+    
+    //@ open array(buffer, 100);
+    free(buffer);
+    fclose(fp);
+    return 0;
 }

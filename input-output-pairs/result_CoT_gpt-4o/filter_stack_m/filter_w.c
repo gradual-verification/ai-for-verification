@@ -1,5 +1,4 @@
 #include "stdlib.h"
-#include <stdbool.h>
 
 struct node
 {
@@ -15,10 +14,10 @@ struct stack
 /*@
 predicate nodes(struct node *node, int count) =
     node == 0 ?
-        count == 0
+    count == 0
     :
-        0 < count &*& node->next |-> ?next &*& node->value |-> ?value &*&
-        nodes(next, count - 1);
+    0 < count &*& node->next |-> ?next &*& node->value |-> ?value &*&
+    nodes(next, count - 1);
 
 predicate stack(struct stack *stack, int count) =
     stack->head |-> ?head &*& nodes(head, count);
@@ -29,7 +28,7 @@ struct stack *create_stack()
 //@ ensures stack(result, 0);
 {
     struct stack *stack = malloc(sizeof(struct stack));
-    if (stack == 0)
+    if (stack == 0) 
     {
         abort();
     }
@@ -56,6 +55,7 @@ int stack_pop(struct stack *stack)
 //@ ensures stack(stack, count - 1);
 {
     struct node *head = stack->head;
+    //@ open nodes(head, count);
     int result = head->value;
     stack->head = head->next;
     free(head);
@@ -67,8 +67,8 @@ typedef bool int_predicate(int x);
 //@ ensures true;
 
 struct node *nodes_filter(struct node *n, int_predicate *p)
-//@ requires nodes(n, ?count) &*& is_int_predicate(p) == true;
-//@ ensures nodes(result, ?new_count);
+//@ requires nodes(n, _) &*& is_int_predicate(p) == true;
+//@ ensures nodes(result, _);
 {
     if (n == 0)
     {
@@ -80,7 +80,10 @@ struct node *nodes_filter(struct node *n, int_predicate *p)
         if (keep)
         {
             struct node *next = nodes_filter(n->next, p);
+            //@ close nodes(n->next, ?c);
+
             n->next = next;
+            //@ close nodes(n, c + 1);
             return n;
         }
         else
@@ -94,10 +97,12 @@ struct node *nodes_filter(struct node *n, int_predicate *p)
 }
 
 void stack_filter(struct stack *stack, int_predicate *p)
-//@ requires stack(stack, ?count) &*& is_int_predicate(p) == true;
-//@ ensures stack(stack, ?new_count);
+//@ requires stack(stack, _) &*& is_int_predicate(p) == true;
+//@ ensures stack(stack, _);
 {
+    //@ open stack(stack, ?count);
     struct node *head = nodes_filter(stack->head, p);
+    //@ close stack(stack, ?new_count);
     stack->head = head;
 }
 
@@ -116,6 +121,7 @@ void stack_dispose(struct stack *stack)
 //@ requires stack(stack, _);
 //@ ensures true;
 {
+    //@ open stack(stack, ?count);
     nodes_dispose(stack->head);
     free(stack);
 }

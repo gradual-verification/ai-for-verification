@@ -8,7 +8,7 @@ struct student {
 };
 
 /*@
-predicate students(struct student *students, int count) =
+predicate students(struct student *students, int count;) =
     count == 0 ?
         true
     :
@@ -19,23 +19,28 @@ predicate students(struct student *students, int count) =
 
 struct student *read_students(int *count)
 //@ requires *count |-> _;
-//@ ensures *count |-> ?nb &*& students(result, nb) &*& malloc_block_students(result, nb) &*& nb >= 0;
+//@ ensures *count |-> ?nb &*& nb >= 0 &*& students(result, nb) &*& malloc_block_chars((void *)result, nb * sizeof(struct student));
 {
     printf("How many students?\n");
     scanf(" %d", count);
     if (*count < 0 || SIZE_MAX / sizeof(struct student) < (size_t)*count) abort();
     struct student *result = malloc(*count * sizeof(struct student));
     if (result == 0) abort();
-    //@ close students(result, *count);
+    
+    //@ close students(result, 0); // Initialize the predicate
     for (int i = 0; i < *count; i++)
-    //@ invariant students(result, *count);
+    //@ invariant 0 <= i &*& i <= *count &*& students(result, i) &*& malloc_block_chars((void *)result, *count * sizeof(struct student));
     {
         printf("Please enter the name of student %d:\n", i);
         if (scanf(" %99s", &result[i].name) != 1) abort();
         printf("Please enter the age of student %d:\n", i);
         scanf(" %d", &result[i].age);
+        
+        //@ open students(result + i, 0); // Unfold the predicate for the current student
+        //@ result[i].name[..100] |-> _ &*& result[i].age |-> _; 
+        //@ close students(result, i + 1); // Fold the predicate back
     }
-    //@ close students(result, *count);
+    
     return result;
 }
 

@@ -1,29 +1,22 @@
 #include "stdlib.h"
+#include "limits.h"
+// Forward declaration of predicates
+predicate counter_f(struct counter* ctr, int v);
 
+// Global declarations
 static int x;
-
-struct counter {
-    int f;
-};
-
-// Predicate for the struct counter
-// Represents ownership and encapsulates the invariants related to 'f'
-predicate counter_f(struct counter *ctr, int v) =
-    ctr != 0 &*& ctr->f |-> v &*& v >= INT_MIN &*& v <= INT_MAX;
-
 static struct counter *c;
+
+// Predicate definition for struct field access
+predicate counter_f(struct counter* ctr, int v) = ctr->f |-> v;
 
 void m()
 //@ requires x |-> 7 &*& c |-> ?ctr &*& counter_f(ctr, ?v) &*& v >= INT_MIN &*& v + 1 <= INT_MAX;
 //@ ensures x |-> 8 &*& c |-> ctr &*& counter_f(ctr, v + 1);
 {
-    // Open the counter_f predicate to access fields of 'ctr'
-    //@ open counter_f(ctr, v);
     int y = x;
     x = y + 1;
-    ctr->f = ctr->f + 1;
-    // Close the counter_f predicate after modifying the field
-    //@ close counter_f(ctr, v + 1);
+    c->f = c->f + 1;
 }
 
 int main() //@ : main_full(globals_m)
@@ -32,21 +25,15 @@ int main() //@ : main_full(globals_m)
 {
     x = 7;
     struct counter *ctr = malloc(sizeof(struct counter));
+    //@ close counter_f(ctr, _); // Close the counter predicate initially
     if (ctr == 0) abort();
-
-    // Initialize the struct counter and establish its predicate
     ctr->f = 42;
-    //@ close counter_f(ctr, 42);
-
     c = ctr;
+    //@ close counter_f(ctr, ctr->f); // Close the counter predicate with field value
     m();
-
-    // Having called m(), the predicate counter_f(ctr, 43) should hold
     int ctr_f = ctr->f;
     assert(ctr_f == 43);
-
-    // Open the counter_f predicate to release ownership before freeing memory
-    //@ open counter_f(ctr, 43);
+    //@ open counter_f(ctr, ctr_f); // Open predicate before free
     free(ctr);
     return 0;
 }

@@ -13,16 +13,16 @@ struct container
 
 /*@
 predicate nodes(struct node *node, int count) =
-    node == 0 ?  
-        count == 0 
-    : 
-        0 < count 
-        &*& node->next |-> ?next &*& node->value |-> ?value &*& nodes(next, count - 1);
+    node == 0 ?
+        count == 0
+    :
+        0 < count &*& node->next |-> ?next &*& node->value |-> _ &*& nodes(next, count - 1);
 
 predicate container(struct container *container, int count) =
     container->head |-> ?head &*& nodes(head, count);
 @*/
 
+// Function to create a new container
 struct container *create_container()
 //@ requires true;
 //@ ensures container(result, 0);
@@ -36,6 +36,7 @@ struct container *create_container()
     return container;
 }
 
+// Function to add a node with a given value to the container
 void container_add(struct container *container, int value)
 //@ requires container(container, ?count);
 //@ ensures container(container, count + 1);
@@ -50,37 +51,39 @@ void container_add(struct container *container, int value)
     container->head = n;
 }
 
+// Function to remove a node from the container
 void container_remove(struct container *container)
 //@ requires container(container, ?count) &*& 0 < count;
 //@ ensures container(container, count - 1);
 {
     struct node *head = container->head;
-    //@ open nodes(head, count);
+    int result = head->value;
     container->head = head->next;
     free(head);
 }
 
+// Recursive function to dispose nodes
 void nodes_dispose(struct node *n)
 //@ requires nodes(n, _);
 //@ ensures true;
 {
     if (n != 0)
     {
-        //@ open nodes(n, _);
         nodes_dispose(n->next);
         free(n);
     }
 }
 
+// Function to dispose the container
 void container_dispose(struct container *container)
 //@ requires container(container, _);
 //@ ensures true;
 {
-    //@ open container(container, _);
     nodes_dispose(container->head);
     free(container);
 }
 
+// Main function to test the container operations
 int main()
 //@ requires true;
 //@ ensures true;

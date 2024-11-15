@@ -4,9 +4,14 @@
 #include <stdbool.h>
 #include "assert.h"
 
+// Predicate for strings
 /*@ 
-predicate malloc_block(char *p; int size) = malloc_block_chars(p, size, _);
-predicate valid_string(char *string;) = string(string, ?cs) &*& malloc_block(string, length(cs) + 1);
+predicate string(char *string, list<char> cs) = 
+  chars(string, ?count, ?cs) &*& cs == append(cs, cons(0, nil));
+@*/
+
+// Fixpoint definition for word count
+/*@
 fixpoint int wcount(list<char> cs, bool inword) {
   switch(cs) {
     case nil: return inword ? 1 : 0;
@@ -15,17 +20,18 @@ fixpoint int wcount(list<char> cs, bool inword) {
 }
 @*/
 
+// Word count function with specifications
 int wc(char* string, bool inword)
-//@ requires [?f]valid_string(string);
-//@ ensures [f]valid_string(string) &*& result == wcount(string, inword);
+//@ requires [?f]string(string, ?cs);
+//@ ensures [f]string(string, cs) &*& result == wcount(cs, inword);
 {
-  char head = * string;
+  char head = *string;
   if(head == 0) {
     return inword ? 1 : 0;
   } else {
     if(head == ' ') {
       int result = wc(string + 1, false);
-      return inword ? 1 + result: result;
+      return inword ? 1 + result : result;
     } else {
       int result = wc(string + 1, true);
       return result;
@@ -33,7 +39,8 @@ int wc(char* string, bool inword)
   }
 }
 
-void test() 
+// Test function with specifications
+void test()
 //@ requires true;
 //@ ensures true;
 {
@@ -41,33 +48,40 @@ void test()
   assert(nb == 7);
 }
 
+// Main function with specifications
 int main(int argc, char** argv) //@ : main
 //@ requires 0 <= argc &*& [_]argv(argv, argc, _);
 //@ ensures true;
 {
-  bool inword = false; struct file* fp = 0; char* buff = 0; int total = 0; char* res = 0;
-  if(argc < 2) { puts("No input file specified."); return -1; }
+  bool inword = false; 
+  struct file* fp = 0; 
+  char* buff = 0; 
+  int total = 0; 
+  char* res = 0;
+
+  if(argc < 2) { 
+    puts("No input file specified."); 
+    return -1; 
+  }
+  
   fp = fopen(argv[1], "r");
   buff = malloc(100);
-  //@ open valid_string(buff);
   if(buff == 0 || fp == 0) { abort(); }
+  
   res = fgets(buff, 100, fp);
-  //@ close valid_string(buff);
   while(res != 0)
-  //@ invariant valid_string(buff) &*& total >= 0 &*& total + wcount(buff, inword) <= INT_MAX;
+  //@ invariant [?f]chars(buff, 100, ?scs) &*& fp != 0 &*& total >= 0 &*& total <= INT_MAX;
   {
-    //@ open valid_string(buff);
     int tmp = wc(buff, inword);
     if (total > INT_MAX - tmp) {
       break;
     }
     total = total + tmp;
     res = fgets(buff, 100, fp);
-    //@ close valid_string(buff);
   }
+
   printf("%i", total);
   free(buff);
-  //@ leak malloc_block(buff, 100);
   fclose(fp);
   return 0;
 }

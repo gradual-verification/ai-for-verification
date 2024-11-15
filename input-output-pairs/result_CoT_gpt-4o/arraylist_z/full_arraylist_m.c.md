@@ -1,5 +1,3 @@
-Here is the modified C code with formal verification in VeriFast:
-
 ```c
 #include <stdint.h>
 #include <stdlib.h>
@@ -23,12 +21,13 @@ struct arraylist * create_arraylist()
 //@ ensures arraylist(result, nil);
 {
     struct arraylist * a = malloc(sizeof(struct arraylist));
+    void * data = 0;
     if (a == 0) abort();
-    void * data = malloc(100 * sizeof(void * ));
+    a -> size = 0;
+    data = malloc(100 * sizeof(void * ));
     if (data == 0) abort();
-    a->size = 0;
-    a->data = data;
-    a->capacity = 100;
+    a -> data = data;
+    a -> capacity = 100;
     return a;
 }
 
@@ -36,55 +35,59 @@ void * list_get(struct arraylist * a, int i)
 //@ requires arraylist(a, ?vs) &*& 0 <= i &*& i < length(vs);
 //@ ensures arraylist(a, vs) &*& result == nth(i, vs);
 {
-    return a->data[i];
+    return a -> data[i];
 }
 
 int list_length(struct arraylist * a)
 //@ requires arraylist(a, ?vs);
 //@ ensures arraylist(a, vs) &*& result == length(vs);
 {
-    return a->size;
+    return a -> size;
 }
 
 void list_add(struct arraylist * a, void * v)
 //@ requires arraylist(a, ?vs);
 //@ ensures arraylist(a, append(vs, cons(v, nil)));
 {
-    if (a->capacity <= a->size) {
-        int size = a->size;
-        void ** data = a->data;
-        int capacity = a->capacity;
-
+    int size = 0;
+    void ** data = 0;
+    if (a -> capacity <= a -> size) {
+        data = a -> data;
+        size = a -> size;
+        int capacity = a -> capacity;
         if (SIZE_MAX / sizeof(void * ) < (size_t)capacity * 2 + 1) abort();
         void ** newData = malloc(((size_t)capacity * 2 + 1) * sizeof(void * ));
         if (newData == 0) abort();
-        memcpy(newData, data, (size_t)size * sizeof(void * ));
-        a->data = newData;
+        memcpy(newData, data, (size_t) size * sizeof(void * ));
+        a -> data = newData;
         if (INT_MAX / 2 - 1 < capacity) abort();
-        a->capacity = capacity * 2 + 1;
+        a -> capacity = capacity * 2 + 1;
         free(data);
     }
-    int size = a->size;
-    void ** data = a->data;
+    size = a -> size;
+    data = a -> data;
     data[size] = v;
-    a->size += 1;
+    a -> size += 1;
 }
+
 
 void list_remove_nth(struct arraylist * a, int n)
 //@ requires arraylist(a, ?vs) &*& 0 <= n &*& n < length(vs);
 //@ ensures arraylist(a, append(take(n, vs), tail(drop(n, vs))));
 {
-    void ** data = a->data;
-    int size = a->size;
+    void ** data = a -> data;
+    int size = a -> size;
     memmove(data + n, data + n + 1, (unsigned int)(size - n - 1) * sizeof(void * ));
-    a->size = size - 1;
+    a -> size = a -> size - 1;
 }
 
 void list_dispose(struct arraylist * a)
 //@ requires arraylist(a, ?vs);
 //@ ensures true;
 {
-    void ** data = a->data;
+    void ** data = a -> data;
+    int size = a -> size;
+    int capacity = a -> capacity;
     free(data);
     free(a);
 }
@@ -105,5 +108,4 @@ int main()
     return 0;
 }
 ```
-
-This complete code includes formal verification specifications using VeriFast. These specifications are written in special comments between `/*@` and `@*/`. They describe the behavior and constraints of each function, ensuring memory safety and correctness of operations. The `arraylist` predicate is used to capture the state of the `arraylist` and its contents. Each function contains preconditions and postconditions, and loop invariants are included where necessary.
+In this code, the specifications (in comments starting with `//@`) ensure memory safety and the boundaries of integers are respected for each function. This is particularly pertinent for functions that involve dynamic memory management and array indexing like `list_add`, `list_get`, and `list_remove_nth`. The main memory safe conditions are checked through preconditions especially, due to their impact on further operations. The code is also careful about arithmetic operations that could otherwise lead to overflow, especially in the `list_add` function where resizing of arrays happens.
