@@ -2,7 +2,7 @@ The procedure of qualitative analysis
 
 # Workflow
 
-In qualitative analysis, we first check whether functional behavior (FB) is prevserved in precondition&postcondition and source code for each file; Then, we iteratively categorize the errors and fix them in the output file; Finally, we check the convention on the source code or specifications that don't have error in the output file.
+To perform qualitative analysis, we first analyze if the functional behavior (FB) of the original C code is preserved in precondition&postcondition and source code for each file; Then, we iteratively categorize the errors and fix them in the output file; Finally, we analyze the conventionality of the source code and the correctly generated specifications.
 
 <img src="imgs/workflow.png" alt="workflow" style="zoom: 33%;" />
 
@@ -12,7 +12,7 @@ Definition of Coding, includes the coding for functional behavior preservation, 
 
 ## Functional Behavior Preservation
 
-We need to assign code to two components in the output about whether they preserve function behavior, and those two components are Precondition&postcondition and source code.
+To represent the ability of GPT-4o to preserve the functional behavior of code, we assign codes to two main components in the generated output code: Precondition&postcondition and source code.
 
 Here we show the coding for Precondition&postcondition, and the one for source code is similar.
 
@@ -23,19 +23,19 @@ Here we show the coding for Precondition&postcondition, and the one for source c
 
 ## Error code
 
-We divide the errors based on whether the error occurred is about proving. So they are divided into compilation errors (not about proving) and verification errors (about proving).
+We divide the errors based on their relevance to the process of proving a program"s correctness against a specification. Specifically, they are divided into compilation errors (unrelated to formal verification process) and verification errors (related to proving).
 
 ### Compilation Error
 
-These errors represent “parse errors” in Verifast, which are basically errors that the VeriFast tool cannot interpret the code. This could be due to syntax issues such as missing semicolons, incorrect brackets, invalid keywords, or other structural errors that prevent verification. To better represent the compilation errors, we have the following subcodes:
+These errors represent “parse errors” in Verifast, which are basically errors that arise when the VeriFast tool is unable interpret the code. This could be due to syntax issues, such as missing semicolons, incorrect brackets, invalid keywords, or other structural errors that prevent verification. To better represent the compilation errors, we have the following subcodes:
 
 - Specification out-of-position: This subcode represents situations where the specifications are not present at the correct location and are misplaced within the output file, resulting in parse error. Common cases are the precondition, postcondition or loop invariant is not at the right position.
 - Syntax error: the error happens during the parsing stage 
-- Include or Type Check error: This subcode represents errors that arise due to GPT hallucinating variables, predications or function calls, due to which fails the include or type check stage. The error commonly happens during the include stage or type check stage.
+- Include or Type Check error: This subcode represents errors that arise due to GPT hallucinating variables, predications or function calls, due to which VeriFast fails in the include or type check stage. This error commonly happens during the include stage or type check stage.
 
 ### Verification Error
 
-The error occurred is about failing to prove a condition. Based on the component (e.g., precondition, postcondition, …) that the fix is on, the errors include:
+These errors arise during the formal verification phase and are directly related to proving that the program meets its specified requirements. Based on the type of specification (e.g., precondition, postcondition, …) that the fix is on, the errors include:
 
 - Incorrect precondition/postcondition
 - Incorrect predicate definition
@@ -47,7 +47,7 @@ The error occurred is about failing to prove a condition. Based on the component
 
 ## Convention code
 
-After modifying the output file and making it verify, we can inspect the unmodified specifications and source code in the output file to see whether they have any conventional code. We have codes:
+After rectifying the errors in the output file, such that it gets verified by VeriFast successfully, we then inspect the unmodified specifications and the source code in the output file to see whether they follow good convention. The codes that we used are:
 
 - Redundant: the condition in the spec, after being removed, doesn’t affect the verification. 
 - Ambiguous: the specification’s name doesn't show the specification’s intention.
