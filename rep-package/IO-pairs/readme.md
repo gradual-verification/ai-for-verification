@@ -9,8 +9,8 @@ This document shows how we get IO-pairs from VeriFast Benchmarks (see readme in 
    1. For NL input: Given the output file, remove all specs and add comment on its functional behavior, including what it does, How it achieves this and restriction on parameters and return value.
    2. For FB+ input: Given the output file, remove all specs except pre and post and the used predicate.
    3. For FB input, Given the FB+ input, remove specifications that are not related to functional behaviors, including
-      * Removing `malloc_block_xxx`, `malloc_block_pointers`, and `struct_xxx_padding` since they are about memory safety
-      * Changing emp to true, since non-expert user may not consider emp as empty heap. [?]
+      * Removing `malloc_block_xxx`, `malloc_block_pointers`, and `struct_xxx_padding` since they are about memory safety.
+      * Changing emp to true, since emp means empty heap, not functional behavior.
       * Removing bound check.
    
    For example, in function `increment` of counter_with_pred.c, 

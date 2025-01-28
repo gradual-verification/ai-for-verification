@@ -29,7 +29,7 @@ struct account *create_account()
     struct account *myAccount = malloc(sizeof(struct account));
     if (myAccount == 0)
     {
-        abort()
+        abort();
     }
     // @ close account(myAccount);
     myAccount->balance = 0;

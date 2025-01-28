@@ -27,7 +27,7 @@ struct student *read_students(int *count)
     if (*count < 0 || SIZE_MAX / sizeof(struct student) < (size_t)*count) abort();
     //@ mul_mono_l(0, *count, sizeof(struct student));
     //@ div_rem_nonneg(SIZE_MAX, sizeof(struct student));
-    //@ mul_mono_l(*count, SIZE_MAX / sizeof(student), sizeof(struct student));
+    //@ mul_mono_l(*count, SIZE_MAX / sizeof(struct student), sizeof(struct student));
     struct student *result = malloc(*count * sizeof(struct student));
     if (result == 0) abort();
     

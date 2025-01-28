@@ -1,7 +1,7 @@
 #include "stdlib.h"
 
 // Predicate that describes a valid account structure
-/*@
+/* @
 predicate account_balance(struct account *acct, int balance) =
     acct->balance |-> balance;
 @*/

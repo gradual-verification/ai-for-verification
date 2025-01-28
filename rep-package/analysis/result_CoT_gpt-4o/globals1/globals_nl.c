@@ -41,8 +41,8 @@ initializes its field f, assigns this structure to a global pointer c,
 calls the m() function, and performs validation on the updated value of field f.
 */
 
-int main() //@ : main_full(globals_n)
-//@ requires module(globals_n, true);
+int main() //@ : main_full(globals_nl)
+//@ requires module(globals_nl, true);
 //@ ensures true;
 // Function involves memory allocation, state updates and condition checking.
 {

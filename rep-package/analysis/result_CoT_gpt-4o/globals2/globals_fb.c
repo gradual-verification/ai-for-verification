@@ -24,8 +24,8 @@ void m()
 
 // Main function allocates a counter, sets initial values and asserts postconditions.
 
-int main() //@ : main_full(globals_w)
-//@ requires module(globals_w, true);
+int main() //@ : main_full(globals_fb)
+//@ requires module(globals_fb, true);
 //@ ensures true;
 {
     //@ open_module();

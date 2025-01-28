@@ -23,8 +23,8 @@ void m()
     c->f = c->f + 1;
 }
 
-int main() //@ : main_full(globals_m)
-//@ requires module(globals_m, true);
+int main() //@ : main_full(globals_fb+)
+//@ requires module(globals_fb+, true);
 //@ ensures true;
 {
     //@ open_module();

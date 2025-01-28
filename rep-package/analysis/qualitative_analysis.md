@@ -16,14 +16,14 @@ To represent the ability of GPT-4o to preserve the functional behavior of code, 
 
 Here we show the coding for Precondition&postcondition, and the one for source code is similar.
 
-- Preserved: For all functions, the intention of the function expressed in precondition&postcondition in the output is equivalent to the intention of the function expressed in the precondition&postcondition or natural language comment in the input.
-- (only) Strengthened: (Other than the case of preserved) There exists some function, the intention of the function expressed in precondition&postcondition in the output implies the intention of the function expressed in the precondition&postcondition or natural language comment in the input.
-- (only) Weakened: (Other than the case of preserved and strengthened) There exists some function, the intention of the function expressed in precondition&postcondition in the output is implied by the intention of the function expressed in the precondition&postcondition or natural language comment in the input.
-- Other cases: Not defined
+- Preserved: For all functions, the precondition&postcondition or natural language comment in the output file that specify the intented behavior of function is equivalent to the corresponding parts (i.e., precondition&postcondition or natural language comment in the output file that specify the intented behavior) in the input.
+- (only) Strengthened: (Other than the case of preserved) There exists some function, the precondition&postcondition or natural language comment in the output file that specify the intented behavior of function implies the corresponding parts in the input.
+- (only) Weakened: (Other than the case of preserved and strengthened) There exists some function, the precondition&postcondition or natural language comment in the output file that specify the intented behavior of function is implied by the corresponding parts in the input.
+- Other cases: The rest of cases
 
 ## Error code
 
-We divide the errors based on their relevance to the process of proving a program"s correctness against a specification. Specifically, they are divided into compilation errors (unrelated to formal verification process) and verification errors (related to proving).
+We divide the errors based on their relevance to the process of proving a program's correctness against a specification. Specifically, they are divided into compilation errors (unrelated to formal verification process) and verification errors (related to proving).
 
 ### Compilation Error
 
@@ -54,4 +54,5 @@ After rectifying the errors in the output file, such that it gets verified by Ve
 
 # Analysis
 
-The data analysis is stored in `qualitative_analysis.xlsx`, where the data and analysis of each benchmark is stored in each subsheet, and the aggregated result is stored in subsheet `statistics` and `final_table`.
+The data analysis is stored in `qualitative_analysis.xlsx`, where the data and analysis of each benchmark is stored in each subsheet (e.g., `enums_weak`), and the aggregated result is stored in subsheet `statistics` and `final_table`. Moreover, the raw result of feature analysis of each output file is stored in subsheet `benchmarks_feature`.
+

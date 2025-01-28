@@ -29,8 +29,8 @@ void m()
 }
 
 
-int main() //@ : main_full(globals_n)
-//@ requires module(globals_n, true);
+int main() //@ : main_full(globals_nl)
+//@ requires module(globals_nl, true);
 //@ ensures result == 0;
 {
     //@ open_module();
