@@ -12,6 +12,7 @@ This document shows how we get IO-pairs from VeriFast Benchmarks (see readme in 
       * Removing `malloc_block_xxx`, `malloc_block_pointers`, and `struct_xxx_padding` since they are about memory safety.
       * Changing emp to true, since emp means empty heap, not functional behavior.
       * Removing bound check.
+      * Loosening the restriction on the type (e.g., from `integer(a, ?x)` to `a |-> ?x` in swap.c)
    
    
    
