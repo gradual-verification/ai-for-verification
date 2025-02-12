@@ -29,9 +29,9 @@ struct expression *create_literal(int value)
     if (literal == 0) abort();
     literal->tag = 0;
     literal->value = value;
-    //@ close expression(literal, value);
     return literal;
 }
+
 
 struct expression *create_negation(struct expression *operand)
     //@ requires expression(operand, ?operandValue);
@@ -41,7 +41,6 @@ struct expression *create_negation(struct expression *operand)
     if (negation == 0) abort();
     negation->tag = 1;
     negation->operand_neg = operand;
-    //@ close expression(negation, 0 - operandValue);
     return negation;
 }
 
@@ -54,7 +53,6 @@ struct expression *create_addition(struct expression *operand1, struct expressio
     addition->tag = 2;
     addition->operand1 = operand1;
     addition->operand2 = operand2;
-    //@ close expression(addition, value1 + value2);
     return addition;
 }
 
@@ -62,7 +60,6 @@ int evaluate(struct expression *expression)
     //@ requires expression(expression, ?value);
     //@ ensures expression(expression, value) &*& result == value;
 {
-    //@ open expression(expression, value);
     int result = 0;
     int tag = expression->tag;
     if (tag == 0)
@@ -78,7 +75,6 @@ int evaluate(struct expression *expression)
             || (v2 < 0 && v1 < INT_MIN - v2) || (v1 < 0 && v2 < INT_MIN - v1)) { abort();}
         result = v1 + v2;
     }
-    //@ close expression(expression, value);
     return result;
 }
 
@@ -86,7 +82,6 @@ void dispose_expression(struct expression *expression)
     //@ requires expression(expression, _);
     //@ ensures true;
 {
-    //@ open expression(expression, _);
     int tag = expression->tag;
     if (tag == 0) {
         free(expression);

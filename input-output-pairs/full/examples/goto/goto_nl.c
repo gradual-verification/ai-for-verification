@@ -5,18 +5,17 @@ struct node {
     int value;
 };
 
-/*@
-predicate nodes(struct node *head) =
-    head == 0 ? emp : head->next |-> ?next &*& head->value |-> _ &*& malloc_block_node(head) &*& nodes(next);
-@*/
+/***
+ * Description:
+The dispose_nodes function iteratively freees the nodes of a given linked list, by using a loop with a goto.
 
+@param head: pointing to the head of the given linked list
+*/
 void dispose_nodes(struct node *head)
     //@ requires nodes(head);
     //@ ensures emp;
 {
 loop:
-    //@ invariant nodes(head);
-    //@ open nodes(head);
     if (head == 0) return;
     struct node *next = head->next;
     free(head);
@@ -24,12 +23,18 @@ loop:
     goto loop;
 }
 
+/***
+ * Description:
+The nested_blocks function tests whether the goto statement can get out of the while loop,
+so it doesn't modify the given parameters.
+
+@param n1, n2: nodes unchanged in this function
+*/
 void nested_blocks(struct node *n1, struct node *n2)
     //@ requires nodes(n1) &*& nodes(n2);
     //@ ensures nodes(n1) &*& nodes(n2);
 {
     while (true)
-        //@ invariant nodes(n1);
     {
         goto l1;
     l2:
@@ -40,12 +45,18 @@ void nested_blocks(struct node *n1, struct node *n2)
 l3:
 }
 
+/***
+ * Description:
+The break_test function tests whether the break statement can get out of the while loop,
+so it doesn't modify the given parameters.
+
+@param n1, n2: nodes unchanged in this function
+*/
 void break_test(struct node *n1, struct node *n2)
     //@ requires nodes(n1) &*& nodes(n2);
     //@ ensures nodes(n1) &*& nodes(n2);
 {
     while (true)
-        //@ invariant nodes(n1);
     {
         break;
     }

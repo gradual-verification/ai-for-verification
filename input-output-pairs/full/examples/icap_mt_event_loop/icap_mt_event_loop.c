@@ -1,8 +1,8 @@
 // Example from Kasper Svendsen and Lars Birkedal, Impredicative Concurrent Abstract Predicates, ESOP 2014.
 
 #include <stdlib.h>
-#include "shared_boxes/gotsmanlock.h"
-#include "icap_mt_event_loop.h"
+#include "../multi-files/shared_boxes/gotsmanlock.h"
+#include "../icap_mt_event_loop.h"
 
 struct eloop {
     int lock;

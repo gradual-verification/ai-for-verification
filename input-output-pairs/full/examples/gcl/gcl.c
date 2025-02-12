@@ -51,8 +51,8 @@ TODO:
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "stringBuffers.h"
-#include "tokenizer.h"
+#include "../stringBuffers.h"
+#include "../tokenizer.h"
 #include "assert.h"
 
 void error(char *msg)

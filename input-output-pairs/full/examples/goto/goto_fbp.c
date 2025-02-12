@@ -15,8 +15,6 @@ void dispose_nodes(struct node *head)
     //@ ensures emp;
 {
 loop:
-    //@ invariant nodes(head);
-    //@ open nodes(head);
     if (head == 0) return;
     struct node *next = head->next;
     free(head);
@@ -29,7 +27,6 @@ void nested_blocks(struct node *n1, struct node *n2)
     //@ ensures nodes(n1) &*& nodes(n2);
 {
     while (true)
-        //@ invariant nodes(n1);
     {
         goto l1;
     l2:
@@ -45,7 +42,6 @@ void break_test(struct node *n1, struct node *n2)
     //@ ensures nodes(n1) &*& nodes(n2);
 {
     while (true)
-        //@ invariant nodes(n1);
     {
         break;
     }
