@@ -1,3 +1,6 @@
+#include <stdbool.h>
+#include <limits.h> 
+
 /*
  * The composite pattern in C with separation logic.
  *
