@@ -43,17 +43,8 @@ int main()
         abort();
     }
     *cell = n;
-    /*@
-    produce_function_pointer_chunk thread_run(increment)(integer1(cell, n), integer2(cell, n + 1))(data) {
-        open integer1(cell, n)(data);
-        call();
-        close integer2(cell, n + 1)();
-    }
-    @*/
-    //@ close integer1(cell, n)(cell);
     struct thread *t = thread_start(increment, cell);
     thread_join(t);
-    //@ open integer2(cell, n + 1)();
     int n1 = *cell;
     free(cell);
     assert(n1 == n + 1);
