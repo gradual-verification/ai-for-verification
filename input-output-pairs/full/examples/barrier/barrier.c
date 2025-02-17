@@ -1,5 +1,6 @@
 #include "stdlib.h"
 #include "threading.h"
+#include <stdbool.h>
 
 // Inspired by [1].
 // [1] Aquinas Hobor and Cristian Gherghina. Barriers in Concurrent Separation Logic. 2010.
@@ -256,7 +257,7 @@ void thread1(struct data *d) //@ : thread_run_joinable
         //@ produce_lemma_function_pointer_chunk(enter);
         //@ produce_lemma_function_pointer_chunk(bexit);
         //@ close barrier_incoming(enter)(2, my_barrier_inv(d), bexit);
-        barrier(barrier);
+        struct barrier(barrier);
         //@ open barrier_exiting(bexit)(2, my_barrier_inv(d));
     }
     int N = 0;
@@ -269,6 +270,7 @@ void thread1(struct data *d) //@ : thread_run_joinable
     {
         int a1 = d->x1;
         int a2 = d->x2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->y1 = a1 + 2 * a2;
         {
             /*@
@@ -320,11 +322,12 @@ void thread1(struct data *d) //@ : thread_run_joinable
             //@ produce_lemma_function_pointer_chunk(enter);
             //@ produce_lemma_function_pointer_chunk(bexit);
             //@ close barrier_incoming(enter)(2, my_barrier_inv(d), bexit);
-            barrier(barrier);
+            struct barrier(barrier);
             //@ open barrier_exiting(bexit)(2, my_barrier_inv(d));
         }
         a1 = d->y1;
         a2 = d->y2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->x1 = a1 + 2 * a2;
         N = N + 1;
         d->i = N;
@@ -378,7 +381,7 @@ void thread1(struct data *d) //@ : thread_run_joinable
             //@ produce_lemma_function_pointer_chunk(enter);
             //@ produce_lemma_function_pointer_chunk(bexit);
             //@ close barrier_incoming(enter)(2, my_barrier_inv(d), bexit);
-            barrier(barrier);
+            struct barrier(barrier);
             //@ open barrier_exiting(bexit)(2, my_barrier_inv(d));
         }
     }
@@ -432,7 +435,7 @@ void thread1(struct data *d) //@ : thread_run_joinable
         //@ produce_lemma_function_pointer_chunk(enter);
         //@ produce_lemma_function_pointer_chunk(bexit);
         //@ close barrier_incoming(enter)(2, my_barrier_inv(d), bexit);
-        barrier(barrier);
+        struct barrier(barrier);
         //@ open barrier_exiting(bexit)(2, my_barrier_inv(d));
     }
     d->i = 0;
@@ -507,7 +510,7 @@ void thread2(struct data *d) //@ : thread_run_joinable
         //@ produce_lemma_function_pointer_chunk(enter);
         //@ produce_lemma_function_pointer_chunk(bexit);
         //@ close barrier_incoming(enter)(2, my_barrier_inv(d), bexit);
-        barrier(barrier);
+        struct barrier(barrier);
         //@ open barrier_exiting(bexit)(2, my_barrier_inv(d));
     }
     int m = 0;
@@ -520,6 +523,7 @@ void thread2(struct data *d) //@ : thread_run_joinable
     {
         int a1 = d->x1;
         int a2 = d->x2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->y2 = a1 + 3 * a2;
         {
             /*@
@@ -571,11 +575,12 @@ void thread2(struct data *d) //@ : thread_run_joinable
             //@ produce_lemma_function_pointer_chunk(enter);
             //@ produce_lemma_function_pointer_chunk(bexit);
             //@ close barrier_incoming(enter)(2, my_barrier_inv(d), bexit);
-            barrier(barrier);
+            struct barrier(barrier);
             //@ open barrier_exiting(bexit)(2, my_barrier_inv(d));
         }
         a1 = d->y1;
         a2 = d->y2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->x2 = a1 + 3 * a2;
         {
             /*@
@@ -627,7 +632,7 @@ void thread2(struct data *d) //@ : thread_run_joinable
             //@ produce_lemma_function_pointer_chunk(enter);
             //@ produce_lemma_function_pointer_chunk(bexit);
             //@ close barrier_incoming(enter)(2, my_barrier_inv(d), bexit);
-            barrier(barrier);
+            struct barrier(barrier);
             //@ open barrier_exiting(bexit)(2, my_barrier_inv(d));
         }
         m = d->i;
@@ -682,7 +687,7 @@ void thread2(struct data *d) //@ : thread_run_joinable
         //@ produce_lemma_function_pointer_chunk(enter);
         //@ produce_lemma_function_pointer_chunk(bexit);
         //@ close barrier_incoming(enter)(2, my_barrier_inv(d), bexit);
-        barrier(barrier);
+        struct barrier(barrier);
         //@ open barrier_exiting(bexit)(2, my_barrier_inv(d));
     }
     //@ close thread_run_post(thread2)(d, info_);
