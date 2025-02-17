@@ -2,14 +2,14 @@
 #include <stdbool.h>
 
 void inc(int* i)
-  //@ requires integer(i, ?v) &*& INT_MIN <= v &*& v < INT_MAX;
+  //@ requires integer(i, ?v);
   //@ ensures integer(i, v+1);
 {
   (*i) = (*i) + 1;
 }
 
 void inc_uintptr_t(uintptr_t *i)
-  //@ requires *i |-> ?v &*& INT_MIN <= v &*& v < INT_MAX;
+  //@ requires *i |-> ?v;
   //@ ensures *i |-> v + 1;
 {
   (*i) = (*i) + 1;
@@ -42,7 +42,7 @@ void address_of_local()
   }
   return;
   
- //@ int tmp = 0;
+
 }
 
 void address_of_local_uintptr_t() 
@@ -61,7 +61,7 @@ void address_of_local_uintptr_t()
   }
   return;
   
- //@ uintptr_t tmp = 0;
+
 }
 
 void test_goto() 
@@ -70,9 +70,9 @@ void test_goto()
 {
   goto end;
   {
-    int x = 5; //~allow_dead_code
-    int *p = &x; //~allow_dead_code
-    abort(); //~allow_dead_code
+    int x = 5;
+    int *p = &x; 
+    abort(); 
   }
   end:
 }
@@ -107,7 +107,7 @@ void test_break()
   //@ ensures true;
 {
   while(true) 
-    //@ invariant true;
+
   {
     int x = 0;
     int* ptr = &x;
@@ -142,23 +142,23 @@ void test_requires_ensures_loop()
       int* ptr = &x;
       i = i + 1;
   }
-  //@ assert i == 5;
+
 }
 
 void destroy(int* i) 
   //@ requires integer(i, _);
   //@ ensures true;
 {
-  //@ assume(false);
+ 
 }
+
 
 void destroy_half(int* i) 
   //@ requires [1/2]integer(i, _);
   //@ ensures true;
 {
-  //@ assume(false);
-}
 
+}
 
 void break_statement()
   //@ requires true;
@@ -166,11 +166,13 @@ void break_statement()
 {
   int i = 0;
   while(i < 1)
-    //@ invariant 0<=i && i<=1;
+ 
   {
     int x = 0;
     int* ptr = &x;    
     break;
   }
 }
+
+
 
