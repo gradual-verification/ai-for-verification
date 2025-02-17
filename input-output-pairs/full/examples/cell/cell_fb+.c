@@ -16,7 +16,7 @@ struct cell* create_cell()
   struct cell* c = malloc(sizeof(struct cell));
   if(c == 0) abort();
   c->x = 0;
-  //@ close cell(c, 0);
+
   return c;
 }
 
@@ -24,27 +24,27 @@ void cell_set(struct cell* c, int v)
   //@ requires cell(c, _);
   //@ ensures cell(c, v);
 {
-  //@ open cell(c, _);
+
   c->x = v;
-  //@ close cell(c, v);
+
 }
 
 void cell_inc(struct cell* c, int v)
   //@ requires cell(c, ?x) &*& INT_MIN - v <= x &*& x <= INT_MAX - v;
   //@ ensures cell(c, x + v);
 {
-  //@ open cell(c, x);
+
   c->x += v;
-  //@ close cell(c, x + v);
+
 }
 
 int cell_get(struct cell* c)
   //@ requires cell(c, ?v);
   //@ ensures cell(c, v) &*& result == v;
 {
-  //@ open cell(c, v);
+
   return c->x;
-  //@ close cell(c, v);
+
 }
 
 void cell_swap(struct cell* c1, struct cell* c2)
@@ -61,7 +61,7 @@ void cell_dispose(struct cell* c)
   //@ requires cell(c, _);
   //@ ensures true;
 {
-  //@ open cell(c, _);
+
   free(c);
 }
 
