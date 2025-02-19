@@ -57,7 +57,7 @@ struct list *create_list()
 }
 
 int list_length_helper(struct node *n1, struct node *n2)
-  //@ requires lseg(n1, n2, ?vs) &*& node(n2, _, _);
+  //@ requires lseg(n1, n2, ?vs) &*& node(n2, _, _) &*& length(vs) <= INT_MAX;
   //@ ensures lseg(n1, n2, vs) &*& node(n2, _, _) &*& result == length(vs);
 {
   int len;
@@ -68,9 +68,6 @@ int list_length_helper(struct node *n1, struct node *n2)
   } else {
     //@ open node(n1, ?n1v, ?n1n);
     len = list_length_helper(n1->next, n2);
-    if (len == INT_MAX) {
-      abort();
-    }
     len = len + 1;
    //@ close node(n1, n1v, n1n);
   }
@@ -79,7 +76,7 @@ int list_length_helper(struct node *n1, struct node *n2)
 }
 
 int list_length(struct list *l)
-  //@ requires list(l, ?vs);
+  //@ requires list(l, ?vs) &*& length(vs) <= INT_MAX;
   //@ ensures list(l, vs);
 {
   return list_length_helper(l->first, l->last);

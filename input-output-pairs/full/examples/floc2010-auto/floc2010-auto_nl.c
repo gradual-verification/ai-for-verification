@@ -55,9 +55,6 @@ int list_length_helper(struct node *n1, struct node *n2)
     len = 0;
   } else {
     len = list_length_helper(n1->next, n2);
-    if (len == INT_MAX) {
-      abort();
-    }
     len = len + 1;
   }
   return len;
