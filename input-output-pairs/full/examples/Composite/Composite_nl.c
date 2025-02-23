@@ -72,7 +72,7 @@ struct Node* create()
 
 /***
  * Description:
- * The `addLeft` function adds a left child to a given node.
+ * The `addLeft` function adds a left child to a given node and returns the newly added child
  *
  * @param node - A pointer to the node where the left child should be added.
  *

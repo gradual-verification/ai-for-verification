@@ -33,6 +33,8 @@ void tokenizer_fill_buffer(struct tokenizer* tokenizer)
 	{
 	        charreader *reader = tokenizer->next_char;
 	        int result = reader();
+			if (result < -128 || result > 127)
+				abort();
 		tokenizer->lastread = result;
 	}
 }
@@ -254,4 +256,30 @@ void print_token(struct tokenizer* tokenizer)
 		puts("BADCHAR");
 		break;
 	}
+}
+
+int my_getchar() //@ : charreader
+	//@ requires true;
+	//@ ensures true;
+{
+	return getchar();
+}
+
+int main()
+ //@ requires true;
+ //@ ensures true;
+{
+	struct tokenizer* tokenizer = tokenizer_create(my_getchar);
+
+	for (;;)
+	{
+		int result = tokenizer_next(tokenizer);
+		if (result == -1) break;
+		print_token(tokenizer);
+	}
+	
+	tokenizer_dispose(tokenizer);
+
+	puts("The end");
+	return 0;
 }

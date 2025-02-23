@@ -162,23 +162,8 @@ void thread1(struct data *d) //@ : thread_run_joinable
    
     struct barrier *barrier = d->barrier;
     {
-        /*@
-        predicate_family_instance barrier_incoming(enter)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit_) =
-            n == 2 &*& inv == my_barrier_inv(d) &*& exit_ == bexit &*&
-            [1/2]d->phase1 |-> writing_x &*& [1/2]d->inside1 |-> false &*&
-            [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> ?_;
-        predicate_family_instance barrier_inside(bexit)(int n, predicate(int k, bool outgoing) inv) =
-            n == 2 &*& inv == my_barrier_inv(d) &*&
-            [1/2]d->phase1 |-> writing_x &*& [1/2]d->inside1 |-> true;
-        predicate_family_instance barrier_exiting(bexit)(int n, predicate(int k, bool outgoing) inv) =
-            n == 2 &*& inv == my_barrier_inv(d) &*&
-            [1/2]d->phase1 |-> writing_y &*& [1/2]d->inside1 |-> false &*&
-            [1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y1 |-> ?_;
-        
-        @*/
-
-        
-        struct barrier(barrier);
+   
+        barrier(barrier);
 
     }
     int N = 0;
@@ -190,22 +175,8 @@ void thread1(struct data *d) //@ : thread_run_joinable
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->y1 = a1 + 2 * a2;
         {
-            /*@
-            predicate_family_instance barrier_incoming(enter)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit_) =
-                n == 2 &*& inv == my_barrier_inv(d) &*& exit_ == bexit &*&
-                [1/2]d->phase1 |-> writing_y &*& [1/2]d->inside1 |-> false &*&
-                [1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y1 |-> ?_;
-            predicate_family_instance barrier_inside(bexit)(int n, predicate(int k, bool outgoing) inv) =
-                n == 2 &*& inv == my_barrier_inv(d) &*&
-                [1/2]d->phase1 |-> writing_y &*& [1/2]d->inside1 |-> true;
-            predicate_family_instance barrier_exiting(bexit)(int n, predicate(int k, bool outgoing) inv) =
-                n == 2 &*& inv == my_barrier_inv(d) &*&
-                [1/2]d->phase1 |-> writing_x &*& [1/2]d->inside1 |-> false &*&
-                [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> ?_;
             
-            @*/
-            
-            struct barrier(barrier);
+            barrier(barrier);
            
         }
         a1 = d->y1;
@@ -215,42 +186,14 @@ void thread1(struct data *d) //@ : thread_run_joinable
         N = N + 1;
         d->i = N;
         {
-            /*@
-            predicate_family_instance barrier_incoming(enter)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit_) =
-                n == 2 &*& inv == my_barrier_inv(d) &*& exit_ == bexit &*&
-                [1/2]d->phase1 |-> writing_x &*& [1/2]d->inside1 |-> false &*&
-                [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> ?_;
-            predicate_family_instance barrier_inside(bexit)(int n, predicate(int k, bool outgoing) inv) =
-                n == 2 &*& inv == my_barrier_inv(d) &*&
-                [1/2]d->phase1 |-> writing_x &*& [1/2]d->inside1 |-> true;
-            predicate_family_instance barrier_exiting(bexit)(int n, predicate(int k, bool outgoing) inv) =
-                n == 2 &*& inv == my_barrier_inv(d) &*&
-                [1/2]d->phase1 |-> writing_y &*& [1/2]d->inside1 |-> false &*&
-                [1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y1 |-> ?_;
             
-            @*/
-            
-            struct barrier(barrier);
+            barrier(barrier);
 
         }
     }
     {
-        /*@
-        predicate_family_instance barrier_incoming(enter)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit_) =
-            n == 2 &*& inv == my_barrier_inv(d) &*& exit_ == bexit &*&
-            [1/2]d->phase1 |-> writing_y &*& [1/2]d->inside1 |-> false &*&
-            [1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y1 |-> ?_;
-        predicate_family_instance barrier_inside(bexit)(int n, predicate(int k, bool outgoing) inv) =
-            n == 2 &*& inv == my_barrier_inv(d) &*&
-            [1/2]d->phase1 |-> writing_y &*& [1/2]d->inside1 |-> true;
-        predicate_family_instance barrier_exiting(bexit)(int n, predicate(int k, bool outgoing) inv) =
-            n == 2 &*& inv == my_barrier_inv(d) &*&
-            [1/2]d->phase1 |-> writing_x &*& [1/2]d->inside1 |-> false &*&
-            [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> ?_;
         
-        @*/
-        
-        struct barrier(barrier);
+        barrier(barrier);
 
     }
     d->i = 0;
@@ -276,22 +219,8 @@ void thread2(struct data *d) //@ : thread_run_joinable
    
     struct barrier *barrier = d->barrier;
     {
-        /*@
-        predicate_family_instance barrier_incoming(enter)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit_) =
-            n == 2 &*& inv == my_barrier_inv(d) &*& exit_ == bexit &*&
-            [1/2]d->phase2 |-> writing_x &*& [1/2]d->inside2 |-> false &*&
-            [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x2 |-> ?_;
-        predicate_family_instance barrier_inside(bexit)(int n, predicate(int k, bool outgoing) inv) =
-            n == 2 &*& inv == my_barrier_inv(d) &*&
-            [1/2]d->phase2 |-> writing_x &*& [1/2]d->inside2 |-> true;
-        predicate_family_instance barrier_exiting(bexit)(int n, predicate(int k, bool outgoing) inv) =
-            n == 2 &*& inv == my_barrier_inv(d) &*&
-            [1/2]d->phase2 |-> writing_y &*& [1/2]d->inside2 |-> false &*&
-            [1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y2 |-> ?_ &*& d->i |-> ?_;
-       
-        @*/
         
-        struct barrier(barrier);
+        barrier(barrier);
         
     }
     int m = 0;
@@ -303,22 +232,8 @@ void thread2(struct data *d) //@ : thread_run_joinable
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->y2 = a1 + 3 * a2;
         {
-            /*@
-            predicate_family_instance barrier_incoming(enter)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit_) =
-                n == 2 &*& inv == my_barrier_inv(d) &*& exit_ == bexit &*&
-                [1/2]d->phase2 |-> writing_y &*& [1/2]d->inside2 |-> false &*&
-                [1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y2 |-> ?_ &*& d->i |-> ?_;
-            predicate_family_instance barrier_inside(bexit)(int n, predicate(int k, bool outgoing) inv) =
-                n == 2 &*& inv == my_barrier_inv(d) &*&
-                [1/2]d->phase2 |-> writing_y &*& [1/2]d->inside2 |-> true;
-            predicate_family_instance barrier_exiting(bexit)(int n, predicate(int k, bool outgoing) inv) =
-                n == 2 &*& inv == my_barrier_inv(d) &*&
-                [1/2]d->phase2 |-> writing_x &*& [1/2]d->inside2 |-> false &*&
-                [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x2 |-> ?_;
             
-            @*/
-            
-            struct barrier(barrier);
+            barrier(barrier);
            
         }
         a1 = d->y1;
@@ -326,43 +241,15 @@ void thread2(struct data *d) //@ : thread_run_joinable
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->x2 = a1 + 3 * a2;
         {
-            /*@
-            predicate_family_instance barrier_incoming(enter)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit_) =
-                n == 2 &*& inv == my_barrier_inv(d) &*& exit_ == bexit &*&
-                [1/2]d->phase2 |-> writing_x &*& [1/2]d->inside2 |-> false &*&
-                [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x2 |-> ?_;
-            predicate_family_instance barrier_inside(bexit)(int n, predicate(int k, bool outgoing) inv) =
-                n == 2 &*& inv == my_barrier_inv(d) &*&
-                [1/2]d->phase2 |-> writing_x &*& [1/2]d->inside2 |-> true;
-            predicate_family_instance barrier_exiting(bexit)(int n, predicate(int k, bool outgoing) inv) =
-                n == 2 &*& inv == my_barrier_inv(d) &*&
-                [1/2]d->phase2 |-> writing_y &*& [1/2]d->inside2 |-> false &*&
-                [1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y2 |-> ?_ &*& d->i |-> ?_;
-            
-            @*/
            
-            struct barrier(barrier);
+            barrier(barrier);
           
         }
         m = d->i;
     }
     {
-        /*@
-        predicate_family_instance barrier_incoming(enter)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit_) =
-            n == 2 &*& inv == my_barrier_inv(d) &*& exit_ == bexit &*&
-            [1/2]d->phase2 |-> writing_y &*& [1/2]d->inside2 |-> false &*&
-            [1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y2 |-> ?_ &*& d->i |-> ?_;
-        predicate_family_instance barrier_inside(bexit)(int n, predicate(int k, bool outgoing) inv) =
-            n == 2 &*& inv == my_barrier_inv(d) &*&
-            [1/2]d->phase2 |-> writing_y &*& [1/2]d->inside2 |-> true;
-        predicate_family_instance barrier_exiting(bexit)(int n, predicate(int k, bool outgoing) inv) =
-            n == 2 &*& inv == my_barrier_inv(d) &*&
-            [1/2]d->phase2 |-> writing_x &*& [1/2]d->inside2 |-> false &*&
-            [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x2 |-> ?_;
         
-        @*/
-        
-        struct barrier(barrier);
+        barrier(barrier);
        
     }
     

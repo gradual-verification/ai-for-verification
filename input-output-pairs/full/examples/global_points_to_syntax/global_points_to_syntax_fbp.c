@@ -43,12 +43,8 @@ int main() //@ : main_full(global_points_to_syntax)
     //@ requires module(global_points_to_syntax, true);
     //@ ensures true;
 {
-    //@ open_module();
-
     modify_primitive_globals_old_syntax();
     modify_primitive_globals_new_syntax();
-    
-    //@ leak global1 |-> _ &*& global2 |-> _ &*& global3 |-> _ &*& global4 |-> _ &*& global5 |-> _;
 
     return 0;
 }

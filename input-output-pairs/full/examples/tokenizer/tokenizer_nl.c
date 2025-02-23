@@ -31,6 +31,8 @@ void tokenizer_fill_buffer(struct tokenizer* tokenizer)
 	{
 	        charreader *reader = tokenizer->next_char;
 	        int result = reader();
+			if (result < -128 || result > 127)
+				abort();
 		tokenizer->lastread = result;
 	}
 }
@@ -327,4 +329,35 @@ void print_token(struct tokenizer* tokenizer)
 		puts("BADCHAR");
 		break;
 	}
+}
+
+/***
+ * Description:
+The my_getchar function acts as a char reader and returns an integer read.
+*/
+int my_getchar() //@ : charreader
+{
+	return getchar();
+}
+
+/***
+ * Description:
+The main function first creates a tokenizer, then continue reading and printing the tokens,
+and finally free the tokenizer.
+*/
+int main()
+{
+	struct tokenizer* tokenizer = tokenizer_create(my_getchar);
+
+	for (;;)
+	{
+		int result = tokenizer_next(tokenizer);
+		if (result == -1) break;
+		print_token(tokenizer);
+	}
+	
+	tokenizer_dispose(tokenizer);
+
+	puts("The end");
+	return 0;
 }

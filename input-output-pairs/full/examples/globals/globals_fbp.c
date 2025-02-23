@@ -17,11 +17,10 @@ void m()
     c->f = c->f + 1;
 }
 
-int main() //@ : main_full(globals)
-//@ requires module(globals, true);
+int main() //@ : main_full(globals_fbp)
+//@ requires module(globals_m, true);
 //@ ensures true;
 {
-    //@ open_module();
     x = 7;
     struct counter *ctr = malloc(sizeof(struct counter));
     if (ctr == 0) abort();
@@ -31,6 +30,5 @@ int main() //@ : main_full(globals)
     int ctr_f = ctr->f;
     assert(ctr_f == 43);
     free(ctr);
-    //@ leak integer(&x, _) &*& pointer(&c, _);
     return 0;
 }
