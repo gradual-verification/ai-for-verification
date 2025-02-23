@@ -4,14 +4,11 @@ struct Counter {
   int value;
 };
 
-/*@
-predicate Counter(struct Counter* c; int v) =
-  c->value |-> v &*& malloc_block_Counter(c);
-@*/
-
+/*init() function
+-params: int v
+-description: initializes a Counter struct with the given value
+*/
 struct Counter* init(int v)
-  //@ requires emp;
-  //@ ensures Counter(result, v);
 {
   struct Counter* c = malloc(sizeof(struct Counter));
   if (c == 0) {
@@ -21,24 +18,30 @@ struct Counter* init(int v)
   return c;
 }
 
+/*increment() function
+-params: struct Counter* c
+-description: increments the value of the Counter struct by 1
+*/
 void increment(struct Counter* c)
-  //@ requires Counter(c, ?v) &*& v < INT_MAX;
-  //@ ensures Counter(c, v+1);
 {
   int tmp = c->value;
   c->value = tmp + 1;
 }
 
+/*dispose() function
+-params: struct Counter* c
+-description: frees the memory allocated for the Counter struct
+*/
 void dispose(struct Counter* c)
-  //@ requires Counter(c, _);
-  //@ ensures emp;
 {
   free(c);
 }
 
+/*swap() function
+-params: struct Counter* c1, struct Counter* c2
+-description: swaps the values of the two Counter structs
+*/
 void swap(struct Counter* c1, struct Counter* c2)
-  //@ requires Counter(c1, ?v1) &*& Counter(c2, ?v2);
-  //@ ensures Counter(c1, v2) &*& Counter(c2, v1); 
 {
   int tmp1 = c1->value;
   int tmp2 = c2->value;
@@ -46,16 +49,20 @@ void swap(struct Counter* c1, struct Counter* c2)
   c1->value = tmp2;
 }
 
+/*get() function
+-params: struct Counter* c
+-description: returns the value of the Counter struct
+*/
 int get(struct Counter* c)
-  //@ requires Counter(c, ?v);
-  //@ ensures Counter(c, v) &*& result==v; 
 {
   return c->value;
 }
 
+/*main() function
+-params: void
+-description: main function to test the Counter struct
+*/
 int main() //@ : main
-  //@ requires emp;
-  //@ ensures emp;
 {
   struct Counter* c1 = init(0); struct Counter* c2 = init(5);
 

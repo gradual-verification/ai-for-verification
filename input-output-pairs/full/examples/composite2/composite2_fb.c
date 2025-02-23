@@ -55,30 +55,23 @@ struct node *create_tree()
         abort();
     }
     n->left = 0;
-    //@ close subtree(0, n, 0);
     n->right = 0;
-    //@ close subtree(0, n, 0);
     n->parent = 0;
     n->count = 1;
-    //@ close subtree(n, 0, 1);
-    //@ close context(n, 0, 1);
-    //@ close tree(n);
     return n;
 }
 
 int subtree_get_count(struct node *node)
     //@ requires subtree(node, ?parent, ?count);
-    //@ ensures subtree(node, parent, count) &*& result == count;// &*& result >= 0;
+    //@ ensures subtree(node, parent, count);
 {
     int result = 0;
-    //@ open subtree(node, parent, count);
     if (node == 0) {
     } else {
         result = node->count;
         // @ assert result >= 0; // Explicitly state the expectation
 
     }
-    //@ close subtree(node, parent, count);
     return result;
 }
 
@@ -86,9 +79,7 @@ int tree_get_count(struct node *node)
     //@ requires tree(node);
     //@ ensures tree(node);
 {
-    //@ open tree(node);
     int result = subtree_get_count(node);
-    //@ close tree(node);
     return result;
 }
 
@@ -96,9 +87,7 @@ void fixup_ancestors(struct node *node, struct node *parent, int count)
     //@ requires context(node, parent, ?oldCount);
     //@ ensures context(node, parent, count);
 {
-//@ open context(node, parent, oldCount);
     if (parent == 0) {
-        //@ close context(node, parent, count);
     } else {
         struct node *left = parent->left;
         struct node *right = parent->right;
@@ -119,7 +108,6 @@ void fixup_ancestors(struct node *node, struct node *parent, int count)
         int parentCount = 1 + leftCount + rightCount;
         parent->count = parentCount;
         fixup_ancestors(parent, grandparent, parentCount);
-        //@ close context(node, parent, count);
     }
 }
 
@@ -127,7 +115,6 @@ struct node *tree_add_left(struct node *node)
     //@ requires tree(node);
     //@ ensures tree(result);
 {
-    //@ open tree(node);
     if (node == 0) {
         abort();
     }
@@ -136,27 +123,18 @@ struct node *tree_add_left(struct node *node)
         if (n == 0) {
             abort();
         }
-        //@ malloc_node_success(n);
         n->left = 0;
-        //@ close subtree(0, n, 0);
         n->right = 0;
-        //@ close subtree(0, n, 0);
         n->parent = node;
         n->count = 1;
-        //@ close subtree(n, node, 1);
-        //@ open subtree(node, ?parent, ?count);
         {
             struct node *nodeLeft = node->left;
             if (nodeLeft != 0) {
                 abort();
             }
-            //@ open subtree(nodeLeft, node, _);
             node->left = n;
-            //@ prove_disjoint(n, node->right);
-            //@ close context(n, node, 0);
             fixup_ancestors(n, node, 1);
         }
-        //@ close tree(n);
         return n;
     }
 }
@@ -165,7 +143,6 @@ struct node *tree_add_right(struct node *node)
     //@ requires tree(node);
     //@ ensures tree(result);
 {
-    //@ open tree(node);
     if (node == 0) {
         abort();
     }
@@ -174,27 +151,18 @@ struct node *tree_add_right(struct node *node)
         if (n == 0) {
             abort();
         }
-        //@ malloc_node_success(n);
         n->left = 0;
-        //@ close subtree(0, n, 0);
         n->right = 0;
-        //@ close subtree(0, n, 0);
         n->parent = node;
         n->count = 1;
-        //@ close subtree(n, node, 1);
-        //@ open subtree(node, ?parent, ?count);
         {
             struct node *nodeRight = node->right;
             if (nodeRight != 0) {
                 abort();
             }
-            //@ open subtree(nodeRight, node, _);
             node->right = n;
-            //@ prove_disjoint(n, node->left);
-            //@ close context(n, node, 0);
             fixup_ancestors(n, node, 1);
         }
-        //@ close tree(n);
         return n;
     }
 }
@@ -203,8 +171,6 @@ struct node *tree_get_parent(struct node *node)
     //@ requires tree(node);
     //@ ensures tree(result);
 {
-    //@ open tree(node);
-    //@ open subtree(node, ?parent_, ?count);
     if (node == 0) {
         abort();
     }
@@ -213,11 +179,6 @@ struct node *tree_get_parent(struct node *node)
         if (parent == 0) {
             abort();
         }
-        //@ close subtree(node, parent_, count);
-        //@ open context(node, parent_, count);
-        //@ assert context(parent_, ?grandparent, ?parentCount);
-        //@ close subtree(parent_, grandparent, parentCount);
-        //@ close tree(parent_);
         return parent;
     }
 }
@@ -226,16 +187,11 @@ struct node *tree_get_left(struct node *node)
     //@ requires tree(node);
     //@ ensures tree(result);
 {
-    //@ open tree(node);
-    //@ open subtree(node, ?parent, ?count);
     if (node == 0) {
         abort();
     }
     {
         struct node *left = node->left;
-        //@ assert subtree(left, node, ?leftCount);
-        //@ close context(left, node, leftCount);
-        //@ close tree(left);
         return left;
     }
 }
@@ -244,20 +200,11 @@ struct node *tree_get_right(struct node *node)
     //@ requires tree(node);
     //@ ensures tree(result);
 {
-    //@ open tree(node);
-    //@ open subtree(node, ?parent, ?count);
     if (node == 0) {
         abort();
     }
     {
         struct node *right = node->right;
-        //@ struct node *left = node->left;
-        //@ open subtree(left, node, ?leftCount);
-        //@ open subtree(right, node, ?rightCount);
-        //@ close subtree(left, node, leftCount);
-        //@ close subtree(right, node, rightCount);
-        //@ close context(right, node, rightCount);
-        //@ close tree(right);
         return right;
     }
 }
@@ -266,16 +213,12 @@ bool tree_has_parent(struct node *node)
     //@ requires tree(node);
     //@ ensures tree(node);
 {
-    //@ open tree(node);
-    //@ open subtree(node, ?parent_, ?count);
     bool result = false;
     if (node == 0) {
     } else {
         struct node *parent = node->parent;
         result = parent != 0;
     }
-    //@ close subtree(node, parent_, count);
-    //@ close tree(node);
     return result;
 }
 
@@ -283,16 +226,12 @@ bool tree_has_left(struct node *node)
     //@ requires tree(node);
     //@ ensures tree(node);
 {
-    //@ open tree(node);
-    //@ open subtree(node, ?parent, ?count);
     bool result = false;
     if (node == 0) {
     } else {
         struct node *left = node->left;
         result = left != 0;
     }
-    //@ close subtree(node, parent, count);
-    //@ close tree(node);
     return result;
 }
 
@@ -300,16 +239,12 @@ bool tree_has_right(struct node *node)
     //@ requires tree(node);
     //@ ensures tree(node);
 {
-    //@ open tree(node);
-    //@ open subtree(node, ?parent, ?count);
     bool result = false;
     if (node == 0) {
     } else {
         struct node *right = node->right;
         result = right != 0;
     }
-    //@ close subtree(node, parent, count);
-    //@ close tree(node);
     return result;
 }
 
@@ -317,7 +252,6 @@ void dispose_node(struct node *node)
     //@ requires subtree(node, _, _);
     //@ ensures emp;
 {
-    //@ open subtree(node, _, _);
     if (node == 0) {
     } else {
         {
@@ -339,15 +273,11 @@ void tree_dispose(struct node *node)
     if (node == 0) {
         abort();
     }
-    //@ open tree(node);
-    //@ open context(node, ?parent_, ?count);
-    //@ open subtree(node, parent_, count);
     {
         struct node *parent = node->parent;
         if (parent != 0) {
             abort();
         }
-        //@ close subtree(node, parent_, count);
     }
     dispose_node(node);
 }

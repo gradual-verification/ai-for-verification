@@ -84,12 +84,7 @@ void only_allow_incrementing(int* c)
   //@ ensures [f]cell(c, incr_only) &*& last_seen(c, currentThread, _);
 {
   int x1 = atomic_load(c);
-  //@ assert last_seen(c, currentThread, ?trace1);
-  //@ last_seen_allowed(c, currentThread);
   int x2 = atomic_load(c);
-  //@ assert last_seen(c, currentThread, ?trace2);
-  //@ last_seen_allowed(c, currentThread);
-  //@ prefix_smaller(trace1, trace2, currentThread);
   assert x1 <= x2;
 }
 
@@ -118,7 +113,7 @@ void acquire(int* c)
   //@ ensures [f]cell(c, is_lock) &*& last_seen(c, currentThread, ?trace1) &*& lock_owner(trace1) == some(currentThread);
 {
   while(true)
-    //@ invariant [f]cell(c, is_lock) &*& last_seen(c, currentThread, ?trace0);
+    
   {
     /*@
     {
@@ -131,7 +126,6 @@ void acquire(int* c)
       produce_lemma_function_pointer_chunk(acquire_ok) : cas_allowed(trace0, is_lock, 0, 1)(x) { call(); };
     }
     @*/
-  //@ last_seen_allowed(c, currentThread);
     int read = atomic_cas(c, 0, 1);
     if(read == 0) {
       break;
@@ -189,7 +183,6 @@ void release(int* c)
   //@ requires [?f]cell(c, is_lock) &*& last_seen(c, currentThread, ?trace0) &*& lock_owner(trace0) == some(currentThread);
   //@ ensures [f]cell(c, is_lock) &*& last_seen(c, currentThread, ?trace1) &*& lock_owner(trace1) == none;
 {
-  //@ int ctid = currentThread;
   /*@
   {
     lemma void release_ok(trace trace)

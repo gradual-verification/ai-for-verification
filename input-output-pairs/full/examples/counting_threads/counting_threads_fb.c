@@ -20,22 +20,17 @@ void m(void *data) //@ : thread_run_joinable
     //@ requires thread_run_pre(m)(data, ?info);
     //@ ensures thread_run_post(m)(data, info);
 {
-    //@ open thread_run_pre(m)(_, _);
     int x = cell;
-    //@ close thread_run_post(m)(data, info);
 }
 
 void process(int n)
-    //@ requires integer(&cell, ?v) &*& 0 <= n &*& 0 <= n * sizeof(struct thread *) &*& n * sizeof(struct thread *) <= INT_MAX;
+    //@ requires integer(&cell, ?v);
     //@ ensures integer(&cell, v);
 {
-    //@ start_counting(integer, &cell);
     
     // Allocate memory for thread pointers
     struct thread **threads = malloc(n * sizeof(struct thread *));
     if (threads == 0) abort();
-
-    //@ close foreach(nil, thread_info);
 
     // Start threads
     for (int i = 0; i < n; i++)
@@ -48,17 +43,8 @@ void process(int n)
             &*& counting(integer, &cell, i, v);
         @*/
     {
-        //@ create_ticket(integer, &cell);
-        //@ close thread_run_pre(m)(0, unit);
         struct thread *t = thread_start_joinable(m, 0);
         threads[i] = t; // <-- Changed from *(threads + i) = t; to threads[i] = t;
-
-        //@ close foreach(nil, thread_info);
-        //@ close thread_info(t);
-        //@ close foreach(cons(t, nil), thread_info);
-        //@ close pointers(threads + i, 1, _);
-        //@ foreach_append(ts, cons(t, nil));
-        //@ pointers_join(threads);
     }
     
     // Join threads
@@ -72,18 +58,8 @@ void process(int n)
             &*& counting(integer, &cell, n - i, v);
         @*/
     {
-        //@ pointer_limits(threads + i);
         struct thread *t = threads[i]; // <-- Changed from *(threads + i) to threads[i]
-        //@ open foreach(_, _);
-        //@ open thread_info(t);
         thread_join(t);
-        //@ open thread_run_post(m)(_, _);
-        //@ destroy_ticket(integer, &cell);
-        //@ close pointers_(threads + i, 1, _);
-        //@ pointers__join(threads);
     }
-    //@ open foreach(_, _);
-    
-    //@ stop_counting(integer, &cell);
     free(threads);
 }

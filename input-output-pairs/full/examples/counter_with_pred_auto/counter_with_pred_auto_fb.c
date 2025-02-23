@@ -22,7 +22,7 @@ struct Counter* init(int v)
 }
 
 void increment(struct Counter* c)
-  //@ requires Counter(c, ?v) &*& v < INT_MAX;
+  //@ requires Counter(c, ?v);
   //@ ensures Counter(c, v+1);
 {
   int tmp = c->value;
@@ -48,7 +48,7 @@ void swap(struct Counter* c1, struct Counter* c2)
 
 int get(struct Counter* c)
   //@ requires Counter(c, ?v);
-  //@ ensures Counter(c, v) &*& result==v; 
+  //@ ensures Counter(c, v); 
 {
   return c->value;
 }

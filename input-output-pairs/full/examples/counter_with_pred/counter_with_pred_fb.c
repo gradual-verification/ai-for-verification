@@ -5,7 +5,7 @@ struct Counter {
 };
 
 /*@
-predicate Counter(struct Counter* c; int v) =
+predicate Counter(struct Counter* c, int v) =
   c->value |-> v &*& malloc_block_Counter(c);
 @*/
 
@@ -18,11 +18,12 @@ struct Counter* init(int v)
     abort();
   }
   c->value = v;
+
   return c;
 }
 
 void increment(struct Counter* c)
-  //@ requires Counter(c, ?v) &*& v < INT_MAX;
+  //@ requires Counter(c, ?v);
   //@ ensures Counter(c, v+1);
 {
   int tmp = c->value;
@@ -48,9 +49,10 @@ void swap(struct Counter* c1, struct Counter* c2)
 
 int get(struct Counter* c)
   //@ requires Counter(c, ?v);
-  //@ ensures Counter(c, v) &*& result==v; 
+  //@ ensures Counter(c, v); 
 {
-  return c->value;
+  int tmp = c->value;
+  return tmp;
 }
 
 int main() //@ : main
@@ -60,8 +62,7 @@ int main() //@ : main
   struct Counter* c1 = init(0); struct Counter* c2 = init(5);
 
   increment(c1); swap(c1, c2); int tmp = get(c2);
-  assert(tmp == 1);
-  
+
   dispose(c1); dispose(c2);
   return 0;
 }

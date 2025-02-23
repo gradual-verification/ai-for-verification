@@ -56,15 +56,11 @@ void contribute(void *data) //@ : thread_run_joinable
     //@ requires thread_run_pre(contribute)(data, ?info) &*& lockset(currentThread, nil);
     //@ ensures thread_run_post(contribute)(data, info) &*& lockset(currentThread, nil);
 {
-    //@ open thread_run_pre(contribute)(data, _);
     struct session *session = data;
-    //@ open contribute_pre(session, ?box1, ?handle1, ?box2, ?handle2, ?thisBox, _, _);
     struct lock *lock = session->lock;
     struct sum *sumObject = session->sum_object;
     free(session);
     lock_acquire(lock);
-    //@ open sum(sumObject, box1, handle1, box2, handle2)();
-    //@ if (thisBox == box1) {} else {}
     /*@
     consuming_box_predicate contrib_box(thisBox, 0, _)
     consuming_handle_predicate contrib_handle(thisBox == box1 ? handle1 : handle2, _)
@@ -79,9 +75,7 @@ void contribute(void *data) //@ : thread_run_joinable
     producing_box_predicate contrib_box(1, thisBox == box1 ? handle1 : handle2)
     producing_handle_predicate contrib_handle(thisBox == box1 ? handle1 : handle2, 1);
     @*/
-    //@ close sum(sumObject, box1, handle1, box2, handle2)();
     lock_release(lock);
-    //@ close thread_run_post(contribute)(session, contribute_info(box1, handle1, box2, handle2, thisBox, sumObject, lock));
 }
 
 int main()
@@ -101,8 +95,6 @@ int main()
     create_box box2 = contrib_box(0, handle2)
     and_handle handle2 = contrib_handle(0);
     @*/
-    //@ close sum(sumObject, box1, handle1, box2, handle2)();
-    //@ close create_lock_ghost_args(sum(sumObject, box1, handle1, box2, handle2), nil, nil);
     struct lock *lock = create_lock();
     
     struct session *session1 = malloc(sizeof(struct session));
@@ -111,8 +103,6 @@ int main()
     }
     session1->sum_object = sumObject;
     session1->lock = lock;
-    //@ close contribute_pre(session1, box1, handle1, box2, handle2, box1, sumObject, lock);
-    //@ close thread_run_pre(contribute)(session1, contribute_info(box1, handle1, box2, handle2, box1, sumObject, lock));
     struct thread *thread1 = thread_start_joinable(contribute, session1);
     
     struct session *session2 = malloc(sizeof(struct session));
@@ -121,18 +111,13 @@ int main()
     }
     session2->sum_object = sumObject;
     session2->lock = lock;
-    //@ close contribute_pre(session2, box1, handle1, box2, handle2, box2, sumObject, lock);
-    //@ close thread_run_pre(contribute)(session2, contribute_info(box1, handle1, box2, handle2, box2, sumObject, lock));
     struct thread *thread2 = thread_start_joinable(contribute, session2);
     
     thread_join(thread1);
-    //@ open thread_run_post(contribute)(session1, contribute_info(box1, handle1, box2, handle2, box1, sumObject, lock));
     
     thread_join(thread2);
-    //@ open thread_run_post(contribute)(session2, contribute_info(box1, handle1, box2, handle2, box2, sumObject, lock));
     
     lock_dispose(lock);
-    //@ open sum(sumObject, box1, handle1, box2, handle2)();
     
     // The following perform_action statement is only to show contrib_handle(_, box1, 1)
     /*@
@@ -142,8 +127,6 @@ int main()
     producing_box_predicate contrib_box(1, owner1)
     producing_handle_predicate contrib_box_handle(box1handle);
     @*/
-    //@ dispose_box contrib_box(box1, _, _);
-    //@ leak contrib_box_handle(_, box1);
     
     // The following perform_action statement is only to show contrib_handle(_, box2, 1)
     /*@
@@ -153,8 +136,6 @@ int main()
     producing_box_predicate contrib_box(1, owner2)
     producing_handle_predicate contrib_box_handle(box2handle);
     @*/
-    //@ dispose_box contrib_box(box2, _, _);
-    //@ leak contrib_box_handle(_, _);
     
     int sum = sumObject->sum;
     assert(sum == 2);
