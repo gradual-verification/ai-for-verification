@@ -181,9 +181,7 @@ struct node *tree_add_right(struct node *node)
     n->count = 1;
     {
         struct node *nodeRight = node->right;
-        //@ open subtree(nodeRight, node, empty);
         node->right = n;
-        //@ close context(n, node, 0, right_context(contextNodes, node, leftNodes));
         fixup_ancestors(n, node, 1);
     }
     return n;
@@ -204,14 +202,6 @@ struct node *tree_get_parent(struct node *node)
     @*/
 {
     struct node *parent = node->parent;
-    /*@ switch (contextNodes) {
-            case root:
-            case left_context(parentContextNodes1, parent0, rightNodes):
-                close subtree(parent, grandparent, tree(parent, subtreeNodes, rightNodes));
-            case right_context(parentContextNodes1, parent0, leftNodes):
-                close subtree(parent, grandparent, tree(parent, leftNodes, subtreeNodes));
-        }
-    @*/
     return parent;
 }
 

@@ -16,7 +16,7 @@ void abort();
 
 /*create_tree function
 -param: void
--description: The function creates a tree and returns it.
+-description: The function creates a tree with one node and returns it.
 */
 struct node *create_tree()
 {
@@ -36,8 +36,6 @@ struct node *create_tree()
 -description: The function gets the count of the current node.
 */
 int subtree_get_count(struct node *node)
-    //@ requires subtree(node, ?parent, ?nodes);
-    //@ ensures subtree(node, parent, nodes);
 {
     int result = 0;
     if (node == 0) {
@@ -92,7 +90,7 @@ void fixup_ancestors(struct node *node, struct node *parent, int count)
 /*tree_add_left function
 -param: struct node *node
 -description: The function adds a left node to the
-current node.
+current node. It requires that before the call, the current node is non-empty and its left node is empty.
 */
 struct node *tree_add_left(struct node *node)
 {
@@ -115,7 +113,7 @@ struct node *tree_add_left(struct node *node)
 /*tree_add_right function
 -param: struct node *node
 -description: The function adds a right node to the
-current node.
+current node. It requires that before the call, the current node is non-empty and its right node is empty.
 */
 struct node *tree_add_right(struct node *node)
 {
@@ -138,41 +136,20 @@ struct node *tree_add_right(struct node *node)
 /*tree_get_parent function
 -param: struct node *node
 -description: The function gets the parent of the
-current node.
+current node. It requires that before the call, the current node and its parent node are non-empty.
 */
 struct node *tree_get_parent(struct node *node)
 {
     struct node *parent = node->parent;
-    /*@ switch (contextNodes) {
-            case root:
-            case left_context(parentContextNodes1, parent0, rightNodes):
-                close subtree(parent, grandparent, tree(parent, subtreeNodes, rightNodes));
-            case right_context(parentContextNodes1, parent0, leftNodes):
-                close subtree(parent, grandparent, tree(parent, leftNodes, subtreeNodes));
-        }
-    @*/
     return parent;
 }
 
 /*tree_get_left function
 -param: struct node *node
 -description: The function gets the left node of the
-current node.
+current node. It requires that before the call, the current node and its left node are non-empty.
 */
 struct node *tree_get_left(struct node *node)
-    /*@ requires tree(node, ?contextNodes, ?subtreeNodes) &*&
-            switch (subtreeNodes) {
-                case empty: return false;
-                case tree(node0, leftNodes, rightNodes): return leftNodes != empty;
-            };
-    @*/
-    /*@ ensures
-            switch (subtreeNodes) {
-                case empty: return false;
-                case tree(node0, leftNodes, rightNodes):
-                    return tree(result, left_context(contextNodes, node, rightNodes), leftNodes);
-            };
-    @*/
 {
     struct node *left = node->left;
     return left;
@@ -181,7 +158,7 @@ struct node *tree_get_left(struct node *node)
 /*tree_get_right function
 -param: struct node *node
 -description: The function gets the right node of the
-current node.
+current node. It requires that before the call, the current node and its right node are non-empty.
 */
 struct node *tree_get_right(struct node *node)
 {
@@ -192,11 +169,9 @@ struct node *tree_get_right(struct node *node)
 /*tree_has_parent function
 -param: struct node *node
 -description: The function checks if the parent of the
-current node is not empty.
+current node is not empty. It requires that before the call, the current node is non-empty.
 */
 bool tree_has_parent(struct node *node)
-    //@ requires tree(node, ?contextNodes, ?subtreeNodes) &*& subtreeNodes != empty;
-    //@ ensures tree(node, contextNodes, subtreeNodes) &*& result == (contextNodes != root);
 {
     struct node *parent1 = node->parent;
     return parent1 != 0;
@@ -205,16 +180,9 @@ bool tree_has_parent(struct node *node)
 /*tree_has_left function
 -param: struct node *node
 -description: The function checks if the left node of the
-current node is not empty.
+current node is not empty. It requires that before the call, the current node is non-empty.
 */
 bool tree_has_left(struct node *node)
-    /*@ ensures
-            tree(node, contextNodes, subtreeNodes) &*&
-            switch (subtreeNodes) {
-                case empty: return false;
-                case tree(node0, leftNodes, rightNodes): return result == (leftNodes != empty);
-            };
-    @*/
 {
     struct node *left = node->left;
     return left != 0;
@@ -223,7 +191,7 @@ bool tree_has_left(struct node *node)
 /*tree_has_right function
 -param: struct node *node
 -description: The function checks if the right node of the
-current node is not empty.
+current node is not empty. It requires that before the call, the current node is non-empty.
 */
 bool tree_has_right(struct node *node)
 {

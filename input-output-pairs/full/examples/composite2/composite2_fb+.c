@@ -31,15 +31,6 @@ predicate context(struct node *node, struct node *parent, int count) =
 
 predicate tree(struct node *node) = 
     context(node, ?parent, ?count) &*& subtree(node, parent, count);
-
-// for proving the disjoint property of a successfully-malloced node and any other node
-lemma void malloc_node_success(struct node *m);
-  requires m != 0;
-  ensures malloc_block_node(m);
-
-lemma void prove_disjoint(struct node *m, struct node *n);
-  requires malloc_block_node(m);
-  ensures m != n;
 @*/
 
 void abort();
@@ -133,6 +124,9 @@ struct node *tree_add_left(struct node *node)
                 abort();
             }
             node->left = n;
+            if (n == node->right) {
+                abort();
+            }
             fixup_ancestors(n, node, 1);
         }
         return n;
@@ -161,6 +155,9 @@ struct node *tree_add_right(struct node *node)
                 abort();
             }
             node->right = n;
+            if (n == node->left) {
+                abort();
+            }
             fixup_ancestors(n, node, 1);
         }
         return n;

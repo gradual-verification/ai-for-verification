@@ -2,8 +2,8 @@
 #include <stdbool.h>
 
 void swap(int *a, int *b)
-//@ requires integer(a, ?x) &*& integer(b, ?y);
-//@ ensures integer(a, y) &*& integer(b, x);
+//@ requires *a |-> ?x &*& *b |-> ?y;
+//@ ensures *a |-> y &*& *b |-> x;
 {
     int tmp = *a;
     *a = *b;

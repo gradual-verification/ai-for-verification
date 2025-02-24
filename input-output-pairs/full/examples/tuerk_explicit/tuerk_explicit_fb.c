@@ -1,0 +1,41 @@
+// Illustrates VeriFast's implementation of the alternative loop proof rule proposed by [1].
+// [1] Thomas Tuerk. Local Reasoning about While-Loops. VS-Theory workshop at VSTTE 2010.
+
+struct node {
+    struct node *next;
+    int value;
+};
+
+/*@
+
+predicate nodes(struct node *node, list<int> values) =
+    node == 0 ?
+        values == nil
+    :
+        node->next |-> ?next &*& node->value |-> ?value &*& nodes(next, ?values0) &*& values == cons(value, values0);
+@*/
+
+int list_length(struct node *node)
+    //@ requires nodes(node, ?values);
+    //@ ensures nodes(node, values) &*& result == length(values);
+{
+    int i = 0;
+    while (node != 0)
+    {
+        node = node->next;
+        i++;
+    }
+    return i;
+}
+
+int list_length_alt(struct node *node)
+    //@ requires nodes(node, ?values);
+    //@ ensures nodes(node, values) &*& result == length(values);
+{
+    int i;
+    for (i = 0; node != 0; node = node->next, i++)
+    {
+
+    }
+    return i;
+}

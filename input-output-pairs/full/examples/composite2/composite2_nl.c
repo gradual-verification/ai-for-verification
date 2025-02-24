@@ -111,6 +111,9 @@ struct node *tree_add_left(struct node *node)
                 abort();
             }
             node->left = n;
+            if (n == node->right) {
+                abort();
+            }
             fixup_ancestors(n, node, 1);
         }
         return n;
@@ -143,6 +146,9 @@ struct node *tree_add_right(struct node *node)
                 abort();
             }
             node->right = n;
+            if (n == node->left) {
+                abort();
+            }
             fixup_ancestors(n, node, 1);
         }
         return n;
@@ -238,7 +244,7 @@ bool tree_has_right(struct node *node)
 
 /*`dispose_node()` Function:
 - Parameters: Takes a node pointer as input.
-- Description: This function frees the memory allocated for the node */
+- Description: This function frees the memory allocated for the node and its subtree */
 void dispose_node(struct node *node)
 {
     if (node == 0) {
