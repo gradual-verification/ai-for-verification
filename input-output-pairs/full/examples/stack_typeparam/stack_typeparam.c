@@ -215,6 +215,9 @@ void push/*@ <T> @*/(struct stack* stack, void* data)
   //@ close StackItems(Ownership, node, Push(data, info, Stack));
   
   stack->first = node;
+  if (stack->size == INT_MAX) {
+    abort();  // or handle error as necessary
+  }
   stack->size++;
   //@ close Stack(stack, destructor, Ownership, Push(data, info, Stack));
 }
@@ -235,6 +238,9 @@ void* pop/*@ <T> @*/(struct stack* stack)
   void* data = first->data;
   stack->first = first->next;
   free(first);
+  if (stack->size == INT_MIN) {
+    abort();  // or handle error as necessary
+  }
   stack->size--;
   //@ close Stack(stack, destructor, Ownership, tail);
   
