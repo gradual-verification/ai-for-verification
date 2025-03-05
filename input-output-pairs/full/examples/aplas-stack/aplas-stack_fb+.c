@@ -69,7 +69,7 @@ void dispose(struct stack* s)
 
 
 int get_length(struct stack* s) 
-  //@ requires stack(s, ?vs)  &*& length(vs) <= INT_MAX  &*& length(vs) < INT_MAX;
+  //@ requires stack(s, ?vs)  &*& length(vs) <= INT_MAX;
   //@ ensures stack(s, vs) &*& result == length(vs);
 {
   int r = 0;

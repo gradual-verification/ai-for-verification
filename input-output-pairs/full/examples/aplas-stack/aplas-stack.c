@@ -98,7 +98,7 @@ lemma void append_assoc<t>(list<t> l1, list<t> l2, list<t> l3)
 @*/
 
 int get_length(struct stack* s) 
-  //@ requires stack(s, ?vs)  &*& length(vs) <= INT_MAX  &*& length(vs) < INT_MAX;
+  //@ requires stack(s, ?vs)  &*& length(vs) <= INT_MAX;
   //@ ensures stack(s, vs) &*& result == length(vs);
 {
   int r = 0;
