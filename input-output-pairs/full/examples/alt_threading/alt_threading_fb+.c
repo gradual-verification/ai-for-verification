@@ -30,7 +30,7 @@ void increment(int *cell)
 
 int read_int();
     //@ requires true;
-    //@ ensures true;
+    //@ ensures 0 <= result &*& result < INT_MAX;
 
 int main()
     //@ requires true;
