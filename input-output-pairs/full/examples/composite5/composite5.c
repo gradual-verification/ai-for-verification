@@ -1,9 +1,8 @@
 #include "malloc.h"
 #include "stdlib.h"
 #include <stdbool.h>
-//@ #include "ghostlist.gh"
+//@ #include "../ghostlist.gh"
 
-// Some general infrastructure; should be in the VeriFast Library.
 
 /*@
 
@@ -106,14 +105,8 @@ predicate tree(int id) =
   ghost_list<struct node *>(id, ?children) &*& foreach(children, node(id));
 
 predicate tree_membership_fact(int id, struct node *n) = ghost_list_member_handle(id, n);
-
-// setting the bounds for the result of adding count in a brute-force way
-lemma void count_bounded(struct node *n, int delta);
-  requires [?f]n->count |-> ?cnt;
-  ensures [f]n->count |-> cnt &*& cnt + delta <= INT_MAX &*& cnt + delta >= INT_MIN;
 @*/
 
-/* private */
 struct node *create_node(struct node *p, struct node *next)
   //@ requires true;
   /*@
@@ -159,7 +152,6 @@ struct node *create_tree()
 
 //@ predicate tree_id(int id) = true;
 
-/* private */
 void add_to_count(struct node *p, int delta)
   /*@
   requires
@@ -170,7 +162,7 @@ void add_to_count(struct node *p, int delta)
     p->firstChild |-> ?firstChild &*&
     children(firstChild, ?children) &*&
     ghost_list(childrenId, children) &*&
-    foreach2(children, ?childrenCounts, child(id, p)) &*&
+    foreach2(children, ?childrenCounts, child(id, p)) &*& delta > 0 &*&
     [1/2]p->count |-> 1 + sum(childrenCounts) - delta &*& // Here's the rub.
     [1/2]p->parent |-> ?parent &*&
     parent == 0 ?
@@ -184,7 +176,8 @@ void add_to_count(struct node *p, int delta)
   //@ ensures tree(id);
 {
   struct node *pp = p->parent;
-  //@ count_bounded(p, delta);
+  if (p->count > INT_MAX - delta)
+    abort();
   if (pp == 0) {
     p->count += delta;
     //@ close node(id)(p);
@@ -246,7 +239,7 @@ struct node *tree_add(struct node *node)
   //@ close [f]tree_membership_fact(id, n);
   return n;
 }
-/*
+
 struct node *tree_get_parent(struct node *node)
   //@ requires tree(?id) &*& [_]tree_membership_fact(id, node);
   //@ ensures tree(id) &*& (result == 0 ? true : [_]tree_membership_fact(id, result));
@@ -261,12 +254,12 @@ struct node *tree_get_parent(struct node *node)
   //@ close node(id)(node);
   //@ foreach_unremove(node, nodes);
   //@ close tree(id);
-  / * @
+  /*@
   if (p != 0) {
     assert [?f]ghost_list_member_handle(id, p);
     close [f]tree_membership_fact(id, p);
   }
-  @ * /
+  @*/
   return p;
 }
 
@@ -301,4 +294,3 @@ int main() //@ : main
     //@ leak tree(_);
     return 0;
 }
-*/

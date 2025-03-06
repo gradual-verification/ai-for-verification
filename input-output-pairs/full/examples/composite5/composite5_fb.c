@@ -1,12 +1,10 @@
 #include "malloc.h"
 #include "stdlib.h"
 #include <stdbool.h>
-//@ #include "ghostlist.gh"
+//@ #include "../ghostlist.gh"
 
-// Some general infrastructure; should be in the VeriFast Library.
 
 /*@
-
 predicate foreach2<a, b>(list<a> as, list<b> bs, predicate(a, b) p) =
   switch (as) {
     case nil: return bs == nil;
@@ -18,48 +16,12 @@ predicate foreach2<a, b>(list<a> as, list<b> bs, predicate(a, b) p) =
       };
   };
 
-fixpoint list<b> remove_assoc<a, b>(a a, list<a> as, list<b> bs);
-fixpoint b assoc2<a, b>(a a, list<a> as, list<b> bs);
-
-lemma void foreach2_remove<a, b>(list<a> as, a a);
-  requires foreach2<a, b>(as, ?bs, ?p) &*& mem(a, as) == true;
-  ensures foreach2<a, b>(remove(a, as), remove_assoc(a, as, bs), p) &*& p(a, assoc2(a, as, bs)) &*& length(bs) == length(as);
-
-fixpoint list<b> update2<a, b>(a a, b b, list<a> as, list<b> bs);
-
-lemma void foreach2_unremove<a, b>(list<a> as, list<b> bs, a a, b b);
-  requires foreach2<a, b>(remove(a, as), remove_assoc(a, as, bs), ?p) &*& mem(a, as) == true &*& p(a, b) &*& length(bs) == length(as);
-  ensures foreach2<a, b>(as, update2(a, b, as, bs), p);
-
 fixpoint int sum(list<int> xs) {
   switch (xs) {
     case nil: return 0;
     case cons(x, xs0): return x + sum(xs0);
   }
 }
-
-lemma void sum_update2<a>(a a, int b, list<a> as, list<int> bs);
-  requires length(bs) == length(as);
-  ensures sum(update2(a, b, as, bs)) == sum(bs) + b - assoc2(a, as, bs);
-
-lemma void neq_mem_remove<t>(t x1, t x2, list<t> xs)
-  requires x1 != x2 &*& mem(x1, xs) == true;
-  ensures mem(x1, remove(x2, xs)) == true;
-{
-  switch (xs) {
-    case nil:
-    case cons(x, xs0):
-      if (x == x1 || x == x2) {
-      } else {
-        neq_mem_remove(x1, x2, xs0);
-      }
-  }
-}
-
-lemma void remove_commut<t>(t x1, t x2, list<t> xs);
-  requires true;
-  ensures remove(x1, remove(x2, xs)) == remove(x2, remove(x1, xs));
-
 @*/
 
 struct node {
@@ -106,14 +68,8 @@ predicate tree(int id) =
   ghost_list<struct node *>(id, ?children) &*& foreach(children, node(id));
 
 predicate tree_membership_fact(int id, struct node *n) = ghost_list_member_handle(id, n);
-
-// setting the bounds for the result of adding count in a brute-force way
-lemma void count_bounded(struct node *n, int delta);
-  requires [?f]n->count |-> ?cnt;
-  ensures [f]n->count |-> cnt &*& cnt + delta <= INT_MAX &*& cnt + delta >= INT_MIN;
 @*/
 
-/* private */
 struct node *create_node(struct node *p, struct node *next)
   //@ requires true;
   /*@
@@ -145,7 +101,6 @@ struct node *create_tree()
 
 //@ predicate tree_id(int id) = true;
 
-/* private */
 void add_to_count(struct node *p, int delta)
   /*@
   requires
@@ -156,7 +111,7 @@ void add_to_count(struct node *p, int delta)
     p->firstChild |-> ?firstChild &*&
     children(firstChild, ?children) &*&
     ghost_list(childrenId, children) &*&
-    foreach2(children, ?childrenCounts, child(id, p)) &*&
+    foreach2(children, ?childrenCounts, child(id, p)) &*& delta > 0 &*&
     [1/2]p->count |-> 1 + sum(childrenCounts) - delta &*& // Here's the rub.
     [1/2]p->parent |-> ?parent &*&
     parent == 0 ?
@@ -170,7 +125,8 @@ void add_to_count(struct node *p, int delta)
   //@ ensures tree(id);
 {
   struct node *pp = p->parent;
- 
+  if (p->count > INT_MAX - delta)
+    abort();
   if (pp == 0) {
     p->count += delta;
 
@@ -194,27 +150,12 @@ struct node *tree_add(struct node *node)
 
   return n;
 }
-/*
+
 struct node *tree_get_parent(struct node *node)
   //@ requires tree(?id) &*& [_]tree_membership_fact(id, node);
   //@ ensures tree(id) &*& (result == 0 ? true : [_]tree_membership_fact(id, result));
 {
-  //@ open tree(id);
-  //@ open tree_membership_fact(id, node);
-  //@ ghost_list_member_handle_lemma(id, node);
-  //@ assert ghost_list(id, ?nodes);
-  //@ foreach_remove(node, nodes);
-  //@ open node(id)(node);
   struct node *p = node->parent;
-  //@ close node(id)(node);
-  //@ foreach_unremove(node, nodes);
-  //@ close tree(id);
-  / * @
-  if (p != 0) {
-    assert [?f]ghost_list_member_handle(id, p);
-    close [f]tree_membership_fact(id, p);
-  }
-  @ * /
   return p;
 }
 
@@ -232,7 +173,6 @@ int main0()
   if (node == 0) abort();
   node = tree_get_parent(node);
   if (node == 0) abort();
-  //@ leak tree(_);
   return 0;
 }
 
@@ -246,7 +186,5 @@ int main() //@ : main
     struct node *leftRightParent = tree_get_parent(leftRight);
     struct node *leftLeft = tree_add(left);
     struct node *leftRightRight = tree_add(leftRight);
-    //@ leak tree(_);
     return 0;
 }
-*/

@@ -9,24 +9,34 @@ struct node {
   int count;
 };
 
-/*create_node() function
--params: struct node *p
--description: create a node
+/***
+* Description:
+The create_node function creates a new node in the tree with the specified parent node, and initializes its left and right children as empty.
+
+@param `p` - a pointer to the parent node.
+
+Requires: No specific preconditions.
+Ensures: Returns a pointer to the newly created node, and the subtree rooted at this node is correctly initialized.
 */
 struct node * create_node(struct node * p)
 {
   struct node *n = malloc(sizeof(struct node));
   if (n == 0) { abort(); }
-  n->left = 0; //@ close subtree(0, n, empty);
-  n->right = 0; //@ close subtree(0, n, empty);
+  n->left = 0;
+  n->right = 0;
   n->parent = p;
   n->count = 1;
   return n;
 }
 
-/*create_tree() function
--params: void
--description: create the tree
+/***
+ * Description: 
+The create_tree function creates a new tree with a single root node.
+
+@param None.
+
+Requires: No specific preconditions.
+Ensures: Returns a pointer to the root node of the newly created tree.
 */
 struct node *create_tree()
 {
@@ -34,9 +44,14 @@ struct node *create_tree()
   return n;
 }
 
-/*subtree_get_count() function
--params: struct node *node
--description: get the count of the subtree
+/***
+ * Description:
+The subtree_get_count function retrieves the count of nodes in the subtree rooted at the specified node.
+
+@param `node` - a pointer to the root of the subtree.
+
+Requires: The subtree rooted at `node` is valid.
+Ensures: Returns the count of nodes in the subtree and ensures it is non-negative.
 */
 int subtree_get_count(struct node *node)
 {
@@ -45,9 +60,16 @@ int subtree_get_count(struct node *node)
   return result;
 }
 
-/*fixup_ancestors() function
--params: struct node *n, struct node *p, int count
--description: fix the ancestors of the node
+/***
+ * Description:
+The fixup_ancestors function updates the count of nodes in the subtree for all ancestor nodes starting from the specified node.
+
+@param `n` - a pointer to the current node.
+@param `p` - a pointer to the parent node.
+@param `count` - the updated count of nodes in the subtree rooted at the current node.
+
+Requires: The parent node is the parent of the current node, and  the count is non-negative.
+Ensures: The ancestor nodes are updated with the correct count.
 */
 void fixup_ancestors(struct node * n, struct node * p, int count)
 {
@@ -76,9 +98,16 @@ void fixup_ancestors(struct node * n, struct node * p, int count)
   }
 }
 
-/*tree_add_left() function
--params: struct node *node
--description: add left node to the tree
+/***
+ * Description:
+The tree_add_left function adds a new left child to the specified node in the tree.
+
+@param `node` - a pointer to the node to which the left child will be added.
+
+Requires: 
+  - The tree rooted at `node` is valid.
+  - The left subtree of `node` is empty.
+Ensures: Returns a pointer to the newly added left child, and the tree is correctly updated.
 */
 struct node *tree_add_left(struct node *node)
 {
@@ -91,9 +120,16 @@ struct node *tree_add_left(struct node *node)
   return n;
 }
 
-/*tree_add_right() function
--params: struct node *node
--description: add right node to the tree
+/***
+ * Description:
+The tree_add_right function adds a new right child to the specified node in the tree.
+
+@param `node` - a pointer to the node to which the right child will be added.
+
+Requires: 
+  - The tree rooted at `node` is valid.
+  - The right subtree of `node` is empty.
+Ensures: Returns a pointer to the newly added right child, and the tree is correctly updated.
 */
 struct node *tree_add_right(struct node *node)
 {
@@ -106,9 +142,15 @@ struct node *tree_add_right(struct node *node)
     return n;
 }
 
-/*tree_get_parent() function
--params: struct node *node
--description: get the parent of the node
+/***
+ * Description: 
+The tree_get_parent function retrieves the parent node of the specified node in the tree.
+
+@param `node` - a pointer to the current node.
+
+Requires: 
+  - `node` is not null, and the parent node is not null.
+Ensures: Returns the parent node of `node`.
 */
 struct node *tree_get_parent(struct node *node)
 {
@@ -116,9 +158,14 @@ struct node *tree_get_parent(struct node *node)
   return p;
 }
 
-/*subtree_dispose() function
--params: struct node *node
--description: dispose the subtree
+/***
+ * Description:
+The subtree_dispose function recursively frees all memory associated with the subtree rooted at the specified node.
+
+@param `node` - a pointer to the root of the subtree to be disposed.
+
+Requires: The subtree rooted at `node` is valid.
+Ensures: All memory associated with the subtree is freed.
 */
 void subtree_dispose(struct node *node)
 {
@@ -135,18 +182,23 @@ void subtree_dispose(struct node *node)
   }
 }
 
-/*tree_dispose() function
--params: struct node *node
--description: dispose the tree
+/***
+ * Description:
+The tree_dispose function frees all memory associated with the tree rooted at the specified node.
+
+@param `node` - a pointer to the root of the tree to be disposed.
+
+Requires: The tree rooted at `node` is valid.
+Ensures: All memory associated with the tree is freed.
 */
 void tree_dispose(struct node *node)
 {
   subtree_dispose(node);
 }
 
-/*main0() function
--params: void
--description: main function to test the tree functions
+/***
+ * Description:
+The main0 function creates a tree, adds left and right children, gets the parent and then disposes of the tree.
 */
 int main0()
 {
@@ -161,9 +213,9 @@ int main0()
   return 0;
 }
 
-/*main() function
--params: void
--description: main function to test the tree functions
+/***
+* Description:
+The main function demonstrates various operations on a binary tree, including adding nodes, retrieving parent nodes, and disposing of the tree.
 */
 int main() //@ : main
 {
