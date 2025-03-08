@@ -5,6 +5,15 @@ struct node {
   struct node* next;
 };
 
+/*equals() function
+-params: void* x1, void* x2
+-description: checks whether the elements of two pointers are equal. It doesn't have a concrete definition.
+
+It requires that there exists two functions to get the value of the elements of x1 and x2,
+and an equal function before calling this function.
+It ensures that the values are not changed and equal function still exists after calling this function. 
+Its return value is the result of executing the equal function on the parameters.
+*/
 typedef bool equals(void* x1, void* x2);
 
 /*create_list() function
@@ -16,8 +25,11 @@ struct node* create_list()
 }
 
 /*add() function
--params: a node pointer and a void pointer
--description: adds a value to the list*/
+-params: struct node* n, void* v
+-description: add a new element to the list. 
+It requires that n is the starting node of the list. 
+It ensures that the element is added to the head of the list.
+*/
 struct node* add(struct node* n, void* v) 
 {
   struct node* nn = malloc(sizeof(struct node));
@@ -28,8 +40,14 @@ struct node* add(struct node* n, void* v)
 }
 
 /*list_contains() function
--params: a node pointer, a void pointer, and an equals function pointer
--description: checks if the given value is in the list*/
+-params: struct node* n, void* v, equals* eq
+-description: check if the list starting on n contains the element v.
+
+It requires that n is the starting node of the list, eq is a equal function, 
+which can be applied on the value of v and each element in the list. 
+It ensures that the list and equal function are unchanged, and the return value is the result 
+of checking whether any element in the list is equal to v.
+*/
 bool list_contains(struct node* n, void* v, equals* eq) 
 {
   if(n == 0) {
@@ -61,9 +79,15 @@ struct cell* create_cell(int v)
   c->val = v;
   return c;
 }
+
 /*cell_equals() function
 -params: two cell pointers
--description: compares the values of the two cells*/
+-description: compares the values of the two cells.
+
+It requires that the cells contain the value, and there exists an equal function before calling this function,
+It ensures that the cells and equal function are still unchanged after calling this function. 
+Its return value is the result of executing the equal function on the parameters.
+*/
 bool cell_equals(struct cell* x1, struct cell* x2) //@: equals
 {
   
@@ -73,7 +97,8 @@ bool cell_equals(struct cell* x1, struct cell* x2) //@: equals
 
 /*test() function
 -params: none
--decription: creates and uses a list*/
+-decription: tests the functionality of contain.
+It creates and uses a list, and check whether iot contains a cell with a specified value. */
 void test() 
 {
   struct node* n = create_list();

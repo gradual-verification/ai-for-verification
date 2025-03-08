@@ -7,7 +7,7 @@ struct node {
 
 /*@
 predicate nodes(struct node* n, list<void*> vs) =
-  n == 0 ? vs == nil : n->value |-> ?v &*& n->next |-> ?nxt &*& malloc_block_node(n) &*& nodes(nxt, ?vs2) &*& vs == cons(v, vs2);
+  n == 0 ? vs == nil : n->value |-> ?v &*& n->next |-> ?nxt &*& nodes(nxt, ?vs2) &*& vs == cons(v, vs2);
 
 predicate_family equals_state1(void* index)(void* x1, int v1,fixpoint(unit, int, int, bool) eq_func);
 predicate_family equals_state2(void* index)(void* x1, int v1,fixpoint(unit, int, int, bool) eq_func);
@@ -99,10 +99,10 @@ struct cell* create_cell(int v)
 
 /*@
 predicate_family_instance equals_state1(cell_equals)(struct cell* c1, int v, fixpoint (unit, int, int,bool) eq_func) =
-  c1->val |-> v &*& malloc_block_cell(c1) &*& eq_func == cell_eq_func;
+  c1->val |-> v &*& eq_func == cell_eq_func;
   
   predicate_family_instance equals_state2(cell_equals)(struct cell* c2, int v, fixpoint (unit, int, int,bool) eq_func) =
-  c2->val |-> v &*& malloc_block_cell(c2) &*& eq_func == cell_eq_func;
+  c2->val |-> v &*& eq_func == cell_eq_func;
   
 fixpoint bool cell_eq_func(unit un, int v1, int v2) {
   switch(un) {

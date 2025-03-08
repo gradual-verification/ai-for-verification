@@ -12,7 +12,11 @@ struct session {
 
 /*contribute() function
 -params: void *data
--description: takes a session object, frees the session object, acquires the lock, increments the sum field of the sum object by 1, releases the lock
+-description: takes a session object, frees the session object, acquires the lock, increments the sum field of the sum object by 1, releases the lock. 
+
+It requires the data object is a session with its sum_object and lock, and the current thread is one of the two that can modify sum, 
+and the current thread hasn't modified the object. 
+It ensures that the current thread has done the contribution on adding the sum.
 */
 void contribute(void *data) //@ : thread_run_joinable
 {
@@ -21,20 +25,12 @@ void contribute(void *data) //@ : thread_run_joinable
     struct sum *sumObject = session->sum_object;
     free(session);
     lock_acquire(lock);
-    /*@
-    consuming_box_predicate contrib_box(thisBox, 0, _)
-    consuming_handle_predicate contrib_handle(thisBox == box1 ? handle1 : handle2, _)
-    perform_action set_value(1) {
-        @*/
+   
         {
             int sum = sumObject->sum;
             sumObject->sum = sum + 1;
         }
-        /*@
-    }
-    producing_box_predicate contrib_box(1, thisBox == box1 ? handle1 : handle2)
-    producing_handle_predicate contrib_handle(thisBox == box1 ? handle1 : handle2, 1);
-    @*/
+        
     lock_release(lock);
 }
 

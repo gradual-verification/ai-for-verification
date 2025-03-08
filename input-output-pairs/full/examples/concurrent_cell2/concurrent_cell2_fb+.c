@@ -65,18 +65,6 @@ fixpoint bool incr_only(trace trace) {
     case cas_(tid, old, new, trace0): return old <= new && incr_only(trace0);
   }
 }
-
-lemma void prefix_smaller(trace t1, trace t2, int ctid)
-  requires incr_only(t1) == true &*& incr_only(t2) == true &*& is_good_prefix(t1, t2, ctid) == true;
-  ensures execute_trace(t1) <= execute_trace(t2);
-{
-  switch(t2) {
-    case zero:
-    case inc(tid, t0): if(t1 != t2) prefix_smaller(t1, t0, ctid);
-    case dec(tid, t0): 
-    case cas_(tid, old, new, t0): if(t1 != t2) prefix_smaller(t1, t0, ctid);
-  }
-}
 @*/
 
 void only_allow_incrementing(int* c)
@@ -115,17 +103,6 @@ void acquire(int* c)
   while(true)
     
   {
-    /*@
-    {
-      lemma void acquire_ok(trace trace)
-        requires is_good_prefix(trace0, trace, currentThread) == true &*& is_lock(trace) == true;
-        ensures is_lock(cas_(currentThread, 0, 1, trace)) == true;
-      {
-        
-      }
-      produce_lemma_function_pointer_chunk(acquire_ok) : cas_allowed(trace0, is_lock, 0, 1)(x) { call(); };
-    }
-    @*/
     int read = atomic_cas(c, 0, 1);
     if(read == 0) {
       break;
@@ -133,66 +110,10 @@ void acquire(int* c)
   }
 }
 
-/*@
-lemma void execute_steps_locked(trace t)
-  requires lock_owner(t) == some(?owner) &*& is_lock(t) == true;
-  ensures execute_trace(t) == 1;
-{
-  switch(t) {
-    case zero:
-    case inc(tid, trace0):
-    case dec(tid, trace0):
-    case cas_(tid, old, new, trace0):
-      if(execute_trace(trace0) == 0) {
-      } else {
-        execute_steps_locked(trace0);
-      }
-  }
-}
-
-lemma void locked_preserved_by_interference(trace t1, trace t2, int ctid)
-  requires is_good_prefix(t1, t2, ctid) == true &*& lock_owner(t1) == some(ctid) &*& is_lock(t2) == true;
-  ensures lock_owner(t2) == some(ctid);
-{
-  switch(t2) {
-    case zero:
-    case inc(tid, trace0):
-      if(t1 == t2) {
-      } else {
-        test(t1, trace0, ctid);
-      }
-    case dec(tid, trace0):
-      if(t1 == t2) {
-      } else {
-        locked_preserved_by_interference(t1, trace0, ctid);
-      }
-    case cas_(tid, old, new, trace0):
-      if(t1 == t2) {
-      } else {
-        if(tid == ctid) {
-        } else {
-           locked_preserved_by_interference(t1, trace0, ctid);
-           execute_steps_locked(trace0);
-        }
-      }
-  }
-}
-@*/
 
 void release(int* c)
   //@ requires [?f]cell(c, is_lock) &*& last_seen(c, currentThread, ?trace0) &*& lock_owner(trace0) == some(currentThread);
   //@ ensures [f]cell(c, is_lock) &*& last_seen(c, currentThread, ?trace1) &*& lock_owner(trace1) == none;
 {
-  /*@
-  {
-    lemma void release_ok(trace trace)
-      requires is_good_prefix(trace0, trace, ctid) == true &*& is_lock(trace) == true;
-      ensures is_lock(dec(ctid, trace)) == true;
-    {
-      locked_preserved_by_interference(trace0, trace, ctid);
-    }
-    produce_lemma_function_pointer_chunk(release_ok) : dec_allowed(trace0, is_lock, currentThread)(x) { call(); };
-  }
-  @*/
   atomic_dec(c);
 }

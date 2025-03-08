@@ -41,7 +41,7 @@ predicate_family_instance thread_run_pre(contribute)(struct session *session, co
     };
 
 predicate contribute_pre(struct session *session, box box1, handle handle1, box box2, handle handle2, box thisBox, struct sum *sumObject, struct lock *lock) =
-    session->sum_object |-> sumObject &*& session->lock |-> lock &*& malloc_block_session(session) &*&
+    session->sum_object |-> sumObject &*& session->lock |-> lock &*&
     [1/2]lock(lock, _, sum(sumObject, box1, handle1, box2, handle2)) &*& (thisBox == box1 || thisBox == box2) &*& contrib_box(thisBox, 0, _);
 
 predicate_family_instance thread_run_post(contribute)(struct session *session, contribute_info info) =
@@ -61,20 +61,12 @@ void contribute(void *data) //@ : thread_run_joinable
     struct sum *sumObject = session->sum_object;
     free(session);
     lock_acquire(lock);
-    /*@
-    consuming_box_predicate contrib_box(thisBox, 0, _)
-    consuming_handle_predicate contrib_handle(thisBox == box1 ? handle1 : handle2, _)
-    perform_action set_value(1) {
-        @*/
+   
         {
             int sum = sumObject->sum;
             sumObject->sum = sum + 1;
         }
-        /*@
-    }
-    producing_box_predicate contrib_box(1, thisBox == box1 ? handle1 : handle2)
-    producing_handle_predicate contrib_handle(thisBox == box1 ? handle1 : handle2, 1);
-    @*/
+      
     lock_release(lock);
 }
 
@@ -87,14 +79,7 @@ int main()
         abort();
     }
     sumObject->sum = 0;
-    /*@
-    create_box box1 = contrib_box(0, handle1)
-    and_handle handle1 = contrib_handle(0);
-    @*/
-    /*@
-    create_box box2 = contrib_box(0, handle2)
-    and_handle handle2 = contrib_handle(0);
-    @*/
+    
     struct lock *lock = create_lock();
     
     struct session *session1 = malloc(sizeof(struct session));
@@ -119,23 +104,6 @@ int main()
     
     lock_dispose(lock);
     
-    // The following perform_action statement is only to show contrib_handle(_, box1, 1)
-    /*@
-    consuming_box_predicate contrib_box(box1, 1, ?owner1)
-    consuming_handle_predicate contrib_handle(?box1handle, _)
-    perform_action set_value(1) {}
-    producing_box_predicate contrib_box(1, owner1)
-    producing_handle_predicate contrib_box_handle(box1handle);
-    @*/
-    
-    // The following perform_action statement is only to show contrib_handle(_, box2, 1)
-    /*@
-    consuming_box_predicate contrib_box(box2, 1, ?owner2)
-    consuming_handle_predicate contrib_handle(?box2handle, _)
-    perform_action set_value(1) {}
-    producing_box_predicate contrib_box(1, owner2)
-    producing_handle_predicate contrib_box_handle(box2handle);
-    @*/
     
     int sum = sumObject->sum;
     assert(sum == 2);
