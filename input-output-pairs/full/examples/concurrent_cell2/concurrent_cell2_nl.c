@@ -4,22 +4,19 @@
 
 It doesn't have any implementation.
 
-It requires the cell has a function that allows the decrement operation, and there is an old trace before this operation. 
-It ensures the cell keeps the same function, having a current trace starting being decremented on, 
-and the old trace is a prefix of current trace from the perspective of this thread. 
+It ensures that this decrement operation must finish at the end 
+(while operations of other threads can be finished concurrently during this operation). 
 */
 void atomic_dec(int* c);
 
 /*atomic_load function
 -param: c: pointer to the cell
--description: atomically load the value of the cell. 
+-description: atomically load and return the value of the cell.
 
 It doesn't have any implementation.
 
-It requires the cell has a function that allows such operation, and there is an old trace before this operation. 
-It ensures the cell keeps the same function, having a current trace, 
-and the old trace is a prefix of current trace from the perspective of this thread, 
-and the result can be calculated by executing the current trace.
+It ensures that this load operation must finish at the end 
+(while operations of other threads can be finished concurrently during this operation). 
 */
 int atomic_load(int* c);
 
@@ -32,10 +29,9 @@ It returns the old value of the cell.
 
 It doesn't have any implementation.
 
-It requires the cell has a function that allows the compare-and-swap operation, and there is an old trace before this operation. 
-It ensures the cell keeps the same function, having a new trace being compare-and-swapped on, 
-and the old trace is a prefix of current trace from the perspective of this thread, 
-and the result can be calculated by executing the current trace.
+It ensures that this compare-and-swap operation must finish at the end 
+(while operations of other threads can be finished concurrently during this operation). 
+Its returns the old value of the cell.
 */
 int atomic_cas(int* c, int old, int new);
 
@@ -43,8 +39,7 @@ int atomic_cas(int* c, int old, int new);
 -param: c: pointer to the cell
 -description: check whether only incrementing operation is done on a cell. 
 
-It requires that the cell has a function that allows the increment-only operation, and there is an old trace on it. 
-It ensures that the function is not changed and a new trace will be seen. 
+It uses an assert statement to show that two loads doesn't decrement the value. 
 */
 void only_allow_incrementing(int* c)
 {
@@ -55,12 +50,7 @@ void only_allow_incrementing(int* c)
 
 /*acquire function
 -param: c: pointer to the cell
--description: acquire the lock by compare-and-swap the value of c with 0 to 1. 
-
-It requires the cell has a function that allows the trace of operation to act as a lock, 
-and there is an old trace before this operation. 
-It ensures the cell keeps the same function, having a new trace , 
-with the lock owner of the trace as the current thread. 
+-description: acquire the lock by compare-and-swaping the value of c with 0 to 1. 
 */
 void acquire(int* c)
 {
@@ -77,11 +67,6 @@ void acquire(int* c)
 /*release function
 -param: c: pointer to the cell
 -description: release the lock by decrementing the value of c
-
-It requires the cell has a function that allows the trace of operation to act as a lock, 
-and there is an old trace before this operation, and the lock owner of the old trace is current thread. 
-It ensures the cell keeps the same function, having a new trace , 
-with the lock owner of the trace as none. 
 */
 void release(int* c)
 {
