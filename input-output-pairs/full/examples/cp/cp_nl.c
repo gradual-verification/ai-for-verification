@@ -4,9 +4,14 @@
 #include <stdbool.h>
 #include "assert.h"
 
-/*main() function
--params: argc, argv
--desciption: copies the content of a file to another file
+/*** 
+ * Description:
+The `main` function copies the content from a file to the other file. 
+It takes command-line arguments `argc` and `argv`.
+It first opens the files to read from and write to, and uses a buffer as a bridge to continuously read and write.
+
+@param `argc` - An integer representing the number of command-line arguments.
+@param `argv` - An array of strings that are the command-line arguments.
 */
 int main(int argc, char** argv) //@ : main
 {

@@ -21,19 +21,6 @@ typedef struct
   int y;
  } struct_with_array;
 
-void check_local_inits(int x, int y)
-  //@ requires y == 17;
-  //@ ensures true;
-{
-  struct_with_array foo = {123, {2, x, 5, 7, 11, 13, y}, 456};
-  struct_with_array bar = foo;
-  char buf[3] = {1, 2, 3};
-  
-  check((&foo)->x == 123);
-  check((&foo)->ar[6] == 17);
-  check(buf[1] == 2);
-}
-
 //@ predicate struct_with_array(struct_with_array *s;) = s->x |-> _ &*& ints(s->ar, 7, _) &*& s->y |-> _;
 
 struct mystruct {

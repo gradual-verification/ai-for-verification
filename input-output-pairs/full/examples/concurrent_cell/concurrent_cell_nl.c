@@ -10,9 +10,6 @@ struct cell {
 -param: none
 -description: This function creates a new cell with an intialized mutex in it.
 
-It requires that there exists a function that checks whether a trace is valid (where the empty trace is valid)
-It ensures that the mutex in the cell enables that checking function to hold (if the cell is not null).
-
 It returns a pointer to the newly created cell.
 */
 struct cell* cell_create()
@@ -29,9 +26,7 @@ struct cell* cell_create()
 -param: struct cell* c
 -description: This function increments field x in the given cell c in a thread-safe manner (using mutex).
 
-It requires that the given cell c is valid, and there is a function to check whether incrementing on a trace is valid, 
-and c has an original trace.
-It ensures that the original trace is the prefix of new trace, and the new value in c->x can be calulated by executing the new trace.
+Other operations can be finished concurrently during this operation. 
 */
 void increment(struct cell* c)
 {
@@ -50,9 +45,7 @@ void increment(struct cell* c)
 -param: struct cell* c
 -description: This function decrements field x in the given cell c in a thread-safe manner (using mutex).
 
-It requires that the given cell c is valid, and there is a function to check whether decrementing on a trace is valid, 
-and c has an original trace.
-It ensures that the original trace is the prefix of new trace, and the new value in c->x can be calulated by executing the new trace.
+Other operations can be finished concurrently during this operation. 
 */
 void decrement(struct cell* c)
 {
@@ -72,9 +65,7 @@ void decrement(struct cell* c)
 -description: This compare-and-swap function checks if the current value of `x` in the given cell c is equal to `old`.
 If it is, the function updates `x` to `new`. This operation is thread-safe due to the use of a mutex. 
 
-It requires that the given cell c is valid, and there is a function to check whether compare-and-swap on a trace is valid,
-and c has an original trace.
-It ensures that the original trace is the prefix of new trace, and the new value in c->x can be calulated by executing the new trace.
+Other operations can be finished concurrently during this operation.  
 
 It returns the original value of `x` before the operation.
 */
@@ -97,9 +88,7 @@ int cas(struct cell* c, int old, int new)
 -param: struct cell* c
 -description: This get function retrieves the current value of the `x` field in the given cell structure in a thread-safe manner (using mutex). 
 
-It requires that the given cell c is valid, and there is a function to check whether the trace is valid,
-and c has an original trace.
-It ensures that the original trace is the prefix of new trace, and the new value in c->x can be calulated by executing the new trace.
+Other operations can be finished concurrently during this operation.  
 
 It returns the value of `x`.
 */
@@ -119,8 +108,7 @@ int get(struct cell* c)
 -description: This function checks that the value of the `x` field in the given cell structure
 can only be incremented, not decremented or changed in any other way.
 
-It requires that the given cell c is valid, and there is a function to make sure only incrementing the value is valid,
-and c has an original trace. In the source code, it uses an assert statement to check whether the value is incremented only.
+In the source code, it uses an assert statement to check whether the value is incremented only.
 */
 void only_allow_incrementing(struct cell* c)
 {

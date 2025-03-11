@@ -1,5 +1,6 @@
 #include "malloc.h"
 #include <stdbool.h>
+#include "stdlib.h"
 
 struct node {
     struct node *left;
@@ -33,9 +34,6 @@ predicate tree(struct node *node) =
     context(node, ?parent, ?count) &*& subtree(node, parent, count);
 @*/
 
-void abort();
-    //@ requires true;
-    //@ ensures false;
 
 struct node *create_tree()
     //@ requires emp;

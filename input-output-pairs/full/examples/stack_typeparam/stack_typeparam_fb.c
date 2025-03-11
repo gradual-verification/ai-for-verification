@@ -33,7 +33,6 @@ inductive Stack<T> =
   | Cons(void* data, T info, Stack<T>);
 
 predicate Node<T>(predicate(void *, T) Ownership, struct node* node, void *data, T info, struct node* next) =
-  malloc_block_node( node ) &*&
   node->data |-> data &*&
   node->next |-> next &*&
   Ownership(data, info) &*&
@@ -46,7 +45,6 @@ predicate StackItems<T>(predicate(void *, T) Ownership, struct node* head, Stack
   S == Cons(data, info, T);
 
 predicate Stack<T>(struct stack* stack, destructor* destructor, predicate(void *, T) Ownership, Stack<T> S) =
-  malloc_block_stack(stack) &*&
   [_]is_destructor(destructor, Ownership) &*&
   stack->destructor |-> destructor &*&
   stack->first |-> ?first &*&
@@ -57,12 +55,6 @@ predicate Stack<T>(struct stack* stack, destructor* destructor, predicate(void *
 fixpoint Stack<T> Push<T>(void* item, T info, Stack<T> Stack)
 {
   return Cons(item, info, Stack);
-}
-
-lemma void RewritePushCons<T>(void* item, T info, Stack<T> Stack)
-  requires emp;
-  ensures Push(item, info, Stack) == Cons(item, info, Stack);
-{
 }
 
 fixpoint Stack<T> Pop<T>(Stack<T> Stack)
@@ -77,29 +69,6 @@ fixpoint Stack<T> Pop<T>(Stack<T> Stack)
   }
 }
 
-fixpoint bool IsEmpty<T>(Stack<T> S)
-{
-  switch ( S )
-  {
-    case Nil:
-      return true;
-    
-    case Cons(x, y, T):
-      return false;
-  }
-}
-
-lemma void IsEmptyNil<T>(Stack<T> S)
-  requires emp;
-  ensures IsEmpty(S) ? S == Nil : emp;
-{
-  switch ( S )
-  {
-    case Nil:
-    case Cons(x, y, z):
-  }
-}
-
 fixpoint int Size<T>(Stack<T> S)
 {
   switch ( S )
@@ -111,53 +80,6 @@ fixpoint int Size<T>(Stack<T> S)
       return 1 + Size(T);
   }
 }
-
-lemma void SizeEmptyStack<T>(Stack<T> S)
-  requires emp;
-  ensures IsEmpty(S) ? Size(S) == 0 : true;
-{
-  switch ( S )
-  {
-    case Nil:
-    case Cons(x, y, z):
-  }
-}
-
-lemma void SizePush<T>(void* data, T info, Stack<T> S)
-  requires emp;
-  ensures Size( Push(data, info, S) ) == Size(S) + 1;
-{
-  switch ( S )
-  {
-    case Nil:
-    case Cons(x, y, z):
-  }
-}
-
-
-fixpoint void* GetTopPointer<T>(Stack<T> S)
-{
-  switch ( S )
-  {
-    case Nil:
-      return 0;
-
-    case Cons(x, y, z):
-      return x;
-  }  
-}
-
-lemma void PushNotNil<T>(void* data, T info, Stack<T> Stack)
-  requires emp;
-  ensures Push(data, info, Stack) != Nil;
-{
-  switch ( Stack )
-  {
-    case Nil:
-    case Cons(x, y, z):
-  }
-}
-
 @*/
 
 struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
@@ -279,7 +201,6 @@ struct data
 /*@
 
 predicate Data(struct data* data, int foo, int bar) =
-  malloc_block_data(data) &*&
   data->foo |-> foo &*&
   data->bar |-> bar;
 
@@ -376,19 +297,3 @@ void check2()
   
   destroy_stack(stack);
 }
-
-/*@
-
-lemma void CheckPushPop<T>(void* item, T info, Stack<T> S)
-  requires emp;
-  ensures Pop( Push( item, info, S ) ) == S;
-{
-}
-
-lemma void CheckSizePush<T>(void* item, T info, Stack<T> S)
-  requires emp;
-  ensures Size( Push( item, info, S ) ) == 1 + Size( S );
-{
-}
-
-@*/

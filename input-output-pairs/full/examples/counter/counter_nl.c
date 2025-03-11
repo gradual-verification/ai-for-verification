@@ -24,11 +24,6 @@ void increment(struct Counter* c)
 {
   int tmp = c->value;
   c->value = tmp + 1;
-  //int tmp = c->value;
-  //if (tmp == INT_MAX) {
-    //abort();  
-  //}
-  //c->value = tmp + 1;
 }
 
 /*dispose() function

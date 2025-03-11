@@ -59,12 +59,6 @@ fixpoint Stack<T> Push<T>(void* item, T info, Stack<T> Stack)
   return Cons(item, info, Stack);
 }
 
-lemma void RewritePushCons<T>(void* item, T info, Stack<T> Stack)
-  requires emp;
-  ensures Push(item, info, Stack) == Cons(item, info, Stack);
-{
-}
-
 fixpoint Stack<T> Pop<T>(Stack<T> Stack)
 {
   switch ( Stack )
@@ -74,29 +68,6 @@ fixpoint Stack<T> Pop<T>(Stack<T> Stack)
 
     case Cons(x, y, T):
       return T;
-  }
-}
-
-fixpoint bool IsEmpty<T>(Stack<T> S)
-{
-  switch ( S )
-  {
-    case Nil:
-      return true;
-    
-    case Cons(x, y, T):
-      return false;
-  }
-}
-
-lemma void IsEmptyNil<T>(Stack<T> S)
-  requires emp;
-  ensures IsEmpty(S) ? S == Nil : emp;
-{
-  switch ( S )
-  {
-    case Nil:
-    case Cons(x, y, z):
   }
 }
 
@@ -111,58 +82,11 @@ fixpoint int Size<T>(Stack<T> S)
       return 1 + Size(T);
   }
 }
-
-lemma void SizeEmptyStack<T>(Stack<T> S)
-  requires emp;
-  ensures IsEmpty(S) ? Size(S) == 0 : true;
-{
-  switch ( S )
-  {
-    case Nil:
-    case Cons(x, y, z):
-  }
-}
-
-lemma void SizePush<T>(void* data, T info, Stack<T> S)
-  requires emp;
-  ensures Size( Push(data, info, S) ) == Size(S) + 1;
-{
-  switch ( S )
-  {
-    case Nil:
-    case Cons(x, y, z):
-  }
-}
-
-
-fixpoint void* GetTopPointer<T>(Stack<T> S)
-{
-  switch ( S )
-  {
-    case Nil:
-      return 0;
-
-    case Cons(x, y, z):
-      return x;
-  }  
-}
-
-lemma void PushNotNil<T>(void* data, T info, Stack<T> Stack)
-  requires emp;
-  ensures Push(data, info, Stack) != Nil;
-{
-  switch ( Stack )
-  {
-    case Nil:
-    case Cons(x, y, z):
-  }
-}
-
 @*/
 
 struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
   //@ requires [_]is_destructor<T>(destructor, ?Ownership);
-  //@ ensures Stack(result, destructor, Ownership, ?Stack) &*& IsEmpty(Stack) == true;
+  //@ ensures Stack(result, destructor, Ownership, ?Stack);
 {
   struct stack* stack = malloc( sizeof( struct stack ) );
   if ( stack == 0 ) abort();
@@ -192,7 +116,7 @@ void destroy_stack/*@ <T> @*/(struct stack* stack)
 }
 
 void push/*@ <T> @*/(struct stack* stack, void* data)
-  //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack) &*& Ownership(data, ?info);
+  //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack);
   //@ ensures Stack(stack, destructor, Ownership, Push(data, info, Stack));
 {
   struct node* node = malloc( sizeof( struct node ) );
@@ -240,7 +164,7 @@ destructor* get_destructor/*@ <T> @*/(struct stack* stack)
 }
 
 void pop_destroy/*@ <T> @*/(struct stack* stack)
-  //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack) &*& Stack != Nil;
+  //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack);
   //@ ensures Stack(stack, destructor, Ownership, Pop(Stack));
 {
   void* data = pop(stack);
@@ -250,7 +174,7 @@ void pop_destroy/*@ <T> @*/(struct stack* stack)
 
 bool is_empty/*@ <T> @*/(struct stack* stack)
   //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack);
-  //@ ensures Stack(stack, destructor, Ownership, Stack) &*& result == IsEmpty(Stack);
+  //@ ensures Stack(stack, destructor, Ownership, Stack);
 {
   struct node* first = stack->first;
   return first == 0;
@@ -258,7 +182,7 @@ bool is_empty/*@ <T> @*/(struct stack* stack)
 
 int size/*@ <T> @*/(struct stack* stack)
   //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack);
-  //@ ensures Stack(stack, destructor, Ownership, Stack) &*& result == Size(Stack);
+  //@ ensures Stack(stack, destructor, Ownership, Stack);
 {
   int size = stack->size;
   return size;
@@ -376,19 +300,3 @@ void check2()
   
   destroy_stack(stack);
 }
-
-/*@
-
-lemma void CheckPushPop<T>(void* item, T info, Stack<T> S)
-  requires emp;
-  ensures Pop( Push( item, info, S ) ) == S;
-{
-}
-
-lemma void CheckSizePush<T>(void* item, T info, Stack<T> S)
-  requires emp;
-  ensures Size( Push( item, info, S ) ) == 1 + Size( S );
-{
-}
-
-@*/

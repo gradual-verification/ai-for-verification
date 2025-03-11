@@ -106,7 +106,7 @@ The tree_add_left function adds a new left child to the specified node in the tr
 
 Requires: 
   - The tree rooted at `node` is valid.
-  - The left subtree of `node` is empty.
+  - The left subtree of `node` is null.
 Ensures: Returns a pointer to the newly added left child, and the tree is correctly updated.
 */
 struct node *tree_add_left(struct node *node)
@@ -128,7 +128,7 @@ The tree_add_right function adds a new right child to the specified node in the 
 
 Requires: 
   - The tree rooted at `node` is valid.
-  - The right subtree of `node` is empty.
+  - The right subtree of `node` is null.
 Ensures: Returns a pointer to the newly added right child, and the tree is correctly updated.
 */
 struct node *tree_add_right(struct node *node)
@@ -149,7 +149,7 @@ The tree_get_parent function retrieves the parent node of the specified node in 
 @param `node` - a pointer to the current node.
 
 Requires: 
-  - `node` is not null, and the parent node is not null.
+  - `node` is not null. 
 Ensures: Returns the parent node of `node`.
 */
 struct node *tree_get_parent(struct node *node)

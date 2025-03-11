@@ -20,20 +20,6 @@ typedef struct
   int y;
  } struct_with_array;
 
-/*check_local_inits() function
--params: two integer arguments
--description: This function initializes a local struct, a local struct pointer, and a local array,
-and then checks if the local struct, local struct pointer, and local array are initialized correctly.*/
-void check_local_inits(int x, int y)
-{
-  struct_with_array foo = {123, {2, x, 5, 7, 11, 13, y}, 456};
-  struct_with_array bar = foo;
-  char buf[3] = {1, 2, 3};
-  
-  check((&foo)->x == 123);
-  check((&foo)->ar[6] == 17);
-  check(buf[1] == 2);
-}
 
 struct mystruct {
   struct_with_array s1;
@@ -65,6 +51,9 @@ static void foo()
 
 static int ar2 [55];
 
+/*mod_ar2() function
+-params: none
+-description: This function modifies a global array. */
 void mod_ar2 (void)
  {
   ar2[ 1] = ar2[ 1] + ar2[26];
@@ -80,8 +69,8 @@ struct point points[] = { { 10, 20 }, { 30, 40 } };
 
 /*main() function
 -params: an integer arguement and a character pointer argument
--description: This function initializes and utilizes a global struct, a global struct pointer, a global array, 
-a local struct, a local struct pointer, a local array, and two local integers.
+-description: This function does some checking on global and local structs or array. 
+It first checks the value of a global struct, and then creates a local struct, and further checks a global array.
 */
 int main(int argc, char **argv) //@ : main_full(static_array)
  {

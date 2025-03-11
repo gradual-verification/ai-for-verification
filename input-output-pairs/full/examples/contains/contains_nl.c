@@ -7,12 +7,14 @@ struct node {
 
 /*equals() function
 -params: void* v1, void* v2
--description: compare two void pointers*/
+-description: checks whether two pointers are equal. It doesn't have a concrete definition.
+
+*/
 typedef bool equals(void* v1, void* v2);
 
 /*create_list() function
 -params: none
--description: create a new list*/
+-description: return an empty list. */
 struct node* create_list() 
 {
   return 0;
@@ -20,7 +22,10 @@ struct node* create_list()
 
 /*add() function
 -params: struct node* n, void* v
--description: add a new element to the list*/
+-description: add a new element to the list. 
+It requires that n is the starting node of the list. 
+It ensures that the element is added to the head of the list.
+*/
 struct node* add(struct node* n, void* v) 
 {
   struct node* nn = malloc(sizeof(struct node));
@@ -32,7 +37,11 @@ struct node* add(struct node* n, void* v)
 
 /*list_contains() function
 -params: struct node* n, void* v, equals* eq
--description: check if the list contains the element*/
+-description: check if the list starting on n contains the element v.
+
+It requires that n is the starting node of the list, eq is a equal function, which can be applied on each element in the list. 
+It ensures that the list is unchanged, and the return value is the result of checking whether any element in the list is equal to v.
+*/
 bool list_contains(struct node* n, void* v, equals* eq) 
 {
   if(n == 0) {
@@ -51,7 +60,8 @@ bool list_contains(struct node* n, void* v, equals* eq)
 
 /*my_equals() function
 -params: void* v1, void* v2
--description: compare two void pointers*/
+-description: checks whether two pointers are equal.
+*/
 bool my_equals(void* v1, void* v2) //@: equals
 {
   if((uintptr_t)v1 == (uintptr_t)v2) {

@@ -58,61 +58,6 @@ fixpoint intlist rev(intlist l) {
     case icons(x, v): return app(rev(v), icons(x, inil));
   }
 }
-
-lemma void app_assoc(intlist l1, intlist l2, intlist l3)
-  requires emp;
-  ensures app(app(l1, l2), l3) == app(l1, app(l2, l3));
-{
-  switch (l1) {
-    case inil:
-    case icons(x, v):
-      app_assoc(v, l2, l3);
-  }
-}
-
-lemma void rev_lemma(int i, intlist gamma, intlist alphap)
-  requires emp;
-  ensures app(rev(icons(i, gamma)), alphap) == app(rev(gamma), icons(i, alphap));
-{
-  app_assoc(rev(gamma), icons(i, inil), alphap);
-}
-
-lemma void app_to_nil(intlist l)
-  requires emp;
-  ensures app(l, inil) == l;
-{
-  switch (l) {
-    case inil:
-    case icons(x, v):
-      app_to_nil(v);
-  }
-}
-
-lemma void rev_app(intlist l1, intlist l2)
-  requires emp;
-  ensures rev(app(l1, l2)) == app(rev(l2), rev(l1));
-{
-  switch (l1) {
-    case inil:
-      app_to_nil(rev(l2));
-    case icons(x, v):
-      rev_app(v, l2);
-      app_assoc(rev(l2), rev(v), icons(x, inil));
-  }
-}
-
-lemma void rev_twice(intlist l)
-  requires emp;
-  ensures rev(rev(l)) == l;
-{
-  switch (l) {
-    case inil:
-    case icons(x, v):
-      rev_app(rev(v), icons(x, inil));
-      rev_twice(v);
-  }
-}
-
 @*/
 
 void reverse(dllist arg)

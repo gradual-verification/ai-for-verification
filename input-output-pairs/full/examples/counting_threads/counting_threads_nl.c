@@ -9,7 +9,7 @@ static int cell;
 
 /*m function
 - param data: pointer to data
-- reads the value of the global variable cell
+- description: reads the value of the global variable cell. 
 */
 void m(void *data) //@ : thread_run_joinable
 {
@@ -18,7 +18,10 @@ void m(void *data) //@ : thread_run_joinable
 
 /*process function
 -param n: number of threads to be created
--creates n threads and joins them
+-descripion: creates n threads that read the value of cell and joins them.
+
+It requires cell points to a value, and n is non-negative. 
+It ensures that the value of cell is not changed.
 */
 void process(int n)
 {

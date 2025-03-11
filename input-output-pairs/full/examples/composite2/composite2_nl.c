@@ -1,5 +1,6 @@
 #include "malloc.h"
 #include <stdbool.h>
+#include "stdlib.h"
 
 struct node {
     struct node *left;
@@ -8,10 +9,6 @@ struct node {
     int count;
 };
 
-/*`abort()` Function:
-- Parameters: None.
-- Description: This function is used to abort the program. */
-void abort();
 
 /*`create_tree()` Function:
 - Parameters: None.
@@ -32,7 +29,7 @@ struct node *create_tree()
 /*`subtree_get_count()` Function:
 - Parameters: Takes a node pointer as input.
 - Description: This function retrieves the count
- value of the node passed in. */
+ value of the node passed in, which means the number of nodes in the subtree rooted at the node. */
 int subtree_get_count(struct node *node)
 {
     int result = 0;
@@ -60,7 +57,7 @@ int tree_get_count(struct node *node)
 and the new count as input.
 - Description: This function updates the count of the
   ancestors of the provided node based on the new count
-  provided. */
+  provided. It makes sure that the ancestors of the node is also updated. */
 void fixup_ancestors(struct node *node, struct node *parent, int count)
 {
     if (parent == 0) {
@@ -90,7 +87,7 @@ void fixup_ancestors(struct node *node, struct node *parent, int count)
 /*`tree_add_left()` Function:
 - Parameters: Takes a node pointer as input.
 - Description: This function adds a new node
- as the left child of the input node.*/
+ as the left child of the input node. It returns the new node. */
 struct node *tree_add_left(struct node *node)
 {
     if (node == 0) {
@@ -125,7 +122,7 @@ struct node *tree_add_left(struct node *node)
 - Description: It adds a new node as the right child 
 of the input node by following a similar process 
 of memory allocation, setting pointers, and 
-updating count values. */
+updating count values. It returns the new node. */
 struct node *tree_add_right(struct node *node)
 {
     if (node == 0) {

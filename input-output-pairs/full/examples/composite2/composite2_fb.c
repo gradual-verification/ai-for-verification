@@ -1,5 +1,6 @@
 #include "malloc.h"
 #include <stdbool.h>
+#include "stdlib.h"
 
 struct node {
     struct node *left;
@@ -14,14 +15,14 @@ predicate subtree(struct node *root, struct node *parent, int count) =
         root == 0 ?
             count == 0
         :
-            root->left |-> ?left &*& root->right |-> ?right &*& root->parent |-> parent &*& root->count |-> count &*& malloc_block_node(root) &*& //count >= 0 &*& 
+            root->left |-> ?left &*& root->right |-> ?right &*& root->parent |-> parent &*& root->count |-> count &*& //count >= 0 &*& 
             subtree(left, root, ?leftCount) &*& subtree(right, root, ?rightCount) &*& count == 1 + leftCount + rightCount; // &*& leftCount >= 0 &*& rightCount >= 0;
 
 predicate context(struct node *node, struct node *parent, int count) = 
         parent == 0 ?
             emp
         :
-            parent->left |-> ?left &*& parent->right |-> ?right &*& parent->parent |-> ?grandparent &*& parent->count |-> ?parentCount &*& malloc_block_node(parent) &*&
+            parent->left |-> ?left &*& parent->right |-> ?right &*& parent->parent |-> ?grandparent &*& parent->count |-> ?parentCount &*&
             context(parent, grandparent, parentCount) &*&
             (node == left ? 
                  subtree(right, parent, ?rightCount) &*& parentCount == 1 + count + rightCount
@@ -33,9 +34,6 @@ predicate tree(struct node *node) =
     context(node, ?parent, ?count) &*& subtree(node, parent, count);
 @*/
 
-void abort();
-    //@ requires true;
-    //@ ensures false;
 
 struct node *create_tree()
     //@ requires emp;

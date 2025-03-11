@@ -1,5 +1,6 @@
 #include "malloc.h"
 #include <stdbool.h>
+#include "stdlib.h"
 
 struct node {
     struct node *left;
@@ -26,7 +27,7 @@ predicate subtree(struct node *root, struct node *parent, tree nodes)
             case tree(root0, leftNodes, rightNodes):
                 return
                     root == root0 &*& root != 0 &*&
-                    root->left |-> ?left &*& root->right |-> ?right &*& root->parent |-> parent &*& root->count |-> tree_count(nodes) &*& malloc_block_node(root) &*&
+                    root->left |-> ?left &*& root->right |-> ?right &*& root->parent |-> parent &*& root->count |-> tree_count(nodes) &*&
                     subtree(left, root, leftNodes) &*& subtree(right, root, rightNodes);
         };
 
@@ -39,13 +40,13 @@ predicate context(struct node *node, struct node *parent, int count, context nod
             case left_context(parentContextNodes, parent0, rightNodes):
                 return
                     parent == parent0 &*& parent != 0 &*&
-                    parent->left |-> node &*& parent->right |-> ?right &*& parent->parent |-> ?grandparent &*& parent->count |-> ?parentCount &*& malloc_block_node(parent) &*&
+                    parent->left |-> node &*& parent->right |-> ?right &*& parent->parent |-> ?grandparent &*& parent->count |-> ?parentCount &*&
                     context(parent, grandparent, parentCount, parentContextNodes) &*& subtree(right, parent, rightNodes) &*&
                     parentCount == 1 + count + tree_count(rightNodes);
             case right_context(parentContextNodes, parent0, leftNodes):
                 return
                     parent == parent0 &*& parent != 0 &*&
-                    parent->left |-> ?left &*& parent->right |-> node &*& parent->parent |-> ?grandparent &*& parent->count |-> ?parentCount &*& malloc_block_node(parent) &*&
+                    parent->left |-> ?left &*& parent->right |-> node &*& parent->parent |-> ?grandparent &*& parent->count |-> ?parentCount &*&
                     context(parent, grandparent, parentCount, parentContextNodes) &*& subtree(left, parent, leftNodes) &*&
                     parentCount == 1 + tree_count(leftNodes) + count;
         };
@@ -55,9 +56,6 @@ predicate tree(struct node *node, context contextNodes, tree subtreeNodes)
 
 @*/
 
-void abort();
-    //@ requires true;
-    //@ ensures false;
 
 struct node *create_tree()
     //@ requires emp;

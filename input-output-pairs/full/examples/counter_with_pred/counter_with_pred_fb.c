@@ -6,7 +6,7 @@ struct Counter {
 
 /*@
 predicate Counter(struct Counter* c, int v) =
-  c->value |-> v &*& malloc_block_Counter(c);
+  c->value |-> v;
 @*/
 
 struct Counter* init(int v)
