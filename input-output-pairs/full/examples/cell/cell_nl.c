@@ -46,7 +46,6 @@ void cell_set(struct cell* c, int v)
  * @param c - A pointer to the `cell` object.
  * @param v - The integer value to add to the current value.
  *
- * The function ensures that the result of the addition does not exceed the integer limits.
  */
 void cell_inc(struct cell* c, int v)
 {

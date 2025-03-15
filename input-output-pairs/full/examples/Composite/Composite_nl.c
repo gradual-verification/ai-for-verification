@@ -1,7 +1,6 @@
 #include <stdbool.h>
 #include <limits.h>
-#include <stdlib.h>
-#include <assert.h>
+#include "stdlib.h"
 
 /***
  * Description:
@@ -74,7 +73,7 @@ struct Node* create()
  * Description:
  * The `addLeft` function adds a left child to a given node and returns the newly added child
  *
- * @param node - A pointer to the node where the left child should be added.
+ * @param node - A pointer to the node where the left child should be added, and its left child is originally empty.
  *
  * The function calls `internalAddLeft(node)`, which allocates and initializes
  * a new left child node and updates the tree structure.
@@ -127,7 +126,7 @@ struct Node* internalCreate(struct Node* parent)
  * Description:
  * The `internalAddLeft` function creates and adds a left child to a node.
  *
- * @param node - A pointer to the node where the left child should be added.
+ * @param node - A pointer to the node where the left child should be added. The node has empty left child.
  *
  * The function calls `internalCreate(node)` to create a new node, assigns it as the left child,
  * and updates the `count` field by calling `fix(node)`.
@@ -160,19 +159,6 @@ void fix(struct Node* node)
     struct Node* parent = node->parent;
     if(parent != 0) {
         fix(parent);
-    }
-}
-
-/***
- * Description:
- * The `abort` function enters an infinite loop, simulating a program termination state.
- *
- * This function is used when an unrecoverable error occurs.
- */
-void abort()
-{
-    while(true) 
-    {
     }
 }
 

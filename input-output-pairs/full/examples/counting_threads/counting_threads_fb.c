@@ -24,7 +24,7 @@ void m(void *data) //@ : thread_run_joinable
 }
 
 void process(int n)
-    //@ requires integer(&cell, ?v) &*& 0 <= n ;
+    //@ requires integer(&cell, ?v) &*& 0 <= n;
     //@ ensures integer(&cell, v);
 {
     

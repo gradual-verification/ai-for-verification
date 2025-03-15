@@ -12,7 +12,7 @@ predicate map(struct node *n; list<pair<void *, void *> > entries) =
     n == 0 ?
         entries == nil
     :
-        n->next |-> ?next &*& n->key |-> ?key &*& n->value |-> ?value &*& malloc_block_node(n) &*&
+        n->next |-> ?next &*& n->key |-> ?key &*& n->value |-> ?value &*&
         map(next, ?entriesTail) &*& entries == cons(pair(key, value), entriesTail);
 
 @*/
@@ -117,7 +117,7 @@ bool foo_equals(struct foo *f1, struct foo *f2)
 
 struct foo *create_foo(int value)
     //@ requires true;
-    //@ ensures result->value |-> value &*& malloc_block_foo(result);
+    //@ ensures result->value |-> value;
 {
     struct foo *foo = malloc(sizeof(struct foo));
     if (foo == 0) abort();

@@ -1,9 +1,8 @@
 #include <stdbool.h>
 #include "malloc.h"
-#include "lists.h"
-#include "stringBuffers.h"
-#include "sockets.h"
-
+#include "../lists.h"
+#include "../stringBuffers.h"
+#include "../sockets.h"
 /***
  * Description:
  * This program establishes a client socket connection to a server on port `12345`.

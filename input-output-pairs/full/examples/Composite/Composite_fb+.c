@@ -1,6 +1,6 @@
 #include <stdbool.h>
 #include <limits.h> 
-
+#include "stdlib.h"
 
 
 int main() //@ : main
@@ -155,16 +155,6 @@ void fix(struct Node* node)
     fix(parent);
   }
 
-}
-
-void abort()
-  //@ requires emp;
-  //@ ensures false; 
-{
-  while(true)
-
-  {
-  }
 }
 
 int internalGetNbOfNodes(struct Node* n)

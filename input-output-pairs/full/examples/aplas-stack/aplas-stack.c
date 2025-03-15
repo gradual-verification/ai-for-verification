@@ -108,6 +108,7 @@ int get_length(struct stack* s)
     //@ invariant lseg(head, n, ?vs0) &*& lseg(n, 0, ?vs1) &*& r == length(vs0) &*& vs == append(vs0, vs1);
     //@ decreases length(vs1);
   {
+    //@ open lseg(n, 0, vs1);
     r = r + 1;
     n = n->next;
     //@ lseg_add(head);

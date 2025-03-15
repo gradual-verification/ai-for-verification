@@ -15,7 +15,7 @@ predicate_family equals_state2(void* index)(void* x1, int v1,fixpoint(unit, int,
 
 typedef bool equals(void* x1, void* x2);
   //@ requires equals_state1(this)(x1, ?v1, ?eq_func) &*& equals_state2(this)(x2, ?v2, eq_func);
-  //@ ensures equals_state1(this)(x1, v1, eq_func) &*& equals_state2(this)(x2, v2, eq_func);
+  //@ ensures equals_state1(this)(x1, v1, eq_func) &*& equals_state2(this)(x2, v2, eq_func) &*& result == eq_func(unit, v1, v2);
 
 /*@
 predicate_ctor equals_state2_ctor(equals * index, fixpoint(unit, int, int, bool) eq_func)(void* x2, int v2) =

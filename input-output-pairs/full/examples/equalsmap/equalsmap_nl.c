@@ -96,6 +96,7 @@ bool foo_equals(struct foo *f1, struct foo *f2)
     return f1->value == f2->value;
    
 }
+
 /**
  * Description:
  * The `create_foo` function dynamically allocates memory for a foo structure
@@ -112,6 +113,11 @@ struct foo *create_foo(int value);
     return foo;
 }
 
+/**
+ * Description:
+ * The `main` function checks whether the created map has and doesn't an element 
+ * whose value equal to the value of the created one.
+ */
 int main()
 {
     struct foo *foo1 = create_foo(100);

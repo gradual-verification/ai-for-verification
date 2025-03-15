@@ -8,11 +8,6 @@ struct node {
 /*equals() function
 -params: void* x1, void* x2
 -description: checks whether the elements of two pointers are equal. It doesn't have a concrete definition.
-
-It requires that there exists two functions to get the value of the elements of x1 and x2,
-and an equal function before calling this function.
-It ensures that the values are not changed and equal function still exists after calling this function. 
-Its return value is the result of executing the equal function on the parameters.
 */
 typedef bool equals(void* x1, void* x2);
 
@@ -45,7 +40,7 @@ struct node* add(struct node* n, void* v)
 
 It requires that n is the starting node of the list, eq is a equal function, 
 which can be applied on the value of v and each element in the list. 
-It ensures that the list and equal function are unchanged, and the return value is the result 
+It ensures that the list is unchanged, and the return value is the result 
 of checking whether any element in the list is equal to v.
 */
 bool list_contains(struct node* n, void* v, equals* eq) 
@@ -83,10 +78,6 @@ struct cell* create_cell(int v)
 /*cell_equals() function
 -params: two cell pointers
 -description: compares the values of the two cells.
-
-It requires that the cells contain the value, and there exists an equal function before calling this function,
-It ensures that the cells and equal function are still unchanged after calling this function. 
-Its return value is the result of executing the equal function on the parameters.
 */
 bool cell_equals(struct cell* x1, struct cell* x2) //@: equals
 {

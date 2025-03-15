@@ -18,7 +18,7 @@ struct thread;
 /***
  * Description:
  * The `thread_start` function creates a new thread and starts executing the given function (`run`)
- * with the provided data.
+ * with the provided data. It doesn't have an implementation. 
  *
  * @param run - A pointer to the function to execute in the thread.
  * @param data - A pointer to the data required by the thread function.
@@ -28,7 +28,7 @@ struct thread *thread_start(void *run, void *data);
 
 /***
  * Description:
- * The `thread_join` function waits for a given thread to finish execution.
+ * The `thread_join` function waits for a given thread to finish execution. It doesn't have an implementation. 
  *
  * @param thread - A pointer to the thread to join.
  *

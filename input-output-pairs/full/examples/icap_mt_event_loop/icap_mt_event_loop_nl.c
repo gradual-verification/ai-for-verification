@@ -9,7 +9,7 @@ typedef struct eloop *eloop;
  * Description:
 The eloop_handler function pointer that handles the data of an event loop and preserves the property of event loop and data.
 
-@param value: the data to be handled, which needs to preserve some property before and after the execution of handler.
+@param data: the data to be handled, which needs to preserve some property before and after the execution of handler.
 */
 typedef void eloop_handler(void *data);
 
@@ -24,6 +24,8 @@ struct eloop {
  * Description:
 The eloop_create function creates an instance of event loop, whose lock should be initialized and released (i.e., unlocked).
 Moreover, its number of signals should be greater than or equal to 0.
+
+@return: the created instance of event loop.
 */
 eloop eloop_create()
 {
@@ -83,7 +85,11 @@ void eloop_signal(eloop x)
 /***
  * Description:
 The eloop_when function updates the loop handler and data for an event loop instance.
-It makes sure that the event loop property holds before and after the execution
+It makes sure that the event loop property holds before and after the execution. 
+
+@param x: the event loop instance.
+@param h: the event loop handler.
+@param data: the data of an event loop handler
 */
 void eloop_when(eloop x, eloop_handler *h, void *data)
 {

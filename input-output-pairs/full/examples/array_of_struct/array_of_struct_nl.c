@@ -17,7 +17,7 @@ The function prompts the user to enter the number of students and stores this va
 It ensures that the number of students is non-negative and that the required memory allocation does not exceed system limits. 
 If these checks fail, the program aborts. The function then allocates memory for the array of struct student and,
 if allocation fails, the program aborts. For each student, 
-it prompts the user to enter the student's name and age, storing this information in the allocated array. 
+it prompts the user to enter the student's name (within 100 characters, ended with '\0') and age, storing this information in the allocated array. 
 Finally, the function returns a pointer to the array of students.
 */
 struct student *read_students(int *count)

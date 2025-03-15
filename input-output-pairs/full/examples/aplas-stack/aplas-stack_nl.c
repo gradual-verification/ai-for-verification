@@ -25,7 +25,7 @@ struct stack {
  *
  * @param none
  * 
- * The function allocates memory for a `stack` and sets its head to `NULL`.
+ * The function allocates memory for a `stack` and sets its head to `NULL`. It returns the pointer to that stack. 
  * If memory allocation fails, the program terminates.
  */
 struct stack* create_stack() 

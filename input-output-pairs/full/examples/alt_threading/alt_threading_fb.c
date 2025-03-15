@@ -19,6 +19,7 @@ void thread_join(struct thread *thread);
     //@ ensures post();
 
 void increment(int *cell)
+    //@ requires integer(cell, ?value)
     //@ ensures integer(cell, value + 1);
 {
     (*cell)++;

@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <limits.h> 
+#include "stdlib.h"
 
 /*
  * The composite pattern in C with separation logic.
@@ -215,15 +216,6 @@ void fix(struct Node* node)
   //@ close context(node, value, c+1);
 }
 
-void abort()
-  //@ requires emp;
-  //@ ensures false; 
-{
-  while(true)
-   //@ invariant emp; 
-  {
-  }
-}
 
 int internalGetNbOfNodes(struct Node* n)
   //@ requires tree(n, ?value);
