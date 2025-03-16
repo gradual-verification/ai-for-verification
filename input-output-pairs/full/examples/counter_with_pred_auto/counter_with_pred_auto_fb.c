@@ -10,7 +10,7 @@ predicate Counter(struct Counter* c; int v) =
 @*/
 
 struct Counter* init(int v)
-  //@ requires emp;
+  //@ requires true;
   //@ ensures Counter(result, v);
 {
   struct Counter* c = malloc(sizeof(struct Counter));
@@ -31,7 +31,7 @@ void increment(struct Counter* c)
 
 void dispose(struct Counter* c)
   //@ requires Counter(c, _);
-  //@ ensures emp;
+  //@ ensures true;
 {
   free(c);
 }
@@ -54,8 +54,8 @@ int get(struct Counter* c)
 }
 
 int main() //@ : main
-  //@ requires emp;
-  //@ ensures emp;
+  //@ requires true;
+  //@ ensures true;
 {
   struct Counter* c1 = init(0); struct Counter* c2 = init(5);
 

@@ -5,7 +5,7 @@ struct Counter {
 };
 
 struct Counter* init(int v)
-  //@ requires emp;
+  //@ requires true;
   //@ ensures result->value |-> v;
 {
   struct Counter* c = malloc(sizeof(struct Counter));
@@ -30,8 +30,8 @@ void increment(struct Counter* c)
 }
 
 void dispose(struct Counter* c)
-  //@ requires c->value |-> _ ;
-  //@ ensures emp;
+  //@ requires true;
+  //@ ensures true;
 {
   free(c);
 }
@@ -47,8 +47,8 @@ void swap(struct Counter* c1, struct Counter* c2)
 }
 
 int main() //@ : main
-  //@ requires emp;
-  //@ ensures emp;
+  //@ requires true;
+  //@ ensures true;
 {
   struct Counter* c1 = init(0); struct Counter* c2 = init(5);
 

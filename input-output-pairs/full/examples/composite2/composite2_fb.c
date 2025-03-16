@@ -20,7 +20,7 @@ predicate subtree(struct node *root, struct node *parent, int count) =
 
 predicate context(struct node *node, struct node *parent, int count) = 
         parent == 0 ?
-            emp
+            true
         :
             parent->left |-> ?left &*& parent->right |-> ?right &*& parent->parent |-> ?grandparent &*& parent->count |-> ?parentCount &*&
             context(parent, grandparent, parentCount) &*&
@@ -36,7 +36,7 @@ predicate tree(struct node *node) =
 
 
 struct node *create_tree()
-    //@ requires emp;
+    //@ requires true;
     //@ ensures tree(result);
 {
     struct node *n = malloc(sizeof(struct node));
@@ -245,7 +245,7 @@ bool tree_has_right(struct node *node)
 
 void dispose_node(struct node *node)
     //@ requires subtree(node, _, _);
-    //@ ensures emp;
+    //@ ensures true;
 {
     if (node == 0) {
     } else {
@@ -263,7 +263,7 @@ void dispose_node(struct node *node)
 
 void tree_dispose(struct node *node)
     //@ requires tree(node);
-    //@ ensures emp;
+    //@ ensures true;
 {
     if (node == 0) {
         abort();
@@ -278,8 +278,8 @@ void tree_dispose(struct node *node)
 }
 
 int main()
-    //@ requires emp;
-    //@ ensures emp;
+    //@ requires true;
+    //@ ensures true;
 {
     struct node *node = create_tree();
     node = tree_add_left(node);

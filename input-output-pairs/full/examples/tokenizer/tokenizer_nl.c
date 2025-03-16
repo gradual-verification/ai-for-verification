@@ -19,7 +19,7 @@ struct tokenizer
 
 /***
  * Description:
-The tokenizer_fill_buffer function reads a character from the next_char reader of the tokenizer and update the lastread char,
+The tokenizer_fill_buffer function reads a character from the next_char reader of the tokenizer and updates the lastread char,
 if the original lastread char is -2 (which means empty).
 
 It needs to make sure that the given tokenizer preserves its property in its next_char field as a char reader,
@@ -116,7 +116,7 @@ bool is_digit(int c)
 
 /***
  * Description:
-The string_buffer_append_char function append a char to a buffer.
+The string_buffer_append_char function appends a char to a buffer.
 
 It needs to make sure that the property of the buffer holds (i.e., the buffer points to a list of characters) before and after the function.
 */
@@ -166,7 +166,7 @@ bool is_symbol_char(int c)
  * Description:
 The tokenizer_eat_symbol function reads all the ASCII symbol characters that are encountered sequentially by the tokenizer, 
 and adds them into the buffer at the same time.
-If it peeks a non-digit character, it exits the loop and return the token that represents symbol.
+If it peeks a non-symbol character, it exits the loop and return the token that represents symbol.
 
 It needs to make sure that the given tokenizer preserves its property in its next_char field as a char reader,
 and its buffer field as a string buffer.
@@ -342,7 +342,7 @@ int my_getchar() //@ : charreader
 
 /***
  * Description:
-The main function first creates a tokenizer, then continue reading and printing the tokens,
+The main function first creates a tokenizer, then continues reading and printing the tokens,
 and finally free the tokenizer.
 */
 int main()
