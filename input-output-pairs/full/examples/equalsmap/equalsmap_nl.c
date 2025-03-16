@@ -50,6 +50,13 @@ void map_dispose(struct node *map)
     }
 }
 
+/**
+ * Description:
+ * The `equalsFuncType` function checks if the two given keys equal.
+ * 
+ * It can have different implementations.
+ */
+typedef bool equalsFuncType(void *key, void *key0);
 
 /**
  * Description:

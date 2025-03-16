@@ -21,7 +21,7 @@ predicate counter(struct C* c, int x, int nbTickets) =
   nbTickets >= 0 &*& (nbTickets == 0 ? [1.0] c->x |-> x : [0.5] c->x |-> x);
 
 predicate tickets(struct C* c, int x, int howMany) =
-  howMany <= 0 ? emp : [0.5] c->x |-> x;
+  howMany <= 0 ? true : [0.5] c->x |-> x;
 @*/
 
 void create_counter(struct C* c)

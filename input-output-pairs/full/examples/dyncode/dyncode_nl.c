@@ -1,75 +1,49 @@
+#include <stdbool.h>
+#include "assert.h"
+#include "malloc.h"
 #include "stdlib.h"
-#include "threading.h"
 
-struct sum {
-    int sum;
-};
-
-struct session {
-    struct sum *sum_object;
-    struct lock *lock;
-};
-
-/*contrinute() function
--params: void *data
--description: This function increments the sum by 1. 
-It acquires the lock, increments the sum by 1 and 
-then releases the lock.
+/*
+  Natural Language Specification:
+  - Description: an interface of a function. 
+  It requires the pointer of this function points to some value, and it returns 1. 
 */
-void contribute(void *data) //@ : thread_run_joinable
-{
-    struct session *session = data;
-    struct lock *lock = session->lock;
-    struct sum *sumObject = session->sum_object;
-    free(session);
-    lock_acquire(lock);
-        {
-            int sum = sumObject->sum;
-            sumObject->sum = sum + 1;
-        }
-    lock_release(lock);
-}
+typedef int sillyfunc();
 
-/*main() function
--params: None
--description: This function creates a sum object and a lock object. It then creates two sessions, each with a sum object and a lock object. It then creates two threads, each with a session object. The first thread increments the sum by 1 and the second thread increments the sum by 1. The main function then joins the first thread and the second thread. The lock object is then disposed. The sum is then checked to be 2.
+/*
+  Natural Language Specification:
+  - Description: Entry point of the program. Allocates memory for machine code, 
+  sets up a function pointer to this code, 
+  executes the code, and frees the allocated memory. 
+  Asserts that the function result is 1.
+  - Parameters: None.
+  - Requires: True.
+  - Ensures: True.
 */
 int main()
 {
-    struct sum *sumObject = malloc(sizeof(struct sum));
-    if (sumObject == 0) {
-        abort();
-    }
-    sumObject->sum = 0;
-    struct lock *lock = create_lock();
+    char *code = malloc(4);
+    if (code == 0) abort();
+    sillyfunc *funcptr = 0;
+    int funcresult = 0;
     
-    struct session *session1 = malloc(sizeof(struct session));
-    if (session1 == 0) {
-        abort();
-    }
-    session1->sum_object = sumObject;
-    session1->lock = lock;
-    struct thread *thread1 = thread_start_joinable(contribute, session1);
+    // x86 machine code:
+    // 33 C0   xor eax, eax
+    // 40      inc eax
+    // C3      ret
     
-    struct session *session2 = malloc(sizeof(struct session));
-    if (session2 == 0) {
-        abort();
-    }
-    session2->sum_object = sumObject;
-    session2->lock = lock;
-    struct thread *thread2 = thread_start_joinable(contribute, session2);
+    *(code + 0) = 0x33;
+    *(code + 1) = (char)0xC0;
+    *(code + 2) = 0x40;
+    *(code + 3) = (char)0xC3;
     
-    thread_join(thread1);
-    
-    thread_join(thread2);
-    
-    lock_dispose(lock);
-    
-    // The following perform_action statement is only to show contrib_handle(_, box1, 1)
-    
-    int sum = sumObject->sum;
-    assert(sum == 2);
-    free(sumObject);
+    funcptr = (void *)code;
 
+    funcresult = funcptr();
+
+    free(code);
+    
+    assert(funcresult == 1);
+    
     return 0;
 }

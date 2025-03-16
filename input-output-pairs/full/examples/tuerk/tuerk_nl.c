@@ -3,14 +3,6 @@ struct node {
     int value;
 };
 
-/*@
-predicate nodes(struct node *node; list<int> values) =
-    node == 0 ?
-        values == nil
-    :
-        node->next |-> ?next &*& node->value |-> ?value &*& nodes(next, ?values0) &*& values == cons(value, values0);
-@*/
-
 /***
  * Description:
 The list_length_rec function calculates the length of a single linked list recursively.
@@ -18,8 +10,6 @@ The list_length_rec function calculates the length of a single linked list recur
 @param node: the starting node of the linkedlist, and null means that the linkedlist is empty.
 */
 int list_length_rec(struct node *node)
-    //@ requires nodes(node, ?values);
-    //@ ensures nodes(node, values) &*& result == length(values);
 {
     if (node == 0)
         return 0;
@@ -36,8 +26,6 @@ The list_length_rec function calculates the length of a single linked list itera
 @param node: the starting node of the linkedlist, and null means that the linkedlist is empty.
 */
 int list_length_iter(struct node *node)
-    //@ requires nodes(node, ?values);
-    //@ ensures nodes(node, values) &*& result == length(values);
 {
     int i = 0;
     while (node != 0)

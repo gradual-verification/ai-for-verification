@@ -13,7 +13,7 @@ void set_to_zero(int* a, int N)
 }
 
 void increment_all(int* a, int N) 
-  //@ requires a[0..N] |-> ?vs
+  //@ requires a[0..N] |-> ?vs;
   //@ ensures a[0..N] |-> ?nvs &*& forall_(int i; i < 0 || i >= length(vs) || nth(i, nvs) == nth(i, vs) + 1);
 {
   int k = 0;

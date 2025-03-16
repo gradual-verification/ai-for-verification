@@ -18,7 +18,7 @@ void m()
 }
 
 int main() //@ : main_full(globals_fbp)
-//@ requires module(globals_m, true);
+//@ requires module(globals_fbp, true);
 //@ ensures true;
 {
     x = 7;

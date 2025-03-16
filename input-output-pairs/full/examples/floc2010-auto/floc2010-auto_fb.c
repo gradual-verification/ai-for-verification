@@ -47,8 +47,8 @@ struct list *create_list()
 }
 
 int list_length_helper(struct node *n1, struct node *n2)
-  //@ requires lseg(n1, n2, ?vs);
-  //@ ensures lseg(n1, n2, vs) &*& result == length(vs);
+  //@ requires lseg(n1, n2, ?vs) &*& node(n2, _, _);
+  //@ ensures lseg(n1, n2, vs) &*& node(n2, _, _) &*& result == length(vs);
 {
   int len;
   if(n1 == n2) {

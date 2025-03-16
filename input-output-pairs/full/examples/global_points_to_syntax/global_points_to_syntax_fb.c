@@ -34,8 +34,8 @@ void modify_primitive_globals_new_syntax()
     global5 = (char)(global5 + 5);
 }
 
-int main() //@ : main_full(global_points_to_syntax)
-    //@ requires module(global_points_to_syntax, true);
+int main() //@ : main_full(global_points_to_syntax_fb)
+    //@ requires module(global_points_to_syntax_fb, true);
     //@ ensures true;
 {
     modify_primitive_globals_old_syntax();

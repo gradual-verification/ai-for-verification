@@ -48,6 +48,17 @@ predicate_family barrier_incoming(void *lem)(int n, predicate(int k, bool outgoi
 predicate_family barrier_inside(void *lem)(int n, predicate(int k, bool outgoing) inv);
 predicate_family barrier_exiting(void *lem)(int n, predicate(int k, bool outgoing) inv);
 
+typedef lemma void barrier_enter(int k);
+    requires barrier_incoming(this)(?n, ?inv, ?exit) &*& inv(k, false) &*& 0 <= k &*& k < n;
+    ensures
+        k == n - 1 ?
+            barrier_exiting(exit)(n, inv) &*& inv(k, true)
+        :
+            barrier_inside(exit)(n, inv) &*& inv(k + 1, false);
+
+typedef lemma void barrier_exit(int k);
+    requires barrier_inside(this)(?n, ?inv) &*& inv(k, true) &*& 1 <= k &*& k < n;
+    ensures barrier_exiting(this)(n, inv) &*& k == 1 ? inv(0, false) : inv(k - 1, true);
 @*/
 
 void barrier(struct barrier *barrier)
@@ -113,9 +124,26 @@ void barrier_dispose(struct barrier *barrier)
     free(barrier);
 }
 
+/*@
+
+inductive phase = writing_x | writing_y;
+
+fixpoint phase next_phase(phase p) {
+    switch (p) {
+        case writing_x: return writing_y;
+        case writing_y: return writing_x;
+    }
+}
+
+@*/
 
 struct data {
     struct barrier *barrier;
+    //@ phase phase;
+    //@ phase phase1;
+    //@ phase phase2;
+    //@ bool inside1;
+    //@ bool inside2;
     int x1;
     int x2;
     int y1;
