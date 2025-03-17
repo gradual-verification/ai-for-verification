@@ -6,7 +6,7 @@ struct account {
 
 struct account *create_account()
     //@ requires true;
-    //@ ensures account_balance(result, 0) &*& malloc_block_account(result);
+    //@ ensures result->balance |-> 0 &*& malloc_block_account(result);
 {
     struct account *myAccount = malloc(sizeof(struct account));
     if (myAccount == 0) { abort(); }
@@ -15,28 +15,28 @@ struct account *create_account()
 }
 
 int account_get_balance(struct account *myAccount)
-    //@ requires account_balance(myAccount, ?theBalance);
-    //@ ensures account_balance(myAccount, theBalance) &*& result == theBalance;
+    //@ requires myAccount->balance |-> ?theBalance;
+    //@ ensures myAccount->balance |-> theBalance &*& result == theBalance;
 {
     return myAccount->balance;
 }
 
 void account_set_balance(struct account *myAccount, int newBalance)
-    //@ requires account_balance(myAccount, _);
-    //@ ensures account_balance(myAccount, newBalance);
+    //@ requires myAccount->balance |-> _;
+    //@ ensures myAccount->balance |-> newBalance;
 {
     myAccount->balance = newBalance;
 }
 
 void account_deposit(struct account *myAccount, int amount)
-    //@ requires account_balance(myAccount, ?theBalance);
-    //@ ensures account_balance(myAccount, theBalance + amount);
+    //@ requires myAccount->balance |-> ?theBalance &*& 0 <= amount &*& theBalance + amount <= INT_MAX;
+    //@ ensures myAccount->balance |-> theBalance + amount;
 {
     myAccount->balance += amount;
 }
 
 void account_dispose(struct account *myAccount)
-    //@ requires account_balance(myAccount, _) &*& malloc_block_account(myAccount);
+    //@ requires myAccount->balance |-> _ &*& malloc_block_account(myAccount);
     //@ ensures true;
 {
     free(myAccount);

@@ -19,18 +19,6 @@ predicate stack(struct stack *stack, int count) =
 
 @*/
 
-struct stack *create_stack()
-    //@ requires true;
-    //@ ensures stack(result, 0);
-{
-    struct stack *stack = malloc(sizeof(struct stack));
-    if (stack == 0) { abort(); }
-    stack->head = 0;
-    //@ close nodes(0, 0);
-    //@ close stack(stack, 0);
-    return stack;
-}
-
 /*@
 
 predicate lseg(struct node *first, struct node *last, int count) =
@@ -81,7 +69,7 @@ lemma void lseg_add_lemma(struct node *first)
 @*/
 
 int stack_get_count(struct stack *stack)
-    //@ requires stack(stack, ?count);
+    //@ requires stack(stack, ?count) &*& count <= INT_MAX;
     //@ ensures stack(stack, count) &*& result == count;
 {
     //@ open stack(stack, count);
@@ -91,7 +79,7 @@ int stack_get_count(struct stack *stack)
     int i = 0;
     //@ close lseg(head, head, 0);
     while (n != 0)
-        //@ invariant lseg(head, n, i) &*& lseg(n, 0, count - i);
+        //@ invariant lseg(head, n, i) &*& lseg(n, 0, count - i) &*& i <= count &*& count <= INT_MAX;
     {
         //@ open lseg(n, 0, count - i);
         n = n->next;
@@ -154,54 +142,4 @@ void stack_push_all(struct stack *stack, struct stack *other)
     }
     //@ lseg_to_nodes_lemma(stack->head);
     //@ close stack(stack, count0 + count);
-}
-
-void stack_push(struct stack *stack, int value)
-    //@ requires stack(stack, ?count);
-    //@ ensures stack(stack, count + 1);
-{
-    //@ open stack(stack, count);
-    struct node *n = malloc(sizeof(struct node));
-    if (n == 0) { abort(); }
-    n->next = stack->head;
-    n->value = value;
-    stack->head = n;
-    //@ close nodes(n, count + 1);
-    //@ close stack(stack, count + 1);
-}
-
-int stack_pop(struct stack *stack)
-    //@ requires stack(stack, ?count) &*& 0 < count;
-    //@ ensures stack(stack, count - 1);
-{
-    //@ open stack(stack, count);
-    struct node *head = stack->head;
-    //@ open nodes(head, count);
-    int result = head->value;
-    stack->head = head->next;
-    free(head);
-    //@ close stack(stack, count - 1);
-    return result;
-}
-
-void stack_dispose(struct stack *stack)
-    //@ requires stack(stack, 0);
-    //@ ensures true;
-{
-    //@ open stack(stack, 0);
-    //@ open nodes(_, _);
-    free(stack);
-}
-
-int main()
-    //@ requires true;
-    //@ ensures true;
-{
-    struct stack *s = create_stack();
-    stack_push(s, 10);
-    stack_push(s, 20);
-    stack_pop(s);
-    stack_pop(s);
-    stack_dispose(s);
-    return 0;
 }

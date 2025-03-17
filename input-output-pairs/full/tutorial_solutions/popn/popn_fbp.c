@@ -23,13 +23,10 @@ int stack_pop(struct stack *stack)
     //@ requires stack(stack, ?count) &*& 0 < count;
     //@ ensures stack(stack, count - 1);
 {
-    //@ open stack(stack, count);
     struct node *head = stack->head;
-    //@ open nodes(head, count);
     int result = head->value;
     stack->head = head->next;
     free(head);
-    //@ close stack(stack, count - 1);
     return result;
 }
 
@@ -39,7 +36,6 @@ void stack_popn(struct stack *stack, int n)
 {
     int i = 0;
     while (i < n)
-        //@ invariant stack(stack, count - i) &*& i <= n;
     {
         stack_pop(stack);
         i++;

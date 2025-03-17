@@ -13,6 +13,20 @@ struct stack {
 
 inductive ints = ints_nil | ints_cons(int, ints);
 
+fixpoint int ints_head(ints values) {
+    switch (values) {
+        case ints_nil: return 0;
+        case ints_cons(value, values0): return value;
+    }
+}
+
+fixpoint ints ints_tail(ints values) {
+    switch (values) {
+        case ints_nil: return ints_nil;
+        case ints_cons(value, values0): return values0;
+    }
+}
+
 predicate nodes(struct node *node, ints values) =
     node == 0 ?
         values == ints_nil
@@ -51,6 +65,20 @@ void stack_push(struct stack *stack, int value)
     //@ close stack(stack, ints_cons(value, values));
 }
 
+int stack_pop(struct stack *stack)
+    //@ requires stack(stack, ?values) &*& values != ints_nil;
+    //@ ensures stack(stack, ints_tail(values)) &*& result == ints_head(values);
+{
+    //@ open stack(stack, values);
+    struct node *head = stack->head;
+    //@ open nodes(head, values);
+    int result = head->value;
+    stack->head = head->next;
+    free(head);
+    //@ close stack(stack, ints_tail(values));
+    return result;
+}
+
 void stack_dispose(struct stack *stack)
     //@ requires stack(stack, ints_nil);
     //@ ensures true;
@@ -58,4 +86,19 @@ void stack_dispose(struct stack *stack)
     //@ open stack(stack, ints_nil);
     //@ open nodes(_, _);
     free(stack);
+}
+
+int main()
+    //@ requires true;
+    //@ ensures true;
+{
+    struct stack *s = create_stack();
+    stack_push(s, 10);
+    stack_push(s, 20);
+    int result1 = stack_pop(s);
+    assert(result1 == 20);
+    int result2 = stack_pop(s);
+    assert(result2 == 10);
+    stack_dispose(s);
+    return 0;
 }

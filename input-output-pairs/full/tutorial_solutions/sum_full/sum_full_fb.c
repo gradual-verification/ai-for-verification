@@ -17,11 +17,11 @@ predicate nodes(struct node *node, ints values) =
     node == 0 ?
         values == ints_nil
     :
-        node->next |-> ?next &*& node->value |-> ?value &*& value >= 0 &*& malloc_block_node(node) &*&
+        node->next |-> ?next &*& node->value |-> ?value &*& value >= 0 &*&
         nodes(next, ?values0) &*& values == ints_cons(value, values0);
 
 predicate stack(struct stack *stack, ints values) =
-    stack->head |-> ?head &*& malloc_block_stack(stack) &*& nodes(head, values);
+    stack->head |-> ?head &*& nodes(head, values);
 
 @*/
 
@@ -37,25 +37,21 @@ fixpoint int ints_sum(ints values) {
 @*/
 
 int nodes_get_sum(struct node *node)
-    //@ requires nodes(node, ?values) &*& ints_sum(values) <= INT_MAX;
+    //@ requires nodes(node, ?values);
     //@ ensures nodes(node, values) &*& result == ints_sum(values);
 {
-    //@ open nodes(node, values);
     int result = 0;
     if (node != 0) {
         int tailSum = nodes_get_sum(node->next);
         result = node->value + tailSum;
     }
-    //@ close nodes(node, values);
     return result;
 }
 
 int stack_get_sum(struct stack *stack)
-    //@ requires stack(stack, ?values) &*& ints_sum(values) <= INT_MAX;
+    //@ requires stack(stack, ?values);
     //@ ensures stack(stack, values) &*& result == ints_sum(values);
 {
-    //@ open stack(stack, values);
     int result = nodes_get_sum(stack->head);
-    //@ close stack(stack, values);
     return result;
 }
