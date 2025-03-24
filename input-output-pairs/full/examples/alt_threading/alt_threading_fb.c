@@ -19,14 +19,14 @@ void thread_join(struct thread *thread);
     //@ ensures post();
 
 void increment(int *cell)
-    //@ requires integer(cell, ?value)
-    //@ ensures integer(cell, value + 1);
+    //@ requires *cell |-> ?value;
+    //@ ensures *cell |-> value + 1;
 {
     (*cell)++;
 }
 
-//@ predicate_ctor integer1(int *cell, int value)(int *cell1) = integer(cell, value) &*& cell1 == cell;
-//@ predicate_ctor integer2(int *cell, int value)() = integer(cell, value);
+//@ predicate_ctor integer1(int *cell, int value)(int *cell1) = *cell |-> value &*& cell1 == cell;
+//@ predicate_ctor integer2(int *cell, int value)() = *cell |-> value;
 
 int read_int();
     //@ requires true;

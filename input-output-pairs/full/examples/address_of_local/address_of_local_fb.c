@@ -2,8 +2,8 @@
 #include <stdbool.h>
 
 void inc(int* i)
-  //@ requires integer(i, ?v);
-  //@ ensures integer(i, v+1);
+  //@ requires *i |-> ?v;
+  //@ ensures *i |-> v+1;
 {
   (*i) = (*i) + 1;
 }

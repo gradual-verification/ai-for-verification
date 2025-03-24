@@ -9,8 +9,8 @@ static int cell;
 
 /*@
 
-predicate_family_instance thread_run_pre(m)(void *data, any info) = ticket(integer, &cell, ?frac) &*& [frac]integer(&cell, _);
-predicate_family_instance thread_run_post(m)(void *data, any info) = ticket(integer, &cell, ?frac) &*& [frac]integer(&cell, _);
+predicate_family_instance thread_run_pre(m)(void *data, any info) = ticket(integer, &cell, ?frac) &*& cell |-> _;
+predicate_family_instance thread_run_post(m)(void *data, any info) = ticket(integer, &cell, ?frac) &*& cell |-> _;
 
 predicate thread_info(struct thread *t) = thread(t, m, _, _);
 
@@ -24,8 +24,8 @@ void m(void *data) //@ : thread_run_joinable
 }
 
 void process(int n)
-    //@ requires integer(&cell, ?v) &*& 0 <= n;
-    //@ ensures integer(&cell, v);
+    //@ requires cell |-> ?v &*& 0 <= n;
+    //@ ensures cell |-> v;
 {
     
     // Allocate memory for thread pointers
