@@ -5,7 +5,7 @@
 #include "assert.h"
 
 int main(int argc, char** argv) //@ : main
-  //@ requires [_]argv(argv, argc, _);
+  //@ requires 0 <= argc &*& [_]argv(argv, argc, _);
   //@ ensures true;
 {
   struct file* from = 0; struct file* to = 0; char* buffer = 0; int nb_read = 0;

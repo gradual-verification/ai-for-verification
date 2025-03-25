@@ -57,7 +57,7 @@ predicate_ctor node(int id)(struct node *n) =
   [1/2]n->count |-> 1 + sum(childrenCounts) &*&
   [1/2]n->parent |-> ?parent &*&
   parent == 0 ?
-    [1/2]n->parent |-> 0
+    [1/2]n->parent |-> 0 &*& n->nextSibling |-> _ &*& [1/2]n->count |-> _
   :
     parent != n &*&
     [_]ghost_list_member_handle(id, parent) &*&   // My parent is in the tree.
@@ -115,7 +115,7 @@ void add_to_count(struct node *p, int delta)
     [1/2]p->count |-> 1 + sum(childrenCounts) - delta &*& // Here's the rub.
     [1/2]p->parent |-> ?parent &*&
     parent == 0 ?
-      [1/2]p->parent |-> 0
+      [1/2]p->parent |-> 0 &*& p->nextSibling |-> _ &*& [1/2]p->count |-> _
     :
       parent != p &*&
       [_]ghost_list_member_handle(id, parent) &*&

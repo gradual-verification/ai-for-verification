@@ -48,7 +48,7 @@ void swap(struct Counter* c1, struct Counter* c2)
 
 int get(struct Counter* c)
   //@ requires Counter(c, ?v);
-  //@ ensures Counter(c, v); 
+  //@ ensures Counter(c, v) &*& result==v; 
 {
   return c->value;
 }

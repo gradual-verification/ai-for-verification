@@ -78,6 +78,7 @@ It makes sure that the property of that event loop is unchanged.
 void eloop_signal(eloop x)
 {
     acquire(&x->lock);
+    if (x->signalCount == INT_MAX) abort();
     x->signalCount++;
     release(&x->lock);
 }

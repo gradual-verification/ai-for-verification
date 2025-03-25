@@ -18,10 +18,14 @@ struct tokenizer
 /*@
 predicate Tokenizer(struct tokenizer* t;) =
   t->next_char |-> ?nc &*& is_charreader(nc) == true &*&
+  t->lastread |-> ?lastread &*&
+  t->lasttoken |-> ?lasttoken &*&
   t->buffer |-> ?b &*& string_buffer(b, _);
 
 predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buffer) =
   t->next_char |-> ?nc &*& is_charreader(nc) == true &*&
+  t->lastread |-> ?lastread &*&
+  t->lasttoken |-> ?lasttoken &*&
   t->buffer |-> buffer;
 @*/
 

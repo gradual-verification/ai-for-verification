@@ -82,12 +82,13 @@ void eloop_loop(eloop x)
 }
 
 void eloop_signal(eloop x)
-    //@ requires eloop(x) &*& x->signalCount |-> ?signalCount &*& signalCount < INT_MAX;
+    //@ requires eloop(x);
     //@ ensures eloop(x);
 {
     //@ open eloop(x);
     acquire(&x->lock);
     //@ open I(x)();
+    if (x->signalCount == INT_MAX) abort();
     x->signalCount++;
     //@ close I(x)();
     release(&x->lock);

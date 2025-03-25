@@ -22,7 +22,7 @@ int account_get_balance(struct account *myAccount)
 }
 
 void account_set_balance(struct account *myAccount, int newBalance)
-    //@ requires true;
+    //@ requires myAccount->balance |-> _;
     //@ ensures myAccount->balance |-> newBalance;
 {
     myAccount->balance = newBalance;
@@ -36,7 +36,7 @@ void account_deposit(struct account *myAccount, int amount)
 }
 
 void account_dispose(struct account *myAccount)
-    //@ requires true;
+    //@ requires myAccount->balance |-> _;
     //@ ensures true;
 {
     free(myAccount);

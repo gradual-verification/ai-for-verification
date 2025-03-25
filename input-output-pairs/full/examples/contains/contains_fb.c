@@ -16,7 +16,7 @@ predicate_family equals_post(void* index)(void* v1, void* v2,  fixpoint(unit, vo
 
 typedef bool equals(void* v1, void* v2);
   //@ requires equals_pre(this)(v1, v2, ?eq_func);
-  //@ ensures equals_post(this)(v1, v2, eq_func);
+  //@ ensures equals_post(this)(v1, v2, eq_func) &*& result == eq_func(unit, v1, v2);
 
 /*@
 predicate_ctor my_pre(equals * index, void* v1, fixpoint(unit, void*, void*, bool) eq_func)(void* v2) =
@@ -57,7 +57,7 @@ struct node* add(struct node* n, void* v)
 
 bool list_contains(struct node* n, void* v, equals* eq) 
   //@ requires nodes(n, ?vs) &*& is_equals(eq) == true &*& is_eq_func(eq, ?eq_func)  &*& foreach(vs, my_pre(eq, v, eq_func)) ;
-  //@ ensures nodes(n, vs) &*& is_eq_func(eq, eq_func) &*& foreach(vs, my_post(eq, v, eq_func)) &*& is_equals(eq) == true;
+  //@ ensures nodes(n, vs) &*& is_eq_func(eq, eq_func) &*& foreach(vs, my_post(eq, v, eq_func)) &*& is_equals(eq) == true &*& result == contains_eq_func(vs, v, eq_func);
 {
   if(n == 0) {
     return false;
@@ -86,7 +86,7 @@ fixpoint bool my_eq_func(unit un, void* v1, void* v2) {
 
 bool my_equals(void* v1, void* v2) //@: equals
   //@ requires equals_pre(my_equals)(v1, v2, ?eq_func);
-  //@ ensures equals_post(my_equals)(v1, v2, eq_func);
+  //@ ensures equals_post(my_equals)(v1, v2, eq_func) &*& result == eq_func(unit, v1, v2);
 {
   if((uintptr_t)v1 == (uintptr_t)v2) {
     return true;

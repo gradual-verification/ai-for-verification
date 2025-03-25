@@ -12,7 +12,7 @@ struct stack {
 /*@
 
 predicate nodes(struct node *node, int count) =
-    node == 0 ? count == 0 : 0 < count &*& node->next |-> ?next &*& nodes(next, count - 1);
+    node == 0 ? count == 0 : 0 < count &*& node->next |-> ?next &*& node->value |-> ?value &*& nodes(next, count - 1);
 
 predicate stack(struct stack *stack, int count) =
     stack->head |-> ?head &*& 0 <= count &*& nodes(head, count);

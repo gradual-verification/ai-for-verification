@@ -19,14 +19,14 @@ typedef struct
   int y;
  } struct_with_array;
 
-//@ predicate struct_with_array(struct_with_array *s;) = ints(s->ar, 7, _);
+//@ predicate struct_with_array(struct_with_array *s;) = s->x |-> _ &*& ints(s->ar, 7, _) &*& s->y |-> _;
 
 struct mystruct {
   struct_with_array s1;
   int s2;
 };
 
-//@ predicate mystruct(struct mystruct *s;) = struct_with_array(&s->s1);
+//@ predicate mystruct(struct mystruct *s;) = struct_with_array(&s->s1) &*& s->s2 |-> _;
 
 struct mystruct my_global_nested_struct = {{42, {420, 421, 422, 423, 424, 425, 426}, -3}, -99};
 

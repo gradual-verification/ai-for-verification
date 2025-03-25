@@ -15,14 +15,14 @@ struct account *create_account()
 }
 
 void account_set_balance(struct account *myAccount, int newBalance)
-    //@ requires true;
+    //@ requires myAccount->balance |-> _;
     //@ ensures myAccount->balance |-> newBalance;
 {
     myAccount->balance = newBalance;
 }
 
 void account_dispose(struct account *myAccount)
-    //@ requires true;
+    //@ requires myAccount->balance |-> _;
     //@ ensures true;
 {
     free(myAccount);

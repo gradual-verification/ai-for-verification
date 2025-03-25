@@ -47,7 +47,7 @@ int account_withdraw(struct account *myAccount, int amount)
 }
 
 void account_dispose(struct account *myAccount)
-    //@ requires true;
+    //@ requires account_pred(myAccount, _, _);
     //@ ensures true;
 {
     free(myAccount);

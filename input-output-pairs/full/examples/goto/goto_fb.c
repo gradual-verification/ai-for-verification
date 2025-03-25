@@ -7,7 +7,7 @@ struct node {
 
 /*@
 predicate nodes(struct node *head) =
-    head == 0 ? true : head->next |-> ?next &*& nodes(next);
+    head == 0 ? true : head->next |-> ?next &*& head->value |-> _ &*& nodes(next);
 @*/
 
 void dispose_nodes(struct node *head)

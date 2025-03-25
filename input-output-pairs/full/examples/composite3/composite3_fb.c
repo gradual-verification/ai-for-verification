@@ -74,7 +74,7 @@ struct node *create_tree()
 
 int subtree_get_count(struct node *node)
     //@ requires subtree(node, ?parent, ?nodes);
-    //@ ensures subtree(node, parent, nodes);
+    //@ ensures subtree(node, parent, nodes) &*& result == tree_count(nodes);
 {
     int result = 0;
     if (node == 0) {
@@ -86,7 +86,7 @@ int subtree_get_count(struct node *node)
 
 int tree_get_count(struct node *node)
     //@ requires tree(node, ?contextNodes, ?subtreeNodes);
-    //@ ensures tree(node, contextNodes, subtreeNodes);
+    //@ ensures tree(node, contextNodes, subtreeNodes) &*& result == tree_count(subtreeNodes);
 {
     int result = subtree_get_count(node);
     return result;

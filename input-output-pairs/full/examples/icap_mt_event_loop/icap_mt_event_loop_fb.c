@@ -24,6 +24,7 @@ predicate_ctor I(eloop x)() =
     x->handler |-> ?h &*&
     x->dataPred |-> ?dataPred &*&
     h == 0 ?
+        x->handlerData |-> _ &*&
         true
     :
         x->handlerData |-> ?data &*&
@@ -75,6 +76,7 @@ void eloop_signal(eloop x)
     //@ ensures eloop(x);
 {
     acquire(&x->lock);
+    if (x->signalCount == INT_MAX) abort();
     x->signalCount++;
     release(&x->lock);
 }

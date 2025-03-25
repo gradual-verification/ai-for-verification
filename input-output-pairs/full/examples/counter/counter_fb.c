@@ -30,7 +30,7 @@ void increment(struct Counter* c)
 }
 
 void dispose(struct Counter* c)
-  //@ requires true;
+  //@ requires c->value |-> _;
   //@ ensures true;
 {
   free(c);
