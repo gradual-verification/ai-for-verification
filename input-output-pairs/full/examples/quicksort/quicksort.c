@@ -79,7 +79,7 @@ void swap (int *a, int i, int j)
 }
 
 int partition(int *a, int lo, int hi)
-  //@ requires a[lo..hi + 1] |-> ?vs &*& lo <= hi;
+  //@ requires a[lo..hi + 1] |-> ?vs &*& lo <= hi &*& lo >= 0;
   /*@
   ensures
       a[lo..result] |-> ?vslow &*&
@@ -91,7 +91,8 @@ int partition(int *a, int lo, int hi)
   @*/
 {
   //@ ints_split(a + lo, hi - lo);
-  int pivot = *(a+hi);
+  //@ open ints(a + hi, 1, _);
+  int pivot = a[hi];
   //@ assert a[lo..hi] |-> ?vstodo0 &*& a[hi..hi + 1] |-> cons(_, ?vsrest);
   //@ switch (vsrest) { case nil: case cons(h, t): }
   int i = lo - 1;
@@ -109,8 +110,8 @@ int partition(int *a, int lo, int hi)
       (mplus)((count_eq)(vstodo), (mplus)((count_eq)(vslow), (count_eq)(cons(pivot, vshigh)))) == (count_eq)(vs);
     @*/
   {
-    
-    int aj = *(a + j);
+    //@ open ints(a + j, 1, _);
+    int aj = a[j];
     if (aj < pivot) {
       i++;
       if (i < j) {
@@ -263,7 +264,7 @@ lemma void is_sorted_append(option<int> lower, list<int> xs, int pivot, list<int
 @*/
 
 void quicksort(int *a, int lo, int hi)
-  //@ requires a[lo..hi + 1] |-> ?vs;
+  //@ requires lo >= 0 &*& hi < INT_MAX &*& a[lo..hi + 1] |-> ?vs;
   //@ ensures a[lo..hi + 1] |-> ?vs2 &*& (count_eq)(vs2) == (count_eq)(vs) &*& is_sorted_between(none, vs2, none) == true;
 {
   if (lo > hi) {
@@ -294,3 +295,4 @@ void quicksort(int *a, int lo, int hi)
     //@ is_sorted_append(none, vslow, pivot, cons(pivot, vshigh));
   }
 }
+
