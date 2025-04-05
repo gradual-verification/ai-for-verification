@@ -1,0 +1,23 @@
+[
+  PackageDecl (l, "", [], [
+    Struct (l, "node", [], Some (([], [Field (l, Real, PtrTypeExpr (l, StructTypeExpr (l, Some ("node"), None, [], [])), "next", Instance, Public, false, None); Field (l, Real, ManifestTypeExpr (l, Int (Signed, IntRank)), "value", Instance, Public, false, None)], [], false)), []);
+    Struct (l, "stack", [], Some (([], [Field (l, Real, PtrTypeExpr (l, StructTypeExpr (l, Some ("node"), None, [], [])), "head", Instance, Public, false, None)], [], false)), []);
+    PredFamilyDecl (l, "nodes", [], 0, [PtrTypeExpr (l, StructTypeExpr (l, Some ("node"), None, [], [])); ManifestTypeExpr (l, Int (Signed, IntRank))], None, Inductiveness_Inductive);
+    PredFamilyInstanceDecl (l, "nodes", [], [], [(PtrTypeExpr (l, StructTypeExpr (l, Some ("node"), None, [], [])), "node"); (ManifestTypeExpr (l, Int (Signed, IntRank)), "count")], IfExpr (l, Operation (l, Eq, [Var (l, "node"); IntLit (l, big_int_of_string "0", false, false, NoLSuffix)]), Operation (l, Eq, [Var (l, "count"); IntLit (l, big_int_of_string "0", false, false, NoLSuffix)]), Sep (l, Operation (l, Lt, [IntLit (l, big_int_of_string "0", false, false, NoLSuffix); Var (l, "count")]), Sep (l, PointsTo (l, Read (l, Var (l, "node"), "next"), "RegularPointsTo", VarPat (l, "next")), Sep (l, PointsTo (l, Read (l, Var (l, "node"), "value"), "RegularPointsTo", VarPat (l, "value")), Sep (l, CallExpr (l, "malloc_block_node", [], [], [LitPat (Var (l, "node"))], Static), CallExpr (l, "nodes", [], [], [
+      LitPat (Var (l, "next"));
+      LitPat (Operation (l, Sub, [Var (l, "count"); IntLit (l, big_int_of_string "1", true, false, NoLSuffix)]))
+    ], Static)))))));
+    PredFamilyDecl (l, "stack", [], 0, [PtrTypeExpr (l, StructTypeExpr (l, Some ("stack"), None, [], [])); ManifestTypeExpr (l, Int (Signed, IntRank))], None, Inductiveness_Inductive);
+    PredFamilyInstanceDecl (l, "stack", [], [], [(PtrTypeExpr (l, StructTypeExpr (l, Some ("stack"), None, [], [])), "stack"); (ManifestTypeExpr (l, Int (Signed, IntRank)), "count")], Sep (l, PointsTo (l, Read (l, Var (l, "stack"), "head"), "RegularPointsTo", VarPat (l, "head")), Sep (l, CallExpr (l, "malloc_block_stack", [], [], [LitPat (Var (l, "stack"))], Static), Sep (l, Operation (l, Le, [IntLit (l, big_int_of_string "0", false, false, NoLSuffix); Var (l, "count")]), CallExpr (l, "nodes", [], [], [LitPat (Var (l, "head")); LitPat (Var (l, "count"))], Static)))));
+    Func (l, Regular, [], Some (PtrTypeExpr (l, StructTypeExpr (l, Some ("stack"), None, [], []))), "create_stack", [], false, None, Some ((True (l), CallExpr (l, "stack", [], [], [LitPat (Var (l, "result")); LitPat (IntLit (l, big_int_of_string "0", false, false, NoLSuffix))], Static))), false, Some (([
+      DeclStmt (l, [
+        (l, Some (PtrTypeExpr (l, StructTypeExpr (l, Some ("stack"), None, [], []))), "stack", Some (CallExpr (l, "malloc", [], [], [LitPat (SizeofExpr (l, TypeExpr (StructTypeExpr (l, Some ("stack"), None, [], []))))], Static)), (ref (false), ref (None)))
+      ]);
+      IfStmt (l, Operation (l, Eq, [Var (l, "stack"); IntLit (l, big_int_of_string "0", false, false, NoLSuffix)]), [
+        BlockStmt (l, [], [ExprStmt (CallExpr (l, "abort", [], [], [], Static))], l, ref ([]))
+      ], []);
+      ExprStmt (AssignExpr (l, Read (l, Var (l, "stack"), "head"), IntLit (l, big_int_of_string "0", false, false, NoLSuffix)));
+      ReturnStmt (l, Some (Var (l, "stack")))
+    ], l)), false, [])
+  ])
+]
