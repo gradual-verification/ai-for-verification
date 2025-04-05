@@ -1,5 +1,32 @@
 import re
+import copy
 
+# The basic information of component (e.g., struct, predicate, function) of a program
+# In the program, it is between start_line and end_line (both inclusive)
+class ComponentInfo:
+    def __init__(self, typ, name, start_line, end_line):
+        self.typ = typ
+        self.name = name
+        self.start_line = start_line
+        self.end_line = end_line
+
+    def __str__(self):
+        return self.typ + ', ' + self.name + ', [' + str(self.start_line) + ', ' + str(self.end_line) + ']'
+
+# The occurrence of a predicate
+# In the program, it is at the line and in between start_col and end_col (both inclusive)
+class PredOccurrence:
+    def __init__(self, name, line, start_col, end_col):
+        self.name = name
+        self.line = line
+        self.start_col = start_col
+        self.end_col = end_col
+
+    def __str__(self):
+        return self.name + ', ' + str(self.line) + ', [' + str(self.start_col) + ', ' + str(self.end_col) + ']'
+
+
+# Given a text version of ast, this function parses it into a list of strings, with declaration/definitions of components.
 def parse_ast(ast):
     package_decl = re.search(r'PackageDecl \(.*?\[(.*)\]\)', ast, re.DOTALL)
     if not package_decl:
@@ -44,72 +71,96 @@ def parse_ast(ast):
 
     return decls
 
-def extract_components(decls_with_locs, total_line_num):
-    components = []
+# Given a list of components and the total number of line of the program,
+# this function extracts the information of those components and return it.
+def extract_component_infos(components_with_locs, total_line_num):
+    component_infos = []
 
     struct_pattern = re.compile(r'Struct \(loc "(.*?)\((\d+),.*?\)", "(.*?)"', re.DOTALL)
     pred_pattern = re.compile(r'PredFamilyInstanceDecl \(loc "(.*?)\((\d+),.*?\)", "(.*?)"', re.DOTALL)
     func_pattern = re.compile(r'Func \(loc "(.*?)\((\d+),.*?\)".*?, "(.*?)",', re.DOTALL)
 
     # get the type, name and starting line number of each component
-    for decl in decls_with_locs:
-        struct_match = struct_pattern.match(decl)
+    for component in components_with_locs:
+        struct_match = struct_pattern.match(component)
         if struct_match:
             _, line, name = struct_match.groups()
-            components.append(('Struct', name, int(line), -1))
+            component_infos.append(ComponentInfo('Struct', name, int(line), -1))
 
-        pred_match = pred_pattern.match(decl)
+        pred_match = pred_pattern.match(component)
         if pred_match:
             _, line, name = pred_match.groups()
-            components.append(('PredFamilyInstanceDecl', name, int(line), -1))
+            component_infos.append(ComponentInfo('PredFamilyInstanceDecl', name, int(line), -1))
 
-        func_match = func_pattern.match(decl)
+        func_match = func_pattern.match(component)
         if func_match:
             _, line, name = func_match.groups()
-            components.append(('Func', name, int(line), -1))
+            component_infos.append(ComponentInfo('Func', name, int(line), -1))
 
     # get the ending line number (inclusive) of each component
-    new_components = []
-    for i, (typ, name, start_line, _) in enumerate(components):
-        if i + 1 < len(components):
-            end_line = components[i + 1][2] - 1
+    new_component_infos = []
+    for i, component_info in enumerate(component_infos):
+        if i + 1 < len(component_infos):
+            end_line = component_infos[i + 1].start_line - 1
         else:
             end_line = total_line_num
-        new_components.append((typ, name, start_line, end_line))
 
-    return new_components
+        new_component_info = copy.deepcopy(component_info)
+        new_component_info.end_line = end_line
+        new_component_infos.append(new_component_info)
+
+    return new_component_infos
 
 
-def extract_predicates(c_text, decls_with_locs, components):
+# Given the text of program, the components and their basic information,
+# this function gets the occurrences of predicates (e.g., definitions and calls)
+def extract_predicate_occurrences(c_text, component_with_locs, component_infos):
     c_lines = c_text.splitlines()
     pred_occurrences = []
     callexpr_pattern = re.compile(r'CallExpr \(loc "(.*?)\((\d+),(\d+)-(\d+)\)", "(.*?)"', re.DOTALL)
 
-    # get the name and location of all predicates
+    # get the name and location of predicate declarations
     pred_names = set()
-    for component in components:
-        if component[0] == 'PredFamilyInstanceDecl':
-            pred_name = component[1]
+    for component_info in component_infos:
+        if component_info.typ == 'PredFamilyInstanceDecl':
+            pred_name = component_info.name
             pred_names.add(pred_name)
 
-            line = component[2]
+            line = component_info.start_line
             if 0 < line <= len(c_lines):
                 line_text = c_lines[line - 1]
-                col_start = line_text.find(pred_name)
-                if col_start != -1:
-                    col_end = col_start + len(pred_name)
-                    pred_occurrences.append((pred_name, line, col_start, col_end))
+                start_col = line_text.find(pred_name)
+                if start_col != -1:
+                    end_col = start_col + len(pred_name)
+                    pred_occurrences.append(PredOccurrence(pred_name, line, start_col, end_col))
 
-    for decl in decls_with_locs:
-        for call_match in callexpr_pattern.finditer(decl):
-            _, line, col_start, col_end, called_name = call_match.groups()
+    # get the name and location of predicate calls
+    for component in component_with_locs:
+        for call_match in callexpr_pattern.finditer(component):
+            _, line, start_col, end_col, called_name = call_match.groups()
             if called_name in pred_names:
-                pred_occurrences.append((called_name, int(line), int(col_start), int(col_end) - 1))
+                pred_occurrences.append(PredOccurrence(called_name, int(line), int(start_col), int(end_col) - 1))
 
-    sorted_pred_occurrences = sorted(pred_occurrences, key=lambda x: (x[1], x[2]), reverse=True)
+    sorted_pred_occurrences = sorted(pred_occurrences, key=lambda x: (x.line, x.start_col), reverse=True)
     return sorted_pred_occurrences
 
+# Given the program, occurring predicates and a suffix
+# this function adds the suffix after all occurring predicates in the program and return a new program
+def rename_preds(c_text, pred_occurrences, suffix):
+    c_lines = c_text.splitlines()
+    extracted_text = []
+    for pred_occurrence in pred_occurrences:
+        pred_line = pred_occurrence.line
+        line_text = c_lines[pred_line - 1]
+        end_loc = pred_occurrence.end_col
 
+        line_text = line_text[:end_loc] + suffix + line_text[end_loc:]
+        c_lines[pred_line - 1] = line_text
+
+    return c_lines
+
+
+'''
 def extract_critical_info(c_text, components, pred_occurrences, suffix):
     c_lines = c_text.splitlines()
     extracted_text = []
@@ -141,7 +192,7 @@ def extract_critical_info(c_text, components, pred_occurrences, suffix):
             extracted_text.append(component_text)
 
     return extracted_text
-
+'''
 
 
 def main():
@@ -156,12 +207,14 @@ def main():
     with open(ast_with_locs_file, 'r') as file:
         ast_with_locs_text = file.read()
 
-    #decls = parse_ast(ast_text)
+    # 1. get the structure, basic component info and predicate occurrences of original program
+    component_with_locs = parse_ast(ast_with_locs_text)
+    component_infos = extract_component_infos(component_with_locs, len(c_text.splitlines()))
+    pred_occurrences = extract_predicate_occurrences(c_text, component_with_locs, component_infos)
 
-    decls_with_locs = parse_ast(ast_with_locs_text)
-    components = extract_components(decls_with_locs, len(c_text.splitlines()))
-    preds = extract_predicates(c_text, decls_with_locs, components)
-    critical_info = extract_critical_info(c_text, components, preds, "_fbp")
+    # 2. rename the predicates in the original file
+    renamed_c_text = rename_preds(c_text, pred_occurrences, "_fbp")
+    #critical_info = extract_critical_info(c_text, components, preds, "_fbp")
     print("hello")
 
 
