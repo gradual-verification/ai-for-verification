@@ -1,5 +1,6 @@
 import re
 import copy
+import subprocess
 
 # The basic information of component (e.g., struct, predicate, function) of a program
 # In the program, it is between start_line and end_line (both inclusive)
@@ -146,7 +147,7 @@ def extract_predicate_occurrences(c_text, component_with_locs, component_infos):
 
 # Given the program, occurring predicates and a suffix
 # this function adds the suffix after all occurring predicates in the program and return a new program
-def rename_preds(c_text, pred_occurrences, suffix):
+def rename_predicates(c_text, pred_occurrences, suffix):
     c_lines = c_text.splitlines()
     extracted_text = []
     for pred_occurrence in pred_occurrences:
@@ -159,46 +160,32 @@ def rename_preds(c_text, pred_occurrences, suffix):
 
     return c_lines
 
-
-'''
-def extract_critical_info(c_text, components, pred_occurrences, suffix):
+# Given a program and the information of components,
+# this function extract the definitions of those components (except functions) in the program.
+def extract_non_functions(c_text, component_infos):
     c_lines = c_text.splitlines()
     extracted_text = []
 
-    for component in components:
-        start_line = component[2]
-        end_line = component[3]
-
-        if component[0] == 'PredFamilyInstanceDecl':
-            # add suffix for each predicate occurrence (which is traversed reversely)
-            for pred_occurrence in pred_occurrences:
-                pred_line = pred_occurrence[1]
-                # todo: double check bound
-                if start_line <= pred_line <= end_line:
-                    line_text = c_lines[pred_line - 1]
-                    end_loc = pred_occurrence[3]
-                    line_text = line_text[:end_loc] + suffix + line_text[end_loc:]
-                    c_lines[pred_line - 1] = line_text
-
-            component_text = c_lines[start_line - 1: end_line]
-            extracted_text.append(component_text)
-
-        if component[0] == 'Struct':
-            component_text = c_lines[start_line - 1: end_line]
-            extracted_text.append(component_text)
-
-        if component[0] == 'Func':
+    for component_info in component_infos:
+        if component_info.typ != 'Func':
+            start_line = component_info.start_line
+            end_line = component_info.end_line
+            # note that the component is at [start_line, end_line] in the file (starting at line 1)
+            # so in the list, the component is at [start_line - 1, end_line - 1]
             component_text = c_lines[start_line - 1: end_line]
             extracted_text.append(component_text)
 
     return extracted_text
-'''
 
 
 def main():
-    c_file = "stack_fbp.c"
-    ast_file = "ast.txt"
-    ast_with_locs_file = "ast_locs.txt"
+    c_file = 'stack_fbp.c'
+    ast_file = 'ast.txt'
+    ast_with_locs_file = 'ast_locs.txt'
+
+    # 1.1 get the ast of the original program
+    subprocess.run(['verifast', '-dump_ast', ast_file, c_file])
+    subprocess.run(['verifast', '-dump_ast_with_locs', ast_with_locs_file, c_file])
 
     with open(c_file, 'r') as file:
         c_text = file.read()
@@ -207,14 +194,36 @@ def main():
     with open(ast_with_locs_file, 'r') as file:
         ast_with_locs_text = file.read()
 
-    # 1. get the structure, basic component info and predicate occurrences of original program
+    # 1.2 get the structure, basic component info and predicate occurrences of original program
     component_with_locs = parse_ast(ast_with_locs_text)
     component_infos = extract_component_infos(component_with_locs, len(c_text.splitlines()))
     pred_occurrences = extract_predicate_occurrences(c_text, component_with_locs, component_infos)
 
-    # 2. rename the predicates in the original file
-    renamed_c_text = rename_preds(c_text, pred_occurrences, "_fbp")
-    #critical_info = extract_critical_info(c_text, components, preds, "_fbp")
+    # 1.3 rename the predicates in the original file
+    renamed_c_lines = rename_predicates(c_text, pred_occurrences, '_fbp')
+    renamed_c_text = '\n'.join(renamed_c_lines)
+    renamed_c_file = 'renamed_' + c_file
+
+    with open(renamed_c_file, 'w') as file:
+        file.write(renamed_c_text)
+
+    # 2.1 get the ast of the renamed program
+    subprocess.run(['verifast', '-dump_ast', ast_file, renamed_c_file])
+    subprocess.run(['verifast', '-dump_ast_with_locs', ast_with_locs_file, renamed_c_file])
+
+    with open(renamed_c_file, 'r') as file:
+        renamed_c_text = file.read()
+    with open(ast_file, 'r') as file:
+        renamed_ast_text = file.read()
+    with open(ast_with_locs_file, 'r') as file:
+        renamed_ast_with_locs_text = file.read()
+
+    # 2.2 extract the definition of non-functions and functions of the renamed program
+    renamed_component_with_locs = parse_ast(renamed_ast_with_locs_text)
+    renamed_component_infos = extract_component_infos(renamed_component_with_locs, len(renamed_c_text.splitlines()))
+
+    renamed_non_funcs = extract_non_functions(renamed_c_text, renamed_component_infos)
+    # todo: extract function in the program
     print("hello")
 
 
