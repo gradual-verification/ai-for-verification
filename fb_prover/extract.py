@@ -1,18 +1,23 @@
 import re
 import copy
 import subprocess
+import sys
+from typing import Optional
 
 # The basic information of component (e.g., struct, predicate, function) of a program
 # In the program, it is between start_line and end_line (both inclusive)
 class ComponentInfo:
-    def __init__(self, typ, name, start_line, end_line):
+    def __init__(self, typ, name, start_line, end_line,
+                 name_start_col: Optional[int] = None, name_end_col: Optional[int] = None):
         self.typ = typ
         self.name = name
         self.start_line = start_line
         self.end_line = end_line
+        self.name_start_col = name_start_col
+        self.name_end_col = name_end_col
 
     def __str__(self):
-        return self.typ + ', ' + self.name + ', [' + str(self.start_line) + ', ' + str(self.end_line) + ']'
+        return self.typ + ', ' + self.name + ', at line [' + str(self.start_line) + ', ' + str(self.end_line) + ']'
 
 # The occurrence of a predicate
 # In the program, it is at the line and in between start_col and end_col (both inclusive)
@@ -24,7 +29,18 @@ class PredOccurrence:
         self.end_col = end_col
 
     def __str__(self):
-        return self.name + ', ' + str(self.line) + ', [' + str(self.start_col) + ', ' + str(self.end_col) + ']'
+        return self.name + ', at line ' + str(self.line) + ', col [' + str(self.start_col) + ', ' + str(self.end_col) + ']'
+
+# The basic information of function, where the signature is the string including and after name.
+class FunctionInfo:
+    def __init__(self, name, signature, precond, postcond):
+        self.name = name
+        self.signature = signature
+        self.precond = precond
+        self.postcond = postcond
+
+    def __str__(self):
+        return self.signature + ', ' + self.precond + ', ' + self.postcond
 
 
 # Given a text version of ast, this function parses it into a list of strings, with declaration/definitions of components.
@@ -72,6 +88,7 @@ def parse_ast(ast):
 
     return decls
 
+
 # Given a list of components and the total number of line of the program,
 # this function extracts the information of those components and return it.
 def extract_component_infos(components_with_locs, total_line_num):
@@ -79,7 +96,7 @@ def extract_component_infos(components_with_locs, total_line_num):
 
     struct_pattern = re.compile(r'Struct \(loc "(.*?)\((\d+),.*?\)", "(.*?)"', re.DOTALL)
     pred_pattern = re.compile(r'PredFamilyInstanceDecl \(loc "(.*?)\((\d+),.*?\)", "(.*?)"', re.DOTALL)
-    func_pattern = re.compile(r'Func \(loc "(.*?)\((\d+),.*?\)".*?, "(.*?)",', re.DOTALL)
+    func_pattern = re.compile(r'Func \(loc "(.*?)\((\d+),(\d+)-(\d+)\)".*?, "(.*?)",', re.DOTALL)
 
     # get the type, name and starting line number of each component
     for component in components_with_locs:
@@ -95,8 +112,8 @@ def extract_component_infos(components_with_locs, total_line_num):
 
         func_match = func_pattern.match(component)
         if func_match:
-            _, line, name = func_match.groups()
-            component_infos.append(ComponentInfo('Func', name, int(line), -1))
+            _, line, start_col, end_col, name = func_match.groups()
+            component_infos.append(ComponentInfo('Func', name, int(line), -1, int(start_col), int(end_col)))
 
     # get the ending line number (inclusive) of each component
     new_component_infos = []
@@ -123,6 +140,7 @@ def extract_predicate_occurrences(c_text, component_with_locs, component_infos):
     # get the name and location of predicate declarations
     pred_names = set()
     for component_info in component_infos:
+        # todo: double check whether it is true
         if component_info.typ == 'PredFamilyInstanceDecl':
             pred_name = component_info.name
             pred_names.add(pred_name)
@@ -134,6 +152,8 @@ def extract_predicate_occurrences(c_text, component_with_locs, component_infos):
                 if start_col != -1:
                     end_col = start_col + len(pred_name)
                     pred_occurrences.append(PredOccurrence(pred_name, line, start_col, end_col))
+                else:
+                    sys.exit("predicate is not standardized.\n")
 
     # get the name and location of predicate calls
     for component in component_with_locs:
@@ -144,6 +164,7 @@ def extract_predicate_occurrences(c_text, component_with_locs, component_infos):
 
     sorted_pred_occurrences = sorted(pred_occurrences, key=lambda x: (x.line, x.start_col), reverse=True)
     return sorted_pred_occurrences
+
 
 # Given the program, occurring predicates and a suffix
 # this function adds the suffix after all occurring predicates in the program and return a new program
@@ -159,6 +180,7 @@ def rename_predicates(c_text, pred_occurrences, suffix):
         c_lines[pred_line - 1] = line_text
 
     return c_lines
+
 
 # Given a program and the information of components,
 # this function extract the definitions of those components (except functions) in the program.
@@ -177,13 +199,33 @@ def extract_non_functions(c_text, component_infos):
 
     return extracted_text
 
+# Given a program and the information of components,
+# this function extract the definitions of function (assumed only one).
+def extract_function(c_text, component_infos):
+    c_lines = c_text.splitlines()
+
+    # get the information of the function
+    for component_info in component_infos:
+        if component_info.typ == 'Func':
+            func_name = component_info.name
+            name_start_col = component_info.name_start_col
+            start_line = component_info.start_line
+
+            signature = c_lines[start_line - 1][name_start_col - 1:]
+            precond = c_lines[start_line]
+            postcond = c_lines[start_line + 1]
+            return FunctionInfo(func_name, signature, precond, postcond)
+
 
 def main():
     c_file = 'stack_fbp.c'
+    #c_file = 'standard_' + orig_c_file
     ast_file = 'ast.txt'
     ast_with_locs_file = 'ast_locs.txt'
 
-    # 1.1 get the ast of the original program
+    # 1.1 standardize get the ast of the program
+    #with open(c_file, 'w') as output_file:
+    #    subprocess.run(['clang-format', orig_c_file], stdout = output_file)
     subprocess.run(['verifast', '-dump_ast', ast_file, c_file])
     subprocess.run(['verifast', '-dump_ast_with_locs', ast_with_locs_file, c_file])
 
@@ -223,8 +265,7 @@ def main():
     renamed_component_infos = extract_component_infos(renamed_component_with_locs, len(renamed_c_text.splitlines()))
 
     renamed_non_funcs = extract_non_functions(renamed_c_text, renamed_component_infos)
-    # todo: extract function in the program
-    print("hello")
+    renamed_func = extract_function(renamed_c_text, renamed_component_infos)
 
 
 if __name__ == "__main__":
