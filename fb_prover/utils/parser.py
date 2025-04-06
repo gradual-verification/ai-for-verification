@@ -116,13 +116,16 @@ def get_component_infos(components_with_locs: List[str], total_line_num: int) ->
 
     # get the ending line number (inclusive) of each component
     new_component_infos = []
-    for i, component_info in enumerate(component_infos):
+    for i in range(len(component_infos)):
         if i + 1 < len(component_infos):
-            end_line = component_infos[i + 1].start_line - 1
+            if component_infos[i + 1].start_line > component_infos[i].start_line:
+                end_line = component_infos[i + 1].start_line - 1
+            else:
+                end_line = component_infos[i].start_line
         else:
             end_line = total_line_num
 
-        new_component_info = copy.deepcopy(component_info)
+        new_component_info = copy.deepcopy(component_infos[i])
         new_component_info.end_line = end_line
         new_component_infos.append(new_component_info)
 
@@ -140,7 +143,7 @@ def get_predicate_occurrences(c_text: str, component_with_locs: List[str],
     # get the name and location of predicate declarations
     pred_names = set()
     for component_info in component_infos:
-        # todo: double check whether it is true
+        # todo: double check whether it is true (now, assuming that the declaration is on one line)
         if component_info.typ == 'PredFamilyInstanceDecl':
             pred_name = component_info.name
             pred_names.add(pred_name)
@@ -178,7 +181,8 @@ def get_non_functions(c_text: str, component_infos: List[ComponentInfo]) -> List
             end_line = component_info.end_line
             # note that the component is at [start_line, end_line] in the file (starting at line 1)
             # so in the list, the component is at [start_line - 1, end_line - 1]
-            component_text = c_lines[start_line - 1: end_line]
+            component_lines = c_lines[start_line - 1: end_line]
+            component_text = '\n'.join(component_lines)
             extracted_text.append(component_text)
 
     return extracted_text
@@ -197,6 +201,11 @@ def get_function(c_text: str, component_infos: List[ComponentInfo]) -> FunctionI
             start_line = component_info.start_line
 
             signature = c_lines[start_line - 1][name_start_col - 1:]
-            precond = c_lines[start_line]
-            postcond = c_lines[start_line + 1]
+            precond = remove_annotation(c_lines[start_line])
+            postcond = remove_annotation(c_lines[start_line + 1])
             return FunctionInfo(func_name, signature, precond, postcond)
+
+
+# This function removes the "//@ requires" or "//@ ensures" annotation at the start of a condition.
+def remove_annotation(cond: str) -> str:
+    return re.sub(r'^.*?\b(?:ensures|requires)\b\s*', '', cond)

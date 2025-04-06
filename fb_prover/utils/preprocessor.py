@@ -7,9 +7,9 @@ import subprocess
 def preprocess(c_file: str) -> str:
     std_c_file = 'standard_' + c_file
 
-    # standardize the format of source code and spec
+    # standardize the format of source code
     standardize_code(c_file, std_c_file)
-    standardize_spec(std_c_file, std_c_file)
+    #standardize_spec(std_c_file, std_c_file)
 
     return std_c_file
 
