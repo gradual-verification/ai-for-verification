@@ -1,34 +1,9 @@
 import os
 from typing import List
-from components.function_info import FunctionInfo
 
-def create_lemmas(non_funcs: List[str], func_1: FunctionInfo, suffix_1: str,
-                  func_2: FunctionInfo, suffix_2: str, folder_name: str):
-    # pre: 1 => 2
-    lemma_name = 'pre_' + suffix_1 + '_to_' + suffix_2
-    lemma_pre = func_1.precond
-    lemma_post = func_2.precond
-    create_lemma(lemma_name, non_funcs, func_1.signature, lemma_pre, lemma_post, folder_name)
-
-    # pre: 2 => 1
-    lemma_name = 'pre_' + suffix_2 + '_to_' + suffix_1
-    lemma_pre = func_2.precond
-    lemma_post = func_1.precond
-    create_lemma(lemma_name, non_funcs, func_2.signature, lemma_pre, lemma_post, folder_name)
-
-    # post: 1 => 2
-    lemma_name = 'post_' + suffix_1 + '_to_' + suffix_2
-    lemma_pre = func_1.postcond
-    lemma_post = func_2.postcond
-    create_lemma(lemma_name, non_funcs, func_1.signature, lemma_pre, lemma_post, folder_name)
-
-    # post: 2 => 1
-    lemma_name = 'post_' + suffix_2 + '_to_' + suffix_1
-    lemma_pre = func_2.postcond
-    lemma_post = func_1.postcond
-    create_lemma(lemma_name, non_funcs, func_2.signature, lemma_pre, lemma_post, folder_name)
-
-
+# Given the name of a lemma, its non-function text, signature,
+# precondition, postcondition and the folder name of created lemma file,
+# this function creates a helper lemma and writes it into the folder.
 def create_lemma(lemma_name: str, non_funcs: List[str], signature: str,
                  cond1: str, cond2: str, folder_name: str):
     lemma_text = '\n'.join(non_funcs)
@@ -39,6 +14,6 @@ def create_lemma(lemma_name: str, non_funcs: List[str], signature: str,
     lemma_text += '{\n\n}\n@*/\n'
 
     os.makedirs(folder_name, exist_ok=True)
-    lemma_file = os.path.join(folder_name, lemma_name + '.c')
-    with open(lemma_file, 'w') as file:
+    lemma_file_path = os.path.join(folder_name, lemma_name + '.c')
+    with open(lemma_file_path, 'w') as file:
         file.write(lemma_text)
