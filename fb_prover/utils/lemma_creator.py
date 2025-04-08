@@ -1,6 +1,18 @@
 import os
 from typing import List
 
+# Given two list of non-function components,
+# this function merges them by getting the distinct ones (not sure whether the order matters).
+def merge_non_funcs(non_funcs_1: List[str], non_funcs_2: List[str]) -> List[str]:
+    merged_non_funcs = non_funcs_1.copy()
+
+    for non_func_2 in non_funcs_2:
+        if non_func_2 not in non_funcs_1:
+            merged_non_funcs.append(non_func_2)
+
+    return merged_non_funcs
+
+
 # Given the name of a lemma, its non-function text, signature,
 # precondition, postcondition and the folder name of created lemma file,
 # this function creates a helper lemma and writes it into the folder.

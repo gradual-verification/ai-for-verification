@@ -23,7 +23,7 @@ def main():
 
     # 3. create helper lemmas for 4 directions
     create_lemmas(renamed_non_funcs_1, renamed_func_1, suffix_1,
-                  renamed_func_2, suffix_2, folder_name)
+                  renamed_non_funcs_2, renamed_func_2, suffix_2, folder_name)
 
     # 4. leverage LLM to annotate and fix each lemma, and leverage VeriFast to verify the lemma
     prove_lemmas(folder_name, example_file_name, max_fix_iter)

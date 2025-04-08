@@ -9,12 +9,16 @@ GPT_MODEL = 'o1'
 
 ANNOTATE_PROMPT = f"You are an expert VeriFast programmer. Now I want to use VeriFast as an entailment prover for separation logic. \
 Given a VeriFast lemma that checks whether its precondition (after requires) entails the postcondition (after ensures), \
-please just add auxiliary specifications (such as open/close/lemma) to make it pass the verification. \
-Note that PLEASE DON'T MODIFY the predicates, lemma's precondition, lemma's postcondition or add source code in the lemma. If you don't need to add auxiliary spec, you can add nothing. \
+please add auxiliary specifications (such as open/close/lemma) inside the lemma body to make it pass the verification. \
+Note that PLEASE DON'T MODIFY the predicates, lemma's precondition, lemma's postcondition or add source code in the lemma. \
+You can modify the signature of lemma to solve the syntax error. \
+If you don't need to add auxiliary spec, you can add nothing. \
 Please just show one code block with the complete code and specification to be verified, in the format of ```c CODE and SPEC ```."
 
 FIX_PROMPT = f"You are an expert VeriFast programmer. Now I want to fix the verification error in the code below.\
-Note that PLEASE DON'T MODIFY the predicates, lemma's precondition, lemma's postcondition or add source code in the lemma. If you don't need to add auxiliary spec, you can add nothing. \
+Note that PLEASE DON'T MODIFY the predicates, lemma's precondition, lemma's postcondition or add source code in the lemma. \
+You can modify the signature of lemma to solve the syntax error. \
+If you don't need to add auxiliary spec, you can add nothing. \
 Please just show one code block with the complete code and specification to be verified, in the format of ```c CODE and SPEC ```."
 
 # Given the prompt, input and extra content,
@@ -70,6 +74,7 @@ def annotate_lemma(lemma_file: str, example_text: str):
 
     with open(lemma_file, 'w') as file:
         file.write(result_program)
+
 
 # Given the path to a file of lemma and the max number of fixes,
 # this function first verifies the lemma, and continues fixing & verifying
