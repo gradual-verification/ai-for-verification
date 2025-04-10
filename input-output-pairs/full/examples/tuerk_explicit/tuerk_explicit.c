@@ -24,6 +24,21 @@ lemma_auto void nodes_inv()
 
 @*/
 
+int list_length_rec(struct node *node)
+    //@ requires nodes(node, ?values) &*& length(values) <= INT_MAX;
+    //@ ensures nodes(node, values) &*& result == length(values);
+{
+    //@ open nodes(node, values);
+    if (node == 0) {
+        return 0;
+        //@ close nodes(node, values);
+    } else {
+        int length0 = list_length_rec(node->next);
+        return 1 + length0;
+        //@ close nodes(node, values);
+    }
+}
+
 int list_length(struct node *node)
     //@ requires nodes(node, ?values) &*& length(values) <= INT_MAX;
     //@ ensures nodes(node, values) &*& result == length(values);

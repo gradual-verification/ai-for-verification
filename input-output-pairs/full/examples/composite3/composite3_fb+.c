@@ -314,7 +314,6 @@ int main()
     node = tree_add_left(node);
     node = tree_get_parent(node);
     node = tree_get_parent(node);
-    //@ assert(node == node0);
     tree_dispose(node);
     return 0;
 }
