@@ -2,46 +2,9 @@ import re
 import copy
 import subprocess
 import sys
-from typing import Optional
-
-# The basic information of component (e.g., struct, predicate, function) of a program
-# In the program, it is between start_line and end_line (both inclusive)
-class ComponentInfo:
-    def __init__(self, typ, name, start_line, end_line,
-                 name_start_col: Optional[int] = None, name_end_col: Optional[int] = None):
-        self.typ = typ
-        self.name = name
-        self.start_line = start_line
-        self.end_line = end_line
-        self.name_start_col = name_start_col
-        self.name_end_col = name_end_col
-
-    def __str__(self):
-        return self.typ + ', ' + self.name + ', at line [' + str(self.start_line) + ', ' + str(self.end_line) + ']'
-
-# The occurrence of a predicate
-# In the program, it is at the line and in between start_col and end_col (both inclusive)
-class PredOccurrence:
-    def __init__(self, name, line, start_col, end_col):
-        self.name = name
-        self.line = line
-        self.start_col = start_col
-        self.end_col = end_col
-
-    def __str__(self):
-        return self.name + ', at line ' + str(self.line) + ', col [' + str(self.start_col) + ', ' + str(self.end_col) + ']'
-
-# The basic information of function, where the signature is the string including and after name.
-class FunctionInfo:
-    def __init__(self, name, signature, precond, postcond):
-        self.name = name
-        self.signature = signature
-        self.precond = precond
-        self.postcond = postcond
-
-    def __str__(self):
-        return self.signature + ', ' + self.precond + ', ' + self.postcond
-
+from components.component_info import ComponentInfo
+from components.pred_occurrence import PredOccurrence
+from components.function_info import FunctionInfo
 
 # Given a text version of ast, this function parses it into a list of strings, with declaration/definitions of components.
 def parse_ast(ast):
