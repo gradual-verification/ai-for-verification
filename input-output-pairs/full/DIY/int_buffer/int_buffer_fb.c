@@ -7,7 +7,6 @@ struct int_array {
 
 /*@
 predicate array(struct int_array *arr, list<int> cs) =
-    malloc_block_int_array(arr) &*&
     arr->values[..10] |-> cs;
 @*/
 
@@ -28,13 +27,12 @@ void fill_zeros(int *arr, int i, int n)
 }
 
 struct int_array *create_array()
-    //@ requires emp;
+    //@ requires true;
     //@ ensures array(result, zeros(10));
 {
     struct int_array *arr = malloc(sizeof(struct int_array));
     if (!arr) abort();
     fill_zeros(arr->values, 0, 10);
-    //@ close array(arr, zeros(10));
     return arr;
 }
 
@@ -42,24 +40,19 @@ void set(struct int_array *arr, int index, int value)
     //@ requires array(arr, ?elems) &*& 0 <= index && index < 10;
     //@ ensures array(arr, update(index, value, elems));
 {
-    //@ open array(arr, elems);
     arr->values[index] = value;
-    //@ close array(arr, update(index, value, elems));
 }
 
 int get(struct int_array *arr, int index)
     //@ requires array(arr, ?elems) &*& 0 <= index && index < 10;
     //@ ensures array(arr, elems) &*& result == nth(index, elems);
 {
-    //@ open array(arr, elems);
     return arr->values[index];
-    //@ close array(arr, elems);
 }
 
 void dispose_array(struct int_array *arr)
     //@ requires array(arr, _);
-    //@ ensures emp;
+    //@ ensures true;
 {
-    //@ open array(arr, _);
     free(arr);
 }

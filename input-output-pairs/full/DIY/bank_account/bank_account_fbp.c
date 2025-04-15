@@ -22,8 +22,6 @@ struct bank_account *create_bank_account(int account_number)
     }
     myAccount->balance = 0;
     myAccount->account_number = account_number;
-    //@ close bank_acc_balance(myAccount, 0);
-    //@ close bank_acc_number(myAccount, account_number);
     
     return myAccount;
 }
@@ -32,20 +30,13 @@ void bank_account_set_balance(struct bank_account *myAccount, int newBalance)
 //@ requires bank_acc_balance(myAccount, _) &*& bank_acc_number(myAccount, _);
 //@ ensures bank_acc_balance(myAccount, newBalance) &*& bank_acc_number(myAccount, _);
 {
-    //@ open bank_acc_balance(myAccount, ?oldBalance);
-    
     myAccount->balance = newBalance;
-    
-    //@ close bank_acc_balance(myAccount, newBalance);
 }
 
 void bank_account_dispose(struct bank_account *myAccount)
 //@ requires bank_acc_balance(myAccount, _) &*& bank_acc_number(myAccount, _) &*& malloc_block_bank_account(myAccount);
 //@ ensures true;
 {
-    //@ open bank_acc_balance(myAccount, ?balance);
-    //@ open bank_acc_number(myAccount, ?accountNumber);
-    
     free(myAccount);
 
 }

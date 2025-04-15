@@ -18,7 +18,6 @@ struct pair* create_pair(int x, int y)
     if (p == 0) abort();
     p->x = x;
     p->y = y;
-    //@ close pair(p, x, y);
     return p;
 }
 
@@ -26,23 +25,18 @@ void update_pair(struct pair *p, int new_x, int new_y)
     //@ requires pair(p, _, _);
     //@ ensures pair(p, new_x, new_y);
 {
-    //@ open pair(p, _, _);
     p->x = new_x;
     p->y = new_y;
-    //@ close pair(p, new_x, new_y);
 }
 
 struct pair* copy_pair(struct pair *p)
     //@ requires pair(p, ?x, ?y);
     //@ ensures pair(p, x, y) &*& pair(result, x, y);
 {
-    //@ open pair(p, x, y);
     struct pair* new_p = malloc(sizeof(struct pair));
     if (new_p == 0) abort();
     new_p->x = p->x;
     new_p->y = p->y;
-    //@ close pair(p, x, y);
-    //@ close pair(new_p, x, y);
     return new_p;
 }
 
@@ -50,7 +44,6 @@ void dispose_pair(struct pair *p)
     //@ requires pair(p, _, _);
     //@ ensures emp;
 {
-    //@ open pair(p, _, _);
     free(p);
 }
 
