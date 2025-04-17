@@ -1,9 +1,23 @@
 import aisuite as ai
 
+from RAG import BestRAG
+from utils import PromptType
+
+
 # This function interacts with LLM.
 # It returns the text of output program from LLM.
-def handle_LLM(input_text: str, prompt: str, model: str) -> str:
-    full_response = query_LLM(input_text, prompt, model)
+def handle_LLM(input_text: str, prompt: str, prompt_type: PromptType, rag: BestRAG, model: str) -> str:
+    # retrieve example for RAG
+    examples = ""
+    if prompt_type.is_RAG():
+        rag_type = "sparse" if prompt_type == PromptType.RAG_SPARSE else "dense"
+        responses = rag.search(input_text, rag_type, 2)
+        for response in responses:
+            results = response[1]
+            for result in results:
+                examples += result.payload["text"] + "\n\n-------------------------------\n\n"
+
+    full_response = query_LLM(input_text, prompt, examples, model)
     program = get_code(full_response)
 
     return program
@@ -11,9 +25,12 @@ def handle_LLM(input_text: str, prompt: str, model: str) -> str:
 
 # Given the input text, prompt and model name,
 # this function queries LLM and return the output.
-def query_LLM(input_text: str, prompt: str, model: str) -> str:
+def query_LLM(input_text: str, prompt: str, examples: str, model: str) -> str:
     client = ai.Client()
-    content = prompt + "\n\n" + input_text
+    if examples != "":
+        content = prompt + "\n\n" + input_text + "\n\n--------Examples--------\n\n:" + examples
+    else:
+        content = prompt + "\n\n" + input_text
 
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},

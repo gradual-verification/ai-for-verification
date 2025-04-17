@@ -1,4 +1,15 @@
 import os
+from enum import Enum
+
+class PromptType(Enum):
+    BASIC = 1
+    COT = 2
+    RAG_SPARSE = 3
+    RAG_DENSE = 4
+
+    def is_RAG(self):
+        return self == PromptType.RAG_SPARSE or self == PromptType.RAG_DENSE
+
 
 def save_env_var() -> dict:
     return os.environ.copy()
