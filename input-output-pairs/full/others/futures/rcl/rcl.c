@@ -39,9 +39,9 @@ that it is relatively safe to run untrusted code with this interpreter.
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "stringBuffers.h"
-#include "tokenizer.h"
-//@ #include "ghostlist.gh"
+#include "../stringBuffers.h"
+#include "../tokenizer.h"
+//@ #include "../ghostlist.gh"
 //@ #include "counting.gh"
 
 void error(char *msg)
@@ -133,6 +133,7 @@ void object_add_ref(void *object)
     //@ assert ghost_list(id, ?objs);
     //@ foreach_remove(o, objs);
     //@ open object_refcount(o);
+    if (o->refCount == INT_MAX) abort();
     o->refCount++;
     //@ create_ticket(object_ticket_base, o);
     //@ close object_refcount(o);
@@ -233,7 +234,7 @@ void cons_dispose(struct object *object)
     //@ open cons_inv(cons);
     object_release(cons->head);
     object_release(cons->tail);
-    free(cons);
+    free(object);
 }
 
 struct class cons_class = {"cons", cons_dispose};
@@ -273,18 +274,10 @@ lemma void cons0_to_cons(struct cons *cons)
 
 @*/
 
-struct cons *create_cons0(struct object *head, struct object *tail)
+struct cons *create_cons0(struct object *head, struct object *tail);
     //@ requires true;
     //@ ensures cons0(result, head, tail) &*& result != 0;
-{
-    struct cons *cons = malloc(sizeof(struct cons));
-    if (cons == 0) error("create_cons: out of memory");
-    (&cons->object)->refCount = 1;
-    (&cons->object)->class = &cons_class;
-    cons->head = head;
-    cons->tail = tail;
-    return cons;
-}
+
 
 struct cons *create_cons(struct object *head, struct object *tail)
     //@ requires heap() &*& ref(head) &*& ref(tail);
@@ -331,46 +324,17 @@ struct atom {
 
 //@ predicate atom_inv(struct atom *atom) = atom->chars |-> ?buffer &*& string_buffer(buffer, _) &*& struct_object_padding((void *)atom) &*& malloc_block_atom(atom);
 
-void atom_dispose(struct object *object)
+void atom_dispose(struct object *object);
     //@ requires heap0(nil) &*& object_refCount(object, _) &*& object_class(object, _) &*& atom_inv((void *)object);
     //@ ensures heap0(nil);
-{
-    struct atom *atom = (void *)object;
-    //@ open atom_inv(atom);
-    string_buffer_dispose(atom->chars);
-    free(atom);
-}
+
 
 struct class atom_class = {"atom", atom_dispose};
 
-struct atom *create_atom(struct string_buffer *buffer)
+struct atom *create_atom(struct string_buffer *buffer);
     //@ requires heap() &*& string_buffer(buffer, _);
     //@ ensures heap() &*& ref((void *)result);
-{
-    struct atom *atom = malloc(sizeof(struct atom));
-    if (atom == 0) abort();
-    (&atom->object)->refCount = 1;
-    (&atom->object)->class = &atom_class;
-    atom->chars = buffer;
-    return atom;
-    //@ open heap();
-    //@ open heap0(nil);
-    //@ int id = (&globals)->objectListId;
-    //@ ghost_list_add<struct object *>(id, (void *)atom);
-    //@ assert foreach(?objs, _);
-    //@ start_counting(object_ticket_base, (void *)atom);
-    //@ create_ticket(object_ticket_base, (void *)atom);
-    //@ create_ticket(object_ticket_base, (void *)atom);
-    //@ close atom_inv(atom);
-    //@ produce_function_pointer_chunk dispose_func(atom_dispose)(atom_inv)(o) { call(); }
-    //@ close object_refcount((void *)atom);
-    //@ close foreach(cons((void *)atom, objs), object_refcount);
-    //@ close object_inv((void *)atom);
-    //@ close foreach(cons((void *)atom, objs), object_inv);
-    //@ close heap0(nil);
-    //@ close heap();
-    //@ close ref((void *)atom);
-}
+
 
 struct atom *create_atom_from_string(char *string)
     //@ requires heap() &*& [?f]string(string, ?cs);
@@ -462,33 +426,15 @@ predicate stack(struct stack *stack) =
 struct stack *operand_stack = 0;
 struct stack *cont_stack = 0;
 
-void stack_push(struct stack **stack, struct object *value)
+void stack_push(struct stack **stack, struct object *value);
     //@ requires pointer(stack, ?s) &*& stack(s) &*& ref(value);
     //@ ensures pointer(stack, ?s1) &*& stack(s1);
-{
-    struct stack *newStack = malloc(sizeof(struct stack));
-    if (newStack == 0) abort();
-    newStack->head = value;
-    newStack->tail = *stack;
-    *stack = newStack;
-    //@ close stack(newStack);
-}
 
-struct object *stack_pop(struct stack **stack)
+
+struct object *stack_pop(struct stack **stack);
     //@ requires pointer(stack, ?s0) &*& stack(s0);
     //@ ensures pointer(stack, ?s1) &*& stack(s1) &*& ref(result);
-{
-    struct stack *s = *stack;
-    if (s == 0)
-        error("pop: operand stack underflow");
-    else {
-        //@ open stack(s0);
-        struct object *result = s->head;
-        *stack = s->tail;
-        free(s);
-        return result;
-    }
-}
+
 
 void push(struct object *object)
     //@ requires heap() &*& ref(object);
@@ -547,47 +493,17 @@ predicate function_inv(struct function *function) =
 
 @*/
 
-void function_dispose(struct object *object)
+void function_dispose(struct object *object);
     //@ requires heap0(nil) &*& object_refCount(object, _) &*& object_class(object, _) &*& function_inv((void *)object);
     //@ ensures heap0(nil);
-{
-    struct function *function = (void *)object;
-    //@ open function_inv(function);
-    object_release(function->data);
-    free(function);
-}
+
 
 struct class function_class = {"function", function_dispose};
 
-struct function *create_function(apply_func *apply, struct object *data)
+struct function *create_function(apply_func *apply, struct object *data);
     //@ requires heap() &*& is_apply_func(apply) == true &*& ref(data);
     //@ ensures heap() &*& ref((void *)result);
-{
-    struct function *function = malloc(sizeof(struct function));
-    if (function == 0) abort();
-    (&function->object)->refCount = 1;
-    (&function->object)->class = &function_class;
-    function->apply = apply;
-    function->data = data;
-    return function;
-    //@ open heap();
-    //@ open heap0(nil);
-    //@ int id = (&globals)->objectListId;
-    //@ ghost_list_add<struct object *>(id, (void *)function);
-    //@ assert foreach(?objs, _);
-    //@ start_counting(object_ticket_base, (void *)function);
-    //@ create_ticket(object_ticket_base, (void *)function);
-    //@ create_ticket(object_ticket_base, (void *)function);
-    //@ close function_inv(function);
-    //@ produce_function_pointer_chunk dispose_func(function_dispose)(function_inv)(o) { call(); }
-    //@ close object_refcount((void *)function);
-    //@ close foreach(cons((void *)function, objs), object_refcount);
-    //@ close object_inv((void *)function);
-    //@ close foreach(cons((void *)function, objs), object_inv);
-    //@ close heap0(nil);
-    //@ close heap();
-    //@ close ref((void *)function);
-}
+
 
 /*@
 
@@ -974,19 +890,10 @@ void fun_function(struct object *data) //@ : apply_func
 
 predicate hide_object_refCount(struct object *object, int refCount) = object->refCount |-> refCount;
 
-lemma void object_not_null(struct object *object)
+lemma void object_not_null(struct object *object);
     requires object->refCount |-> ?r;
     ensures object->refCount |-> r &*& object != 0;
-{
-    close [1/2]hide_object_refCount(object, _);
-    open object_refCount(object, _);
-    integer_to_chars((void *)object);
-    if (object == 0) {
-        chars_zero();
-    }
-    close [1/2]object_refCount(object, _);
-    open [1/2]hide_object_refCount(object, _);
-}
+
 
 lemma void init_heap()
     requires module(rcl, true);
