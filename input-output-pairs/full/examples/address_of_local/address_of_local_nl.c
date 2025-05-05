@@ -8,7 +8,7 @@
  *
  * @param i - A pointer to an integer variable that should be incremented.
  *
- * The function reads the current value, increases it by 1, and stores the new value.
+ * The function makes sure that the value at i is incremented by 1.
  */
 void inc(int* i)
 {
@@ -21,7 +21,7 @@ void inc(int* i)
  *
  * @param i - A pointer to a `uintptr_t` variable that should be incremented.
  *
- * The function retrieves the current value, increases it by 1, and updates the variable.
+ * The function makes sure that the value at i is incremented by 1.
  */
 void inc_uintptr_t(uintptr_t *i)
 {
@@ -33,9 +33,6 @@ void inc_uintptr_t(uintptr_t *i)
  * The `address_of_param` function demonstrates passing a local variable’s address.
  *
  * @param x - A local integer variable.
- *
- * The function sets `x` to `5`, assigns its address to a pointer, increments it,
- * and asserts that the final value is `6`.
  */
 void address_of_param(int x) 
 {
@@ -51,9 +48,6 @@ void address_of_param(int x)
  * The `address_of_local` function demonstrates the use of pointers 
  * and pointer-to-pointer relationships.
  *
- * It creates a local integer, stores its address in a pointer, then 
- * a pointer to that pointer, and increments the original variable.
- * The function asserts that the final value is `1`.
  */
 void address_of_local() 
 {
@@ -75,9 +69,6 @@ void address_of_local()
  * The `address_of_local_uintptr_t` function is similar to `address_of_local`
  * but uses `uintptr_t` instead of an integer.
  *
- * It initializes a `uintptr_t` variable, stores its address in a pointer, 
- * then creates a pointer to that pointer, increments the original variable,
- * and asserts that its final value is `1`.
  */
 void address_of_local_uintptr_t() 
 {

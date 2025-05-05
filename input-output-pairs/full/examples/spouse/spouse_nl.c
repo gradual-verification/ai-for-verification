@@ -9,8 +9,7 @@ struct person {
  * Description:
 The `create_person` function allocates and initializes a new `person` struct with no spouse.
 
-@param i - None.
-@return - A pointer to the newly created `person` struct.
+It makes sure that the return value is a non-null person with its spouse as null. 
 */
 struct person *create_person()
 {
@@ -24,8 +23,10 @@ struct person *create_person()
  * Description:
 The `marry` function marries two unmarried `person` instances by setting their spouse pointers to each other.
 
-@param `this` - Pointer to the first `person`.
-@param `other` - Pointer to the second `person`.
+@param `this` - Pointer to the first `person` whose spouse is null
+@param `other` - Pointer to the second `person` whose spouse is null
+
+It makes sure that this and other are married to each other. 
 */
 void marry(struct person *this, struct person *other)
 {
@@ -37,8 +38,9 @@ void marry(struct person *this, struct person *other)
  * Description:
 The `person_get_spouse` function retrieves the spouse of the given `person`.
 
-@param `this` - Pointer to the `person` whose spouse is to be retrieved.
-@returns - A pointer to the spouse, or `0` if unmarried.
+@param `this` - Pointer to the `person` whose spouse is to be retrieved
+
+It makes sure that `this` person is not changed and its spouse is returned.
 */
 struct person* person_get_spouse(struct person* this)
 {
@@ -49,7 +51,9 @@ struct person* person_get_spouse(struct person* this)
  * Description:
 The `divorce` function divorces two married `person` instances by setting their spouse pointers to `0`.
 
-@param `this` - Pointer to one `person` in the marriage.
+@param `this` - Pointer to one `person` in the marriage
+
+It makes sure that `this` person and its original spouse has their spouses as null. 
 */
 void divorce(struct person* this)
 {
@@ -63,7 +67,6 @@ The `die` function handles the death of a `person` by freeing the memory and set
 
 @param `this` - Pointer to the `person` who dies.
 
-It requires that the `person` instance and their spouse (if any) are valid.
 It ensures that if the `person` had a spouse, the spouse's spouse pointer is set to `0`. The `person` instance is freed.
 */
 void die(struct person *this)

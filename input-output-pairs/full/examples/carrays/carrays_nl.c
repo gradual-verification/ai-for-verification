@@ -6,7 +6,7 @@
  *
  * @param a - A pointer to an array containing at least 3 elements.
  *
- * The function reads the first three elements of the array into temporary variables.
+ * The function makes sure that the array is not changed.
  */
 void array_test1(int* a)
 {
@@ -17,13 +17,11 @@ void array_test1(int* a)
 
 /***
  * Description:
- * The `array_test2` function modifies the first element of the array to `10`
- * while ensuring the second element remains unchanged.
- *
+ * The `array_test2` function modifies the first element of the array to `10` and reads its second element. 
+ * 
  * @param a - A pointer to an array of at least two elements.
  *
- * The function updates `a[0]` to `10`, asserts the value is correctly set,
- * and verifies that `a[1]` retains its original value.
+ * The function\ makes sure that a[0] is updated to 10 and other elements are unchanged. 
  */
 void array_test2(int* a)
 {
@@ -38,10 +36,12 @@ void array_test2(int* a)
 /***
  * Description:
  * The `to_verify` function increments the fourth element (`arr[3]`) of a 
- * predefined array and returns its previous value.
+ * predefined array {0, 10, 20, 30, 40, 50, 60, 70, 80, 90} and returns its previous value.
  *
  * @param arr - A pointer to an array of at least 10 integers.
- * @returns The original value of `arr[3]` before incrementing.
+ * 
+ * It makes sure that the return value is the original value of `arr[3]` before incrementing (i.e., 30),
+ * and arr is modified to {0, 10, 20, 31, 40, 50, 60, 70, 80, 90}.
  */
 int to_verify(int* arr)
 {

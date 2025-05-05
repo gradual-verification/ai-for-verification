@@ -12,8 +12,7 @@ struct bank_account
  *
  * @param account_number: the given account_number
  *
- * The function allocates memory for a new `bank_account`, sets its balance as 0 and sets account number. 
- * It makes sure that the created bank_account satsifies the property of bank_account. 
+ * The function makes sure that the created bank_account has its balance as 0 and account number as account_number.
  */
 struct bank_account *create_bank_account(int account_number)
 {
@@ -32,10 +31,10 @@ struct bank_account *create_bank_account(int account_number)
  * Description:
  * The `bank_account_set_balance` function sets the new balance for the given account.
  *
- * @param myAccount: the given account, which satsifies the property of bank_account
+ * @param myAccount: the given account
  * @param newBalance: the new balanced to be set as
  * 
- * It makes sure that the account has its balance set as newBalance and still keeps the property of bank_account. 
+ * It makes sure that the account has its balance set as newBalance and account number unchanged.
  */
 void bank_account_set_balance(struct bank_account *myAccount, int newBalance)
 {
@@ -46,7 +45,7 @@ void bank_account_set_balance(struct bank_account *myAccount, int newBalance)
  * Description:
  * The `bank_account_dispose` function disposes a given account. 
  *
- * @param myAccount: the given account, which satsifies the property of bank_account
+ * @param myAccount: the given account
  * 
  * It makes sure that the bank account is freed. 
  */

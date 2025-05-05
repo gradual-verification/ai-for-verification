@@ -18,9 +18,7 @@ struct heap_node {
  *
  * @param val: the value in the new heap node
  *
- * The function allocates memory for a new `heap_node`, sets its value, 
- * and sets its left and right child as 0.
- * It makes sure that the new node is the root of a heap. 
+ * The function makes sure that the new node is the root of a heap with its value as val.
  */
 struct heap_node *heap_create(int val)
 {
@@ -36,10 +34,9 @@ struct heap_node *heap_create(int val)
  * Description:
  * The `heap_merge` function merges the two heaps into one heap.
  *
- * @param h1, h2: the given nodes of two heaps that have the heap property.
+ * @param h1, h2: the given nodes of two heaps
  *
- * The function lets the new root have the smallest value, and then recursively merge the heaps. 
- * It makes sure that the new heap maintains the heap property and its root value is the minimum of two original heaps.
+ * The function makes sure that the new heap has its value as the minimum value of two original heaps.
  */
 struct heap_node *heap_merge(struct heap_node *h1, struct heap_node *h2)
 {
@@ -75,9 +72,9 @@ struct heap_node *heap_merge(struct heap_node *h1, struct heap_node *h2)
  * Description:
  * The `heap_get_min` function gets the minimum value of a given heap.
  *
- * @param h1, h2: the given node of a heap that is not null and has the heap property
+ * @param h1, h2: the given node of a heap that is not null
  *
- * It makes sure that the heap property is still perserved and the return value is the minimum value of the heap. 
+ * It makes sure that the heap property is unchanged and the return value is the minimum value of the heap. 
  */
 int heap_get_min(struct heap_node *h)
 {

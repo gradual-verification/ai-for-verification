@@ -1,18 +1,18 @@
 #include "stdlib.h"
 
+// the field count keeps track of how many times add/subtract has been called
 struct Accumulator {
   int total;
-  int count; // keeps track of how many times add/subtract has been called
+  int count; 
 };
 
 /***
  * Description:
- * The `create` function creates a new accumulator with the given value
+ * The `create` function creates a new accumulator with the given value.
  *
  * @param val: the given value
  *
- * The function allocates memory for a new `Accumulator`, sets its total as val and sets its count as 1. 
- * It makes sure that the created accumulator satsifies the property of Accumulator. 
+ * The function makes sure that the created accumulator has total as val and its count as 1. 
  */
 struct Accumulator* create(int v)
 {
@@ -29,10 +29,10 @@ struct Accumulator* create(int v)
  * Description:
  * The `add` function adds up the value in the accumulator with a given value. 
  * 
- * @param a: the given accumulator, which has the property of Accumulator
+ * @param a: the given accumulator 
  * @param x: the given value
  *
- * The function updates the total and count of the accumulator, and makes sure it has the property of Accumulator.
+ * The function makes sure the accumulator has the total added by x and the count incremented by 1.
  */
 void add(struct Accumulator* a, int x)
 {
@@ -44,10 +44,10 @@ void add(struct Accumulator* a, int x)
  * Description:
  * The `subtract` function subtracts the value in the accumulator by a given value. 
  * 
- * @param a: the given accumulator, which has the property of Accumulator
+ * @param a: the given accumulator
  * @param x: the given value
  *
- * The function updates the total and count of the accumulator, and makes sure it has the property of Accumulator.
+ * The function makes sure the accumulator has the total subtracted by x and the count decremented by 1.
  */
 void subtract(struct Accumulator* a, int x)
 {
@@ -59,9 +59,9 @@ void subtract(struct Accumulator* a, int x)
  * Description:
  * The `reset` function resets the accumulator. 
  * 
- * @param a: the given accumulator, which has the property of Accumulator
+ * @param a: the given accumulator
  *
- * The function resets the total and count of the accumulator to 0, and makes sure it has the property of Accumulator.
+ * The function makes sure the accumulator has the total and count of the accumulator to be 0.
  */
 void reset(struct Accumulator* a)
 {
@@ -73,9 +73,9 @@ void reset(struct Accumulator* a)
  * Description:
  * The `current` function returns the total of a given accumulator. 
  * 
- * @param a: the given accumulator, which has the property of Accumulator
+ * @param a: the given accumulator
  *
- * The function makes sure the accumulator keeps the property of Accumulator.
+ * The function makes sure the accumulator is not modified, and the return value is the total field of the accumulator.
  */
 int current(struct Accumulator* a)
 {
@@ -85,11 +85,11 @@ int current(struct Accumulator* a)
 
 /***
  * Description:
- * The `average` function returns the average value of each operation (i.e., total/count). 
+ * The `average` function returns the average value of each operation. 
  * 
- * @param a: the given accumulator, which has the property of Accumulator and its count > 0
+ * @param a: the given accumulator, which has its count > 0
  *
- * The function makes sure the accumulator keeps the property of Accumulator.
+ * The function makes sure the accumulator is not changed, and the return value is total/count of this accumulator.
  */
 int average(struct Accumulator* a)
 {
@@ -101,7 +101,7 @@ int average(struct Accumulator* a)
  * Description:
  * The `destroy` function disposes a given accumulator.
  * 
- * @param a: the given accumulator, which has the property of Accumulator
+ * @param a: the given accumulator
  *
  * The function makes sure the accumulator is freed. 
  */

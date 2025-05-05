@@ -31,7 +31,7 @@ struct stack
 
 /* create_empty_stack function
 -params: A destructor
--description: Creates an empty stack*/
+This function makes sure to create and return an empty stack */
 struct stack* create_empty_stack(destructor* destructor)
 {
   struct stack* stack = malloc( sizeof( struct stack ) );
@@ -46,7 +46,7 @@ struct stack* create_empty_stack(destructor* destructor)
 
 /* destroy_stack function
 -params: A stack
--description: Destroys the stack by destructing the data of each node and freeing each node. */
+This function makes sure to destroy the stack by destructing the data of each node and freeing each node. */
 void destroy_stack(struct stack* stack)
 {
   struct node* current = stack->first;
@@ -63,8 +63,8 @@ void destroy_stack(struct stack* stack)
 }
 
 /* push function
--params: A stack and a data element
--description: Pushes the data element onto the head of stack*/
+-params: A stack and a data element, where the data has ownership
+This function makes sure to push the data element onto the head of stack (with ownership) */
 void push(struct stack* stack, void* data)
 {
   struct node* node = malloc( sizeof( struct node ) );
@@ -82,7 +82,8 @@ void push(struct stack* stack, void* data)
 /* pop function
 -params: A stack
 -description: Pops the top element from the stack.
-It requires that the stack is not empty and returns the popped element. */
+It requires that the stack is not empty.
+It ensures that the head element is removed and returned (with ownership) */
 void* pop(struct stack* stack)
 {
   struct node* first = stack->first;
@@ -98,7 +99,8 @@ void* pop(struct stack* stack)
 
 /* get_destructor function
 -params: A stack
--description: Returns the destructor of the stack*/
+
+It makes sure to return the destructor of the stack*/
 destructor* get_destructor(struct stack* stack)
 {
   destructor* d = stack->destructor;
@@ -107,7 +109,7 @@ destructor* get_destructor(struct stack* stack)
 
 /* pop_destroy function
 -params: A stack
--description: Pops the top element from the stack and destroys it*/
+It makes sure to pop the top element from the stack and destroys it*/
 void pop_destroy(struct stack* stack)
 {
   void* data = pop(stack);
@@ -117,7 +119,7 @@ void pop_destroy(struct stack* stack)
 
 /* is_empty function
 -params: A stack
--description: Checks if the stack is empty*/
+This function makes sure to checks if the stack is empty and does not modify the stack. */
 bool is_empty(struct stack* stack)
 {
   struct node* first = stack->first;
@@ -126,7 +128,7 @@ bool is_empty(struct stack* stack)
 
 /* size function
 -params: A stack
--description: Returns the size of the stack*/
+This function makes sure to return the size of the stack and does not modify the stack. */
 int size(struct stack* stack)
 {
   int size = stack->size;
@@ -148,7 +150,7 @@ struct data
 /*
   create_data function
   - params: two integers foo and bar
-  - description: This function creates a data structure and initializes its fields.
+  - description: This function creates a data structure and initializes its fields by the fiven foo and bar.
 */
 struct data* create_data(int foo, int bar)
 {

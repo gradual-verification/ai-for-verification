@@ -6,9 +6,7 @@
 
 /*** 
  * Description:
-The `main` function copies the content from a file to the other file. 
-It takes command-line arguments `argc` and `argv`.
-It first opens the files to read from and write to, and uses a buffer as a bridge to continuously read and write.
+The `main` function copies the content from a file to the other file (whose name are in command-line arguments).
 
 @param `argc` - An integer representing the number of command-line arguments.
 @param `argv` - An array of strings that are the command-line arguments.

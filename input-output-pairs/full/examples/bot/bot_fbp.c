@@ -22,8 +22,7 @@ int main() //@ : main
     reader_read_line(r, line);
     writer_write_string(w, "BoT\r\n");
     
-    while (!stop)
-       
+    while (!stop)   
     {
         bool test = true;
         bool result = false;

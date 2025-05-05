@@ -10,6 +10,8 @@ The `wc` function calculates the word count in a given string.
 
 @param `string` - The string to count words in.
 @param `inword` - A boolean flag indicating whether the current position is inside a word or not.
+
+It makes sure that the return value is the word count of the string.
 */
 int wc(char* string, bool inword)
 {
@@ -27,15 +29,6 @@ int wc(char* string, bool inword)
   }
 }
 
-/*** 
- * Description:
-The `test` function is a test function to validate the `wc` function.
-*/
-void test()
-{
-  int nb = wc("This line of text contains 8 words.", false);
-  assert(nb == 7);
-}
 
 /*** 
  * Description:

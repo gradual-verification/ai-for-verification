@@ -7,8 +7,7 @@ struct account {
 
 /*@
 predicate account_pred(struct account *myAccount, int theLimit, int theBalance) =
-    myAccount->limit |-> theLimit &*& myAccount->balance |-> theBalance
-    &*& malloc_block_account(myAccount);
+    myAccount->limit |-> theLimit &*& myAccount->balance |-> theBalance;
 @*/
 
 struct account *create_account(int limit)

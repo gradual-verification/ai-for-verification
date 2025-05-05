@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
+// a node of an ascendingly sorted list
 struct node {
     int value;
     struct node *next;
@@ -10,7 +11,7 @@ struct node {
  * Description:
  * The `create_list` function creates an empty list. 
  *
- * The function ensures that the returned value trivially has the sorted list property. 
+ * The function ensures that the returned value is a sorted list. 
  */
 struct node *create_list()
 {
@@ -21,11 +22,10 @@ struct node *create_list()
  * Description:
  * The `append` function appends a node of given value to a sorted list, and still keeps the list sorted. 
  *
- * @param head: the head of a given sorted list, which has the sorted list property
- * @param val: the given value to be added. It is within the bound of the nax and min value of the sorted list. 
+ * @param head: the head of a given sorted list
+ * @param val: the given value to be added. It is within the bound of the max and min value of the sorted list. 
  * 
- * The function inserts the value at the proper position of the list.
- * It makes sure that the new list is still sorted. 
+ * It makes sure that the new list is still sorted with the same bound of max and min value. 
  */
 struct node *append(struct node *head, int value)
 {
@@ -47,7 +47,7 @@ struct node *append(struct node *head, int value)
  * 
  * @param head: the head of a sorted list
  *
- * The function ensures that the list is freed. 
+ * The function ensures that the list of head is freed. 
  */
 void dispose_list(struct node *head)
 {

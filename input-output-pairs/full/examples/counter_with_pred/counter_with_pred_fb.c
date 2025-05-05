@@ -23,11 +23,19 @@ struct Counter* init(int v)
 }
 
 void increment(struct Counter* c)
-  //@ requires Counter(c, ?v);
+  //@ requires Counter(c, ?v) &*& v < INT_MAX;
   //@ ensures Counter(c, v+1);
 {
   int tmp = c->value;
   c->value = tmp + 1;
+}
+
+void decrement(struct Counter* c)
+  //@ requires Counter(c, ?v) &*& v > INT_MIN;
+  //@ ensures Counter(c, v - 1);
+{
+  int tmp = c->value;
+  c->value = tmp - 1;
 }
 
 void dispose(struct Counter* c)
@@ -62,7 +70,36 @@ int main() //@ : main
   struct Counter* c1 = init(0); struct Counter* c2 = init(5);
 
   increment(c1); swap(c1, c2); int tmp = get(c2);
-
+  
   dispose(c1); dispose(c2);
+  return 0;
+}
+
+bool random();
+//@ requires true;
+//@ ensures true;
+
+int main2() 
+//@ requires true;
+//@ ensures true;
+{
+  struct Counter* c = init(0);
+  bool b = random();
+  int n = 0;
+  // split of an arbitrary number of children
+  while(b && n < INT_MAX) 
+  {
+    increment(c);
+    n = n + 1;
+    b = random();
+  }
+
+  // put the permission back together
+  while(0<n) 
+  {
+    decrement(c);
+    n = n - 1;
+  }
+  dispose(c);
   return 0;
 }

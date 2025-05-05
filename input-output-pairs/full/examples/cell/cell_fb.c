@@ -24,27 +24,21 @@ void cell_set(struct cell* c, int v)
   //@ requires cell(c, _);
   //@ ensures cell(c, v);
 {
-
   c->x = v;
-
 }
 
 void cell_inc(struct cell* c, int v)
   //@ requires cell(c, ?x);
   //@ ensures cell(c, x + v);
 {
-
   c->x += v;
-
 }
 
 int cell_get(struct cell* c)
   //@ requires cell(c, ?v);
   //@ ensures cell(c, v) &*& result == v;
 {
-
   return c->x;
-
 }
 
 void cell_swap(struct cell* c1, struct cell* c2)

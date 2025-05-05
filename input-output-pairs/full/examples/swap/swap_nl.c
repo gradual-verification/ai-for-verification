@@ -7,6 +7,8 @@ The swap function takes two integer pointers as parameters and swaps the values 
 
 @param a - Pointer to the first integer value to be swapped.
 @param b - Pointer to the second integer value to be swapped.
+
+It makes sure that the values pointed to by a and b are swapped correctly.
 */
 void swap(int *a, int *b)
 {
@@ -25,6 +27,8 @@ struct point {
 The point_mirror function takes a pointer to a struct point as a parameter and swaps the x and y values of the point.
 
 @param p - Pointer to the struct point whose x and y values need to be swapped.
+
+It makes sure that the x and y values of the point are swapped correctly.
 */
 void point_mirror(struct point *p)
 {
@@ -33,8 +37,7 @@ void point_mirror(struct point *p)
 
 /*** 
  * Description: 
-The main function of the program that allocates memory for a struct point, initializes its x and y values, 
-mirrors the point, checks if the mirror operation was successful, and frees the allocated memory before exiting.
+The main function checks if the mirror operation is successful.
 */
 int main()
 {

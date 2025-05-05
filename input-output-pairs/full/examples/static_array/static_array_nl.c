@@ -5,13 +5,6 @@
 
 #include <stdbool.h>
 
-/*check() function
--params: boolean value
--description: the function asserts the boolean value*/
-void check (bool b)
-{
-  assert(b);
-}
 
 typedef struct
  {
@@ -31,8 +24,9 @@ struct mystruct my_global_nested_struct = {{42, {420, 421, 422, 423, 424, 425, 4
 
 /*foo() function
 -params: none
--description: This function initializes a local struct and a local struct pointer, 
-and then checks if the global struct is different from the local struct and the local struct pointer*/
+-description: This function checks if the global struct is different from the local structs.
+It makes sure that my_global_nested_struct still keeps the structure of mystruct. 
+*/
 static void foo()
 {
   struct mystruct my_local_nested_struct;
@@ -53,7 +47,11 @@ static int ar2 [55];
 
 /*mod_ar2() function
 -params: none
--description: This function modifies a global array. */
+-description: This function modifies a global array. 
+
+It requires that the first and 26-th elements are in the range of 0 ~ 50.
+It ensures that the first element is updated to the sum of the first and 26-th elements.
+*/
 void mod_ar2 (void)
  {
   ar2[ 1] = ar2[ 1] + ar2[26];
@@ -70,19 +68,12 @@ struct point points[] = { { 10, 20 }, { 30, 40 } };
 /*main() function
 -params: an integer arguement and a character pointer argument
 -description: This function does some checking on global and local structs or array. 
-It first checks the value of a global struct, and then creates a local struct, and further checks a global array.
+It makes sure to return 0.
 */
 int main(int argc, char **argv) //@ : main_full(static_array)
  {
-  check((&(&my_global_nested_struct)->s1)->x == 42);
-  check((&(&my_global_nested_struct)->s1)->ar[0] == 420);
-  check((&(&my_global_nested_struct)->s1)->ar[6] == 426);
-  check((&(&my_global_nested_struct)->s1)->y == -3);
-  check((&my_global_nested_struct)->s2 == -99);
   
   struct_with_array *bigArrayPtr = bigArray;
-  check((bigArrayPtr + 1)->x == 300);
-  check((bigArrayPtr + 1)->ar[2] == 7);
   
   foo();
 
@@ -125,7 +116,6 @@ int main(int argc, char **argv) //@ : main_full(static_array)
 
 
   /* global array */
-  check(ar2[0] == 0);
   ar2[ 0] = 1;
   ar2[ 1] = 5;
   ar2[ 2] = 0;

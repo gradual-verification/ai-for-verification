@@ -58,7 +58,6 @@ void dispose(struct stack* s)
 {
   struct node* n = s->head;
   while(n != 0) 
-    
   {
     struct node* tmp = n;
     n = n->next;
@@ -73,14 +72,11 @@ int get_length(struct stack* s)
   //@ ensures stack(s, vs) &*& result == length(vs);
 {
   int r = 0;
-
   struct node* n = s->head;
   while(n != 0) 
-
   {
     r = r + 1;
     n = n->next;
- 
   }
   return r;
 }

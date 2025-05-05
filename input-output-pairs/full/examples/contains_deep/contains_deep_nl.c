@@ -78,6 +78,7 @@ struct cell* create_cell(int v)
 /*cell_equals() function
 -params: two cell pointers
 -description: compares the values of the two cells.
+It ensures that the two cells are unchanged, and the return value is true if the values are equal, false otherwise.
 */
 bool cell_equals(struct cell* x1, struct cell* x2) //@: equals
 {
@@ -89,7 +90,7 @@ bool cell_equals(struct cell* x1, struct cell* x2) //@: equals
 /*test() function
 -params: none
 -decription: tests the functionality of contain.
-It creates and uses a list, and check whether iot contains a cell with a specified value. */
+*/
 void test() 
 {
   struct node* n = create_list();

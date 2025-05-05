@@ -2,7 +2,7 @@
 
 struct Accumulator {
   int total;
-  int count; // keeps track of how many times add/subtract has been called
+  int count;
 };
 
 /*@

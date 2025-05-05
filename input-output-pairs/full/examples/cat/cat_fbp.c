@@ -2,9 +2,6 @@
 #include "malloc.h"
 #include "stdlib.h"
 
-/*
-Prints the contents of given file to stdout.
-*/
 int main(int argc, char** argv) //@ : main
   //@ requires 0 <= argc &*& [_]argv(argv, argc, _);
   //@ ensures true;
@@ -17,7 +14,6 @@ int main(int argc, char** argv) //@ : main
   if(fp == 0 || buffer == 0) { abort(); }
   res = fgets(buffer, 100, fp);
   while(res != 0) 
-  
   {
     puts(buffer);
     res = fgets(buffer, 100, fp);

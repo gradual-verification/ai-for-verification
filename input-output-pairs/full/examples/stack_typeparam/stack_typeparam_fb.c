@@ -84,7 +84,7 @@ fixpoint int Size<T>(Stack<T> S)
 
 struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
   //@ requires [_]is_destructor<T>(destructor, ?Ownership);
-  //@ ensures Stack(result, destructor, Ownership, ?Stack);
+  //@ ensures Stack(result, destructor, Ownership, ?Stack) &*& IsEmpty(Stack) == true;
 {
   struct stack* stack = malloc( sizeof( struct stack ) );
   if ( stack == 0 ) abort();
@@ -114,7 +114,7 @@ void destroy_stack/*@ <T> @*/(struct stack* stack)
 }
 
 void push/*@ <T> @*/(struct stack* stack, void* data)
-  //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack);
+  //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack) &*& Ownership(data, ?info);
   //@ ensures Stack(stack, destructor, Ownership, Push(data, info, Stack));
 {
   struct node* node = malloc( sizeof( struct node ) );
@@ -162,7 +162,7 @@ destructor* get_destructor/*@ <T> @*/(struct stack* stack)
 }
 
 void pop_destroy/*@ <T> @*/(struct stack* stack)
-  //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack);
+  //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack) &*& Stack != Nil;
   //@ ensures Stack(stack, destructor, Ownership, Pop(Stack));
 {
   void* data = pop(stack);
@@ -172,7 +172,7 @@ void pop_destroy/*@ <T> @*/(struct stack* stack)
 
 bool is_empty/*@ <T> @*/(struct stack* stack)
   //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack);
-  //@ ensures Stack(stack, destructor, Ownership, Stack);
+  //@ ensures Stack(stack, destructor, Ownership, Stack) &*& result == IsEmpty(Stack);
 {
   struct node* first = stack->first;
   return first == 0;
@@ -180,7 +180,7 @@ bool is_empty/*@ <T> @*/(struct stack* stack)
 
 int size/*@ <T> @*/(struct stack* stack)
   //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack);
-  //@ ensures Stack(stack, destructor, Ownership, Stack);
+  //@ ensures Stack(stack, destructor, Ownership, Stack) &*& result == Size(Stack);
 {
   int size = stack->size;
   return size;

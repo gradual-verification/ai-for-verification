@@ -9,14 +9,15 @@ struct node {
 
 /**
  * Description:
- * The `map_nil` function returns a null pointer, indicating the end of a mapped list.
+ * The `map_nil` function returns a null pointer.
  *
- * @returns A null pointer.
+ * It makes sure that the return value is a null pointer (representing an empty map).
  */
 struct node *map_nil()
 {
     return 0;
 }
+
 /**
  * Description:
  * The `map_cons` function creates a new node with the given key and value, and attaches it to the provided tail node.
@@ -24,7 +25,9 @@ struct node *map_nil()
  * @param key The key to be stored in the new node.
  * @param value The value to be stored in the new node.
  * @param tail The tail node to which the new node will be attached.
- * @returns A pointer to the newly created node.
+ * 
+ * It makes sure that the return value is a pointer to the newly created node, 
+ * which contains the key and value and is the head of the map.
  */
 struct node *map_cons(void *key, void *value, struct node *tail)
 {
@@ -35,11 +38,14 @@ struct node *map_cons(void *key, void *value, struct node *tail)
     n->next = tail;
     return n;
 }
+
 /**
  * Description:
- * The `map_dispose` function recursively frees of all nodes in the map, starting from the given node.
+ * The `map_dispose` function frees of all nodes in the map.
  *
- * @param map The head node of the map to be disposed of.
+ * @param map The head node of the map to be disposed of
+ * 
+ * This function makes sure that all nodes in the map are freed.
  */
 void map_dispose(struct node *map)
 {
@@ -111,6 +117,8 @@ bool foo_equals(struct foo *f1, struct foo *f2)
  *
  * @param value The value to be assigned to the `value` member of the created foo structure.
  * @return Pointer to the newly created foo structure.
+ * 
+ * It makes sure that the return value is a foo structure with the given value.
  */
 struct foo *create_foo(int value);
 {

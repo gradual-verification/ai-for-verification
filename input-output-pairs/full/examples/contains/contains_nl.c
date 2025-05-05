@@ -8,7 +8,6 @@ struct node {
 /*equals() function
 -params: void* v1, void* v2
 -description: checks whether two pointers are equal. It doesn't have a concrete definition.
-
 */
 typedef bool equals(void* v1, void* v2);
 
@@ -60,7 +59,7 @@ bool list_contains(struct node* n, void* v, equals* eq)
 
 /*my_equals() function
 -params: void* v1, void* v2
--description: checks whether two pointers are equal.
+-description: checks whether two pointers have an equal value.
 */
 bool my_equals(void* v1, void* v2) //@: equals
 {

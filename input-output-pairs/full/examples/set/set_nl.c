@@ -17,7 +17,7 @@ The create_set function creates a new, empty set.
 
 @param - None.
 @requires - No specific preconditions.
-@ensures - Returns a pointer to a newly allocated set if successful, or 0 if memory allocation fails. The set is initially empty.
+@ensures - Returns a pointer to a newly allocated set if successful, or 0. The set is initially empty.
 */
 struct set* create_set()
 {
@@ -51,7 +51,6 @@ The set_contains function checks whether a given element is present in the set.
 
 @param set - A pointer to the set.
 @param x - A pointer to the element to check for.
-@requires - The set must be valid.
 @ensures - Returns true if x is present in the set, otherwise returns false. The set remains unchanged.
 */
 bool set_contains(struct set* set, void* x)
@@ -74,7 +73,7 @@ The set_dispose function disposes of the set by freeing all allocated memory.
 
 @param set - A pointer to the set to be disposed of.
 @requires - The set must be valid.
-@ensures - All memory associated with the set is freed, and the set is no longer valid.
+@ensures - All memory associated with the set is freed. 
 */
 void set_dispose(struct set* set)
 {
@@ -91,10 +90,6 @@ void set_dispose(struct set* set)
 /***
 * Description:
 The main function demonstrates the use of the set data structure.
-
-@param - None.
-@requires - No specific preconditions.
-@ensures - Adds elements to the set, checks for their existence, and then disposes of the set.
 */
 int main() 
 {

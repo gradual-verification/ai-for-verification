@@ -14,8 +14,7 @@ struct queue {
  * Description:
  * The `create_queue` function creates an empty heap. 
  *
- * The function allocates memory for a new `queue`, and sets its head and tail as 0.
- * It makes sure that the new queue keeps the queue structure. 
+ * The function makes sure that the returned heap has no element. 
  */
 struct queue *create_queue()
 {
@@ -30,11 +29,10 @@ struct queue *create_queue()
  * Description:
  * The `enqueue` function puts a new node with the given value into the tail of a given queue. 
  *
- * @param q: the given queue to be enqueued, which keeps the queue structure
+ * @param q: the given queue to be enqueued
  * @param val: the given value to be added
  * 
- * The function allocates memory for a new `node`, sets its value and links it next to the tail of the queue. 
- * It makes sure that the new queue keeps the queue structure and its number of elements is incremented. 
+ * The function makes sure that q has its number of elements incremented by 1. 
  */
 void enqueue(struct queue *q, int val)
 {
@@ -56,10 +54,9 @@ void enqueue(struct queue *q, int val)
  * Description:
  * The `dequeue` function removes the head of a non-empty heap and returns its value. 
  *
- * @param q: the given queue to be dequeued, which keeps the queue structure and is not empty
+ * @param q: the given non-empty queue to be dequeued
  * 
- * This function frees the original head and lets the head of new queue be the next node of original head.
- * It makes sure that the new queue keeps the queue structure and its number of elements is decremented. 
+ * This function makes sure that q has its number of elements decremented by 1. 
  */
 int dequeue(struct queue *q)
 {
@@ -87,7 +84,7 @@ int dequeue(struct queue *q)
  *
  * @param q: the given empty queue to be freed
  * 
- * It makes sure that queue is freed. 
+ * It makes sure that q is freed. 
  */
 void dispose_queue(struct queue *q)
 {

@@ -11,6 +11,8 @@ static struct counter *c;
 /*** 
  * Description:
 The m function updates the value of a global variable x and also increments the value of a field f within a global structure c.
+
+It makes sure that the value of x and c->f are incremented by 1.
 */
 void m()
 {
@@ -21,9 +23,7 @@ void m()
 
 /***
  * Description:
-The main function serves as the entry point of the program and allocates memory for a global structure, 
-initializes its field f, assigns this structure to a global pointer c, 
-calls the m() function, and performs validation on the updated value of field f.
+The main function tests the property of global variables. 
 */
 int main() //@ : main_full(globals_nl)
 {

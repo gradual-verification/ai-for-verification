@@ -10,8 +10,8 @@ typedef int charreader();
 struct tokenizer
 {
 	charreader*           next_char;
-	int                   lastread; // -1 = EOF, -2 = empty buffer
-	int                   lasttoken;
+	int                   lastread; // the character lastly read. Special: -1 = EOF, -2 = empty buffer
+	int                   lasttoken; // the last token parsed
 	struct string_buffer* buffer;
 };
 

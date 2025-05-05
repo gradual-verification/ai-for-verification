@@ -11,8 +11,7 @@ struct pair {
  *
  * @param x, y: the values in the new pair
  *
- * The function allocates memory for a new `pair` and sets its values, 
- * It makes sure that the new pair has the structure of pair. 
+ * The function makes sure that the returned pair has its x and y set. 
  */
 struct pair* create_pair(int x, int y)
 {
@@ -27,10 +26,10 @@ struct pair* create_pair(int x, int y)
  * Description:
  * The `update_pair` function updates the values of a given pair with the given values.
  *
- * @param p: the given pair to be updated, which has the structure of pair
- * @param x, y: the values in the new pair
+ * @param p: the given pair to be updated
+ * @param new_x, new_y: the values in the new pair
  *
- * It makes sure that the new pair has the structure of pair and the values are updated. 
+ * It makes sure that p has its x and y values updated by new_x and new_y. 
  */
 void update_pair(struct pair *p, int new_x, int new_y)
 {
@@ -42,9 +41,9 @@ void update_pair(struct pair *p, int new_x, int new_y)
  * Description:
  * The `copy_pair` function copies the given pair into the return value.
  *
- * @param p: the given pair to be copied, which has the structure of pair
+ * @param p: the given pair to be copied
  *
- * It makes sure that the returned pair has the structure of pair and the same value as the given pair. 
+ * It makes sure that p is not changed, and the returned pair has the same values as p. 
  */
 struct pair* copy_pair(struct pair *p)
 {
@@ -57,11 +56,11 @@ struct pair* copy_pair(struct pair *p)
 
 /***
  * Description:
- * The `dispose_pair` function disposes the given pair by freeing it
+ * The `dispose_pair` function disposes the given pair by freeing it.
  *
- * @param p: the given pair to be disposed, which has the structure of pair
+ * @param p: the given pair to be disposed
  *
- * It makes sure that the given pair is freed. 
+ * It makes sure that the given pair p is freed. 
  */
 void dispose_pair(struct pair *p)
 {

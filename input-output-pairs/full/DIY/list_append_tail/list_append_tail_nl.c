@@ -8,7 +8,7 @@ struct node {
  * Description:
  * The `create_list` function creates an empty list.
  *
- * It makes sure that the new empty list has the list property. 
+ * It makes sure that the return value is the head of a list. 
  */
 struct node *create_list()
 {
@@ -19,8 +19,9 @@ struct node *create_list()
  * Description:
  * The `append_tail` function appends a new node to the tail of a given list. 
  *
- * @param head: the head to a given list, which has the list property
- * It makes sure that the new list (being returned) keeps the list property. 
+ * @param head: the head to a given list
+ * 
+ * It makes sure that the returned value is the head of a list. 
  */
 struct node *append_tail(struct node *head)
 {
@@ -46,7 +47,7 @@ struct node *append_tail(struct node *head)
  * Description:
  * The `dispose_list` function disposes a given list.
  *
- * @param head: the head of a given list, which has the list property
+ * @param head: the head of a given list
  * It makes sure that the given list is freed. 
  */
 void dispose_list(struct node *head)

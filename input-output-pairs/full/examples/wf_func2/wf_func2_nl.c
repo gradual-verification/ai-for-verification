@@ -8,9 +8,7 @@ The `fill` function fills a buffer with a specified character up to a given leng
 @param length - An integer specifying the number of positions in the buffer to fill.
 @param c - A character that will be used to fill the buffer.
 
-The behavior goes below:
-The function iterates from 0 to length - 1.
-In each iteration, it assigns the character c to the current position in the buffer.
+The function makes sure that 0 to length - 1 in buf are filled with c.
 */
 void fill(char *buf, int length, char c)
 {

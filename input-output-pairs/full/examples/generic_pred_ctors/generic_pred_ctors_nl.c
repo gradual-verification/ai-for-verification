@@ -13,8 +13,7 @@ The create_MutexCell function allocates and initializes a new MutexCell object w
 @param value - The value to initialize the payload field of the struct, which satisfies the property of T
 @return - A pointer to the newly allocated MutexCell object, whose mutex is not held and payload satisfies the property of T
 
-The function ensures that the allocated memory block for the MutexCell object is valid.
-If memory allocation fails, the program aborts.
+The function ensures that the return value is a MutexCell
 */
 struct MutexCell<T> *create_MutexCell<T>(T value)
 {

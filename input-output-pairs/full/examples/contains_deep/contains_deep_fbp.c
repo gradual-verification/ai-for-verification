@@ -115,9 +115,7 @@ bool cell_equals(struct cell* x1, struct cell* x2) //@: equals
   //@ requires equals_state1(cell_equals)(x1, ?v1, ?eq_func) &*& equals_state2(cell_equals)(x2, ?v2, eq_func);
   //@ ensures equals_state1(cell_equals)(x1, v1, eq_func) &*& equals_state2(cell_equals)(x2, v2, eq_func) &*& result == eq_func(unit, v1, v2);
 {
-  
   return x1->val == x2->val;
-
 }
 
 void test() 

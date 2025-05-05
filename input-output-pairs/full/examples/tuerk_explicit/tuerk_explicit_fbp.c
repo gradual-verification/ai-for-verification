@@ -1,5 +1,4 @@
-// Illustrates VeriFast's implementation of the alternative loop proof rule proposed by [1].
-// [1] Thomas Tuerk. Local Reasoning about While-Loops. VS-Theory workshop at VSTTE 2010.
+
 
 struct node {
     struct node *next;

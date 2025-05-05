@@ -11,6 +11,8 @@ The create_node function allocates a node with the specified fields of value and
 
 @param value: the specified value for the field value in the new node
 @param next: the specified next for the field next in the new node
+
+It makes sure that the return value is a node with its value and next being set.
 */
 struct node *create_node(int value, struct node *next)
 {
@@ -29,6 +31,8 @@ struct list {
 /***
  * Description:
 The create_node function allocates an empty linked list with a node as both the first and last of the linked list.
+
+It makes sure that the return value is an empty list. 
 */
 struct list *create_list()
 {
@@ -47,6 +51,8 @@ For example, if n1 = n2, then the length is 0. If n1->n->n2, then the length is 
 
 @param n1: the node at the beginning of the list segment
 @param n2: the node at the end of the list segment
+
+It make sures that the list segment is not changed, and the return value is the length of such list segment.
 */
 int list_length_helper(struct node *n1, struct node *n2)
 {
@@ -65,6 +71,8 @@ int list_length_helper(struct node *n1, struct node *n2)
 The list_length function calculates the length of the linked list.
 
 @param l: a single linked list
+
+It makes sure that the list is not changed. 
 */
 int list_length(struct list *l)
 {
@@ -74,10 +82,11 @@ int list_length(struct list *l)
 /***
  * Description:
 The list_add function adds an element to the end of the linked list,
-by allocating a new node, assigning its value and making it as the last node of the linked list.
 
 @param l: a single linked list
 @param x: the element to be added
+
+It makes sure that the list has added x as its last element.
 */
 void list_add(struct list *l, int x)
 {

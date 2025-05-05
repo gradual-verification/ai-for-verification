@@ -15,9 +15,7 @@ The create_stack function is a constructor for a stack data structure.
 
 @param none
 
-The function creates a new stack object by allocating memory for a struct stack 
-and sets its head pointer to NULL. The function takes no parameters and 
-returns the newly created stack.
+The function returns the newly created empty stack.
 */
 struct stack *create_stack()
 {
@@ -34,10 +32,7 @@ The stack_push function adds an element to the top of the stack.
 @param stack - pointer to the stack
 @param value - integer value to be added to the stack
 
-The function dynamically allocates memory for a new node, 
-assigns the value to the node, and updates the head pointer 
-of the stack to point to the new node. The number of elements 
-in the stack is incremented by one.
+It makes sure that the number of elements in the stack is incremented by one.
 */
 void stack_push(struct stack *stack, int value)
 {
@@ -55,8 +50,7 @@ The stack_push_all function pushes all elements in the other stack to the head o
 @param stack - pointer to the given stack
 @param other - pointer to the other stack
 
-It first traverses over the other stack to go to its end; Then, it links the end of other stack
-to the head of given stack, and let the new stack's head be the head of the other stack.
+It makes sure the `stack` has the number of elements in the `other` plus the number of elements in original `stack`.
 */
 void stack_push_all(struct stack *stack, struct stack *other)
 {
@@ -75,15 +69,11 @@ void stack_push_all(struct stack *stack, struct stack *other)
 
 /***
  * Description:
-The stack_pop function removes the top element 
-from the non-empty stack and returns that element.
+The stack_pop function removes the top element from the non-empty stack and returns that element.
 
 @param stack - pointer to the non-empty stack
 
-The function takes a pointer to the stack as a parameter and 
-retrieves the value of the top node. It then updates the 
-head pointer of the stack to the next node and frees the 
-memory of the popped node.
+This function ensures that the number of elements in the stack decreases by 1.
 */
 int stack_pop(struct stack *stack)
 {
@@ -96,13 +86,12 @@ int stack_pop(struct stack *stack)
 
 /***
  * Description:
-The stack_popn function removes the top n elements
-from a stack with at least n elements. 
+The stack_popn function removes the top n elements from a stack with at least n elements. 
 
 @param stack - pointer to the stack
-@param n - number of elements to be popped out
+@param n - number of elements to be popped out, where n >= 0
 
-The function iteratively calls stack_pop() function to pop elements. 
+The function makes sure that the number of elements in the stack decreases by n.
 */
 void stack_popn(struct stack *stack, int n)
 {
@@ -128,27 +117,21 @@ The nodes_filter function filters nodes based on a predicate.
 @param p - A predicate function to determine whether to keep a node.
 @return - A pointer to the head of the filtered nodes list.
 
-This function recursively filters the linked list of nodes, keeping only those
-nodes for which the predicate function returns true. It frees the memory of the nodes
-that do not satisfy the predicate.
+This function makes sure that the return value is still a start of a list of nodes. 
 */
 struct node *nodes_filter(struct node *n, int_predicate *p)
 {
-    if (n == 0)
-    {
+    if (n == 0) {
         return 0;
     }
-    else
-    {
+    else {
         bool keep = p(n->value);
-        if (keep)
-        {
+        if (keep) {
             struct node *next = nodes_filter(n->next, p);
             n->next = next;
             return n;
         }
-        else
-        {
+        else {
             struct node *next = n->next;
             free(n);
             struct node *result = nodes_filter(next, p);
@@ -164,8 +147,7 @@ The stack_filter function filters the stack based on a predicate.
 @param stack - A pointer to the stack.
 @param p - A predicate function to determine whether to keep a node.
 
-This function filters the nodes in the stack using the given predicate function.
-It updates the stack to contain only the nodes that satisfy the predicate.
+This function makes sure that `stack` after filtering is still a head of a stack.
 */
 void stack_filter(struct stack *stack, int_predicate *p)
 {
@@ -179,6 +161,8 @@ The stack_is_empty function checks if the given stack has no element,
 by checking whether the head is null. 
 
 @param stack - pointer to the stack
+
+This function makes sure that the stack is unchanged, and the return value is true if the stack is empty, false otherwise.
 */
 bool stack_is_empty(struct stack *stack)
 {
@@ -193,6 +177,8 @@ The stack_get_count function gets the number of nodes in a stack,
 by iteratively traversing over the stack till the end. 
 
 @param stack - pointer to the stack
+
+This function makes sure that the stack is unchanged, and the return value is the number of nodes in the stack.
 */
 int stack_get_count(struct stack *stack)
 {
@@ -214,10 +200,7 @@ for all nodes in a linked list starting from a given node.
 
 @param n - pointer to the node to be disposed.
 
-The function takes a pointer to a node as a parameter and traverses 
-the linked list by recursively calling itself on the next 
-node until reaching the end of the list. The function frees 
-the memory of each node as it unwinds the recursion.
+The function makes sure to free the memory of each node in the list starting from n.
 */
 void nodes_dispose(struct node *n)
 {
@@ -234,10 +217,7 @@ stack including all the nodes in its linked list.
 
 @param stack - pointer to the stack to be deleted.
 
-It takes a pointer to the stack as a parameter and calls 
-nodes_dispose on the head of the stack to deallocate 
-memory for all nodes. Finally, it frees the memory of the 
-stack itself.
+This function makes sure to free the stack.
 */
 void stack_dispose(struct stack *stack)
 {
@@ -251,6 +231,8 @@ The stack_dispose function iteratively frees the memory of an entire
 stack including all the nodes in its linked list. 
 
 @param stack - pointer to the stack to be deleted.
+
+This function makes sure to free the stack.
 */
 void stack_dispose_itr(struct stack *stack)
 {

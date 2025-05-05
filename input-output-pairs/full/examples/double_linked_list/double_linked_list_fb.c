@@ -75,7 +75,6 @@ void reverse(dllist arg)
 		ptr->next = temp2;
 		ptr->prev = temp1;
 		ptr = temp1;
-        // The following two lines bind the tail of beta to variable betap.
 	}
 	temp1 = arg->head;
 	temp2 = arg->tail;

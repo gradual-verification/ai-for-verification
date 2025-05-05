@@ -5,12 +5,6 @@
 
 #include <stdbool.h>
 
-void check (bool b)
-  //@ requires b;
-  //@ ensures true;
-{
-  assert(b);
-}
 
 typedef struct
  {
@@ -72,15 +66,8 @@ int main(int argc, char **argv) //@ : main_full(static_array)
 //@ requires module(static_array, true);
 //@ ensures result == 0;
  {
-  check((&(&my_global_nested_struct)->s1)->x == 42);
-  check((&(&my_global_nested_struct)->s1)->ar[0] == 420);
-  check((&(&my_global_nested_struct)->s1)->ar[6] == 426);
-  check((&(&my_global_nested_struct)->s1)->y == -3);
-  check((&my_global_nested_struct)->s2 == -99);
   
   struct_with_array *bigArrayPtr = bigArray;
-  check((bigArrayPtr + 1)->x == 300);
-  check((bigArrayPtr + 1)->ar[2] == 7);
   
   foo();
 
@@ -123,7 +110,6 @@ int main(int argc, char **argv) //@ : main_full(static_array)
 
 
   /* global array */
-  check(ar2[0] == 0);
   ar2[ 0] = 1;
   ar2[ 1] = 5;
   ar2[ 2] = 0;

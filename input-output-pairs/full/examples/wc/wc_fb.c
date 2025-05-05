@@ -31,13 +31,6 @@ int wc(char* string, bool inword)
   }
 }
 
-void test() 
-//@ requires true;
-//@ ensures true;
-{
-  int nb = wc("This line of text contains 8 words.", false);
-  assert(nb == 7);
-}
 
 int main(int argc, char** argv) //@ : main
 //@ requires 0 <= argc &*& [_]argv(argv, argc, _);

@@ -42,7 +42,7 @@ struct int_array *create_array()
  * Description:
  * The `set` function sets the element at the given index in an int_array to be the given value.
  * 
- * @param arr: the integer array to be set, which has the property of int_array.
+ * @param arr: the int_array to be set
  * @param index: the index to be set into, which is >= 0 and < 10
  * @param value: the value to be set with
  * 
@@ -57,10 +57,10 @@ void set(struct int_array *arr, int index, int value)
  * Description:
  * The `get` function gets the element at the given index in an int_array.
  * 
- * @param arr: the integer array, which has the property of int_array.
+ * @param arr: the int_array.
  * @param index: the index to be accessed, which is >= 0 and < 10
  * 
- * It makes sure that the int_array is not changed and it returns that element. 
+ * It makes sure that the int_array is not changed and it returns the element at index in arr. 
  */
 int get(struct int_array *arr, int index)
 {

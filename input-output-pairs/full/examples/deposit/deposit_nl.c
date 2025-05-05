@@ -7,14 +7,9 @@ struct account
 
 /***
  * Description:
-The create_account function creates a new account by allocating 
-memory for it dynamically.
+The create_account function creates a new account.
 
-@param none
-
-The function creates a new account and after verifying that the 
-memory allocation was successful, it initializes the balance of 
-the account to zero and returns a pointer to the newly created account.
+The function makes sure that the returned value is an account whose balance is zero.
 */
 struct account *create_account()
 {
@@ -29,29 +24,12 @@ struct account *create_account()
 
 /***
  * Description:
-The account_deposit function is used to deposit a specified 
-amount (not less than 0) into an existing account. 
-
-@param myAccount - pointer to the existing account object.
-@param amount - the specific amount to be deposited.
-
-The function adds the deposited amount to the account balance and 
-updates the account balance accordingly.
-*/
-void account_deposit(struct account *myAccount, int amount)
-{
-    myAccount->balance += amount;
-}
-
-/***
- * Description:
-The account_get_balance function retrieves the balance of
-the given account.
+The account_get_balance function retrieves the balance of the given account.
 
 @param myAccount - pointer to an existing account.
 
 The function returns the current balance of the account
-and does not modify any data.
+and does not modify the account.
 */
 int account_get_balance(struct account *myAccount)
 {
@@ -77,12 +55,28 @@ void account_set_balance(struct account *myAccount, int newBalance)
 
 /***
  * Description:
+The account_deposit function is used to deposit a specified 
+amount (not less than 0) into an existing account. 
+
+@param myAccount - pointer to the existing account object.
+@param amount - the specific amount to be deposited.
+
+The function adds the deposited amount to the account balance and 
+updates the account balance accordingly.
+*/
+void account_deposit(struct account *myAccount, int amount)
+{
+    myAccount->balance += amount;
+}
+
+/***
+ * Description:
 The account_dispose function is used to deallocate the memory allocated 
 for an account object once it is no longer needed.
 
 @param myAccount - pointer to the existing account that needs to be disposed.
 
-The function ensures that the memory allocated for the account is freed.
+The function ensures that the account is freed.
 */
 void account_dispose(struct account *myAccount)
 {

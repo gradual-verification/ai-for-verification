@@ -7,6 +7,8 @@ of a given length and pointed to by a given pointer.
 
 @param a: the pointer pointing to an array
 @param N: the length of the array
+
+It makes sure that the array has its N elements to be 0. 
 */
 void set_to_zero(int* a, int N) 
 {
@@ -25,6 +27,8 @@ of a given length and pointed to by a given pointer.
 
 @param a: the pointer pointing to an array
 @param N: the length of the array
+
+It makes suer that the array has its N elements incremented by 1.
 */
 void increment_all(int* a, int N) 
 {

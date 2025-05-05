@@ -16,8 +16,7 @@ struct cell {
  *
  * @returns A pointer to a newly allocated `cell` object.
  *
- * Allocates memory for a `cell` structure, initializes the value to `0`, and returns a pointer to it.
- * If memory allocation fails, the program terminates.
+ * It makes sure that the return value is a cell with its x field as 0.
  */
 struct cell* create_cell() 
 {
@@ -33,6 +32,8 @@ struct cell* create_cell()
  *
  * @param c - A pointer to the `cell` object.
  * @param v - The integer value to set.
+ * 
+ * It makes sures that c has its x field set as v.
  */
 void cell_set(struct cell* c, int v)
 {
@@ -46,6 +47,7 @@ void cell_set(struct cell* c, int v)
  * @param c - A pointer to the `cell` object.
  * @param v - The integer value to add to the current value.
  *
+ * It makes sures that c has its x field incremented by v.
  */
 void cell_inc(struct cell* c, int v)
 {
@@ -58,6 +60,8 @@ void cell_inc(struct cell* c, int v)
  *
  * @param c - A pointer to the `cell` object.
  * @returns The integer value stored in the `cell`.
+ * 
+ * It makes sure that the cell c is not changed and the return value is the x field of c.
  */
 int cell_get(struct cell* c)
 {
@@ -71,7 +75,7 @@ int cell_get(struct cell* c)
  * @param c1 - A pointer to the first `cell`.
  * @param c2 - A pointer to the second `cell`.
  *
- * The function retrieves the values of both cells, swaps them, and stores the swapped values back.
+ * The function makes sure that the x fields in c1 and c2 are swapped.
  */
 void cell_swap(struct cell* c1, struct cell* c2)
 {
@@ -97,9 +101,6 @@ void cell_dispose(struct cell* c)
 /***
  * Description:
  * Demonstrates the creation and manipulation of `cell` objects.
- *
- * The `main` function creates two cells, sets their values to `5` and `10`,
- * swaps their contents, verifies the swap, and disposes of the cells to free allocated memory.
  */
 int main() 
 {

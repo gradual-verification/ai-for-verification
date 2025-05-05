@@ -23,7 +23,6 @@ int main() //@ : main
     writer_write_string(w, "BoT\r\n");
     
     while (!stop)
-
     {
         bool test = true;
         bool result = false;

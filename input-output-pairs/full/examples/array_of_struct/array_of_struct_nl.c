@@ -13,12 +13,8 @@ The read_students function reads student information from user input and allocat
 
 @param count A pointer to an integer that will store the number of students entered by the user.
 
-The function prompts the user to enter the number of students and stores this value in count. 
-It ensures that the number of students is non-negative and that the required memory allocation does not exceed system limits. 
-If these checks fail, the program aborts. The function then allocates memory for the array of struct student and,
-if allocation fails, the program aborts. For each student, 
-it prompts the user to enter the student's name (within 100 characters, ended with '\0') and age, storing this information in the allocated array. 
-Finally, the function returns a pointer to the array of students.
+The function makes sure that the return value is a pointer to an array of students, 
+whose number is stored in count and they are initialized with name and age. 
 */
 struct student *read_students(int *count)
 {
@@ -44,14 +40,7 @@ struct point {
 
 /***
  * Description:
-The main function serves as the entry point of the program, demonstrating safe memory allocation, initialization, and deallocation for an array of structures in C.
- 
-It performs the following steps:
-1. Validates that getting the total size of two instances of struct point will not cause an integer overflow. If an overflow is detected, the program terminates.
-2. Allocates memory for two struct point structures. If the memory allocation fails, the program terminates.
-3. Initializes the x and y members of the two struct point structures with specific values.
-4. Frees the allocated memory to prevent memory leaks.
-5. Returns 0 to indicate successful program termination.
+The main function demonstrates safe memory allocation, initialization, and deallocation for an array of structures in C.
 */
 int main()
 {

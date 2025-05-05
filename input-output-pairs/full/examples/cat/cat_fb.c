@@ -2,9 +2,6 @@
 #include "malloc.h"
 #include "stdlib.h"
 
-/*
-Prints the contents of given file to stdout.
-*/
 int main(int argc, char** argv) //@ : main
   //@ requires 0 <= argc &*& [_]argv(argv, argc, _);
   //@ ensures true;

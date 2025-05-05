@@ -12,8 +12,8 @@ typedef int charreader();
 struct tokenizer
 {
 	charreader*           next_char;
-	int                   lastread; // -1 = EOF, -2 = empty buffer
-	int                   lasttoken;
+	int                   lastread; // the character lastly read. Special: -1 = EOF, -2 = empty buffer
+	int                   lasttoken; // the last token parsed
 	struct string_buffer* buffer;
 };
 
@@ -22,8 +22,7 @@ struct tokenizer
 The tokenizer_fill_buffer function reads a character from the next_char reader of the tokenizer and updates the lastread char,
 if the original lastread char is -2 (which means empty).
 
-It needs to make sure that the given tokenizer preserves its property in its next_char field as a char reader,
-and its buffer field as a string buffer.
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
 {
@@ -41,8 +40,7 @@ void tokenizer_fill_buffer(struct tokenizer* tokenizer)
  * Description:
 The tokenizer_peek function reads the next value character of a tokenizer and returns the updated lastread character.
 
-It needs to make sure that the given tokenizer preserves its property in its next_char field as a char reader,
-and its buffer field as a string buffer.
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_peek(struct tokenizer* tokenizer)
 {
@@ -54,8 +52,7 @@ int tokenizer_peek(struct tokenizer* tokenizer)
  * Description:
 The tokenizer_drop function drops the last character of a tokenizer by assigning its lastread field to -2 (meaning empty).
 
-It needs to make sure that the given tokenizer preserves its property in its next_char field as a char reader,
-and its buffer field as a string buffer.
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 void tokenizer_drop(struct tokenizer* tokenizer)
 {
@@ -67,8 +64,7 @@ void tokenizer_drop(struct tokenizer* tokenizer)
 The tokenizer_next_char function reads the next character of a tokenizer, returns that character 
 and drops that character by assigning the lastread field to -2 (meaning empty).
 
-It needs to make sure that the given tokenizer preserves its property in its next_char field as a char reader,
-and its buffer field as a string buffer.
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_next_char(struct tokenizer* tokenizer)
 {
@@ -83,6 +79,8 @@ int tokenizer_next_char(struct tokenizer* tokenizer)
 /***
  * Description:
 The is_whitespace function checks whether a given character in integer means a whitespace.
+
+This function ensures nothing. 
 */
 bool is_whitespace(int c)
 {
@@ -92,10 +90,8 @@ bool is_whitespace(int c)
 /***
  * Description:
 The tokenizer_skip_whitespace function reads and drops all the whitespace characters that are encountered sequentially by the tokenizer.
-If it peeks a non-whitespace character, it exits the loop and function.
 
-It needs to make sure that the given tokenizer preserves its property in its next_char field as a char reader,
-and its buffer field as a string buffer.
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 void tokenizer_skip_whitespace(struct tokenizer* tokenizer)
 {
@@ -108,6 +104,8 @@ void tokenizer_skip_whitespace(struct tokenizer* tokenizer)
 /***
  * Description:
 The is_digit function checks whether a given character in integer means a digit number.
+
+It ensures nothing.
 */
 bool is_digit(int c)
 {
@@ -132,8 +130,7 @@ The tokenizer_eat_number function reads all the digit characters that are encoun
 and adds them into the buffer at the same time.
 If it peeks a non-digit character, it exits the loop and returns the token that represents digit.
 
-It needs to make sure that the given tokenizer preserves its property in its next_char field as a char reader,
-and its buffer field as a string buffer.
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_eat_number(struct tokenizer* tokenizer)
 {
@@ -155,7 +152,9 @@ int tokenizer_eat_number(struct tokenizer* tokenizer)
 
 /***
  * Description:
-The is_symbol_char function checks whether a given character in integer means a symbol in ASCII.
+The is_symbol_char function checks whether a given character in integer means a symbol in ASCII (except parentheses).
+
+It ensures nothing
 */
 bool is_symbol_char(int c)
 {
@@ -168,8 +167,7 @@ The tokenizer_eat_symbol function reads all the ASCII symbol characters that are
 and adds them into the buffer at the same time.
 If it peeks a non-symbol character, it exits the loop and return the token that represents symbol.
 
-It needs to make sure that the given tokenizer preserves its property in its next_char field as a char reader,
-and its buffer field as a string buffer.
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_eat_symbol(struct tokenizer* tokenizer)
 {
@@ -194,8 +192,7 @@ int tokenizer_eat_symbol(struct tokenizer* tokenizer)
  * Description:
 The tokenizer_next function gets the next token of the tokenizer by reading the stream sequentially, assigning the token to lasttoken field, and returning it.
 
-It needs to make sure that the given tokenizer preserves its property in its next_char field as a char reader,
-and its buffer field as a string buffer.
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_next(struct tokenizer* tokenizer)
 {
@@ -234,8 +231,8 @@ int tokenizer_next(struct tokenizer* tokenizer)
  * Description:
 The tokenizer_get_buffer function returns the buffer of a given tokenizer
 
-It needs to make sure that the given tokenizer preserves its property in its next_char field as a char reader,
-and its buffer field as a string buffer.
+It needs to make sure that the given tokenizer preserves its property of tokenizer, and 
+the return value is a string buffer.
 */
 struct string_buffer *tokenizer_get_buffer(struct tokenizer *tokenizer)
 {
@@ -246,8 +243,7 @@ struct string_buffer *tokenizer_get_buffer(struct tokenizer *tokenizer)
  * Description:
 The tokenizer_create function creates a tokenizer given a charreader.
 
-It needs to make sure that the created tokenizer preserves its property in its next_char field as a char reader,
-and its buffer field as a string buffer.
+It needs to make sure that the returned tokenizer preserves its property of tokenizer. 
 */
 struct tokenizer* tokenizer_create(charreader* reader)
 {
@@ -268,8 +264,7 @@ struct tokenizer* tokenizer_create(charreader* reader)
  * Description:
 The tokenizer_dispose function frees the tokenizer.
 
-It needs to make sure that the given tokenizer preserves its property in its next_char field as a char reader,
-and its buffer field as a string buffer.
+It needs to make sure that the given tokenizer is freed.
 */
 void tokenizer_dispose(struct tokenizer *tokenizer)
 {
@@ -298,8 +293,7 @@ void print_string_buffer(struct string_buffer *buffer)
  * Description:
 The print_token function prints the last token of of a tokenizer by reading its lasttoken field and prints a readable content of the token.
 
-It needs to make sure that the given tokenizer preserves its property in its next_char field as a char reader,
-and its buffer field as a string buffer.
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 void print_token(struct tokenizer* tokenizer)
 {
@@ -334,6 +328,8 @@ void print_token(struct tokenizer* tokenizer)
 /***
  * Description:
 The my_getchar function acts as a char reader and returns an integer read.
+
+It ensures nothing.
 */
 int my_getchar() //@ : charreader
 {
@@ -342,7 +338,8 @@ int my_getchar() //@ : charreader
 
 /***
  * Description:
-The main function first creates a tokenizer, then continues reading and printing the tokens,
+The main function tests the functionality of tokenizer operations.
+It first creates a tokenizer, then continues reading and printing the tokens,
 and finally free the tokenizer.
 */
 int main()

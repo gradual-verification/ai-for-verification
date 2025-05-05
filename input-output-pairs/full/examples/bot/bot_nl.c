@@ -3,16 +3,14 @@
 #include "../lists.h"
 #include "../stringBuffers.h"
 #include "../sockets.h"
+
 /***
  * Description:
- * This program establishes a client socket connection to a server on port `12345`.
- * It continuously listens for incoming messages and processes specific bot commands.
- * If the bot detects "!hello", it responds with a greeting.
- * If the bot detects "!quit", it exits the loop and closes the connection.
+ * This program establishes a client socket connection to a server on port `12345`, 
+ * and continuously listens for incoming messages and processes specific bot commands.
  *
  * The program utilizes string buffers to handle message parsing and output formatting.
  */
-
 int main()
 {
     struct socket *s = create_client_socket(12345);

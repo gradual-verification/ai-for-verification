@@ -1,5 +1,6 @@
 #include "stdlib.h"
 
+// a binary tree node
 struct tree_node {
     struct tree_node *left;
     struct tree_node *right;
@@ -12,9 +13,7 @@ struct tree_node {
  *
  * @param val: the value in the new leaf node
  *
- * The function allocates memory for a new `node`, sets its value, 
- * and sets its left and right child as 0.
- * It makes sure that the new node is the root of a tree. 
+ * The function makes sure that the new node is the root of a tree. 
  */
 struct tree_node *tree_create_leaf(int val)
 {
@@ -34,8 +33,7 @@ struct tree_node *tree_create_leaf(int val)
  * @param left: the node as the left child, which is a root of a tree
  * @param right: the node as the right child, which is a root of a tree
  *
- * The function allocates memory for a new `node`, sets its value, left child and right child. 
- * It ensures that the new node is a root of a tree. 
+ * The function makes sure that the new node is a root of a tree. 
  */
 struct tree_node *tree_create_node(int val, struct tree_node *left, struct tree_node *right)
 {
@@ -53,8 +51,7 @@ struct tree_node *tree_create_node(int val, struct tree_node *left, struct tree_
  *
  * @param node: the node to be traversed on, which is a root of a tree
  *
- * The function first reads the value, then recursively traverses the left child and right child. 
- * It makes sure that the given node is still a root of a tree. 
+ * The function makes sure that the given node is still a root of a tree. 
  */
 void tree_traverse(struct tree_node *node)
 {

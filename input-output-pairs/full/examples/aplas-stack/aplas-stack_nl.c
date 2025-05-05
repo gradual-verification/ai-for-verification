@@ -25,8 +25,7 @@ struct stack {
  *
  * @param none
  * 
- * The function allocates memory for a `stack` and sets its head to `NULL`. It returns the pointer to that stack. 
- * If memory allocation fails, the program terminates.
+ * The function makes sure that the return value is a stack whose elements are empty.
  */
 struct stack* create_stack() 
 {
@@ -43,10 +42,7 @@ struct stack* create_stack()
  * @param s - A pointer to the stack.
  * @param x - The integer value to be pushed onto the stack.
  *
- * The function allocates memory for a new `node`, sets its value, 
- * updates the `next` pointer to point to the previous head, and 
- * assigns it as the new head of the stack.
- * If memory allocation fails, the program terminates.
+ * The function makes sure that value x is at the top of the new stack.
  */
 void push(struct stack* s, int x)
 {
@@ -61,11 +57,10 @@ void push(struct stack* s, int x)
  * Description:
  * The `pop` function removes and returns the top value of the stack.
  *
- * @param s - A pointer to the stack.
+ * @param s - A pointer to the stack, which is not empty.
  *
- * The function retrieves the value of the top node, updates the 
- * stack head pointer, frees the removed node, and returns its value.
- * If the stack is empty, the function should not be called.
+ * The function makes sure that the new stack is the tail of the original stack,
+ * and that the return value is the top value of the original stack.
  */
 int pop(struct stack* s)
 {
@@ -82,8 +77,7 @@ int pop(struct stack* s)
  *
  * @param s - A pointer to the stack.
  *
- * The function iterates through all nodes in the stack, freeing them one by one.
- * Finally, it frees the stack structure itself.
+ * The function makes sure that all the nodes in the stack are freed.
  */
 void dispose(struct stack* s) 
 {
@@ -103,7 +97,7 @@ void dispose(struct stack* s)
  *
  * @param s - A pointer to the stack.
  *
- * The function iterates through the stack, counting the number of nodes.
+ * The function makes sure to return the number of nodes.
  */
 int get_length(struct stack* s) 
 {
@@ -120,9 +114,6 @@ int get_length(struct stack* s)
 /***
  * Description:
  * The `main` function demonstrates the use of the stack data structure.
- *
- * It creates a stack, pushes three values onto it, pops three values,
- * asserts the expected values, and then disposes of the stack.
  */
 int main()
 {

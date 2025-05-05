@@ -12,9 +12,8 @@ The create_account function creates a new account with the specified limit.
 
 @param limit - represents the limit of the new account, which should be no greater than 0.
 
-The function allocates memory for a new account struct, sets
-the limit to the provided value, initializes the balance to 0,
-and then returns a pointer to the created account.
+The function makes sure that the returned value is an account with its limit set to the provided value
+and balance set to 0. 
 */
 struct account *create_account(int limit)
 {
@@ -36,7 +35,7 @@ the given account.
 @param myAccount - pointer to an existing account.
 
 The function returns the current balance of the account
-and does not modify any data.
+and does not modify the account.
 */
 int account_get_balance(struct account *myAccount)
 {
@@ -67,9 +66,9 @@ from the account's balance.
 @param myAccount - pointer to an existing account.
 @param amount - amount to be withdrawn
 
-The function calculates the actual amount to withdraw based on
-the account's current balance and limit such that the new balance is no less than limit.
-It then updates the balance accordingly, and finally returns the withdrawn amount.
+The function makes sure that if balance - amount is no less than limit, then the withdrawal value is the given amount; 
+Otherwise, the withdrawal value is balance - limit.
+Also, it will return the withdrawal value.
 */
 int account_withdraw(struct account *myAccount, int amount)
 {
@@ -94,9 +93,7 @@ void account_dispose(struct account *myAccount)
 
 /***
  * Description:
-The main function first creates an account with a negative limit, 
-then does some deposits and withdraws and validates the balance is correct,
-and finally dispose the account.
+The main function test the operations of account. 
 */
 int main()
 {

@@ -19,10 +19,14 @@ typedef struct dllist {
 } *dllist;
 
 
-/*reverse function
--params: a doubly linked list
--description: reverses the doubly linked list
-*/
+/***
+ * Description:
+ * The `reverse` function reverses the doubly linked list.
+ *
+ * @param arg: the head of a given doubly linked list
+ * 
+ * The function ensures that the doubly linked list has its values reversed.
+ */
 void reverse(dllist arg)
 {
 	node ptr = arg->head;
@@ -35,7 +39,6 @@ void reverse(dllist arg)
 		ptr->next = temp2;
 		ptr->prev = temp1;
 		ptr = temp1;
-        // The following two lines bind the tail of beta to variable betap.
 	}
 	temp1 = arg->head;
 	temp2 = arg->tail;
