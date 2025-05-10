@@ -4,8 +4,10 @@
 
 It doesn't have any implementation.
 
+It requires that the decrement operation is allowed on the cell.
 It ensures that this decrement operation must finish at the end 
-(while operations of other threads can be finished concurrently during this operation). 
+(while operations of other threads can be finished concurrently during this operation),
+so the old trace is the prefix of current trace.
 */
 void atomic_dec(int* c);
 
@@ -15,8 +17,7 @@ void atomic_dec(int* c);
 
 It doesn't have any implementation.
 
-It ensures that this load operation must finish at the end 
-(while operations of other threads can be finished concurrently during this operation). 
+It ensures that the old trace is the prefix of current trace.
 */
 int atomic_load(int* c);
 
@@ -29,8 +30,10 @@ It returns the old value of the cell.
 
 It doesn't have any implementation.
 
+It requires that the cas operation is allowed on the cell.
 It ensures that this compare-and-swap operation must finish at the end 
-(while operations of other threads can be finished concurrently during this operation). 
+(while operations of other threads can be finished concurrently during this operation), 
+so the old trace is the prefix of current trace.
 Its returns the old value of the cell.
 */
 int atomic_cas(int* c, int old, int new);
@@ -51,6 +54,8 @@ void only_allow_incrementing(int* c)
 /*acquire function
 -param: c: pointer to the cell
 -description: acquire the lock by compare-and-swaping the value of c with 0 to 1. 
+
+It ensures that in the end, the lock is acquired by the current thread.
 */
 void acquire(int* c)
 {
@@ -67,6 +72,9 @@ void acquire(int* c)
 /*release function
 -param: c: pointer to the cell
 -description: release the lock by decrementing the value of c
+
+It requires that the lock of old trace is held by the current thread,
+and it ensures that the lock of the new trace is not held by no thread. 
 */
 void release(int* c)
 {

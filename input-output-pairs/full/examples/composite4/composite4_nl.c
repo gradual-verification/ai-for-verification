@@ -68,7 +68,7 @@ The fixup_ancestors function updates the count of nodes in the subtree for all a
 @param `p` - a pointer to the parent node.
 @param `count` - the updated count of nodes in the subtree rooted at the current node.
 
-Requires: The parent node is the parent of the current node, and  the count is non-negative.
+Requires: The parent node is the parent of the current node, and the count is non-negative.
 Ensures: The ancestor nodes are updated with the correct count.
 */
 void fixup_ancestors(struct node * n, struct node * p, int count)
@@ -150,7 +150,7 @@ The tree_get_parent function retrieves the parent node of the specified node in 
 
 Requires: 
   - `node` is not null. 
-Ensures: Returns the parent node of `node`.
+Ensures: Returns the parent node of `node` and ensures the tree structure is unchanged.
 */
 struct node *tree_get_parent(struct node *node)
 {

@@ -28,21 +28,18 @@ void process(int n)
     //@ ensures cell |-> v;
 {
     
-    // Allocate memory for thread pointers
     struct thread **threads = malloc(n * sizeof(struct thread *));
     if (threads == 0) abort();
 
-    // Start threads
     for (int i = 0; i < n; i++)
     {
         struct thread *t = thread_start_joinable(m, 0);
-        threads[i] = t; // <-- Changed from *(threads + i) = t; to threads[i] = t;
+        threads[i] = t;
     }
     
-    // Join threads
     for (int i = 0; i < n; i++)
     {
-        struct thread *t = threads[i]; // <-- Changed from *(threads + i) to threads[i]
+        struct thread *t = threads[i];
         thread_join(t);
     }
     free(threads);

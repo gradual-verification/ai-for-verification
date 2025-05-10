@@ -12,7 +12,9 @@ struct node {
 
 /*`create_tree()` Function:
 - Parameters: None.
-- Description: This function creates a new tree */
+- Description: This function creates a new tree.
+
+It makes sure that the return value is a tree. */
 struct node *create_tree()
 {
     struct node *n = malloc(sizeof(struct node));
@@ -29,15 +31,15 @@ struct node *create_tree()
 /*`subtree_get_count()` Function:
 - Parameters: Takes a node pointer as input.
 - Description: This function retrieves the count
- value of the node passed in, which means the number of nodes in the subtree rooted at the node. */
+ value of the node passed in, which means the number of nodes in the subtree rooted at the node. 
+
+ This function makes sure that the subtree is no changed and the return value is the count. */
 int subtree_get_count(struct node *node)
 {
     int result = 0;
     if (node == 0) {
     } else {
         result = node->count;
-        // @ assert result >= 0; // Explicitly state the expectation
-
     }
     return result;
 }
@@ -45,7 +47,9 @@ int subtree_get_count(struct node *node)
 /*`tree_get_count()` Function:
 - Parameters: Takes a node pointer as input.
 - Description: This function is used to get the 
-count value of the tree starting from the given node.*/
+count value of the tree starting from the given node.
+
+This function makes sure that the tree of node is not changed. */
 int tree_get_count(struct node *node)
 {
     int result = subtree_get_count(node);
@@ -57,7 +61,9 @@ int tree_get_count(struct node *node)
 and the new count as input.
 - Description: This function updates the count of the
   ancestors of the provided node based on the new count
-  provided. It makes sure that the ancestors of the node is also updated. */
+  provided.
+  
+It makes sure that the node's count is updated with the given value and the ancestors' count is also updated. */
 void fixup_ancestors(struct node *node, struct node *parent, int count)
 {
     if (parent == 0) {
@@ -87,7 +93,9 @@ void fixup_ancestors(struct node *node, struct node *parent, int count)
 /*`tree_add_left()` Function:
 - Parameters: Takes a node pointer as input.
 - Description: This function adds a new node
- as the left child of the input node. It returns the new node. */
+ as the left child of the input node.
+ 
+It makes sure to return the new node in the tree.*/
 struct node *tree_add_left(struct node *node)
 {
     if (node == 0) {
@@ -122,7 +130,9 @@ struct node *tree_add_left(struct node *node)
 - Description: It adds a new node as the right child 
 of the input node by following a similar process 
 of memory allocation, setting pointers, and 
-updating count values. It returns the new node. */
+updating count values. 
+
+It makes sure to return the new node in the tree. */
 struct node *tree_add_right(struct node *node)
 {
     if (node == 0) {
@@ -154,7 +164,9 @@ struct node *tree_add_right(struct node *node)
 
 /*tree_get_parent Function:
 - Parameters: Takes a node pointer as input.
-- Description: This function retrieves the parent node */
+- Description: This function retrieves the parent node 
+
+It makes sure to return the parent node in the tree. */
 struct node *tree_get_parent(struct node *node)
 {
     if (node == 0) {
@@ -171,7 +183,9 @@ struct node *tree_get_parent(struct node *node)
 
 /*`tree_get_left()` Function:
 - Parameters: Takes a node pointer as input.
-- Description: This function retrieves the left child node */
+- Description: This function retrieves the left child node 
+
+It makes sure to return the left node in the tree. */
 struct node *tree_get_left(struct node *node)
 {
     if (node == 0) {
@@ -185,7 +199,9 @@ struct node *tree_get_left(struct node *node)
 
 /*`tree_get_right()` Function:
 - Parameters: Takes a node pointer as input.
-- Description: This function retrieves the right child node */
+- Description: This function retrieves the right child node 
+
+It makes sure to return the right node in the tree. */
 struct node *tree_get_right(struct node *node)
 {
     if (node == 0) {
@@ -199,7 +215,9 @@ struct node *tree_get_right(struct node *node)
 
 /*`tree_has_parent()` Function:
 - Parameters: Takes a node pointer as input.
-- Description: This function checks if the node has a parent */
+- Description: This function checks if the node has a parent
+
+It makes sure that the tree is not changed. */
 bool tree_has_parent(struct node *node)
 {
     bool result = false;
@@ -213,7 +231,9 @@ bool tree_has_parent(struct node *node)
 
 /*`tree_has_left()` Function:
 - Parameters: Takes a node pointer as input.
-- Description: This function checks if the node has a left child */
+- Description: This function checks if the node has a left child
+
+It makes sure that the tree is not changed. */
 bool tree_has_left(struct node *node)
 {
     bool result = false;
@@ -227,7 +247,9 @@ bool tree_has_left(struct node *node)
 
 /*`tree_has_right()` Function:
 - Parameters: Takes a node pointer as input.
-- Description: This function checks if the node has a right child */
+- Description: This function checks if the node has a right child 
+
+It makes sure that the tree is not changed. */
 bool tree_has_right(struct node *node)
 {
     bool result = false;
@@ -241,7 +263,9 @@ bool tree_has_right(struct node *node)
 
 /*`dispose_node()` Function:
 - Parameters: Takes a node pointer as input.
-- Description: This function frees the memory allocated for the node and its subtree */
+- Description: This function frees the memory allocated for the node and its subtree
+
+It makes sure that the subtree of the node is freed. */
 void dispose_node(struct node *node)
 {
     if (node == 0) {
@@ -259,7 +283,9 @@ void dispose_node(struct node *node)
 }
 /*`tree_dispose()` Function:
 - Parameters: Takes a node pointer as input.
-- Description: This function disposes of the tree */
+- Description: This function disposes of the tree
+
+It makes sure that the tree is freed. */
 void tree_dispose(struct node *node)
 {
     if (node == 0) {

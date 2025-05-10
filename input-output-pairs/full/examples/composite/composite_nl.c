@@ -51,9 +51,7 @@ int main()
  *
  * @returns A pointer to a newly allocated `Node`.
  *
- * The function allocates memory for a new node, initializes its fields (`left`, `right`, `parent` to `NULL`), 
- * sets `count` to 1, and returns it.
- * If memory allocation fails, the program aborts.
+ * This function makes sure to return a tree with one node. 
  */
 struct Node* create() 
 {
@@ -71,12 +69,11 @@ struct Node* create()
 
 /***
  * Description:
- * The `addLeft` function adds a left child to a given node and returns the newly added child
+ * The `addLeft` function adds a left child to a given node and returns the newly added child.
  *
- * @param node - A pointer to the node where the left child should be added, and its left child is originally empty.
+ * @param node - A pointer to the node where the left child should be added, and its both children are originally empty.
  *
- * The function calls `internalAddLeft(node)`, which allocates and initializes
- * a new left child node and updates the tree structure.
+ * The function makes sure that a new (and distinct) left child node is added and returned.
  */
 struct Node* addLeft(struct Node* node)
 {
@@ -90,7 +87,7 @@ struct Node* addLeft(struct Node* node)
  *
  * @param n - A pointer to the root of the subtree.
  *
- * The function calls `internalGetNbOfNodes(n)`, which reads and returns the `count` field of the node.
+ * The function makes sure not to change the subtree and return the `count` field of the node.
  */
 int getNbOfNodes(struct Node* n)
 {
@@ -104,9 +101,7 @@ int getNbOfNodes(struct Node* n)
  *
  * @param parent - A pointer to the parent node.
  *
- * The function allocates memory for a new node, initializes its fields (`left` and `right` to `NULL`),
- * sets its parent pointer, and initializes `count` to 1.
- * If memory allocation fails, the program aborts.
+ * The function makes sure that the returned node is not null and a subtree with that node is linked to the parent.
  */
 struct Node* internalCreate(struct Node* parent)
 {
@@ -128,8 +123,7 @@ struct Node* internalCreate(struct Node* parent)
  *
  * @param node - A pointer to the node where the left child should be added. The node has empty left child.
  *
- * The function calls `internalCreate(node)` to create a new node, assigns it as the left child,
- * and updates the `count` field by calling `fix(node)`.
+ * The function makes sure to add a left child to node and updates the `count` field of its ancestors by incrementing by 1.
  */
 struct Node* internalAddLeft(struct Node* node)
 {
@@ -141,12 +135,11 @@ struct Node* internalAddLeft(struct Node* node)
 
 /***
  * Description:
- * The `fix` function updates the `count` field of a node and propagates the update to its ancestors.
+ * The `fix` function updates the `count` field of a non-null node and propagates the update to its ancestors.
  *
  * @param node - A pointer to the node whose count should be updated.
  *
- * The function increments the `count` field by 1, ensuring it does not exceed `INT_MAX`.
- * It then recursively updates the parent node, if it exists.
+ * The function makes sure that the count field of current node with its ancestors is incremented by 1
  */
 void fix(struct Node* node)
 {

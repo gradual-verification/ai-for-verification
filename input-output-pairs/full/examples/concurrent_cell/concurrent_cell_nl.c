@@ -26,7 +26,8 @@ struct cell* cell_create()
 -param: struct cell* c
 -description: This function increments field x in the given cell c in a thread-safe manner (using mutex).
 
-Other operations can be finished concurrently during this operation. 
+Other operations can be finished concurrently during this operation, so this function makes sure that
+the old trace is the prefix of the new trace. 
 */
 void increment(struct cell* c)
 {
@@ -45,7 +46,8 @@ void increment(struct cell* c)
 -param: struct cell* c
 -description: This function decrements field x in the given cell c in a thread-safe manner (using mutex).
 
-Other operations can be finished concurrently during this operation. 
+Other operations can be finished concurrently during this operation, so this function makes sure that
+the old trace is the prefix of the new trace. 
 */
 void decrement(struct cell* c)
 {
@@ -65,7 +67,8 @@ void decrement(struct cell* c)
 -description: This compare-and-swap function checks if the current value of `x` in the given cell c is equal to `old`.
 If it is, the function updates `x` to `new`. This operation is thread-safe due to the use of a mutex. 
 
-Other operations can be finished concurrently during this operation.  
+Other operations can be finished concurrently during this operation, so this function makes sure that
+the old trace is the prefix of the new trace. 
 
 It returns the original value of `x` before the operation.
 */
@@ -88,7 +91,8 @@ int cas(struct cell* c, int old, int new)
 -param: struct cell* c
 -description: This get function retrieves the current value of the `x` field in the given cell structure in a thread-safe manner (using mutex). 
 
-Other operations can be finished concurrently during this operation.  
+Other operations can be finished concurrently during this operation, so this function makes sure that
+the old trace is the prefix of the new trace. 
 
 It returns the value of `x`.
 */

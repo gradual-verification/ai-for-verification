@@ -1,7 +1,7 @@
 // Example from Kasper Svendsen and Lars Birkedal, Impredicative Concurrent Abstract Predicates, ESOP 2014.
 
 #include <stdlib.h>
-#include "../multi-files/shared_boxes/gotsmanlock.h"
+#include "../../others/futures/multi-files/shared_boxes/gotsmanlock.h"
 
 typedef struct eloop *eloop;
 
@@ -45,6 +45,8 @@ It has a forever loop, and does the following things in the loop: acquiring the 
 releasing the lock and handling the data (if the handler is found.)
 
 @param x: the event loop instance to be run.
+
+It makes sure that x presevees the property of event loop before and after the execution.
 */
 void eloop_loop(eloop x)
 {

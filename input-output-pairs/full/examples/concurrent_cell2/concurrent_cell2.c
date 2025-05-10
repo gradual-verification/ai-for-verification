@@ -23,10 +23,6 @@ predicate cell(int* c, fixpoint(trace, bool) allowed);
 
 predicate last_seen(int* c, int tid, trace trace);
 
-lemma int create_atomic_int(int* c, fixpoint(trace, bool) allowed);
-  requires integer(c, 0);
-  ensures cell(c, allowed);
-
 lemma void last_seen_allowed(int* c, int ctid);
   requires [?f]cell(c, ?allowed) &*& last_seen(c, ctid, ?trace);
   ensures [f]cell(c, allowed) &*& last_seen(c, ctid, trace) &*& allowed(trace) == true;

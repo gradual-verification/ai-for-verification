@@ -44,8 +44,8 @@ struct node *create_tree()
 -description: This function adds the delta value to the count of the node p and its parent nodes,
 where count is the number of nodes in the subtree rooted at the node.
 
-It requires that p is in a tree, and all nodes in its subtree except p itself are valid nodes. 
-p's count will be valid after adding delta (>0) to it.
+It requires that p is non-null and in a tree, and all nodes in its subtree except p itself are valid nodes. 
+p's count will be valid after adding delta (>0) to it. So it ensures that the tree is valid after the operation.
 */
 void add_to_count(struct node *p, int delta)
 {
@@ -78,4 +78,38 @@ struct node *tree_add(struct node *node)
   add_to_count(node, 1);
 
   return n;
+}
+
+/*main0 function
+
+This function tests the operations of composite tree.
+*/
+int main0()
+{
+  struct node *node = create_tree();
+  node = tree_add(node);
+  node = tree_add(node);
+  node = tree_get_parent(node);
+  if (node == 0) abort();
+  node = tree_add(node);
+  node = tree_get_parent(node);
+  if (node == 0) abort();
+  node = tree_get_parent(node);
+  if (node == 0) abort();
+  return 0;
+}
+
+/*main function
+
+This function tests the operations of composite tree.
+*/
+int main() //@ : main
+{
+    struct node *root = create_tree();
+    struct node *left = tree_add(root);
+    struct node *leftRight = tree_add(left);
+    struct node *leftRightParent = tree_get_parent(leftRight);
+    struct node *leftLeft = tree_add(left);
+    struct node *leftRightRight = tree_add(leftRight);
+    return 0;
 }

@@ -15,8 +15,8 @@ predicate subtree(struct node *root, struct node *parent, int count) =
         root == 0 ?
             count == 0
         :
-            root->left |-> ?left &*& root->right |-> ?right &*& root->parent |-> parent &*& root->count |-> count &*& //count >= 0 &*& 
-            subtree(left, root, ?leftCount) &*& subtree(right, root, ?rightCount) &*& count == 1 + leftCount + rightCount; // &*& leftCount >= 0 &*& rightCount >= 0;
+            root->left |-> ?left &*& root->right |-> ?right &*& root->parent |-> parent &*& root->count |-> count &*&
+            subtree(left, root, ?leftCount) &*& subtree(right, root, ?rightCount) &*& count == 1 + leftCount + rightCount;
 
 predicate context(struct node *node, struct node *parent, int count) = 
         parent == 0 ?
@@ -58,8 +58,6 @@ int subtree_get_count(struct node *node)
     if (node == 0) {
     } else {
         result = node->count;
-        // @ assert result >= 0; // Explicitly state the expectation
-
     }
     return result;
 }

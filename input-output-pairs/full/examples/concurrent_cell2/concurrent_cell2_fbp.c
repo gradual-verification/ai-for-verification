@@ -23,9 +23,6 @@ predicate cell(int* c, fixpoint(trace, bool) allowed);
 
 predicate last_seen(int* c, int tid, trace trace);
 
-lemma int create_atomic_int(int* c, fixpoint(trace, bool) allowed);
-  requires integer(c, 0);
-  ensures cell(c, allowed);
 
 lemma void last_seen_allowed(int* c, int ctid);
   requires [?f]cell(c, ?allowed) &*& last_seen(c, ctid, ?trace);
@@ -101,7 +98,6 @@ void acquire(int* c)
   //@ ensures [f]cell(c, is_lock) &*& last_seen(c, currentThread, ?trace1) &*& lock_owner(trace1) == some(currentThread);
 {
   while(true)
-    
   {
     int read = atomic_cas(c, 0, 1);
     if(read == 0) {
