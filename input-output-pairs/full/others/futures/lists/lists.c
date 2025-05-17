@@ -1,8 +1,14 @@
 #include "stdlib.h"
 #include <stdbool.h>
-#include "lists.h"
 
 /*@
+
+predicate lseg(void *first, void *last, list<void *> xs, predicate(void *) p) =
+    first == last ?
+        xs == nil
+    :
+        pointer(first, ?next) &*& lseg(next, last, ?xs0, p) &*& xs == cons(first, xs0) &*& p(first);
+
 
 lemma void lseg_append(void *n1)
     requires lseg(n1, ?n2, ?xs0, ?p) &*& lseg(n2, ?n3, ?xs1, p) &*& lseg(n3, 0, ?xs2, p);
