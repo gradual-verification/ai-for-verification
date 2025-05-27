@@ -93,15 +93,22 @@ void stack_reverse(struct stack *stack)
 
 /***
  * Description:
-The stack_dispose function deletes an empty stack.
+The stack_dispose function frees a stack.
 
-@param stack- A pointer to a stack whose values are empty
+@param stack- A pointer to a stack
 
 The function makes sure that the stack is freed. 
 */
-void stack_dispose(struct stack *stack)
+void stack_dispose(struct stack *s)
 {
-    free(stack);
+  struct node* n = s->head;
+  while(n != 0) 
+  {
+    struct node* tmp = n;
+    n = n->next;
+    free(tmp);
+  }
+  free(s);
 }
 
 /***

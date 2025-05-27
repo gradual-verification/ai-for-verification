@@ -29,8 +29,7 @@ struct barrier {
  * @returns A pointer to a newly allocated and initialized `struct barrier`.
  *
  * The function allocates memory for the barrier, sets all fields to default
- * values, and creates a mutex to protect updates to the barrier. If memory 
- * allocation fails, the program calls `abort()`.
+ * values, and creates a mutex to protect updates to the barrier.
  */
 struct barrier *create_barrier(int n)
 {
@@ -56,6 +55,9 @@ struct barrier *create_barrier(int n)
  * (`k`) and to handle the barrier’s `outgoing` flag. Threads spin inside 
  * critical sections (by releasing and reacquiring the mutex) until the 
  * barrier state changes appropriately.
+ * 
+ * It requires that the barrier is incoming at the beginning, and makes sure that
+ * the barrier is exiting at the end.
  */
 void barrier(struct barrier *barrier)
 {

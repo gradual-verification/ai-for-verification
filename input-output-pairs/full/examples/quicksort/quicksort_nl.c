@@ -22,7 +22,8 @@ void swap(int *a, int i, int j)
 
 /*** 
  * Description:
-The partition function rearranges the subrange of the array `a` from indices `lo` to `hi` around a pivot value (chosen from `a[hi]`), ensuring elements less than the pivot end up before it, and elements greater than or equal to it come after it.
+The partition function rearranges the subrange of the array `a` from indices `lo` to `hi` around a pivot value (chosen from `a[hi]`), 
+ensuring elements less than the pivot end up before it, and elements greater than or equal to it come after it.
 
 @param - 
 a  - A pointer to an integer array in memory.
@@ -30,7 +31,7 @@ lo - The lower index of the subrange to be partitioned.
 hi - The upper index of the subrange to be partitioned.
 
 @requires - 
-`lo` and `hi` must be valid indices within the array, and `lo <= hi`.
+`lo` and `hi` must be valid indices within the array, and `lo <= hi` and lo >= 0.
 
 @ensures - 
 Partitions the subrange in place. 
@@ -63,7 +64,7 @@ lo - The lower index of the subrange to be sorted.
 hi - The upper index of the subrange to be sorted.
 
 @requires - 
-`lo` and `hi` must be valid indices within the array (with `lo <= hi` if there are elements to sort).
+`lo` and `hi` must be valid indices within the array (with `lo <= hi` if there are elements to sort) and lo >= 0.
 
 @ensures - 
 Sorts the specified subrange of the array in place. No value is returned.

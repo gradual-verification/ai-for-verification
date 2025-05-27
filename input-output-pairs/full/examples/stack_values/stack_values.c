@@ -146,13 +146,22 @@ void stack_reverse(struct stack *stack)
     //@ close stack(stack, ints_reverse(values));
 }
 
-void stack_dispose(struct stack *stack)
-    //@ requires stack(stack, ints_nil);
-    //@ ensures true;
+void stack_dispose(struct stack *s)
+  //@ requires stack(s, ?vs);
+  //@ ensures emp;
 {
-    //@ open stack(stack, ints_nil);
-    //@ open nodes(_, _);
-    free(stack);
+  //@ open stack(s, vs);
+  struct node* n = s->head;
+  while(n != 0) 
+    //@ invariant nodes(n, ?vs0);
+  {
+    //@ open nodes(n, vs0);
+    struct node* tmp = n;
+    n = n->next;
+    free(tmp);
+  }
+  //@ open nodes(n, vs0);
+  free(s);
 }
 
 int main()

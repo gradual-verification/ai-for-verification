@@ -105,11 +105,18 @@ void stack_reverse(struct stack *stack)
     stack->head = m;
 }
 
-void stack_dispose(struct stack *stack)
-    //@ requires stack(stack, ints_nil);
-    //@ ensures true;
+void stack_dispose(struct stack *s)
+  //@ requires stack(s, ?vs);
+  //@ ensures true;
 {
-    free(stack);
+  struct node* n = s->head;
+  while(n != 0) 
+  {
+    struct node* tmp = n;
+    n = n->next;
+    free(tmp);
+  }
+  free(s);
 }
 
 int main()

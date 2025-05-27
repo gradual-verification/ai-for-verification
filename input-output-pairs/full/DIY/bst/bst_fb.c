@@ -10,36 +10,30 @@ struct bst_node {
 /*@ 
 predicate bst(struct bst_node *node, int min, int max) =
     node == 0 ?
-        emp
+        true
     :
-        malloc_block_bst_node(node) &*&
         node->value |-> ?v &*& min < v &*& v < max &*&
         node->left |-> ?left &*& node->right |-> ?right &*&
         bst(left, min, v) &*& bst(right, v, max);
 @*/
 
 struct bst_node *bst_create()
-    //@ requires emp;
+    //@ requires true;
     //@ ensures bst(result, INT_MIN, INT_MAX);
 {
     return 0;
-    //@ close bst(0, INT_MIN, INT_MAX);
 }
 
 struct bst_node *bst_insert(struct bst_node *node, int value)
     //@ requires bst(node, ?min, ?max) &*& min < value &*& value < max;
     //@ ensures bst(result, min, max);
 {
-    //@ open bst(node, min, max);
     if (node == 0) {
         struct bst_node *new_node = malloc(sizeof(struct bst_node));
         if (new_node == 0) abort();
         new_node->value = value;
         new_node->left = 0;
         new_node->right = 0;
-        //@ close bst(0, min, value);
-        //@ close bst(0, value, max);
-        //@ close bst(new_node, min, max);
         return new_node;
     } else {
         if (value < node->value) {
@@ -50,7 +44,6 @@ struct bst_node *bst_insert(struct bst_node *node, int value)
         }
 
         return node;
-        //@ close bst(node, min, max);
     }
 }
 
@@ -58,30 +51,24 @@ bool bst_search(struct bst_node *node, int value)
     //@ requires bst(node, ?min, ?max);
     //@ ensures bst(node, min, max);
 {
-    //@ open bst(node, min, max);
     if (node == 0) {
         return false;
-        //@ close bst(node, min, max);
     }
     else if (node->value == value) {
         return true;
-        //@ close bst(node, min, max);
     }
     else if (value < node->value) {
         return bst_search(node->left, value);
-        //@ close bst(node, min, max);
     }
     else {
         return bst_search(node->right, value);
-        //@ close bst(node, min, max);
     }
 }
 
 void bst_dispose(struct bst_node *node)
     //@ requires bst(node, ?min, ?max);
-    //@ ensures emp;
+    //@ ensures true;
 {
-    //@ open bst(node, min, max);
     if (node != 0) {
         bst_dispose(node->left);
         bst_dispose(node->right);

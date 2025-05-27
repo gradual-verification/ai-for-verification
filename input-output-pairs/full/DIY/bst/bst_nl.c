@@ -1,45 +1,43 @@
 #include "stdlib.h"
 #include "stdbool.h"
 
+// a node for a binary search tree (BST) where each node has a unique value
 struct bst_node {
     struct bst_node *left;
     struct bst_node *right;
     int value;
 };
 
-/*@ 
-predicate bst(struct bst_node *node, int min, int max) =
-    node == 0 ?
-        emp
-    :
-        malloc_block_bst_node(node) &*&
-        node->value |-> ?v &*& min < v &*& v < max &*&
-        node->left |-> ?left &*& node->right |-> ?right &*&
-        bst(left, min, v) &*& bst(right, v, max);
-@*/
-
+/***
+ * Description:
+ * The `bst_create` function creates an empty BST.
+ *
+ *
+ * The function makes sure that the new node is the root of a BST. 
+ */
 struct bst_node *bst_create()
-    //@ requires emp;
-    //@ ensures bst(result, INT_MIN, INT_MAX);
 {
     return 0;
-    //@ close bst(0, INT_MIN, INT_MAX);
 }
 
+/***
+ * Description:
+ * The `bst_insert` function inserts a value into the BST.
+ *
+ * @param node: the root of the BST
+ * @param value: the value to be inserted
+ * 
+ * The function requires that the value is within the range of possible MAX and MIN value of BST,
+ * and ensures that the returned node is still a root of a BST.
+ */
 struct bst_node *bst_insert(struct bst_node *node, int value)
-    //@ requires bst(node, ?min, ?max) &*& min < value &*& value < max;
-    //@ ensures bst(result, min, max);
 {
-    //@ open bst(node, min, max);
     if (node == 0) {
         struct bst_node *new_node = malloc(sizeof(struct bst_node));
         if (new_node == 0) abort();
         new_node->value = value;
         new_node->left = 0;
         new_node->right = 0;
-        //@ close bst(0, min, value);
-        //@ close bst(0, value, max);
-        //@ close bst(new_node, min, max);
         return new_node;
     } else {
         if (value < node->value) {
@@ -50,38 +48,44 @@ struct bst_node *bst_insert(struct bst_node *node, int value)
         }
 
         return node;
-        //@ close bst(node, min, max);
     }
 }
 
+/***
+ * Description:
+ * The `bst_search` function searches a value in the given BST.
+ *
+ * @param node: the root of the BST
+ * @param value: the value to be searched
+ * 
+ * The function makes sure that the BST is still valid after the search operation,
+ */
 bool bst_search(struct bst_node *node, int value)
-    //@ requires bst(node, ?min, ?max);
-    //@ ensures bst(node, min, max);
 {
-    //@ open bst(node, min, max);
     if (node == 0) {
         return false;
-        //@ close bst(node, min, max);
     }
     else if (node->value == value) {
         return true;
-        //@ close bst(node, min, max);
     }
     else if (value < node->value) {
         return bst_search(node->left, value);
-        //@ close bst(node, min, max);
     }
     else {
         return bst_search(node->right, value);
-        //@ close bst(node, min, max);
     }
 }
 
+/***
+ * Description:
+ * The `bst_dispose` function frees a given BST.
+ *
+ * @param node: the root of the BST
+ * 
+ * The function makes sure that the nodes in the BST are freed.
+ */
 void bst_dispose(struct bst_node *node)
-    //@ requires bst(node, ?min, ?max);
-    //@ ensures emp;
 {
-    //@ open bst(node, min, max);
     if (node != 0) {
         bst_dispose(node->left);
         bst_dispose(node->right);
@@ -89,9 +93,11 @@ void bst_dispose(struct bst_node *node)
     }
 }
 
+/***
+ * Description:
+ * The `main` function tests the operations of BST.
+ */
 int main()
-    //@ requires true;
-    //@ ensures true;
 {
     struct bst_node *tree = bst_create();
     tree = bst_insert(tree, 10);
