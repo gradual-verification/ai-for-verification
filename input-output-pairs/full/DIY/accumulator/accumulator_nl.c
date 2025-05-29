@@ -42,6 +42,27 @@ void add(struct Accumulator* a, int x)
 
 /***
  * Description:
+ * The `add_multiple` function adds up the value in the accumulator with a given value for multiple times. 
+ * 
+ * @param a: the given accumulator
+ * @param n: the number of times to add
+ * @param x: the given value
+ *
+ * The function makes sure the accumulator has the total added by n*x and the count incremented by n.
+ */
+void add_multiple(struct Accumulator* a, int n, int x)
+{
+  int i = 0;
+  while (i < n)
+  {
+    a->total += x;
+    a->count += 1;
+    i++;
+  }
+}
+
+/***
+ * Description:
  * The `subtract` function subtracts the value in the accumulator by a given value. 
  * 
  * @param a: the given accumulator
@@ -121,7 +142,7 @@ int main() //@ : main
   subtract(acc, 3);   // total = 12, count = 3
   int avg = average(acc); 
   reset(acc);         // total = 0, count = 0
-  add(acc, 8);        // total = 8, count = 1
+  add_multiple(acc, 2, 8);  // total = 16, count = 2
   destroy(acc);
   return 0;
 }

@@ -11,21 +11,27 @@ predicate array(struct int_array *arr, list<int> cs) =
     arr->values[..10] |-> cs;
 @*/
 
-/*@ fixpoint_auto list<int> zeros(int n) {
-    return n == 0 ? nil : cons(0, zeros(n - 1));
+/*@
+fixpoint_auto list<int> zeros(int n) {
+    return n == 0? nil : append(zeros(n - 1), cons(0, nil));
 }
 @*/
 
-void fill_zeros(int *arr, int i, int n)
-    //@ requires arr[i..n] |-> _ &*& 0 <= i && i <= n;
-    //@ ensures arr[i..n] |-> zeros(n - i);
+/*@
+lemma void ints_join(int *p, int n, list<int> vs, int n0, list<int> vs0)
+  requires [?f]ints(p, n, vs) &*& [f]ints(p + n, n0, vs0);
+  ensures  [f]ints(p, n + n0, append(vs, vs0));
 {
-    if (i == n) {
-    } else {
-        arr[i] = 0;
-        fill_zeros(arr, i + 1, n);
-    }
+  open ints(p, n, vs);
+  switch(vs) {
+    case nil:
+      return;
+    case cons(v, vsTail):
+      ints_join(p + 1, n - 1, vsTail, n0, vs0);
+      return;
+  }
 }
+@*/
 
 struct int_array *create_array()
     //@ requires emp;
@@ -33,7 +39,22 @@ struct int_array *create_array()
 {
     struct int_array *arr = malloc(sizeof(struct int_array));
     if (!arr) abort();
-    fill_zeros(arr->values, 0, 10);
+    int *values = arr->values;
+
+    //@ close ints(values, 0, zeros(0));
+    //@ close ints_(values, 10, _);
+    for (int i = 0; i < 10; i++)
+        /*@
+          invariant
+            0 <= i && i <= 10
+          &*& ints(values, i, zeros(i))
+          &*& ints_(values + i, 10 - i, _);
+        @*/
+    {
+        values[i] = 0;
+        //@ ints_join(values, i, zeros(i), 1, zeros(1));
+    }
+
     //@ close array(arr, zeros(10));
     return arr;
 }

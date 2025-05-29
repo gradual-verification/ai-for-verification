@@ -5,24 +5,6 @@ struct int_array {
     int values[10];
 };
 
-/***
- * Description:
- * The `fill_zeros` function fills array[i,..n] with 0. 
- * 
- * @param arr: the integer array to be filled
- * @param i: the starting index (inclusive) to be filled, (i >= 0)
- * @param n: the ending index (exclusive) to be filled (i <= n)
- * 
- * It makes sure that the new array has 0s in array[i,..n]. 
- */
-void fill_zeros(int *arr, int i, int n)
-{
-    if (i == n) {
-    } else {
-        arr[i] = 0;
-        fill_zeros(arr, i + 1, n);
-    }
-}
 
 /***
  * Description:
@@ -34,7 +16,13 @@ struct int_array *create_array()
 {
     struct int_array *arr = malloc(sizeof(struct int_array));
     if (!arr) abort();
-    fill_zeros(arr->values, 0, 10);
+    int *values = arr->values;
+
+    for (int i = 0; i < 10; i++)
+    {
+        values[i] = 0;
+    }
+
     return arr;
 }
 

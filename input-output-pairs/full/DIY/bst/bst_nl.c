@@ -78,6 +78,24 @@ bool bst_search(struct bst_node *node, int value)
 
 /***
  * Description:
+ * The `bst_traverse` function traverses the subtree of a given node.
+ *
+ * @param node: the node to be traversed on, which is a root of a bst
+ *
+ * The function makes sure that the given node is still a root of a bst. 
+ */
+void bst_traverse(struct bst_node *node)
+{
+    if (node == 0) {
+    } else {
+        int val = node->value;
+        bst_traverse(node->left);
+        bst_traverse(node->right);
+    }
+}
+
+/***
+ * Description:
  * The `bst_dispose` function frees a given BST.
  *
  * @param node: the root of the BST
@@ -108,6 +126,8 @@ int main()
 
     bool found8 = bst_search(tree, 8);
     bool found20 = bst_search(tree, 20);
+
+    bst_traverse(tree);
 
     bst_dispose(tree);
     return 0;

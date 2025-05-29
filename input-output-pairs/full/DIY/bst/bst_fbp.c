@@ -66,6 +66,18 @@ bool bst_search(struct bst_node *node, int value)
     }
 }
 
+void bst_traverse(struct bst_node *node)
+    //@ requires bst(node, ?min, ?max);
+    //@ ensures bst(node, min, max);
+{
+    if (node == 0) {
+    } else {
+        int val = node->value;
+        bst_traverse(node->left);
+        bst_traverse(node->right);
+    }
+}
+
 void bst_dispose(struct bst_node *node)
     //@ requires bst(node, ?min, ?max);
     //@ ensures emp;
@@ -90,6 +102,8 @@ int main()
 
     bool found8 = bst_search(tree, 8);
     bool found20 = bst_search(tree, 20);
+
+    tree_traverse(tree);
 
     bst_dispose(tree);
     return 0;

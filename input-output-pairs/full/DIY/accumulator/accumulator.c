@@ -34,6 +34,38 @@ void add(struct Accumulator* a, int x)
   //@ close Accumulator(a, t + x, c + 1);
 }
 
+void add_multiple(struct Accumulator* a, int n, int x)
+/*@
+  requires Accumulator(a, ?t, ?c) 
+           &*& n >= 1 &*& x >= 0
+           &*& t + n * x <= INT_MAX
+           &*& c + n <= INT_MAX;
+@*/
+/*@
+  ensures Accumulator(a, t + n * x, c + n);
+@*/
+{
+  int i = 0;
+  //@ int currTotal = t;
+  //@ int currCount = c;
+  while (i < n)
+    /*@ invariant Accumulator(a, currTotal, currCount) 
+                 &*& currTotal == t + i * x
+                 &*& currCount == c + i 
+                 &*& i <= n;
+    @*/
+  {
+    //@ open Accumulator(a, currTotal, currCount);
+    //@ mul_mono_l(i + 1, n, x);
+    a->total += x;
+    a->count += 1;
+    //@ currTotal += x;
+    //@ currCount += 1;
+    i++;
+    //@ close Accumulator(a, currTotal, currCount);
+  }
+}
+
 void subtract(struct Accumulator* a, int x)
   //@ requires Accumulator(a, ?t, ?c) &*& t - x <= INT_MAX &*& t - x >= INT_MIN &*& c < INT_MAX;
   //@ ensures Accumulator(a, t - x, c + 1);
@@ -92,7 +124,7 @@ int main() //@ : main
   int avg = average(acc); 
   //@ assert avg == 4;
   reset(acc);         // total = 0, count = 0
-  add(acc, 8);        // total = 8, count = 1
+  add_multiple(acc, 2, 8);  // total = 16, count = 2
   destroy(acc);
   return 0;
 }

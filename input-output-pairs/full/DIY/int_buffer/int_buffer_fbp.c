@@ -11,21 +11,11 @@ predicate array(struct int_array *arr, list<int> cs) =
     arr->values[..10] |-> cs;
 @*/
 
-/*@ fixpoint_auto list<int> zeros(int n) {
-    return n == 0 ? nil : cons(0, zeros(n - 1));
+/*@
+fixpoint_auto list<int> zeros(int n) {
+    return n == 0? nil : append(zeros(n - 1), cons(0, nil));
 }
 @*/
-
-void fill_zeros(int *arr, int i, int n)
-    //@ requires arr[i..n] |-> _ &*& 0 <= i && i <= n;
-    //@ ensures arr[i..n] |-> zeros(n - i);
-{
-    if (i == n) {
-    } else {
-        arr[i] = 0;
-        fill_zeros(arr, i + 1, n);
-    }
-}
 
 struct int_array *create_array()
     //@ requires emp;
@@ -33,7 +23,13 @@ struct int_array *create_array()
 {
     struct int_array *arr = malloc(sizeof(struct int_array));
     if (!arr) abort();
-    fill_zeros(arr->values, 0, 10);
+    int *values = arr->values;
+
+    for (int i = 0; i < 10; i++)
+    {
+        values[i] = 0;
+    }
+
     return arr;
 }
 

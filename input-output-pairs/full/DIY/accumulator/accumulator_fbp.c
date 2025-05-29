@@ -31,6 +31,26 @@ void add(struct Accumulator* a, int x)
   a->count += 1;
 }
 
+void add_multiple(struct Accumulator* a, int n, int x)
+/*@
+  requires Accumulator(a, ?t, ?c) 
+           &*& n >= 1 &*& x >= 0
+           &*& t + n * x <= INT_MAX
+           &*& c + n <= INT_MAX;
+@*/
+/*@
+  ensures Accumulator(a, t + n * x, c + n);
+@*/
+{
+  int i = 0;
+  while (i < n)
+  {
+    a->total += x;
+    a->count += 1;
+    i++;
+  }
+}
+
 void subtract(struct Accumulator* a, int x)
   //@ requires Accumulator(a, ?t, ?c) &*& t - x <= INT_MAX &*& t - x >= INT_MIN &*& c < INT_MAX;
   //@ ensures Accumulator(a, t - x, c + 1);
@@ -79,7 +99,7 @@ int main() //@ : main
   subtract(acc, 3);
   int avg = average(acc); 
   reset(acc);
-  add(acc, 8);
+  add_multiple(acc, 2, 8);
   destroy(acc);
   return 0;
 }
