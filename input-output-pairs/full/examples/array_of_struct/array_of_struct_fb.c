@@ -10,14 +10,14 @@ struct student {
 /*@
 predicate students(struct student *students, int count;) =
     count == 0 ?
-        true
+        emp
     :
         students->name[..100] |-> ?cs &*& &*& mem('\0', cs) == true &*& students->age |-> _ &*&
         students(students + 1, count - 1);
 @*/
 
 struct student *read_students(int *count)
-//@ requires true;
+//@ requires *count |-> _;
 //@ ensures *count |-> ?nb &*& students(result, nb);
 {
     printf("How many students?\n");

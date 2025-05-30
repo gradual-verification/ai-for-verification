@@ -6,7 +6,7 @@
 
 typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
   //@ requires Ownership(data, _);
-  //@ ensures true;
+  //@ ensures emp;
   
 
 /*
@@ -98,7 +98,7 @@ struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
 
 void destroy_stack/*@ <T> @*/(struct stack* stack)
   //@ requires Stack<T>(stack, _, _, ?S);
-  //@ ensures true;
+  //@ ensures emp;
 {
   struct node* current = stack->first;
   destructor* destructor = stack->destructor;
@@ -207,7 +207,7 @@ predicate Data(struct data* data, int foo, int bar) =
 @*/
 
 struct data* create_data(int foo, int bar)
-  //@ requires true;
+  //@ requires emp;
   //@ ensures Data(result, foo, bar);
 {
   struct data* data = malloc( sizeof( struct data ) );
@@ -247,7 +247,7 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 void destroy_data(struct data* data)
   //@ requires Data_Ownership(data, _);
-  //@ ensures true;
+  //@ ensures emp;
 {
   free(data);
 }

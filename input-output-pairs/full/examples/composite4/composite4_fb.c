@@ -75,7 +75,7 @@ predicate tree(struct node * node, context c, tree subtree) =
 @*/
 
 struct node * create_node(struct node * p)
-  //@ requires true;
+  //@ requires emp;
   /*@ ensures 
        subtree(result, p, tree(result, empty, empty));
   @*/
@@ -90,7 +90,7 @@ struct node * create_node(struct node * p)
 }
 
 struct node *create_tree()
-  //@ requires true;
+  //@ requires emp;
   /*@ ensures
        tree(result, root, tree(result, empty, empty));
   @*/
@@ -208,7 +208,7 @@ struct node *tree_get_parent(struct node *node)
 
 void subtree_dispose(struct node *node)
   //@ requires subtree(node, _, _);
-  //@ ensures true;
+  //@ ensures emp;
 {
   if (node != 0) {
     {
@@ -225,7 +225,7 @@ void subtree_dispose(struct node *node)
 
 void tree_dispose(struct node *node)
   //@ requires tree(node, root, _);
-  //@ ensures true;
+  //@ ensures emp;
 {
   subtree_dispose(node);
 }

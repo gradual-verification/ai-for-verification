@@ -24,7 +24,7 @@ predicate llist(struct llist *list; list<int> v) =
 @*/
 
 struct llist *create_llist()
-  //@ requires true;
+  //@ requires emp;
   //@ ensures llist(result, nil);
 {
   struct llist *l = malloc(sizeof(struct llist));
@@ -53,7 +53,7 @@ void llist_add(struct llist *list, int x)
 
 void llist_dispose(struct llist *list)
   //@ requires llist(list, _);
-  //@ ensures true;
+  //@ ensures emp;
 {
   struct node *n = list->first;
   struct node *l = list->last;

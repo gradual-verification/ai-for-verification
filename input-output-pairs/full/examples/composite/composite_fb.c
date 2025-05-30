@@ -21,7 +21,7 @@ int main() //@ : main
 
 
 struct Node* create() 
-  //@ requires true;
+  //@ requires emp;
   //@ ensures isTree(result, tree(result, Nil, Nil));
 {
   struct Node* n = malloc(sizeof(struct Node));
@@ -112,7 +112,7 @@ struct Node {
 };
 
 struct Node* internalCreate(struct Node* parent)
-  //@ requires true;
+  //@ requires emp;
   //@ ensures result!=0 &*& tree(result, tree(result, Nil, Nil)) &*& result->parent |-> parent;
 {
   struct Node* n = malloc(sizeof(struct Node));
