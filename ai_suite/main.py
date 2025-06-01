@@ -1,22 +1,13 @@
 from LLM_handler import handle_LLM
 from RAG import BestRAG
 from utils import *
+from lib_extractor import *
+from configs import *
 
-models = ["google:gemini-2.5-pro-preview-03-25", "google:gemini-2.0-flash", "openai:gpt-4.5-preview", "openai:o1", "openai:o3-mini", "openai:gpt-4o",
-        "deepseek:deepseek-chat", "deepseek:deepseek-reasoner",
-        "anthropic:claude-3-7-sonnet-20250219", "anthropic:claude-3-5-sonnet-20241022", "anthropic:claude-3-5-haiku-20241022",
-        "groq:llama-3.3-70b-versatile", "groq:llama-3.1-8b-instant",
-        "mistral:codestral-latest", "mistral:codestral-2405"]
 
 # This function can query multiple LLM models.
-# Please specify the input file, output folder and prompt in main() function.
+# Please specify the input folder, output folder and prompt in configs.py
 def main():
-    input_file = "input/stack_values_nl.c"
-    KB_folder = "KB"
-    output_folder = "output"
-
-    prompt = f"You are an expert VeriFast programmer, your task is that for the C code below, modify it to include a formal code verification in Verifast that verifies correctly. \
-                Please just show one code block with the complete code and specification to be verified, in the format of ```c CODE and SPEC ```."
     prompt_type = PromptType.BASIC
 
     # preparations: environmental variables, knowledge base for RAG, reading program
@@ -31,19 +22,32 @@ def main():
     if prompt_type.is_RAG():
         rag.store_KB_embeddings(KB_folder)
 
-    with open(input_file, 'r') as file:
-        input_program = file.read()
+    rel_input_files = get_rel_input_files(base_input_folder)
 
-    # try on each model
-    for model in models:
-        output_program = handle_LLM(input_program, prompt, prompt_type, rag, model)
-        output_file = os.path.join(output_folder, model + ".c")
+    for rel_input_file in rel_input_files:
+        # get the program and included programs of the input file
+        input_file = os.path.join(base_input_folder, rel_input_file)
+        input_folder = os.path.dirname(input_file)
 
-        os.makedirs(output_folder, exist_ok=True)
-        with open(output_file, 'w') as file:
-            file.write(output_program)
+        with open(input_file, 'r') as file:
+            input_program = file.read()
 
-        print("Finish " + model + "\n")
+        results = read_included_lib_files(default_lib_files, input_folder, input_file, lib_folder)
+
+        # try on each model
+        for model in models:
+            output_program = handle_LLM(input_program, prompt, prompt_type, rag, model)
+
+            # write the output program into the output folder
+            new_base_output_folder = os.path.join(base_output_folder, model)
+            output_file = os.path.join(new_base_output_folder, rel_input_file)
+
+            output_folder = os.path.dirname(output_file)
+            os.makedirs(output_folder, exist_ok=True)
+            with open(output_file, 'w') as file:
+                file.write(output_program)
+
+            print("Finish " + model + "\n")
 
     # finish
     if prompt_type.is_RAG():

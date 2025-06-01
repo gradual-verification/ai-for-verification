@@ -34,3 +34,17 @@ def load_API_keys():
 def restore_env_var(old_env: dict):
     os.environ.clear()
     os.environ.update(old_env)
+
+
+# get the relative path of input files
+def get_rel_input_files(base_input_folder: str) -> list[str]:
+    rel_input_files = []
+
+    for dirpath, _, filenames in os.walk(base_input_folder):
+        rel_dirpath = os.path.relpath(dirpath, base_input_folder)
+        for fname in filenames:
+            if fname.endswith(("fbp.c", "fb.c", "nl.c")):
+                rel_fname = os.path.join(rel_dirpath, fname)
+                rel_input_files.append(rel_fname)
+
+    return rel_input_files
