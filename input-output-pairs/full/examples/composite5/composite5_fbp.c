@@ -1,7 +1,5 @@
-#include "malloc.h"
 #include "stdlib.h"
-#include <stdbool.h>
-//@ #include "../ghostlist.gh"
+//@ #include "ghostlist.gh"
 
 
 /*@

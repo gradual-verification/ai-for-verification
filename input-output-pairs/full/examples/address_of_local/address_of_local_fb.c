@@ -1,5 +1,3 @@
-#include <stdint.h>
-#include <stdbool.h>
 
 void inc(int* i)
   //@ requires *i |-> ?v;

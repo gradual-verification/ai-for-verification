@@ -1,4 +1,3 @@
-#include "malloc.h"
 
 void set_to_zero(int* a, int N) 
   //@ requires a[0..N] |-> ?vs;

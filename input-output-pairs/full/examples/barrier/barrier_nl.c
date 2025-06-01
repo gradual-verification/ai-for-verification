@@ -1,6 +1,5 @@
 #include "stdlib.h"
 #include "threading.h"
-#include <stdbool.h>
 
 /***
  * Description:

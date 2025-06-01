@@ -1,5 +1,4 @@
 #include "stdlib.h"
-#include <stdbool.h>
 
 void swap(int *a, int *b)
 //@ requires integer(a, ?x) &*& integer(b, ?y);

@@ -1,5 +1,3 @@
-#include "stdlib.h"
-#include <stdbool.h>
 
 /* Description
     - Behavior: This function removes a specific element from the list segment starting from *phead*.

@@ -1,6 +1,4 @@
 #include "stdlib.h"
-#include "malloc.h"
-#include <limits.h>
 
 typedef void thread_run/*@(predicate(void *) pre, predicate() post)@*/(void *data);
     //@ requires pre(data);

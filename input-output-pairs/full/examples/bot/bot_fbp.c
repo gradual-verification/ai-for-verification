@@ -1,8 +1,4 @@
-#include <stdbool.h>
-#include "malloc.h"
-#include "../lists.h"
-#include "../stringBuffers.h"
-#include "../sockets.h"
+#include "sockets.h"
 
 int main() //@ : main
     //@ requires true;

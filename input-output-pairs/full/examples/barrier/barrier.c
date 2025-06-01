@@ -1,6 +1,5 @@
 #include "stdlib.h"
 #include "threading.h"
-#include <stdbool.h>
 
 // Inspired by [1].
 // [1] Aquinas Hobor and Cristian Gherghina. Barriers in Concurrent Separation Logic. 2010.

@@ -1,6 +1,6 @@
 #include "stdio.h"
 #include "stdlib.h"
-#include "../stringBuffers.h"
+#include "stringBuffers.h"
 
 /***
  * Description:

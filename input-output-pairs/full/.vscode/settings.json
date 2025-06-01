@@ -47,6 +47,9 @@
         "streambuf": "c",
         "typeinfo": "c",
         "assert.h": "c",
-        "algorithm": "c"
+        "algorithm": "c",
+        "pthreadtypes.h": "c",
+        "pthread.h": "c",
+        "limits.h": "c"
     }
 }

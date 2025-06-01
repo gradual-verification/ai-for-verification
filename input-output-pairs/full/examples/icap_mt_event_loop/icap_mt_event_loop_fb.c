@@ -1,7 +1,7 @@
 // Example from Kasper Svendsen and Lars Birkedal, Impredicative Concurrent Abstract Predicates, ESOP 2014.
 
 #include <stdlib.h>
-#include "../../others/futures/multi-files/shared_boxes/gotsmanlock.h"
+#include "gotsmanlock.h"
 
 typedef struct eloop *eloop;
 

@@ -1,6 +1,6 @@
 #include "stdio.h"
 #include "stdlib.h"
-#include "../stringBuffers.h"
+#include "stringBuffers.h"
 
 typedef int charreader();
     //@ requires true;

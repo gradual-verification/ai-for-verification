@@ -1,7 +1,5 @@
 // Includes necessary libraries
-//@ #include "arrays.gh"
 //@ #include "counting.gh"
-#include "malloc.h"
 #include "stdlib.h"
 #include "threading.h"
 

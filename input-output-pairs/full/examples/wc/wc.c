@@ -1,8 +1,5 @@
 #include "stdlib.h"
 #include "stdio.h"
-#include "malloc.h"
-#include <stdbool.h>
-#include "assert.h"
 
 /*@
 fixpoint int wcount(list<char> cs, bool inword) {

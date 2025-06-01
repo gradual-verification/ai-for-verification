@@ -1,4 +1,3 @@
-#include "stdlib.h"
 
 struct node {
     struct node *next;

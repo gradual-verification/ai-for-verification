@@ -1,4 +1,3 @@
-#include "malloc.h"
 
 /***
  * Description:

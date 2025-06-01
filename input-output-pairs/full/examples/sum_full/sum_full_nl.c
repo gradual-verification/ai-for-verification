@@ -1,4 +1,3 @@
-#include "stdlib.h"
 
 // the value in each node is bigger or equal to 0
 struct node {
