@@ -229,8 +229,8 @@ void tree_dispose(struct node *node)
 }
 
 int main0()
-  //@ requires true;
-  //@ ensures true;
+  //@ requires emp;
+  //@ ensures emp;
 {
   struct node *node = create_tree();
   node = tree_add_left(node);
@@ -244,8 +244,8 @@ int main0()
 }
 
 int main() //@ : main
-    //@ requires true;
-    //@ ensures true;
+    //@ requires emp;
+    //@ ensures emp;
 {
     struct node *root = create_tree();
     struct node *left = tree_add_left(root);

@@ -156,8 +156,8 @@ int llist_removeFirst(struct llist *l)
 }
 
 void main0()
-  //@ requires true;
-  //@ ensures true;
+  //@ requires emp;
+  //@ ensures emp;
 {
   struct llist *l = create_llist();
   llist_add(l, 10);
@@ -172,8 +172,8 @@ void main0()
 }
 
 int main() //@ : main
-  //@ requires true;
-  //@ ensures true;
+  //@ requires emp;
+  //@ ensures emp;
 {
   struct llist *l1 = create_llist();
   struct llist *l2 = create_llist();

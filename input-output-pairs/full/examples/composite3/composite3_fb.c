@@ -301,8 +301,8 @@ void tree_dispose(struct node *node)
 }
 
 int main()
-    //@ requires true;
-    //@ ensures true;
+    //@ requires emp;
+    //@ ensures emp;
 {
     struct node *node0 = create_tree();
     struct node *node = node0;

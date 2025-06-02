@@ -127,8 +127,8 @@ void iter_dispose(struct iter *i)
 }
 
 int main()
-    //@ requires true;
-    //@ ensures true;
+    //@ requires emp;
+    //@ ensures emp;
 {
     struct llist *l = create_llist();
     llist_add(l, 5);

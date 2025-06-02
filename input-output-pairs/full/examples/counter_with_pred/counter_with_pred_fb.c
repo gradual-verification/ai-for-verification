@@ -64,8 +64,8 @@ int get(struct Counter* c)
 }
 
 int main() //@ : main
-  //@ requires true;
-  //@ ensures true;
+  //@ requires emp;
+  //@ ensures emp;
 {
   struct Counter* c1 = init(0); struct Counter* c2 = init(5);
 
@@ -80,8 +80,8 @@ bool random();
 //@ ensures true;
 
 int main2() 
-//@ requires true;
-//@ ensures true;
+//@ requires emp;
+//@ ensures emp;
 {
   struct Counter* c = init(0);
   bool b = random();

@@ -253,8 +253,8 @@ void destroy_data(struct data* data)
 }
 
 void check()
-  //@ requires true;
-  //@ ensures true;
+  //@ requires emp;
+  //@ ensures emp;
 {
   struct stack* stack = create_empty_stack(destroy_data);
   int s = size(stack);
@@ -278,8 +278,8 @@ void check()
 }
 
 void check2()
-  //@ requires true;
-  //@ ensures true;
+  //@ requires emp;
+  //@ ensures emp;
 {
   struct stack* stack = create_empty_stack(destroy_data);
   struct data* d1 = create_data(1, 1);
