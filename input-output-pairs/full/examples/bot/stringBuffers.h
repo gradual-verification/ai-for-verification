@@ -19,7 +19,7 @@ lemma_auto void string_buffer_not_null();
 @*/
 
 struct string_buffer *create_string_buffer();
-    //@ requires emp;
+    //@ requires true;
     //@ ensures string_buffer(result, nil) &*& result != 0;
 int string_buffer_get_length(struct string_buffer *buffer);
     //@ requires [?f]string_buffer(buffer, ?cs);
@@ -55,7 +55,7 @@ void string_buffer_drop_front(struct string_buffer *buffer, int length);
     //@ requires string_buffer(buffer, ?bcs) &*& length >= 0;
     //@ ensures string_buffer(buffer, _);
 void string_buffer_dispose(struct string_buffer *buffer);
-    //@ requires buffer == 0 ? emp : string_buffer(buffer, _);
-    //@ ensures emp;
+    //@ requires buffer == 0 ? true : string_buffer(buffer, _);
+    //@ ensures true;
 
 #endif

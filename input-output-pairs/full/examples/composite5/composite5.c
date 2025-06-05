@@ -131,7 +131,7 @@ struct node *create_node(struct node *p, struct node *next)
 }
 
 struct node *create_tree()
-  //@ requires emp;
+  //@ requires true;
   //@ ensures tree(?id) &*& [_]tree_membership_fact(id, result);
 {
   struct node *n = create_node(0, 0);
@@ -262,8 +262,8 @@ struct node *tree_get_parent(struct node *node)
 }
 
 int main0()
-  //@ requires emp;
-  //@ ensures emp;
+  //@ requires true;
+  //@ ensures true;
 {
   struct node *node = create_tree();
   node = tree_add(node);
@@ -280,8 +280,8 @@ int main0()
 }
 
 int main() //@ : main
-    //@ requires emp;
-    //@ ensures emp;
+    //@ requires true;
+    //@ ensures true;
 {
     struct node *root = create_tree();
     struct node *left = tree_add(root);

@@ -6,7 +6,7 @@
 
 typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
   //@ requires Ownership(data, _);
-  //@ ensures emp;
+  //@ ensures true;
   
 
 /*
@@ -60,7 +60,7 @@ fixpoint Stack<T> Push<T>(void* item, T info, Stack<T> Stack)
 }
 
 lemma void RewritePushCons<T>(void* item, T info, Stack<T> Stack)
-  requires emp;
+  requires true;
   ensures Push(item, info, Stack) == Cons(item, info, Stack);
 {
 }
@@ -90,8 +90,8 @@ fixpoint bool IsEmpty<T>(Stack<T> S)
 }
 
 lemma void IsEmptyNil<T>(Stack<T> S)
-  requires emp;
-  ensures IsEmpty(S) ? S == Nil : emp;
+  requires true;
+  ensures IsEmpty(S) ? S == Nil : true;
 {
   switch ( S )
   {
@@ -113,7 +113,7 @@ fixpoint int Size<T>(Stack<T> S)
 }
 
 lemma void SizeEmptyStack<T>(Stack<T> S)
-  requires emp;
+  requires true;
   ensures IsEmpty(S) ? Size(S) == 0 : true;
 {
   switch ( S )
@@ -124,7 +124,7 @@ lemma void SizeEmptyStack<T>(Stack<T> S)
 }
 
 lemma void SizePush<T>(void* data, T info, Stack<T> S)
-  requires emp;
+  requires true;
   ensures Size( Push(data, info, S) ) == Size(S) + 1;
 {
   switch ( S )
@@ -148,7 +148,7 @@ fixpoint void* GetTopPointer<T>(Stack<T> S)
 }
 
 lemma void PushNotNil<T>(void* data, T info, Stack<T> Stack)
-  requires emp;
+  requires true;
   ensures Push(data, info, Stack) != Nil;
 {
   switch ( Stack )
@@ -179,7 +179,7 @@ struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
 
 void destroy_stack/*@ <T> @*/(struct stack* stack)
   //@ requires Stack<T>(stack, _, _, ?S);
-  //@ ensures emp;
+  //@ ensures true;
 {
   //@ open Stack(stack, _, _, S);
   struct node* current = stack->first;
@@ -314,7 +314,7 @@ predicate Data(struct data* data, int foo, int bar) =
 @*/
 
 struct data* create_data(int foo, int bar)
-  //@ requires emp;
+  //@ requires true;
   //@ ensures Data(result, foo, bar);
 {
   struct data* data = malloc( sizeof( struct data ) );
@@ -355,7 +355,7 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 void destroy_data(struct data* data)
   //@ requires Data_Ownership(data, _);
-  //@ ensures emp;
+  //@ ensures true;
 {
   //@ open Data_Ownership(data, _);
   //@ open Data(data, _, _);
@@ -363,8 +363,8 @@ void destroy_data(struct data* data)
 }
 
 void check()
-  //@ requires emp;
-  //@ ensures emp;
+  //@ requires true;
+  //@ ensures true;
 {
   //@ produce_function_pointer_chunk destructor<DataCarrier>(destroy_data)(Data_Ownership)(data) { call(); }
   struct stack* stack = create_empty_stack(destroy_data);
@@ -398,8 +398,8 @@ void check()
 }
 
 void check2()
-  //@ requires emp;
-  //@ ensures emp;
+  //@ requires true;
+  //@ ensures true;
 {
   //@ produce_function_pointer_chunk destructor<DataCarrier>(destroy_data)(Data_Ownership)(data) { call(); }
   struct stack* stack = create_empty_stack(destroy_data);
@@ -442,13 +442,13 @@ void check2()
 /*@
 
 lemma void CheckPushPop<T>(void* item, T info, Stack<T> S)
-  requires emp;
+  requires true;
   ensures Pop( Push( item, info, S ) ) == S;
 {
 }
 
 lemma void CheckSizePush<T>(void* item, T info, Stack<T> S)
-  requires emp;
+  requires true;
   ensures Size( Push( item, info, S ) ) == 1 + Size( S );
 {
 }

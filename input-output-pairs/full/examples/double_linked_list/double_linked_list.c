@@ -60,7 +60,7 @@ fixpoint intlist rev(intlist l) {
 }
 
 lemma void app_assoc(intlist l1, intlist l2, intlist l3)
-  requires emp;
+  requires true;
   ensures app(app(l1, l2), l3) == app(l1, app(l2, l3));
 {
   switch (l1) {
@@ -71,14 +71,14 @@ lemma void app_assoc(intlist l1, intlist l2, intlist l3)
 }
 
 lemma void rev_lemma(int i, intlist gamma, intlist alphap)
-  requires emp;
+  requires true;
   ensures app(rev(icons(i, gamma)), alphap) == app(rev(gamma), icons(i, alphap));
 {
   app_assoc(rev(gamma), icons(i, inil), alphap);
 }
 
 lemma void app_to_nil(intlist l)
-  requires emp;
+  requires true;
   ensures app(l, inil) == l;
 {
   switch (l) {
@@ -89,7 +89,7 @@ lemma void app_to_nil(intlist l)
 }
 
 lemma void rev_app(intlist l1, intlist l2)
-  requires emp;
+  requires true;
   ensures rev(app(l1, l2)) == app(rev(l2), rev(l1));
 {
   switch (l1) {
@@ -102,7 +102,7 @@ lemma void rev_app(intlist l1, intlist l2)
 }
 
 lemma void rev_twice(intlist l)
-  requires emp;
+  requires true;
   ensures rev(rev(l)) == l;
 {
   switch (l) {

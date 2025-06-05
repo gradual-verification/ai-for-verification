@@ -19,7 +19,7 @@ int main() //@ : main
     writer_write_string(w, "BoT\r\n");
     
     while (!stop)
-        //@ invariant reader(r) &*& writer(w) &*& stop ? emp : string_buffer(line, _) &*& string_buffer(nick, _) &*& string_buffer(text, _);
+        //@ invariant reader(r) &*& writer(w) &*& stop ? true : string_buffer(line, _) &*& string_buffer(nick, _) &*& string_buffer(text, _);
     {
         bool test = true;
         bool result = false;

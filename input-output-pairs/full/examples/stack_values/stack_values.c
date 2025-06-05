@@ -148,7 +148,7 @@ void stack_reverse(struct stack *stack)
 
 void stack_dispose(struct stack *s)
   //@ requires stack(s, ?vs);
-  //@ ensures emp;
+  //@ ensures true;
 {
   //@ open stack(s, vs);
   struct node* n = s->head;

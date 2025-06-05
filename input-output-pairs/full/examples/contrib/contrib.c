@@ -12,7 +12,7 @@ struct session {
 
 /*@
 box_class contrib_box(int contrib, handle owner) {
-    invariant emp;
+    invariant true;
 
     action set_value(int contrib0);
         requires actionHandles == cons(owner, nil);

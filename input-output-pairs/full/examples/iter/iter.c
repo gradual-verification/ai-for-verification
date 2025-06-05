@@ -17,14 +17,14 @@ predicate node(struct node *node; struct node *next, int value) =
 
 /*@
 predicate lseg(struct node *n1, struct node *n2; list<int> v) =
-  n1 == n2 ? emp &*& v == nil : node(n1, ?_n, ?h) &*& lseg(_n, n2, ?t) &*& v == cons(h, t);
+  n1 == n2 ? true &*& v == nil : node(n1, ?_n, ?h) &*& lseg(_n, n2, ?t) &*& v == cons(h, t);
 
 predicate llist(struct llist *list; list<int> v) =
   list->first |-> ?_f &*& list->last |-> ?_l &*& lseg(_f, _l, v) &*& node(_l, _, _) &*& malloc_block_llist(list);
 @*/
 
 struct llist *create_llist()
-  //@ requires emp;
+  //@ requires true;
   //@ ensures llist(result, nil);
 {
   struct llist *l = malloc(sizeof(struct llist));
@@ -94,7 +94,7 @@ lemma_auto void lseg_append(struct node *n1, struct node *n2, struct node *n3)
 
 void llist_dispose(struct llist *list)
   //@ requires llist(list, _);
-  //@ ensures emp;
+  //@ ensures true;
 {
   struct node *n = list->first;
   struct node *l = list->last;
@@ -224,8 +224,8 @@ void iter_dispose(struct iter *i)
 }
 
 int main()
-    //@ requires emp;
-    //@ ensures emp;
+    //@ requires true;
+    //@ ensures true;
 {
     struct llist *l = create_llist();
     llist_add(l, 5);

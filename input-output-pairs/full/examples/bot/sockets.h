@@ -17,13 +17,13 @@ predicate writer(struct writer *writer);
 @*/
 
 struct server_socket *create_server_socket(int port);
-    //@ requires emp;
+    //@ requires true;
     //@ ensures server_socket(result);
 struct socket *server_socket_accept(struct server_socket *serverSocket);
     //@ requires server_socket(serverSocket);
     //@ ensures server_socket(serverSocket) &*& socket(result, ?reader, ?writer) &*& reader(reader) &*& writer(writer);
 struct socket *create_client_socket(int port);
-    //@ requires emp;
+    //@ requires true;
     //@ ensures socket(result, ?reader, ?writer) &*& reader(reader) &*& writer(writer);
 
 struct reader *socket_get_reader(struct socket *socket);
@@ -34,7 +34,7 @@ struct writer *socket_get_writer(struct socket *socket);
     //@ ensures socket(socket, reader, writer) &*& result == writer;
 void socket_close(struct socket *socket);
     //@ requires socket(socket, ?reader, ?writer) &*& reader(reader) &*& writer(writer);
-    //@ ensures emp;
+    //@ ensures true;
     
 bool reader_read_line(struct reader *reader, struct string_buffer *buffer);
     //@ requires reader(reader) &*& string_buffer(buffer, _);

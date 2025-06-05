@@ -25,7 +25,7 @@ int main() //@ : main
 // client visible definitions - lemma's
 
 struct Node* create() 
-  //@ requires emp;
+  //@ requires true;
   //@ ensures isTree(result, tree(result, Nil, Nil));
 {
   struct Node* n = malloc(sizeof(struct Node));
@@ -168,7 +168,7 @@ struct Node {
 };
 
 struct Node* internalCreate(struct Node* parent)
-  //@ requires emp;
+  //@ requires true;
   //@ ensures result!=0 &*& tree(result, tree(result, Nil, Nil)) &*& result->parent |-> parent;
 {
   struct Node* n = malloc(sizeof(struct Node));

@@ -7,12 +7,12 @@ struct node {
 
 /*@
 predicate nodes(struct node *head) =
-    head == 0 ? emp : head->next |-> ?next &*& head->value |-> _ &*& malloc_block_node(head) &*& nodes(next);
+    head == 0 ? true : head->next |-> ?next &*& head->value |-> _ &*& malloc_block_node(head) &*& nodes(next);
 @*/
 
 void dispose_nodes(struct node *head)
     //@ requires nodes(head);
-    //@ ensures emp;
+    //@ ensures true;
 {
 loop:
     if (head == 0) return;
