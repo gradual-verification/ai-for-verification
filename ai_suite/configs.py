@@ -6,6 +6,19 @@ models = ["google:gemini-2.5-pro-preview-03-25", "google:gemini-2.0-flash",
         "groq:llama-3.3-70b-versatile", "groq:llama-3.1-8b-instant",
         "mistral:codestral-latest", "mistral:codestral-2405"]
 
+# the type of prompt, can be "BASIC", "COT", "RAG_SPARSE", "RAG_DENSE"
+prompt_type_name = "RAG_DENSE"
+
+# options to store and delete the vector embedding of context in RAG
+store_embedding = False
+delete_embedding = False
+
+# the number of returned context in RAG
+RAG_TOP_N = 10
+
+# the name of collection in vector database to store knowledge base
+collection_name = "LLM4SL"
+
 # the name of lib files being implicitly included
 default_lib_files = ["prelude.h", "prelude_core.gh", "list.gh"]
 

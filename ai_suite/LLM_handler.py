@@ -1,6 +1,7 @@
 import aisuite as ai
 
 from RAG import BestRAG
+from configs import RAG_TOP_N
 from utils import PromptType
 
 
@@ -11,7 +12,7 @@ def handle_LLM(input_text: str, prompt: str, prompt_type: PromptType, rag: BestR
     examples = ""
     if prompt_type.is_RAG():
         rag_type = "sparse" if prompt_type == PromptType.RAG_SPARSE else "dense"
-        responses = rag.search(input_text, rag_type, 2)
+        responses = rag.search(input_text, rag_type, RAG_TOP_N)
         for response in responses:
             results = response[1]
             for result in results:

@@ -1,6 +1,7 @@
 """BestRAG"""
 import os
 # Authors: Abdul Samad Siddiqui <abdulsamadsid1@gmail.com>
+# from https://github.com/samadpls/BestRAG
 
 import uuid
 from typing import List, Optional
@@ -8,6 +9,7 @@ from qdrant_client import QdrantClient, models
 from qdrant_client.http.models import Distance
 from fastembed import TextEmbedding
 from fastembed.sparse.bm25 import Bm25
+import PyPDF2
 
 
 
@@ -91,52 +93,88 @@ class BestRAG:
         return next(self.sparse_model.embed(text))
 
 
-    def store_KB_embeddings(self, KB_path: str,
-                             metadata: Optional[dict] = None):
+    def _extract_pdf_text_per_page(self, pdf_path: str) -> List[str]:
         """
-        Store the embeddings for each file of knowledge base in the Qdrant collection.
+        Load a PDF file and extract the text from each page.
+
+        Args:
+            pdf_path (str): The path to the PDF file.
+
+        Returns:
+            List[str]: The text from each page of the PDF.
+        """
+        with open(pdf_path, "rb") as pdf_file:
+            reader = PyPDF2.PdfReader(pdf_file)
+            return [page.extract_text() for page in reader.pages]
+
+
+    def store_KB_embeddings(self, KB_path: str,
+                           metadata: Optional[dict] = None):
+        """
+        Store the embeddings for each file of knowledge base into chunks in the Qdrant collection.
+        The file may be text or pdf.
 
         Args:
             KB_path (str): The path to the knowledge base
             metadata (Optional[dict]): Additional metadata to store with each embedding.
         """
 
-        for filename in os.listdir(KB_path):
-            file_path = os.path.join(KB_path, filename)
-            if os.path.isfile(file_path):
-                with open(file_path, 'r') as file:
-                    content = file.read()
+        for dirpath, _, file_names in os.walk(KB_path):
+            for file_name in file_names:
+                file_path = os.path.join(dirpath, file_name)
+                if os.path.isfile(file_path):
+                    # handle pdf file
+                    if file_path.endswith(".pdf"):
+                        texts = self._extract_pdf_text_per_page(file_path)
+                        for page_num, text in enumerate(texts):
+                            self.store_KB_embedding(file_name, text, metadata)
+                    elif file_path.endswith(".c") or file_path.endswith(".h") or file_path.endswith(".gh"):
+                        with open(file_path, "r") as file:
+                            text = file.read()
+                        self.store_KB_embedding(file_name, text, metadata)
 
-                dense_embedding = self._get_dense_embedding(content)
-                sparse_embedding = self._get_sparse_embedding(content)
 
-                hybrid_vector = {
-                    "dense": dense_embedding,
-                    "sparse": models.SparseVector(
-                        indices=sparse_embedding.indices,
-                        values=sparse_embedding.values,
-                    )
-                }
+    def store_KB_embedding(self, file_name: str, content: str,
+                             metadata: Optional[dict] = None):
+        """
+        Store the embedding for each chunk of knowledge base in the Qdrant collection.
 
-                payload = {
-                    "text": content,
-                    "name": filename
-                }
+        Args:
+            filename (str): The name of the knowledge base
+            content (str): The content of the knowledge base
+            metadata (Optional[dict]): Additional metadata to store with each embedding.
+        """
 
-                if metadata:
-                    payload.update(metadata)
+        dense_embedding = self._get_dense_embedding(content)
+        sparse_embedding = self._get_sparse_embedding(content)
 
-                point = models.PointStruct(
-                    id=str(uuid.uuid4()),
-                    vector=hybrid_vector,
-                    payload=payload
-                )
+        hybrid_vector = {
+            "dense": dense_embedding,
+            "sparse": models.SparseVector(
+                indices=sparse_embedding.indices,
+                values=sparse_embedding.values,
+            )
+        }
 
-                self.client.upsert(
-                    collection_name=self.collection_name,
-                    points=[point]
-                )
-                print(f"Stored embedding for file {filename} in collection '{self.collection_name}'.")
+        payload = {
+            "text": content,
+            "name": file_name
+        }
+
+        if metadata:
+            payload.update(metadata)
+
+        point = models.PointStruct(
+            id=str(uuid.uuid4()),
+            vector=hybrid_vector,
+            payload=payload
+        )
+
+        self.client.upsert(
+            collection_name=self.collection_name,
+            points=[point]
+        )
+        print(f"Stored embedding for file {file_name} in collection '{self.collection_name}'.")
 
 
     def delete_KB_embeddings(self, KB_path: str):
@@ -153,16 +191,16 @@ class BestRAG:
                 filter_ = models.Filter(
                     must=[
                         models.FieldCondition(
-                        key="name",
-                        match=models.MatchValue(value=filename))
+                            key="name",
+                            match=models.MatchValue(value=filename))
                     ]
                 )
 
-            result = self.client.delete(
-                collection_name=self.collection_name,
-                points_selector=models.FilterSelector(filter=filter_))
+                result = self.client.delete(
+                    collection_name=self.collection_name,
+                    points_selector=models.FilterSelector(filter=filter_))
 
-            print(f"Deleted all embeddings for '{filename}' from collection '{self.collection_name}': '{result}'.")
+                print(f"Deleted all embeddings for '{filename}' from collection '{self.collection_name}': '{result}'.")
 
 
     def search(self, query: str, rag_type: str, limit: int = 10):
@@ -196,6 +234,14 @@ class BestRAG:
         )
 
         return results
+
+
+    def delete_collection(self):
+        result = self.client.delete_collection(self.collection_name)
+        if result:
+            print(f"Deleted collection '{self.collection_name}'.")
+        else:
+            print(f"Failed to delete collection '{self.collection_name}'.")
 
 
     def __str__(self):

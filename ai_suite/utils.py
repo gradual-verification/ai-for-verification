@@ -8,6 +8,13 @@ class PromptType(Enum):
     RAG_SPARSE = 3
     RAG_DENSE = 4
 
+    @classmethod
+    def from_string(cls, name: str) -> "PromptType":
+        try:
+            return cls[name]
+        except KeyError:
+            raise ValueError(f"'{name}' is not a valid {cls.__name__}")
+
     def is_RAG(self):
         return self == PromptType.RAG_SPARSE or self == PromptType.RAG_DENSE
 
