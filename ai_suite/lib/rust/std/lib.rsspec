@@ -1,0 +1,398 @@
+/*@
+
+abstract_type type_info;
+
+@*/
+
+mod intrinsics {
+
+    unsafe fn copy_nonoverlapping<T>(src: *mut T, dst: *mut T, count: usize);
+    //@ req [?f]src[..count] |-> ?vs &*& dst[..count] |-> _;
+    //@ ens [f]src[..count] |-> vs &*& dst[..count] |-> vs;
+
+    unsafe fn ptr_offset_from<T>(ptr: *const T, base: *const T) -> isize;
+    /*@
+    req
+        (ptr as pointer).provenance == (base as pointer).provenance &*&
+        (ptr as usize - base as usize) % std::mem::size_of::<T>() == 0 &*&
+        isize::MIN <= ptr as usize - base as usize &*& ptr as usize - base as usize <= isize::MAX;
+    @*/
+    //@ ens result == ptr as usize - base as usize;
+}
+
+mod mem {
+
+    //@ fix size_of_<T>() -> usize { std::mem::size_of::<T>() }
+    //@ fix align_of_<T>() -> usize;
+
+    fn size_of<T>() -> usize;
+    //@ req true;
+    //@ ens result == std::mem::size_of_::<T>();
+
+    fn drop<T>(value: T);
+    //@ req thread_token(?t) &*& <T>.own(t, value);
+    //@ ens thread_token(t);
+    
+}
+
+mod ptr {
+
+    unsafe fn drop_in_place<T>(to_drop: *mut T);
+    //@ req thread_token(?t) &*& (<T>.full_borrow_content(t, to_drop))();
+    //@ ens thread_token(t) &*& *to_drop |-> _;
+
+    struct NonNull<T>;
+    /*@
+    pred NonNull_own<T>(t: thread_id_t, v: NonNull<T>;) = NonNull_ptr(v) as usize != 0;
+    pred NonNull_share<T>(k: lifetime_t, t: thread_id_t, l: *NonNull<T>);
+    fix NonNull_ptr<_T>(v: NonNull<_T>) -> *_T;
+    @*/
+
+    impl<T> NonNull<T> {
+        //TODO: Needs support in MIR translator
+        //fn from<'a>(reference: &'a mut T) -> NonNull<T>;
+        // req thread_token(?t) &*& [?qa]lifetime_token(?a) &*& full_borrow(a, <T>.full_borrow_content(t, reference));
+        // ens thread_token(t) &*& [qa]lifetime_token(a) &*& NonNull_own::<T>(t, result) &*& NonNull_ptr(result) == reference;
+
+        unsafe fn new_unchecked(ptr: *mut T) -> NonNull<T>;
+        //@ req ptr as usize != 0;
+        //@ ens NonNull_ptr(result) == ptr;
+
+        unsafe fn as_ref<'a>(self: &'a NonNull<T>) -> &'a T;
+        //@ req [?q](*self) |-> ?v;
+        //@ ens [q](*self) |-> v &*& result == NonNull_ptr(v);
+
+        fn as_ptr(self: NonNull<T>) -> *mut T;
+        //@ req true;
+        //@ ens result == NonNull_ptr(self);
+    }
+}
+
+mod alloc {
+
+    struct Layout;
+    //@ fix Layout::size_(layout: Layout) -> usize;
+    //@ fix Layout::align_(layout: Layout) -> usize;
+    //@ fix Layout::from_size_align_(size: usize, align: usize) -> Layout;
+    //@ fix Layout::new_<T>() -> Layout { Layout::from_size_align_(std::mem::size_of_::<T>(), std::mem::align_of_::<T>()) }
+    
+    /*@
+    
+    lem_auto Layout_size__Layout_from_size_align_(size: usize, align: usize);
+        req true;
+        ens Layout::size_(Layout::from_size_align_(size, align)) == size;
+    
+    lem_auto Layout_align__Layout_from_size_align_(size: usize, align: usize);
+        req true;
+        ens Layout::align_(Layout::from_size_align_(size, align)) == align;
+    
+    @*/
+    
+    impl Layout {
+    
+        fn new<T>() -> Layout;
+        //@ req true;
+        //@ ens result == Layout::new_::<T>();
+
+        fn from_size_align_unchecked(size: usize, align: usize) -> Layout;
+        //@ req align == 1 || align == 2 || align == 4 || align == 8 || align == 16;
+        //@ ens result == Layout::from_size_align_(size, align);
+
+    }
+    
+    //@ pred alloc_block(ptr: *u8; layout: Layout);
+    
+    /*@
+    
+    lem alloc_aligned(ptr: *mut u8);
+        req [?f]alloc_block(ptr, ?layout);
+        ens [f]alloc_block(ptr, layout) &*& (ptr as usize) % Layout::align_(layout) == 0;
+    
+    @*/
+
+    fn alloc(layout: Layout) -> *u8;
+    //@ req 1 <= Layout::size_(layout);
+    /*@
+    ens
+        if result == 0 {
+            true
+        } else {
+            result[..Layout::size_(layout)] |-> _ &*& alloc_block(result, layout) &*&
+            object_pointer_within_limits(result, Layout::size_(layout)) == true
+        };
+    @*/
+    //@ terminates;
+    
+    fn realloc(buffer: *u8, layout: Layout, new_size: usize) -> *u8;
+    //@ req buffer[..?len] |-> ?vs1 &*& buffer[len..Layout::size_(layout)] |-?-> ?vs2 &*& alloc_block(buffer, layout) &*& Layout::size_(layout) <= new_size;
+    /*@
+    ens
+        if result == 0 {
+            buffer[..len] |-> vs1 &*& buffer[len..Layout::size_(layout)] |-?-> vs2 &*& alloc_block(buffer, layout)
+        } else {
+            result[..len] |-> vs1 &*& result[len..Layout::size_(layout)] |-?-> vs2 &*&
+            result[Layout::size_(layout)..new_size] |-> _ &*& alloc_block(result, Layout::from_size_align_(new_size, Layout::align_(layout)))
+        };
+    @*/
+    
+    fn dealloc(p: *u8, layout: Layout);
+    //@ req alloc_block(p, layout) &*& p[..Layout::size_(layout)] |-> _;
+    //@ ens true;
+    //@ terminates;
+
+    fn handle_alloc_error(layout: Layout);
+    //@ req true;
+    //@ ens false;
+    //@ terminates;
+    
+    struct Global;
+    
+}
+
+mod boxed {
+
+    struct Box<T, A>;
+    
+    /*@
+    
+    pred Box<T, A>(self: Box<T, A>, value: T);
+    
+    lem Box_to_own<T, A>(self: Box<T, A>);
+        req thread_token(?t) &*& Box::<T, A>(self, ?value) &*& <T>.own(t, value);
+        ens thread_token(t) &*& <Box<T, A>>.own(t, self);
+    
+    @*/
+
+    impl<T> Box<T> {
+    
+        fn new(x: T) -> Box<T, std::alloc::Global>;
+        //@ req true;
+        //@ ens Box(result, x);
+        
+        fn from_raw(x: *T) -> Box<T, std::alloc::Global>;
+        //@ req *x |-> ?value &*& std::alloc::alloc_block(x as *u8, std::alloc::Layout::new_::<T>());
+        //@ ens Box(result, value);
+        
+    }
+    
+    impl<T, A> Box<T, A> {
+    
+        fn into_raw(b: Box<T, std::alloc::Global>) -> *T;
+        //@ req Box(b, ?value);
+        //@ ens *result |-> value &*& std::alloc::alloc_block(result as *u8, std::alloc::Layout::new_::<T>()) &*& result as usize != 0;
+    
+    }
+
+}
+
+mod process {
+    fn abort();
+    //@ req true;
+    //@ ens false;
+    //@ terminates;
+
+    fn exit(code: i32);
+    //@ req true;
+    //@ ens false;
+    //@ terminates;
+}
+//Todo @Nima: Edit Rust parser so it substitutes `!` type with std_empty_ union
+
+mod result {
+
+    enum Result<T, E> {
+        Ok(T),
+        Err(E),
+    }
+    
+    //@ pred Result_own<T, E>(t: thread_id_t, v: Result<T, E>);
+    
+    impl<T, E> Result<T, E> {
+    
+        fn unwrap(self: Result<T, E>) -> T;
+        //@ req thread_token(?t) &*& Result_own::<T, E>(t, self);
+        //@ ens thread_token(t);
+    
+    }
+
+}
+
+mod vec {
+
+    struct Vec<T, A>;
+    
+    //@ pred Vec<T, A>(self: Vec<T, A>, capacity: usize, elems: list<T>); // This predicate does *not* assert ownership of the elements.
+    //@ pred Vec_minus_buffer<T, A>(self: Vec<T, A>, capacity: usize, len: usize, buffer: *T);
+    
+    /*@
+    
+    lem_auto Vec_inv<T, A>();
+        req [?f]Vec::<T, A>(?vec, ?capacity, ?elems);
+        ens [f]Vec::<T, A>(vec, capacity, elems) &*& length(elems) <= capacity &*& capacity <= isize::MAX;
+    
+    lem Vec_separate_buffer<T, A>(self: Vec<T, A>) -> *T;
+        req [?f]Vec::<T, A>(self, ?capacity, ?elems);
+        ens [f]Vec_minus_buffer::<T, A>(self, capacity, length(elems), result) &*& [f]result[..length(elems)] |-> elems &*& [f]result[length(elems)..capacity] |-> _;
+    
+    lem Vec_unseparate_buffer<T, A>(self: Vec<T, A>);
+        req [?f]Vec_minus_buffer::<T, A>(self, ?capacity, ?len, ?buffer) &*& [f]buffer[..len] |-> ?elems &*& [f]buffer[len..capacity] |-> _;
+        ens [f]Vec::<T, A>(self, capacity, elems);
+    
+    lem Vec_to_own<T, A>(self: Vec<T, A>);
+        req thread_token(?t) &*& Vec::<T, A>(self, ?capacity, ?elems) &*& foreach(elems, own::<T>(t));
+        ens thread_token(t) &*& <Vec<T, A>>.own(t, self);
+    
+    @*/
+    
+    impl<T> Vec<T> {
+    
+        fn new() -> Vec<T, std::alloc::Global>;
+        //@ req true;
+        //@ ens Vec(result, _, []);
+    
+    }
+    
+    impl<T, A> Vec<T, A> {
+    
+        fn len(self: *Vec<T, A>) -> usize;
+        //@ req [?f](*self |-> ?self_) &*& [f]Vec::<T, A>(self_, ?capacity, ?elems);
+        //@ ens [f](*self |-> self_) &*& [f]Vec::<T, A>(self_, capacity, elems) &*& result == length(elems);
+    
+        fn push(self: *Vec<T, A>, elem: T);
+        //@ req *self |-> ?self0 &*& Vec::<T, A>(self0, _, ?elems0);
+        //@ ens *self |-> ?self1 &*& Vec::<T, A>(self1, _, append(elems0, [elem]));
+        
+        fn reserve(self: *Vec<T, A>, additional: usize);
+        //@ req *self |-> ?self0 &*& Vec::<T, A>(self0, _, ?elems);
+        //@ ens *self |-> ?self1 &*& Vec::<T, A>(self1, ?capacity, elems) &*& length(elems) + additional <= capacity;
+        
+        fn as_mut_ptr(self: *Vec<T, A>) -> *mut T;
+        //@ req [?f](*self |-> ?self_) &*& [f]Vec_minus_buffer::<T, A>(self_, ?capacity, ?len, ?buffer);
+        //@ ens [f](*self |-> self_) &*& [f]Vec_minus_buffer::<T, A>(self_, capacity, len, buffer) &*& result == buffer;
+        
+        fn as_ptr(self: *Vec<T, A>) -> *const T;
+        //@ req [?f](*self |-> ?self_) &*& [f]Vec_minus_buffer::<T, A>(self_, ?capacity, ?len, ?buffer);
+        //@ ens [f](*self |-> self_) &*& [f]Vec_minus_buffer::<T, A>(self_, capacity, len, buffer) &*& result == buffer;
+
+        fn spare_capacity_mut(self: *Vec<T, A>) -> &[T];
+        //@ req [?f](*self |-> ?self_) &*& [f]Vec_minus_buffer::<T, A>(self_, ?capacity, ?len, ?buffer);
+        //@ ens [f](*self |-> self_) &*& [f]Vec_minus_buffer::<T, A>(self_, capacity, len, buffer) &*& result.ptr == buffer + len &*& result.len == capacity - len;
+
+        fn set_len(self: *Vec<T, A>, new_len: usize);
+        //@ req *self |-> ?self0 &*& Vec_minus_buffer::<T, A>(self0, ?capacity, ?len, ?buffer) &*& new_len <= capacity;
+        //@ ens *self |-> ?self1 &*& Vec_minus_buffer::<T, A>(self1, capacity, new_len, buffer);
+        
+    }
+    
+}
+
+mod io {
+
+    struct Error;
+    
+    type Result<T> = std::result::Result<T, Error>;
+    
+    trait Write {
+    
+        fn write(self: *Self, buf: &[u8]) -> Result<usize>;
+        //@ req thread_token(?t) &*& *self |-> ?self0 &*& <Self>.own(t, self0) &*& [?f]buf.ptr[..buf.len] |-> ?bs;
+        //@ ens thread_token(t) &*& *self |-> ?self1 &*& <Self>.own(t, self1) &*& [f]buf.ptr[..buf.len] |-> bs &*& std::result::Result_own::<usize, Error>(t, result);
+        
+        fn flush(self: *Self) -> Result<()>;
+        //@ req thread_token(?t) &*& *self |-> ?self0 &*& <Self>.own(t, self0);
+        //@ ens thread_token(t) &*& *self |-> ?self1 &*& <Self>.own(t, self1);
+        
+    }
+
+    struct Stdout;
+    
+    fn stdout() -> Stdout;
+    //@ req thread_token(?t);
+    //@ ens thread_token(t) &*& <Stdout>.own(t, result);
+
+}
+
+mod sync {
+    mod atomic {
+
+        enum Ordering {
+            SeqCst
+        }
+
+        struct AtomicUsize;
+
+        /*@
+        fix AtomicUsize_inner(v: AtomicUsize) -> usize;
+        pred AtomicUsize(p: *AtomicUsize; v: usize) = *p |-> ?v_ &*& v == AtomicUsize_inner(v_);
+
+        lem AtomicUsize_to_usize(p: *AtomicUsize);
+            req *p |-> ?v;
+            ens *(p as *usize) |-> AtomicUsize_inner(v) &*& (p as usize) % std::mem::size_of::<usize>() == 0;
+
+        lem usize_to_AtomicUsize(p: *usize);
+            nonghost_callers_only
+            req *p |-> ?v0 &*& (p as usize) % std::mem::size_of::<usize>() == 0;
+            ens AtomicUsize(p as *AtomicUsize, v0);
+
+        lem_type AtomicUsize_fetch_add_op(self: *AtomicUsize, val: usize, P: pred(), Q: pred(usize)) = lem();
+            req AtomicUsize(self, ?v0) &*& P();
+            ens AtomicUsize(self, (v0 + val) % (usize::MAX + 1)) &*& Q(v0);
+
+        lem_type AtomicUsize_fetch_add_ghop(self: *AtomicUsize, val: usize, pre: pred(), post: pred(usize)) = lem();
+            req atomic_mask(MaskTop) &*& is_AtomicUsize_fetch_add_op(?op, self, val, ?P, ?Q) &*& P() &*& pre();
+            ens atomic_mask(MaskTop) &*& is_AtomicUsize_fetch_add_op(op, self, val, P, Q) &*& Q(?result) &*& post(result);
+
+        lem_type AtomicUsize_fetch_sub_op(self: *AtomicUsize, val: usize, P: pred(), Q: pred(usize)) = lem();
+            req AtomicUsize(self, ?v0) &*& P();
+            ens AtomicUsize(self, (v0 - val + usize::MAX + 1) % (usize::MAX + 1)) &*& Q(v0);
+
+        lem_type AtomicUsize_fetch_sub_ghop(self: *AtomicUsize, val: usize, pre: pred(), post: pred(usize)) = lem();
+            req atomic_mask(MaskTop) &*& is_AtomicUsize_fetch_sub_op(?op, self, val, ?P, ?Q) &*& P() &*& pre();
+            ens atomic_mask(MaskTop) &*& is_AtomicUsize_fetch_sub_op(op, self, val, P, Q) &*& Q(?result) &*& post(result);
+
+        lem_type AtomicUsize_load_op(self: *AtomicUsize, P: pred(), Q: pred(usize)) = lem();
+            req [?f]AtomicUsize(self, ?v) &*& P();
+            ens [f]AtomicUsize(self, v) &*& Q(v);
+
+        lem_type AtomicUsize_load_ghop(self: *AtomicUsize, pre: pred(), post: pred(usize)) = lem();
+            req atomic_mask(MaskTop) &*& is_AtomicUsize_load_op(?op, self, ?P, ?Q) &*& P() &*& pre();
+            ens atomic_mask(MaskTop) &*& is_AtomicUsize_load_op(op, self, P, Q) &*& Q(?result) &*& post(result);
+
+        lem_type AtomicUsize_compare_exchange_op(self: *AtomicUsize, current: usize, new: usize, P: pred(), Q: pred(std::result::Result<usize, usize>)) = lem();
+            req AtomicUsize(self, ?v0) &*& P();
+            ens if v0 == current { AtomicUsize(self, new) &*& Q(std::result::Result::Ok(v0)) } else
+                { AtomicUsize(self, v0) &*& Q(std::result::Result::Err(v0)) };
+
+        lem_type AtomicUsize_compare_exchange_ghop(self: *AtomicUsize, current: usize, new: usize, pre: pred(), post: pred(std::result::Result<usize, usize>)) = lem();
+            req atomic_mask(MaskTop) &*& is_AtomicUsize_compare_exchange_op(?op, self, current, new, ?P, ?Q) &*& P() &*& pre();
+            ens atomic_mask(MaskTop) &*& is_AtomicUsize_compare_exchange_op(op, self, current, new, P, Q) &*& Q(?result) &*& post(result);
+        @*/
+
+        impl AtomicUsize {
+            fn new(v: usize) -> AtomicUsize;
+            //@ req true;
+            //@ ens AtomicUsize_inner(result) == v;
+
+            fn from_ptr<'a>(ptr: *mut usize) -> &'a AtomicUsize;
+            //@ req true;
+            //@ ens result as *mut usize == ptr;
+
+            fn fetch_add(self: &AtomicUsize, val: usize, order: Ordering) -> usize;
+            //@ req order == std::sync::atomic::Ordering::SeqCst &*& is_AtomicUsize_fetch_add_ghop(?ghop, self, val, ?pre, ?post) &*& pre();
+            //@ ens post(result);
+
+            fn fetch_sub(self: &AtomicUsize, val: usize, order: Ordering) -> usize;
+            //@ req order == std::sync::atomic::Ordering::SeqCst &*& is_AtomicUsize_fetch_sub_ghop(?ghop, self, val, ?pre, ?post) &*& pre();
+            //@ ens post(result);
+
+            fn load(self: &AtomicUsize, order: Ordering) -> usize;
+            //@ req order == std::sync::atomic::Ordering::SeqCst &*& is_AtomicUsize_load_ghop(?ghop, self, ?pre, ?post) &*& pre();
+            //@ ens post(result);
+
+            fn compare_exchange(self: &AtomicUsize, current: usize, new: usize, success: Ordering, failure: Ordering) -> std::result::Result<usize, usize>;
+            /*@ req success == std::sync::atomic::Ordering::SeqCst &*& failure == std::sync::atomic::Ordering::SeqCst &*&
+                is_AtomicUsize_compare_exchange_ghop(?ghop, self, current, new, ?pre, ?post) &*& pre(); @*/
+            //@ ens post(result);
+        }
+    }
+}
