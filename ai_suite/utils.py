@@ -1,6 +1,8 @@
 import os
 import json
 from enum import Enum
+from configs import basic_prompt, CoT_prompt, RAG_prompt, input_suffixes
+
 
 class PromptType(Enum):
     BASIC = 1
@@ -17,6 +19,15 @@ class PromptType(Enum):
 
     def is_RAG(self):
         return self == PromptType.RAG_SPARSE or self == PromptType.RAG_DENSE
+
+    # get the prompt by its type
+    def get_prompt(self) -> str:
+        if self == PromptType.BASIC:
+            return basic_prompt
+        elif self == PromptType.COT:
+            return CoT_prompt
+        else:
+            return RAG_prompt
 
 
 def save_env_var() -> dict:
@@ -50,7 +61,7 @@ def get_rel_input_files(base_input_folder: str) -> list[str]:
     for dirpath, _, filenames in os.walk(base_input_folder):
         rel_dirpath = os.path.relpath(dirpath, base_input_folder)
         for fname in filenames:
-            if fname.endswith(("fbp.c", "fb.c", "nl.c")):
+            if fname.endswith(input_suffixes):
                 rel_fname = os.path.join(rel_dirpath, fname)
                 rel_input_files.append(rel_fname)
 

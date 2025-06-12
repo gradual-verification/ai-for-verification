@@ -9,6 +9,7 @@ from configs import *
 # Please specify the input folder, output folder and prompt in configs.py
 def main():
     prompt_type = PromptType.from_string(prompt_type_name)
+    prompt = prompt_type.get_prompt()
 
     # preparations: environmental variables, knowledge base for RAG, reading program
     old_env = save_env_var()
@@ -36,14 +37,15 @@ def main():
         with open(input_file, "r") as file:
             input_program = file.read()
 
-        results = read_included_lib_files(default_lib_files, input_folder, input_file, lib_folder)
+        # get the content of included lib files
+        lib_contents = read_included_lib_files(default_lib_files, input_folder, input_file, lib_folder)
 
         # try on each model
         for model in models:
-            output_program = handle_LLM(input_program, prompt, prompt_type, rag, model)
+            output_program = handle_LLM(prompt, input_program, lib_contents, prompt_type, rag, model)
 
             # write the output program into the output folder
-            new_base_output_folder = os.path.join(base_output_folder, model)
+            new_base_output_folder = os.path.join(base_output_folder, model + "_" + prompt_type_name + "_" + split_type)
             output_file = os.path.join(new_base_output_folder, rel_input_file)
 
             output_folder = os.path.dirname(output_file)
@@ -51,7 +53,7 @@ def main():
             with open(output_file, "w") as file:
                 file.write(output_program)
 
-            print("Finish " + model + "\n")
+            print("Finish " + model + " on " + rel_input_file + "\n")
 
     # finish
     if prompt_type.is_RAG() and delete_embedding:

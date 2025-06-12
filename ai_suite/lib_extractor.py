@@ -5,17 +5,23 @@ import re
 """
 Given a list of filenames of default library, a base folder, 
 the path to the c file, and a folder of lib, this function reads the files
-being implicitly and explicitly included by the c file and returns them in a mapping.
+being implicitly and explicitly included by the c file and returns them in a string.
 """
 def read_included_lib_files(filenames: list[str], folder_path: str,
-                            c_file_path: str, lib_folder_path: str) -> dict[str, str]:
+                            c_file_path: str, lib_folder_path: str) -> str:
     with open(c_file_path, 'r', encoding='utf-8') as f:
         input_content = f.read()
 
     results = {}
     read_implicitly_included_lib_files(filenames, lib_folder_path, results)
     read_explicitly_included_lib_files_recursive(folder_path, input_content, lib_folder_path, results)
-    return results
+
+    lib_contents = ""
+    for lib_name, lib_content in results.items():
+        lib_contents += "//" + lib_name + ":\n" + lib_content
+        lib_contents += "\n\n------------------\n\n"
+
+    return lib_contents
 
 
 """
