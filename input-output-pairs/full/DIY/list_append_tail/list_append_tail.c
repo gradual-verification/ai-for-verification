@@ -7,7 +7,7 @@ struct node {
 /*@
 predicate lseg(struct node *from, struct node *to) =
     from == to ?
-        emp
+        true
     :
         from != 0 &*& malloc_block_node(from) &*& from->next |-> ?next &*&
         lseg(next, to);
@@ -31,7 +31,7 @@ lemma void lseg_merge(struct node *x, struct node *y, struct node *z)
 @*/
 
 struct node *create_list()
-    //@ requires emp;
+    //@ requires true;
     //@ ensures llist(result);
 {
     return 0;
@@ -79,7 +79,7 @@ struct node *append_tail(struct node *head)
 
 void dispose_list(struct node *head)
     //@ requires llist(head);
-    //@ ensures emp;
+    //@ ensures true;
 {
     //@ open llist(head);
     if (head != 0) {

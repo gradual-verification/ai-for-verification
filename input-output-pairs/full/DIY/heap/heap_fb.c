@@ -19,6 +19,7 @@ predicate heap(struct heap_node *node, int min_val) =
         min_val == v;
 @*/
 
+// TODO: make this function pass the verification
 struct heap_node *heap_create(int val)
     //@ requires true;
     //@ ensures heap(result, val);
@@ -31,6 +32,7 @@ struct heap_node *heap_create(int val)
     return node;
 }
 
+// TODO: make this function pass the verification
 struct heap_node *heap_merge(struct heap_node *h1, struct heap_node *h2)
     //@ requires heap(h1, ?min1) &*& heap(h2, ?min2);
     //@ ensures heap(result, ?new_min) &*& new_min == (min1 < min2 ? min1 : min2);
@@ -63,6 +65,7 @@ struct heap_node *heap_merge(struct heap_node *h1, struct heap_node *h2)
     return smaller;
 }
 
+// TODO: make this function pass the verification
 int heap_get_min(struct heap_node *h)
     //@ requires heap(h, ?min_val) &*& h != 0;
     //@ ensures heap(h, min_val) &*& result == min_val;
@@ -71,6 +74,7 @@ int heap_get_min(struct heap_node *h)
     return val;
 }
 
+// TODO: make this function pass the verification
 void heap_dispose(struct heap_node *node)
     //@ requires heap(node, _);
     //@ ensures true;

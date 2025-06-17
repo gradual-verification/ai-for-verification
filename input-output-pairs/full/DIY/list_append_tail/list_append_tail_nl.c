@@ -4,6 +4,7 @@ struct node {
     struct node *next;
 };
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `create_list` function creates an empty list.
@@ -15,6 +16,7 @@ struct node *create_list()
     return 0;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `append_tail` function appends a new node to the tail of a given list. 
@@ -43,6 +45,7 @@ struct node *append_tail(struct node *head)
     }
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `dispose_list` function disposes a given list.
@@ -59,6 +62,7 @@ void dispose_list(struct node *head)
     }
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `main` function tests the operations of the list. 

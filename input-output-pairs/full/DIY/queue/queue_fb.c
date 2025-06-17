@@ -25,6 +25,7 @@ predicate queue(struct queue *q, int count) =
         count > 0 &*& tail != 0 &*& lseg(head, tail, count - 1) &*& tail->value |-> ?v &*& tail->next |-> 0);
 @*/
 
+// TODO: make this function pass the verification
 struct queue *create_queue()
     //@ requires true;
     //@ ensures queue(result, 0);
@@ -36,6 +37,7 @@ struct queue *create_queue()
     return q;
 }
 
+// TODO: make this function pass the verification
 void enqueue(struct queue *q, int val)
     //@ requires queue(q, ?count);
     //@ ensures queue(q, count + 1);
@@ -54,6 +56,7 @@ void enqueue(struct queue *q, int val)
     }
 }
 
+// TODO: make this function pass the verification
 int dequeue(struct queue *q)
     //@ requires queue(q, ?count) &*& count > 0;
     //@ ensures queue(q, count - 1);
@@ -76,6 +79,7 @@ int dequeue(struct queue *q)
     return val;
 }
 
+// TODO: make this function pass the verification
 void dispose_queue(struct queue *q)
     //@ requires queue(q, 0);
     //@ ensures true;

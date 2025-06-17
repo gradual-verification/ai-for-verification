@@ -5,7 +5,7 @@ struct int_array {
     int values[10];
 };
 
-
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `create_array` function creates an int_array with its values as 10 zeros.
@@ -26,6 +26,7 @@ struct int_array *create_array()
     return arr;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `set` function sets the element at the given index in an int_array to be the given value.
@@ -41,6 +42,7 @@ void set(struct int_array *arr, int index, int value)
     arr->values[index] = value;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `get` function gets the element at the given index in an int_array.
@@ -55,6 +57,7 @@ int get(struct int_array *arr, int index)
     return arr->values[index];
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `dispose_array` function disposes an int_array.

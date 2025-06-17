@@ -22,7 +22,7 @@ predicate_family_instance thread_run_post(worker)(struct shared *s, any info) =
     [1/NUM] s->mtx |-> ?m &*& [1/NUM] mutex(m, shared_inv(s));
 @*/
 
-
+// TODO: make this function pass the verification
 void worker(struct shared *data) //@ : thread_run_joinable
     //@ requires thread_run_pre(worker)(data, ?info);
     //@ ensures thread_run_post(worker)(data, info);
@@ -39,6 +39,7 @@ void worker(struct shared *data) //@ : thread_run_joinable
     mutex_release(s->mtx);
 }
 
+// TODO: make this function pass the verification
 void run_workers()
     //@ requires counter |-> 0;
     //@ ensures counter |-> ?v &*& v >= 0;

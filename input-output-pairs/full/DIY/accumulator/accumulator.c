@@ -11,7 +11,7 @@ predicate Accumulator(struct Accumulator* a, int t, int c) =
 @*/
 
 struct Accumulator* create(int v)
-  //@ requires emp;
+  //@ requires true;
   //@ ensures Accumulator(result, v, 1);
 {
   struct Accumulator* a = malloc(sizeof(struct Accumulator));
@@ -108,15 +108,15 @@ int average(struct Accumulator* a)
 
 void destroy(struct Accumulator* a)
   //@ requires Accumulator(a, _, _);
-  //@ ensures emp;
+  //@ ensures true;
 {
   //@ open Accumulator(a, _, _);
   free(a);
 }
 
 int main() //@ : main
-  //@ requires emp;
-  //@ ensures emp;
+  //@ requires true;
+  //@ ensures true;
 {
   struct Accumulator* acc = create(10);
   add(acc, 5);        // total = 15, count = 2

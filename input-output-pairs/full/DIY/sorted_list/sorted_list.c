@@ -17,7 +17,7 @@ predicate sorted_list(struct node *n, int lower_bound, int upper_bound) =
 @*/
 
 struct node *create_list()
-    //@ requires emp;
+    //@ requires true;
     //@ ensures sorted_list(result, INT_MIN, INT_MAX);
 {
     return 0;
@@ -46,7 +46,7 @@ struct node *append(struct node *head, int value)
 
 void dispose_list(struct node *head)
     //@ requires sorted_list(head, ?lower, ?upper);
-    //@ ensures emp;
+    //@ ensures true;
 {
     //@ open sorted_list(head, lower, upper);
     if (head != 0) {

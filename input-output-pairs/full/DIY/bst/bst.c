@@ -10,7 +10,7 @@ struct bst_node {
 /*@ 
 predicate bst(struct bst_node *node, int min, int max) =
     node == 0 ?
-        emp
+        true
     :
         malloc_block_bst_node(node) &*&
         node->value |-> ?v &*& min < v &*& v < max &*&
@@ -19,7 +19,7 @@ predicate bst(struct bst_node *node, int min, int max) =
 @*/
 
 struct bst_node *bst_create()
-    //@ requires emp;
+    //@ requires true;
     //@ ensures bst(result, INT_MIN, INT_MAX);
 {
     return 0;
@@ -93,7 +93,7 @@ void bst_traverse(struct bst_node *node)
 
 void bst_dispose(struct bst_node *node)
     //@ requires bst(node, ?min, ?max);
-    //@ ensures emp;
+    //@ ensures true;
 {
     //@ open bst(node, min, max);
     if (node != 0) {

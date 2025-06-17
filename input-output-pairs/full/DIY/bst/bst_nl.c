@@ -8,6 +8,7 @@ struct bst_node {
     int value;
 };
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `bst_create` function creates an empty BST.
@@ -20,6 +21,7 @@ struct bst_node *bst_create()
     return 0;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `bst_insert` function inserts a value into the BST.
@@ -51,6 +53,7 @@ struct bst_node *bst_insert(struct bst_node *node, int value)
     }
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `bst_search` function searches a value in the given BST.
@@ -76,6 +79,7 @@ bool bst_search(struct bst_node *node, int value)
     }
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `bst_traverse` function traverses the subtree of a given node.
@@ -94,6 +98,7 @@ void bst_traverse(struct bst_node *node)
     }
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `bst_dispose` function frees a given BST.
@@ -111,6 +116,7 @@ void bst_dispose(struct bst_node *node)
     }
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `main` function tests the operations of BST.

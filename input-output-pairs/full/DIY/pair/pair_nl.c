@@ -5,6 +5,7 @@ struct pair {
     int y;
 };
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `create_pair` function creates a pair with the given values.
@@ -22,6 +23,7 @@ struct pair* create_pair(int x, int y)
     return p;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `update_pair` function updates the values of a given pair with the given values.
@@ -37,6 +39,7 @@ void update_pair(struct pair *p, int new_x, int new_y)
     p->y = new_y;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `copy_pair` function copies the given pair into the return value.
@@ -54,6 +57,7 @@ struct pair* copy_pair(struct pair *p)
     return new_p;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `dispose_pair` function disposes the given pair by freeing it.
@@ -67,7 +71,7 @@ void dispose_pair(struct pair *p)
     free(p);
 }
 
-
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `main` function tests the operations of pair.

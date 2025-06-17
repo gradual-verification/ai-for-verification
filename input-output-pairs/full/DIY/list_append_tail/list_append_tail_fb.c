@@ -16,6 +16,7 @@ predicate llist(struct node *head) =
     lseg(head, 0);
 @*/
 
+// TODO: make this function pass the verification
 struct node *create_list()
     //@ requires true;
     //@ ensures llist(result);
@@ -23,6 +24,7 @@ struct node *create_list()
     return 0;
 }
 
+// TODO: make this function pass the verification
 struct node *append_tail(struct node *head)
     //@ requires llist(head);
     //@ ensures llist(result);
@@ -45,6 +47,7 @@ struct node *append_tail(struct node *head)
     }
 }
 
+// TODO: make this function pass the verification
 void dispose_list(struct node *head)
     //@ requires llist(head);
     //@ ensures true;
@@ -56,6 +59,7 @@ void dispose_list(struct node *head)
     }
 }
 
+// TODO: make this function pass the verification
 int main()
     //@ requires true;
     //@ ensures true;

@@ -11,6 +11,7 @@ struct shared {
     struct mutex *mtx;
 };
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `worker` function acquires exclusive access and increments the counter.
@@ -33,6 +34,7 @@ void worker(struct shared *data) //@ : thread_run_joinable
     mutex_release(s->mtx);
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `run_workers` function creates a shared data structure, starts multiple worker threads, and waits for them to finish.

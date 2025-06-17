@@ -10,6 +10,7 @@ predicate pair(struct pair *p, int x, int y) =
     p->x |-> x &*& p->y |-> y;
 @*/
 
+// TODO: make this function pass the verification
 struct pair* create_pair(int x, int y)
     //@ requires true;
     //@ ensures pair(result, x, y);
@@ -21,6 +22,7 @@ struct pair* create_pair(int x, int y)
     return p;
 }
 
+// TODO: make this function pass the verification
 void update_pair(struct pair *p, int new_x, int new_y)
     //@ requires pair(p, _, _);
     //@ ensures pair(p, new_x, new_y);
@@ -29,6 +31,7 @@ void update_pair(struct pair *p, int new_x, int new_y)
     p->y = new_y;
 }
 
+// TODO: make this function pass the verification
 struct pair* copy_pair(struct pair *p)
     //@ requires pair(p, ?x, ?y);
     //@ ensures pair(p, x, y) &*& pair(result, x, y);
@@ -40,6 +43,7 @@ struct pair* copy_pair(struct pair *p)
     return new_p;
 }
 
+// TODO: make this function pass the verification
 void dispose_pair(struct pair *p)
     //@ requires pair(p, _, _);
     //@ ensures true;
@@ -47,6 +51,7 @@ void dispose_pair(struct pair *p)
     free(p);
 }
 
+// TODO: make this function pass the verification
 int main()
     //@ requires true;
     //@ ensures true;

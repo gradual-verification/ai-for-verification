@@ -17,8 +17,9 @@ predicate_family_instance thread_run_data(writer)(struct rwlock *l) =
     [1/2]l->mutex |-> ?m &*& [1/2]mutex(m, rwlock_inv(l));
 @*/
 
+// TODO: make this function pass the verification
 struct rwlock *rwlock_init()
-    //@ requires emp;
+    //@ requires true;
     //@ ensures result->mutex |-> ?m &*& mutex(m, rwlock_inv(result));
 {
     struct rwlock *l = malloc(sizeof(struct rwlock));
@@ -28,6 +29,7 @@ struct rwlock *rwlock_init()
     return l;
 }
 
+// TODO: make this function pass the verification
 void reader(struct rwlock *l) //@ : thread_run
     //@ requires thread_run_data(reader)(l);
     //@ ensures true;
@@ -50,6 +52,7 @@ void reader(struct rwlock *l) //@ : thread_run
     mutex_release(l->mutex);
 }
 
+// TODO: make this function pass the verification
 void writer(struct rwlock *l) //@ : thread_run
     //@ requires thread_run_data(writer)(l);
     //@ ensures true;
@@ -68,6 +71,7 @@ void writer(struct rwlock *l) //@ : thread_run
     mutex_release(l->mutex);
 }
 
+// TODO: make this function pass the verification
 int main() //@ : main
     //@ requires true;
     //@ ensures true;

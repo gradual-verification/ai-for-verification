@@ -7,6 +7,7 @@ struct rwlock {
     int readers;
 };
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `rwlock_init` function creates a new reader-writer lock with no reader.
@@ -22,6 +23,7 @@ struct rwlock *rwlock_init()
     return l;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `reader` function acquires shared access by using the reader-writer lock. 
@@ -50,6 +52,7 @@ void reader(struct rwlock *l) //@ : thread_run
     mutex_release(l->mutex);
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `writer` function acquires exclusive access by using the reader-writer lock. 
@@ -74,6 +77,7 @@ void writer(struct rwlock *l) //@ : thread_run
     mutex_release(l->mutex);
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `main` function initializes a reader-writer lock and starts a reader and a writer thread.

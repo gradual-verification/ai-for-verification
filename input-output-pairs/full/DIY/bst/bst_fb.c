@@ -17,6 +17,7 @@ predicate bst(struct bst_node *node, int min, int max) =
         bst(left, min, v) &*& bst(right, v, max);
 @*/
 
+// TODO: make this function pass the verification
 struct bst_node *bst_create()
     //@ requires true;
     //@ ensures bst(result, INT_MIN, INT_MAX);
@@ -24,6 +25,7 @@ struct bst_node *bst_create()
     return 0;
 }
 
+// TODO: make this function pass the verification
 struct bst_node *bst_insert(struct bst_node *node, int value)
     //@ requires bst(node, ?min, ?max) &*& min < value &*& value < max;
     //@ ensures bst(result, min, max);
@@ -47,6 +49,7 @@ struct bst_node *bst_insert(struct bst_node *node, int value)
     }
 }
 
+// TODO: make this function pass the verification
 bool bst_search(struct bst_node *node, int value)
     //@ requires bst(node, ?min, ?max);
     //@ ensures bst(node, min, max);
@@ -65,6 +68,7 @@ bool bst_search(struct bst_node *node, int value)
     }
 }
 
+// TODO: make this function pass the verification
 void bst_traverse(struct bst_node *node)
     //@ requires bst(node, ?min, ?max);
     //@ ensures bst(node, min, max);
@@ -77,6 +81,7 @@ void bst_traverse(struct bst_node *node)
     }
 }
 
+// TODO: make this function pass the verification
 void bst_dispose(struct bst_node *node)
     //@ requires bst(node, ?min, ?max);
     //@ ensures true;
@@ -88,6 +93,7 @@ void bst_dispose(struct bst_node *node)
     }
 }
 
+// TODO: make this function pass the verification
 int main()
     //@ requires true;
     //@ ensures true;

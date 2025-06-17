@@ -6,6 +6,7 @@ struct Accumulator {
   int count; 
 };
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `create` function creates a new accumulator with the given value.
@@ -25,6 +26,7 @@ struct Accumulator* create(int v)
   return a;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `add` function adds up the value in the accumulator with a given value. 
@@ -40,6 +42,7 @@ void add(struct Accumulator* a, int x)
   a->count += 1;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `add_multiple` function adds up the value in the accumulator with a given value for multiple times. 
@@ -61,6 +64,7 @@ void add_multiple(struct Accumulator* a, int n, int x)
   }
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `subtract` function subtracts the value in the accumulator by a given value. 
@@ -76,6 +80,7 @@ void subtract(struct Accumulator* a, int x)
   a->count += 1;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `reset` function resets the accumulator. 
@@ -90,6 +95,7 @@ void reset(struct Accumulator* a)
   a->count = 0;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `current` function returns the total of a given accumulator. 
@@ -104,6 +110,7 @@ int current(struct Accumulator* a)
   return tmp;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `average` function returns the average value of each operation. 
@@ -118,6 +125,7 @@ int average(struct Accumulator* a)
   return avg;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `destroy` function disposes a given accumulator.
@@ -131,6 +139,7 @@ void destroy(struct Accumulator* a)
   free(a);
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `main` function tests the operations of Accumulator. 

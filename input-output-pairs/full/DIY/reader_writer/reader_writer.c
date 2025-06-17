@@ -19,7 +19,7 @@ predicate_family_instance thread_run_data(writer)(struct rwlock *l) =
 @*/
 
 struct rwlock *rwlock_init()
-    //@ requires emp;
+    //@ requires true;
     //@ ensures result->mutex |-> ?m &*& mutex(m, rwlock_inv(result));
 {
     struct rwlock *l = malloc(sizeof(struct rwlock));

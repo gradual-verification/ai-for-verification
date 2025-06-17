@@ -12,6 +12,7 @@ struct heap_node {
     struct heap_node *right;
 };
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `heap_create` function creates a single heap node with the given value.
@@ -30,6 +31,7 @@ struct heap_node *heap_create(int val)
     return node;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `heap_merge` function merges the two heaps into one heap.
@@ -68,6 +70,7 @@ struct heap_node *heap_merge(struct heap_node *h1, struct heap_node *h2)
     return smaller;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `heap_get_min` function gets the minimum value of a given heap.
@@ -82,6 +85,7 @@ int heap_get_min(struct heap_node *h)
     return val;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `heap_dispose` function disposes a heap rooted at a given node.

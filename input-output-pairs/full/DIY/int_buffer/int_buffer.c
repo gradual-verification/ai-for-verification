@@ -34,7 +34,7 @@ lemma void ints_join(int *p, int n, list<int> vs, int n0, list<int> vs0)
 @*/
 
 struct int_array *create_array()
-    //@ requires emp;
+    //@ requires true;
     //@ ensures array(result, zeros(10));
 {
     struct int_array *arr = malloc(sizeof(struct int_array));
@@ -79,7 +79,7 @@ int get(struct int_array *arr, int index)
 
 void dispose_array(struct int_array *arr)
     //@ requires array(arr, _);
-    //@ ensures emp;
+    //@ ensures true;
 {
     //@ open array(arr, _);
     free(arr);

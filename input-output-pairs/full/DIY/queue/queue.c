@@ -44,7 +44,7 @@ lemma void lseg_add(struct node *head, struct node *tail, struct node *new_tail,
 @*/
 
 struct queue *create_queue()
-    //@ requires emp;
+    //@ requires true;
     //@ ensures queue(result, 0);
 {
     struct queue *q = malloc(sizeof(struct queue));
@@ -106,7 +106,7 @@ int dequeue(struct queue *q)
 
 void dispose_queue(struct queue *q)
     //@ requires queue(q, 0);
-    //@ ensures emp;
+    //@ ensures true;
 {
     //@ open queue(q, 0);
     free(q);

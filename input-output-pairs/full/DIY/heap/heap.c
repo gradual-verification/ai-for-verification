@@ -21,7 +21,7 @@ predicate heap(struct heap_node *node, int min_val) =
 @*/
 
 struct heap_node *heap_create(int val)
-    //@ requires emp;
+    //@ requires true;
     //@ ensures heap(result, val);
 {
     struct heap_node *node = malloc(sizeof(struct heap_node));
@@ -94,7 +94,7 @@ int heap_get_min(struct heap_node *h)
 
 void heap_dispose(struct heap_node *node)
     //@ requires heap(node, _);
-    //@ ensures emp;
+    //@ ensures true;
 {
     if (node != 0) {
         //@ open heap(node, _);

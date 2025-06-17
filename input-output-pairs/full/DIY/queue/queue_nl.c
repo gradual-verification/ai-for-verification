@@ -10,6 +10,7 @@ struct queue {
     struct node *tail;
 };
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `create_queue` function creates an empty heap. 
@@ -25,6 +26,7 @@ struct queue *create_queue()
     return q;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `enqueue` function puts a new node with the given value into the tail of a given queue. 
@@ -50,6 +52,7 @@ void enqueue(struct queue *q, int val)
     }
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `dequeue` function removes the head of a non-empty heap and returns its value. 
@@ -78,6 +81,7 @@ int dequeue(struct queue *q)
     return val;
 }
 
+// TODO: make this function pass the verification
 /***
  * Description:
  * The `dispose_queue` function frees an empty queue. 

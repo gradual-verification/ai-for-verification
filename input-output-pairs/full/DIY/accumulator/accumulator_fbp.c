@@ -10,8 +10,9 @@ predicate Accumulator(struct Accumulator* a, int t, int c) =
   a->total |-> t &*& a->count |-> c &*& malloc_block_Accumulator(a);
 @*/
 
+// TODO: make this function pass the verification
 struct Accumulator* create(int v)
-  //@ requires emp;
+  //@ requires true;
   //@ ensures Accumulator(result, v, 1);
 {
   struct Accumulator* a = malloc(sizeof(struct Accumulator));
@@ -23,6 +24,7 @@ struct Accumulator* create(int v)
   return a;
 }
 
+// TODO: make this function pass the verification
 void add(struct Accumulator* a, int x)
   //@ requires Accumulator(a, ?t, ?c) &*& INT_MIN <= t + x &*& t <= INT_MAX - x &*& c < INT_MAX;
   //@ ensures Accumulator(a, t + x, c + 1);
@@ -31,6 +33,7 @@ void add(struct Accumulator* a, int x)
   a->count += 1;
 }
 
+// TODO: make this function pass the verification
 void add_multiple(struct Accumulator* a, int n, int x)
 /*@
   requires Accumulator(a, ?t, ?c) 
@@ -51,6 +54,7 @@ void add_multiple(struct Accumulator* a, int n, int x)
   }
 }
 
+// TODO: make this function pass the verification
 void subtract(struct Accumulator* a, int x)
   //@ requires Accumulator(a, ?t, ?c) &*& t - x <= INT_MAX &*& t - x >= INT_MIN &*& c < INT_MAX;
   //@ ensures Accumulator(a, t - x, c + 1);
@@ -59,6 +63,7 @@ void subtract(struct Accumulator* a, int x)
   a->count += 1;
 }
 
+// TODO: make this function pass the verification
 void reset(struct Accumulator* a)
   //@ requires Accumulator(a, _, _);
   //@ ensures Accumulator(a, 0, 0);
@@ -67,6 +72,7 @@ void reset(struct Accumulator* a)
   a->count = 0;
 }
 
+// TODO: make this function pass the verification
 int current(struct Accumulator* a)
   //@ requires Accumulator(a, ?t, ?c);
   //@ ensures Accumulator(a, t, c) &*& result == t;
@@ -75,6 +81,7 @@ int current(struct Accumulator* a)
   return tmp;
 }
 
+// TODO: make this function pass the verification
 int average(struct Accumulator* a)
   //@ requires Accumulator(a, ?t, ?c) &*& c > 0;
   //@ ensures Accumulator(a, t, c) &*& result == t / c;
@@ -83,16 +90,18 @@ int average(struct Accumulator* a)
   return avg;
 }
 
+// TODO: make this function pass the verification
 void destroy(struct Accumulator* a)
   //@ requires Accumulator(a, _, _);
-  //@ ensures emp;
+  //@ ensures true;
 {
   free(a);
 }
 
+// TODO: make this function pass the verification
 int main() //@ : main
-  //@ requires emp;
-  //@ ensures emp;
+  //@ requires true;
+  //@ ensures true;
 {
   struct Accumulator* acc = create(10);
   add(acc, 5);

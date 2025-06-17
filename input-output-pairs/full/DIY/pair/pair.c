@@ -11,7 +11,7 @@ predicate pair(struct pair *p, int x, int y) =
 @*/
 
 struct pair* create_pair(int x, int y)
-    //@ requires emp;
+    //@ requires true;
     //@ ensures pair(result, x, y);
 {
     struct pair* p = malloc(sizeof(struct pair));
@@ -48,7 +48,7 @@ struct pair* copy_pair(struct pair *p)
 
 void dispose_pair(struct pair *p)
     //@ requires pair(p, _, _);
-    //@ ensures emp;
+    //@ ensures true;
 {
     //@ open pair(p, _, _);
     free(p);
