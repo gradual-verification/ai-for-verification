@@ -69,13 +69,12 @@ void enqueue(struct queue *q, int val)
         q->head = n;
         q->tail = n;
         //@ close lseg(q->head, q->tail, 0);
-        //@ close queue(q, 1);
     } else {
         q->tail->next = n;
         //@ lseg_add(q->head, q->tail, n, count - 1);
         q->tail = n;
-        //@ close queue(q, count + 1);
     }
+    //@ close queue(q, count + 1);
 }
 
 int dequeue(struct queue *q)

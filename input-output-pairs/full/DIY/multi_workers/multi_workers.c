@@ -56,8 +56,7 @@ void run_workers()
 
     //@ close thread_run_pre(worker)(s, unit);
     for (int i = 0; i < NUM; i++)
-    /*@ invariant
-        0 <= i &*& i <= NUM &*& thread_run_pre(worker)(s, unit);
+    /*@ invariant thread_run_pre(worker)(s, unit);
     @*/
     {
         struct thread *t = thread_start_joinable(worker, s);

@@ -50,13 +50,12 @@ struct node *append_tail(struct node *head)
     //@ close lseg(new_node->next, 0);
     //@ close lseg(new_node, 0);
 
-    if (head == 0) {
-        //@ open lseg(head, 0);
+    //@ open lseg(head, 0);
+    if (head == 0) {    
         //@ close llist(new_node);
         return new_node;
     } else {
         struct node *curr = head;
-        //@ open lseg(head, 0);
         //@ close lseg(head, curr);
         while (curr->next != 0)
         //@ invariant curr != 0 &*& lseg(head, curr) &*& malloc_block_node(curr) &*& curr->next |-> ?cn &*& lseg(cn, 0);

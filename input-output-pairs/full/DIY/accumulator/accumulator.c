@@ -46,23 +46,17 @@ void add_multiple(struct Accumulator* a, int n, int x)
 @*/
 {
   int i = 0;
-  //@ int currTotal = t;
-  //@ int currCount = c;
   while (i < n)
-    /*@ invariant Accumulator(a, currTotal, currCount) 
-                 &*& currTotal == t + i * x
-                 &*& currCount == c + i 
+    /*@ invariant Accumulator(a, t + i * x, c + i) 
                  &*& i <= n;
     @*/
   {
-    //@ open Accumulator(a, currTotal, currCount);
+    //@ open Accumulator(a, t + i * x, c + i);
     //@ mul_mono_l(i + 1, n, x);
     a->total += x;
     a->count += 1;
-    //@ currTotal += x;
-    //@ currCount += 1;
     i++;
-    //@ close Accumulator(a, currTotal, currCount);
+    //@ close Accumulator(a, t + i * x, c + i);
   }
 }
 
