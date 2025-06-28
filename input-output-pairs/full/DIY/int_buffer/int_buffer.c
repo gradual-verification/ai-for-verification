@@ -41,8 +41,8 @@ struct int_array *create_array()
     if (!arr) abort();
     int *values = arr->values;
 
-    //@ close ints(values, 0, zeros(0));
-    //@ close ints_(values, 10, _);
+    // @ close ints(values, 0, zeros(0));
+    // @ close ints_(values, 10, _) 
     for (int i = 0; i < 10; i++)
         /*@
           invariant

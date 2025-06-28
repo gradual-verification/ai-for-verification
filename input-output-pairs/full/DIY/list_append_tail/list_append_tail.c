@@ -44,13 +44,13 @@ struct node *append_tail(struct node *head)
     //@ ensures llist(result);
 {
     //@ open llist(head);
+    //@ open lseg(head, 0);
     struct node *new_node = malloc(sizeof(struct node));
     if (new_node == 0) abort();
     new_node->next = 0;
     //@ close lseg(new_node->next, 0);
     //@ close lseg(new_node, 0);
 
-    //@ open lseg(head, 0);
     if (head == 0) {    
         //@ close llist(new_node);
         return new_node;
@@ -81,13 +81,12 @@ void dispose_list(struct node *head)
     //@ ensures true;
 {
     //@ open llist(head);
+    //@ open lseg(head, 0);
     if (head != 0) {
-        //@ open lseg(head, 0);
         //@ close llist(head->next);
         dispose_list(head->next);
         free(head);
     } else {
-        //@ open lseg(head, 0);
     }
 }
 

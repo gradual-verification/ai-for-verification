@@ -91,14 +91,13 @@ int dequeue(struct queue *q)
         q->head = 0;
         q->tail = 0;
         free(n);
-        //@ close queue(q, 0);
     } else {
         val = n->value;
         struct node *next = n->next;
         q->head = next;
         free(n);
-        //@ close queue(q, count - 1);
     }
+    //@ close queue(q, count - 1);
 
     return val;
 }

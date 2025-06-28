@@ -67,10 +67,10 @@ void writer(struct rwlock *l) //@ : thread_run
     //@ ensures true;
 {
     //@ open thread_run_data(writer)(l);
-    //@ assert [1/2]l->mutex |-> ?m;
+    // @ assert [1/2]l->mutex |-> ?m;
     // acquire exclusive lock by spinning
     for (;;)
-        //@ invariant [1/2]l->mutex |-> m &*& [1/2]mutex(m, rwlock_inv(l));
+        //@ invariant [1/2]l->mutex |-> ?m &*& [1/2]mutex(m, rwlock_inv(l));
     {
         mutex_acquire(l->mutex);
         //@ open rwlock_inv(l)();
