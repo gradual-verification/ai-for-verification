@@ -4,16 +4,12 @@ from utils import *
 from lib_extractor import *
 from configs import *
 
-
-# This function can query multiple LLM models.
-# Please specify the input folder, output folder and prompt in configs.py
 def main():
-    prompt_type = PromptType.from_string(prompt_type_name)
-    prompt = prompt_type.get_prompt()
-
-    # preparations: environmental variables, knowledge base for RAG, reading program
+    # preparations: environmental variables
     old_env = save_env_var()
     modify_env_var()
+
+    prompt_type = PromptType.from_string(prompt_type_name)
 
     rag = BestRAG(
         url=os.environ["qdrant_url"],
@@ -21,12 +17,20 @@ def main():
         collection_name=collection_name
     )
 
-    if prompt_type.is_RAG() and delete_embedding:
-        rag.delete_collection()
-
     if prompt_type.is_RAG() and store_embedding:
         rag.store_KB_embeddings(KB_folder)
+    elif prompt_type.is_RAG() and delete_embedding:
+        rag.delete_collection()
+    else:
+        evaluate(prompt_type, rag)
 
+    restore_env_var(old_env)
+
+
+# This function can query multiple LLM models.
+# Please specify the input folder, output folder and prompt in configs.py
+def evaluate(prompt_type: PromptType, rag: BestRAG):
+    prompt = prompt_type.get_prompt()
     rel_input_files = get_rel_input_files(base_input_folder)
 
     for rel_input_file in rel_input_files:
@@ -54,11 +58,6 @@ def main():
                 file.write(output_program)
 
             print("Finish " + model + " on " + rel_input_file + "\n")
-
-    # finish
-    if prompt_type.is_RAG() and delete_embedding:
-        rag.delete_collection()
-    restore_env_var(old_env)
 
 
 if __name__ == "__main__":

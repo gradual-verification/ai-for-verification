@@ -7,10 +7,12 @@ import uuid
 from typing import List, Optional
 from qdrant_client import QdrantClient, models
 from qdrant_client.http.models import Distance
+from qdrant_client.http import models as rest_models
 from fastembed import TextEmbedding
 from fastembed.sparse.bm25 import Bm25
 import PyPDF2
 
+from configs import tutorial_typename, program_typename
 
 
 class BestRAG:
@@ -62,6 +64,13 @@ class BestRAG:
                 },
                 sparse_vectors_config={"sparse": models.SparseVectorParams()}
             )
+
+            self.client.create_payload_index(
+                collection_name=self.collection_name,
+                field_name="type",
+                field_schema=rest_models.PayloadSchemaType.KEYWORD,
+            )
+
             print(f"Created collection: {self.collection_name}")
         else:
             print(f"Using existing collection: {self.collection_name}")
@@ -124,17 +133,29 @@ class BestRAG:
                 file_path = os.path.join(dirpath, file_name)
                 if os.path.isfile(file_path):
                     # handle pdf file
-                    if file_path.endswith(".pdf"):
-                        texts = self._extract_pdf_text_per_page(file_path)
-                        for page_num, text in enumerate(texts):
-                            self.store_KB_embedding(file_name, text, metadata)
+                    if "tutorial" in file_path and file_path.endswith(".txt"):
+                        with open(file_path, "r") as file:
+                            text = file.read()
+                            self.store_KB_embedding(file_name, tutorial_typename, text, metadata)
+                        #texts = self._extract_pdf_text_per_page(file_path)
+                        # store in vector database
+                        #for _, text in enumerate(texts):
+                        #    self.store_KB_embedding(file_name, tutorial_typename, text, metadata)
+                        # store locally
+                        #tutorial_text = ""
+                        #for _, text in enumerate(texts):
+                        #    tutorial_text += text + "\n------------------------------\n"
+                        #with open(file_path + ".txt", "w") as text_file:
+                        #    text_file.write(tutorial_text)
+
+                    # handle programs
                     elif file_path.endswith(".c") or file_path.endswith(".h") or file_path.endswith(".gh"):
                         with open(file_path, "r") as file:
                             text = file.read()
-                        self.store_KB_embedding(file_name, text, metadata)
+                        self.store_KB_embedding(file_name, program_typename, text, metadata)
 
 
-    def store_KB_embedding(self, file_name: str, content: str,
+    def store_KB_embedding(self, file_name: str, file_type: str, content: str,
                              metadata: Optional[dict] = None):
         """
         Store the embedding for each chunk of knowledge base in the Qdrant collection.
@@ -158,7 +179,8 @@ class BestRAG:
 
         payload = {
             "text": content,
-            "name": file_name
+            "name": file_name,
+            "type": file_type,
         }
 
         if metadata:
@@ -203,7 +225,7 @@ class BestRAG:
                 print(f"Deleted all embeddings for '{filename}' from collection '{self.collection_name}': '{result}'.")
 
 
-    def search(self, query: str, rag_type: str, limit: int = 10):
+    def search(self, query: str, rag_type: str, file_type: str, limit: int = 10):
         """
         Search the Qdrant collection for documents that match the given query.
 
@@ -226,11 +248,21 @@ class BestRAG:
             )
         }
 
+        filter = models.Filter(
+            must=[
+                models.FieldCondition(
+                    key="type",
+                    match=models.MatchValue(value=file_type)
+                )
+            ]
+        )
+
         results = self.client.query_points(
             collection_name=self.collection_name,
             query=query_vector[rag_type],
             using=rag_type,
             limit=limit,
+            query_filter=filter
         )
 
         return results

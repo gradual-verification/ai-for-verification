@@ -1,29 +1,36 @@
 import textwrap
 
 # the name of LLMs to be tested
+'''
 models = ["google:gemini-2.5-pro-preview-03-25", "google:gemini-2.0-flash",
         "openai:gpt-4.5-preview", "openai:o1", "openai:o3-mini", "openai:gpt-4o",
         "deepseek:deepseek-chat", "deepseek:deepseek-reasoner",
         "anthropic:claude-3-7-sonnet-20250219", "anthropic:claude-3-5-sonnet-20241022", "anthropic:claude-3-5-haiku-20241022",
         "groq:llama-3.3-70b-versatile", "groq:llama-3.1-8b-instant",
-        "mistral:codestral-latest", "mistral:codestral-2405"]
-# models = ["openai:gpt-4o-2024-08-06"]
+        "mistral:codestral-latest", "mistral:codestral-2405"]\
+'''
+models = ["openai:gpt-4o-2024-08-06"]
 
 # the type of prompt, can be "BASIC", "COT", "RAG_SPARSE", "RAG_DENSE"
 prompt_type_name = "RAG_SPARSE"
 
 # "non-split" or "split" on functional granularity
-split_type = "non-split"
+split_type = "split"
 
 # the suffix of input files to be evaluated
-input_suffixes = ("fbp.c", "fb.c", "nl.c")
+#input_suffixes = ("fbp.c", "fb.c", "nl.c")
+input_suffixes = ("fbp.c")
+
+# the name of types of contexts
+tutorial_typename = "tutorial"
+program_typename = "program"
 
 # options to store and delete the vector embedding of context in RAG
 store_embedding = False
 delete_embedding = False
 
 # the number of returned context in RAG
-RAG_TOP_N = 20
+RAG_TOP_N = 10
 
 # the temperature of LLM
 temperature = 0
@@ -38,13 +45,13 @@ default_lib_files = ["prelude.h", "prelude_core.gh", "list.gh"]
 lib_folder = "lib/"
 
 # the folder that stores the input files
-base_input_folder = "../input-output-pairs/full/DIY/"
+base_input_folder = "../input-output-pairs/full/DIY_split/"
 
 # the folder that stores knowledge base
 KB_folder = "KB"
 
 # the folder that stores the output of LLM
-base_output_folder = "output1/"
+base_output_folder = "output/"
 
 # prompts for different types
 basic_prompt = textwrap.dedent("""\
