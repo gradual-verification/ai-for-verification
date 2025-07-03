@@ -18,25 +18,31 @@ struct pair* create_pair(int x, int y)
     if (p == 0) abort();
     p->x = x;
     p->y = y;
+    //@ close pair(p, x, y);
     return p;
 }
 
 void update_pair(struct pair *p, int new_x, int new_y)
-    //@ requires pair(p, _, _);
+    //@ requires pair(p, ?old_x, ?old_y);
     //@ ensures pair(p, new_x, new_y);
 {
+    //@ open pair(p, old_x, old_y);
     p->x = new_x;
     p->y = new_y;
+    //@ close pair(p, new_x, new_y);
 }
 
 struct pair* copy_pair(struct pair *p)
     //@ requires pair(p, ?x, ?y);
     //@ ensures pair(p, x, y) &*& pair(result, x, y);
 {
+    //@ open pair(p, x, y);
     struct pair* new_p = malloc(sizeof(struct pair));
     if (new_p == 0) abort();
     new_p->x = p->x;
     new_p->y = p->y;
+    //@ close pair(new_p, x, y);
+    //@ close pair(p, x, y);
     return new_p;
 }
 
@@ -44,21 +50,19 @@ void dispose_pair(struct pair *p)
     //@ requires pair(p, _, _);
     //@ ensures true;
 {
+    //@ open pair(p, _, _);
     free(p);
 }
 
 // TODO: make this function pass the verification
 int main()
-    //@ requires true;z
+    //@ requires true;
     //@ ensures true;
 {
     struct pair* p = create_pair(1, 2);
-    //@ open pair(p, 1, 2);
     update_pair(p, 3, 4);
-    //@ close pair(p, 3, 4);
     
     struct pair* p_copy = copy_pair(p);
-    //@ open pair(p_copy, 3, 4);
     
     dispose_pair(p);
     dispose_pair(p_copy);

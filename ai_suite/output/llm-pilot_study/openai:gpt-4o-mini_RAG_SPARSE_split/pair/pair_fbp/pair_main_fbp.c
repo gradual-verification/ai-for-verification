@@ -49,16 +49,13 @@ void dispose_pair(struct pair *p)
 
 // TODO: make this function pass the verification
 int main()
-    //@ requires true;z
+    //@ requires true;
     //@ ensures true;
 {
     struct pair* p = create_pair(1, 2);
-    //@ open pair(p, 1, 2);
     update_pair(p, 3, 4);
-    //@ close pair(p, 3, 4);
     
     struct pair* p_copy = copy_pair(p);
-    //@ open pair(p_copy, 3, 4);
     
     dispose_pair(p);
     dispose_pair(p_copy);
