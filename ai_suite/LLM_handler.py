@@ -53,12 +53,15 @@ def query_LLM(prompt: str, input_text: str, lib_contents: str, examples: str, mo
         {"role": "user", "content": content}
     ]
 
-    response = client.chat.completions.create(
-        model=model,
-        messages=messages,
-        temperature= temperature
-    )
+    # consider o3 specially for temperature
+    kwargs = {
+        "model": model,
+        "messages": messages,
+    }
+    if model.lower() != "openai:o3":
+        kwargs["temperature"] = temperature
 
+    response = client.chat.completions.create(**kwargs)
     full_output = response.choices[0].message.content
     return full_output
 

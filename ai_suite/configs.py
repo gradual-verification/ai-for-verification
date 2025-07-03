@@ -2,14 +2,22 @@ import textwrap
 
 # the name of LLMs to be tested
 '''
+# original list
 models = ["google:gemini-2.5-pro-preview-03-25", "google:gemini-2.0-flash",
-        "openai:gpt-4.5-preview", "openai:o1", "openai:o3-mini", "openai:gpt-4o",
+        "openai:gpt-4.5-preview", "openai:o1", "openai:o3-mini", "openai:o3", "openai:gpt-4o",
         "deepseek:deepseek-chat", "deepseek:deepseek-reasoner",
         "anthropic:claude-3-7-sonnet-20250219", "anthropic:claude-3-5-sonnet-20241022", "anthropic:claude-3-5-haiku-20241022",
         "groq:llama-3.3-70b-versatile", "groq:llama-3.1-8b-instant",
-        "mistral:codestral-latest", "mistral:codestral-2405"]\
-'''
+        "mistral:codestral-latest", "mistral:codestral-2405", "groq:meta-llama/llama-4-scout-17b-16e-instruct", "groq:qwen/qwen3-32b"]\
+# for the first pilot study
 models = ["openai:gpt-4o-2024-08-06"]
+'''
+
+models = ["openai:gpt-4o", "openai:gpt-4o-mini", "openai:o3",
+          "anthropic:claude-3-7-sonnet-20250219", "deepseek:deepseek-chat", "deepseek:deepseek-reasoner",
+          "google:gemini-2.5-pro", "groq:llama-3.3-70b-versatile", "groq:meta-llama/llama-4-scout-17b-16e-instruct",
+          "groq:qwen/qwen3-32b"]
+
 
 # the type of prompt, can be "BASIC", "COT", "RAG_SPARSE", "RAG_DENSE"
 prompt_type_name = "RAG_SPARSE"
@@ -51,7 +59,7 @@ base_input_folder = "../input-output-pairs/full/DIY_split/"
 KB_folder = "KB"
 
 # the folder that stores the output of LLM
-base_output_folder = "output/"
+base_output_folder = "output/llm-pilot_study/"
 
 # prompts for different types
 basic_prompt = textwrap.dedent("""\
