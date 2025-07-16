@@ -9,12 +9,6 @@ struct rwlock {
 /*@
 predicate_ctor rwlock_inv(struct rwlock *l)() =
     l->readers |-> ?r &*& r >= 0 &*& malloc_block_rwlock(l);
-
-predicate_family_instance thread_run_data(reader)(struct rwlock *l) =
-    [1/2]l->mutex |-> ?m &*& [1/2]mutex(m, rwlock_inv(l));
-
-predicate_family_instance thread_run_data(writer)(struct rwlock *l) =
-    [1/2]l->mutex |-> ?m &*& [1/2]mutex(m, rwlock_inv(l));
 @*/
 
 // TODO: make this function pass the verification
