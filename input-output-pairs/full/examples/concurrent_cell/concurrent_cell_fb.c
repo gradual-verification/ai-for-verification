@@ -79,6 +79,35 @@ predicate observed(struct cell* c, trace trace) =
   [_]c->id |-> ?id &*& is_prefix_handle(?h, id, trace);
 @*/
 
+/*@
+typedef lemma void inc_allowed(fixpoint(trace, bool) allowed)(trace t);
+  requires allowed(t) == true;
+  ensures allowed(inc(t)) == true;
+@*/
+
+/*@
+typedef lemma void dec_allowed(fixpoint(trace, bool) allowed)(trace t);
+  requires allowed(t) == true;
+  ensures allowed(dec(t)) == true;
+@*/
+
+/*@
+typedef lemma void cas_allowed(fixpoint(trace, bool) allowed, int old, int new)(trace t);
+  requires allowed(t) == true;
+  ensures allowed(cas_(old, new, t)) == true;
+@*/
+
+/*@
+fixpoint bool incr_only(trace trace) {
+  switch(trace) {
+    case zero: return true;
+    case inc(trace0): return incr_only(trace0);
+    case dec(trace0): return false;
+    case cas_(old, new, trace0): return old <= new && incr_only(trace0);
+  }
+}
+@*/
+
 struct cell* cell_create()
   //@ requires exists<fixpoint(trace, bool)>(?allowed) &*& allowed(zero) == true;
   //@ ensures result == 0 ? true : cell(result, allowed) &*& observed(result, zero);
@@ -90,12 +119,6 @@ struct cell* cell_create()
   c->mutex = m;
   return c;
 }
-
-/*@
-typedef lemma void inc_allowed(fixpoint(trace, bool) allowed)(trace t);
-  requires allowed(t) == true;
-  ensures allowed(inc(t)) == true;
-@*/
 
 void increment(struct cell* c)
   //@ requires [?f]cell(c, ?allowed) &*& is_inc_allowed(?lem, allowed) &*& observed(c, ?trace0);
@@ -112,12 +135,6 @@ void increment(struct cell* c)
   mutex_release(c->mutex);
 }
 
-/*@
-typedef lemma void dec_allowed(fixpoint(trace, bool) allowed)(trace t);
-  requires allowed(t) == true;
-  ensures allowed(dec(t)) == true;
-@*/
-
 void decrement(struct cell* c)
   //@ requires [?f]cell(c, ?allowed) &*& is_dec_allowed(?lem, allowed) &*& observed(c, ?trace0);
   //@ ensures [f]cell(c, allowed) &*& is_dec_allowed(lem, allowed) &*& observed(c, ?trace) &*& is_prefix(trace0, trace) == true;
@@ -132,12 +149,6 @@ void decrement(struct cell* c)
   }
   mutex_release(c->mutex);
 }
-
-/*@
-typedef lemma void cas_allowed(fixpoint(trace, bool) allowed, int old, int new)(trace t);
-  requires allowed(t) == true;
-  ensures allowed(cas_(old, new, t)) == true;
-@*/
 
 int cas(struct cell* c, int old, int new)
   //@ requires [?f]cell(c, ?allowed) &*& is_cas_allowed(?lem, allowed, old, new) &*& observed(c, ?trace0);
@@ -168,17 +179,6 @@ int get(struct cell* c)
   mutex_release(c->mutex);
   return res;
 }
-
-/*@
-fixpoint bool incr_only(trace trace) {
-  switch(trace) {
-    case zero: return true;
-    case inc(trace0): return incr_only(trace0);
-    case dec(trace0): return false;
-    case cas_(old, new, trace0): return old <= new && incr_only(trace0);
-  }
-}
-@*/
 
 void only_allow_incrementing(struct cell* c)
   //@ requires [?f]cell(c, incr_only) &*& observed(c, ?trace0);

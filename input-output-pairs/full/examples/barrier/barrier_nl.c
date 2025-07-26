@@ -22,6 +22,21 @@ struct barrier {
 
 /***
  * Description:
+ * This structure holds shared data used by two threads that coordinate 
+ * via the barrier. The fields `x1`, `x2`, `y1`, `y2`, and `i` are used 
+ * as example variables manipulated by the threads.
+ */
+struct data {
+    struct barrier *barrier;
+    int x1;
+    int x2;
+    int y1;
+    int y2;
+    int i;
+};
+
+/***
+ * Description:
  * Creates and initializes a new barrier intended for `n` threads.
  *
  * @param n - The number of threads to synchronize with this barrier.
@@ -120,21 +135,6 @@ void barrier_dispose(struct barrier *barrier)
     
     free(barrier);
 }
-
-/***
- * Description:
- * This structure holds shared data used by two threads that coordinate 
- * via the barrier. The fields `x1`, `x2`, `y1`, `y2`, and `i` are used 
- * as example variables manipulated by the threads.
- */
-struct data {
-    struct barrier *barrier;
-    int x1;
-    int x2;
-    int y1;
-    int y2;
-    int i;
-};
 
 /***
  * Description:

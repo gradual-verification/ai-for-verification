@@ -1,5 +1,11 @@
 #include "stdlib.h"
 
+struct point {
+    int x;
+    int y;
+};
+
+
 /*** 
  * Description:
 The swap function takes two integer pointers as parameters and swaps the values they point to.
@@ -16,10 +22,6 @@ void swap(int *a, int *b)
     *b = tmp;
 }
 
-struct point {
-    int x;
-    int y;
-};
 
 /*** 
  * Description:

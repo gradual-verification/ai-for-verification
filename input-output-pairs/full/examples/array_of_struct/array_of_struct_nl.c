@@ -7,6 +7,11 @@ struct student {
     int age;
 };
 
+struct point {
+    int x;
+    int y;
+};
+
 /***
  * Description:
 The read_students function reads student information from user input and allocates memory for storing the students' data.
@@ -32,11 +37,6 @@ struct student *read_students(int *count)
     }
     return result;
 }
-
-struct point {
-    int x;
-    int y;
-};
 
 /***
  * Description:

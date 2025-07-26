@@ -18,6 +18,14 @@ struct mystruct {
 
 struct mystruct my_global_nested_struct = {{42, {420, 421, 422, 423, 424, 425, 426}, -3}, -99};
 
+static int ar2 [55];
+
+static struct_with_array bigArray[10] = {{100, {1,2,3,4}, 200}, {300, {5,6,7}, 400}}; // Incomplete initializer lists; remaining elements get default value.
+
+struct point { int x; int y; };
+
+struct point points[] = { { 10, 20 }, { 30, 40 } };
+
 /*foo() function
 -params: none
 -description: This function checks if the global struct is different from the local structs.
@@ -39,7 +47,6 @@ static void foo()
   free(sh);
 }
 
-static int ar2 [55];
 
 /*mod_ar2() function
 -params: none
@@ -53,12 +60,6 @@ void mod_ar2 (void)
   ar2[ 1] = ar2[ 1] + ar2[26];
   return;
  }
-
-static struct_with_array bigArray[10] = {{100, {1,2,3,4}, 200}, {300, {5,6,7}, 400}}; // Incomplete initializer lists; remaining elements get default value.
-
-struct point { int x; int y; };
-
-struct point points[] = { { 10, 20 }, { 30, 40 } };
 
 
 /*main() function

@@ -69,6 +69,79 @@ lemma void count_eq_append<t>(list<t> xs, list<t> ys)
 
 @*/
 
+/*@
+
+lemma void is_sorted_forall_le(int lower, list<int> vs)
+    requires is_sorted_between(none, vs, none) && forall(vs, (le)(lower));
+    ensures is_sorted_between(some(lower), vs, none) == true;
+{
+    switch (vs) {
+        case nil:
+        case cons(v, vs0):
+    }
+}
+
+lemma void is_sorted_forall_ge(option<int> lower, list<int> vs, int upper)
+    requires is_sorted_between(lower, vs, none) && forall(vs, (ge)(upper)) && option_le(lower, upper);
+    ensures is_sorted_between(lower, vs, some(upper)) == true;
+{
+    switch (vs) {
+        case nil:
+        case cons(v, vs0):
+            is_sorted_forall_ge(some(v), vs0, upper);
+    }
+}
+
+lemma void mem_count_eq<t>(t x, list<t> xs)
+    requires true;
+    ensures mem(x, xs) == (count_eq(xs, x) > 0);
+{
+    switch (xs) {
+        case nil:
+        case cons(x0, xs0):
+            if (x0 == x) {
+                count_nonnegative(xs0, (eq)(x));
+            } else {
+                mem_count_eq(x, xs0);
+            }
+    }
+}
+
+lemma void note(bool b)
+    requires b;
+    ensures b;
+{}
+
+lemma void count_eq_forall<t>(list<t> xs, list<t> ys, fixpoint(t, bool) p)
+    requires forall(xs, p) == true &*& (count_eq)(ys) == (count_eq)(xs);
+    ensures forall(ys, p) == true;
+{
+    if (!forall(ys, p)) {
+        t x = not_forall(ys, p);
+        mem_count_eq(x, ys);
+        mem_count_eq(x, xs);
+        note((count_eq)(xs)(x) > 0);
+        assert mem(x, xs) == true;
+        forall_elim(xs, p, x);
+        assert false;
+    }
+}
+
+lemma void is_sorted_append(option<int> lower, list<int> xs, int pivot, list<int> ys)
+    requires is_sorted_between(lower, xs, some(pivot)) && is_sorted_between(some(pivot), ys, none);
+    ensures is_sorted_between(lower, append(xs, ys), none) == true;
+{
+    switch (xs) {
+        case nil:
+            switch (lower) { case none: case some(l): }
+            switch (ys) { case nil: case cons(h, t): }
+        case cons(x, xs0):
+            is_sorted_append(some(x), xs0, pivot, ys);
+    }
+}
+
+@*/
+
 void swap (int *a, int i, int j)
   //@ requires a[i] |-> ?vi &*& a[j] |-> ?vj;
   //@ ensures a[i] |-> vj &*& a[j] |-> vi;
@@ -189,79 +262,6 @@ int partition(int *a, int lo, int hi)
   }
   return i;
 }
-
-/*@
-
-lemma void is_sorted_forall_le(int lower, list<int> vs)
-    requires is_sorted_between(none, vs, none) && forall(vs, (le)(lower));
-    ensures is_sorted_between(some(lower), vs, none) == true;
-{
-    switch (vs) {
-        case nil:
-        case cons(v, vs0):
-    }
-}
-
-lemma void is_sorted_forall_ge(option<int> lower, list<int> vs, int upper)
-    requires is_sorted_between(lower, vs, none) && forall(vs, (ge)(upper)) && option_le(lower, upper);
-    ensures is_sorted_between(lower, vs, some(upper)) == true;
-{
-    switch (vs) {
-        case nil:
-        case cons(v, vs0):
-            is_sorted_forall_ge(some(v), vs0, upper);
-    }
-}
-
-lemma void mem_count_eq<t>(t x, list<t> xs)
-    requires true;
-    ensures mem(x, xs) == (count_eq(xs, x) > 0);
-{
-    switch (xs) {
-        case nil:
-        case cons(x0, xs0):
-            if (x0 == x) {
-                count_nonnegative(xs0, (eq)(x));
-            } else {
-                mem_count_eq(x, xs0);
-            }
-    }
-}
-
-lemma void note(bool b)
-    requires b;
-    ensures b;
-{}
-
-lemma void count_eq_forall<t>(list<t> xs, list<t> ys, fixpoint(t, bool) p)
-    requires forall(xs, p) == true &*& (count_eq)(ys) == (count_eq)(xs);
-    ensures forall(ys, p) == true;
-{
-    if (!forall(ys, p)) {
-        t x = not_forall(ys, p);
-        mem_count_eq(x, ys);
-        mem_count_eq(x, xs);
-        note((count_eq)(xs)(x) > 0);
-        assert mem(x, xs) == true;
-        forall_elim(xs, p, x);
-        assert false;
-    }
-}
-
-lemma void is_sorted_append(option<int> lower, list<int> xs, int pivot, list<int> ys)
-    requires is_sorted_between(lower, xs, some(pivot)) && is_sorted_between(some(pivot), ys, none);
-    ensures is_sorted_between(lower, append(xs, ys), none) == true;
-{
-    switch (xs) {
-        case nil:
-            switch (lower) { case none: case some(l): }
-            switch (ys) { case nil: case cons(h, t): }
-        case cons(x, xs0):
-            is_sorted_append(some(x), xs0, pivot, ys);
-    }
-}
-
-@*/
 
 void quicksort(int *a, int lo, int hi)
   //@ requires lo >= 0 &*& hi < INT_MAX &*& a[lo..hi + 1] |-> ?vs;

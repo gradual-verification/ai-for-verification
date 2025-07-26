@@ -5,6 +5,13 @@
 
 typedef struct eloop *eloop;
 
+struct eloop {
+    int lock;
+    int signalCount;
+    eloop_handler *handler;
+    void *handlerData;
+};
+
 /***
  * Description:
 The eloop_handler function pointer that handles the data of an event loop and preserves the property of event loop and data.
@@ -12,13 +19,6 @@ The eloop_handler function pointer that handles the data of an event loop and pr
 @param data: the data to be handled, which needs to preserve some property before and after the execution of handler.
 */
 typedef void eloop_handler(void *data);
-
-struct eloop {
-    int lock;
-    int signalCount;
-    eloop_handler *handler;
-    void *handlerData;
-};
 
 /***
  * Description:

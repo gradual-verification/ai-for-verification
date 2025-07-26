@@ -7,6 +7,11 @@ struct student {
     int age;
 };
 
+struct point {
+    int x;
+    int y;
+};
+
 /*@
 predicate students(struct student *students, int count;) =
     count == 0 ?
@@ -45,11 +50,6 @@ struct student *read_students(int *count)
     }
     return result;
 }
-
-struct point {
-    int x;
-    int y;
-};
 
 int main() //@ : main
 //@ requires true;

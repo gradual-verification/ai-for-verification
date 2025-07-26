@@ -34,23 +34,11 @@ typedef lemma void dec_allowed(trace pretrace, fixpoint(trace, bool) allowed, in
   ensures allowed(dec(ctid, trace)) == true;
 @*/
 
-void atomic_dec(int* c);
-  //@ requires [?f]cell(c, ?allowed) &*& last_seen(c, currentThread, ?oldtrace) &*& is_dec_allowed(?lem, oldtrace, allowed, currentThread);
-  //@ ensures [f]cell(c, allowed) &*& last_seen(c, currentThread, dec(currentThread, ?currtrace)) &*& is_good_prefix(oldtrace, currtrace, currentThread) == true;
-  
-int atomic_load(int* c);
-  //@ requires [?f]cell(c, ?allowed) &*& last_seen(c, currentThread, ?oldtrace);
-  //@ ensures [f]cell(c, allowed) &*& last_seen(c, currentThread, ?currtrace) &*& is_good_prefix(oldtrace, currtrace, currentThread) == true &*& execute_trace(currtrace) == result;
-  
 /*@
 typedef lemma void cas_allowed(trace pretrace, fixpoint(trace, bool) allowed, int old, int new)(trace trace);
   requires is_good_prefix(pretrace, trace, currentThread) == true &*& allowed(trace) == true;
   ensures allowed(cas_(currentThread, old, new, trace)) == true;
 @*/
-  
-int atomic_cas(int* c, int old, int new);
-  //@ requires [?f]cell(c, ?allowed) &*& last_seen(c, currentThread, ?oldtrace) &*& is_cas_allowed(?lem, oldtrace, allowed, old, new);
-  //@ ensures [f]cell(c, allowed) &*& last_seen(c, currentThread, cas_(currentThread, old, new, ?currtrace)) &*& is_good_prefix(currtrace, currtrace, currentThread) == true &*& result == execute_trace(currtrace);
 
 /*@
 fixpoint bool incr_only(trace trace) {
@@ -75,20 +63,6 @@ lemma void prefix_smaller(trace t1, trace t2, int ctid)
 }
 @*/
 
-void only_allow_incrementing(int* c)
-  //@ requires [?f]cell(c, incr_only) &*& last_seen(c, currentThread, ?trace0);
-  //@ ensures [f]cell(c, incr_only) &*& last_seen(c, currentThread, _);
-{
-  int x1 = atomic_load(c);
-  //@ assert last_seen(c, currentThread, ?trace1);
-  //@ last_seen_allowed(c, currentThread);
-  int x2 = atomic_load(c);
-  //@ assert last_seen(c, currentThread, ?trace2);
-  //@ last_seen_allowed(c, currentThread);
-  //@ prefix_smaller(trace1, trace2, currentThread);
-  assert x1 <= x2;
-}
-
 /*@
 fixpoint option<int> lock_owner(trace trace) {
   switch(trace) {
@@ -108,32 +82,6 @@ fixpoint bool is_lock(trace trace) {
   }
 }
 @*/
-
-void acquire(int* c)
-  //@ requires [?f]cell(c, is_lock) &*& last_seen(c, currentThread, _);
-  //@ ensures [f]cell(c, is_lock) &*& last_seen(c, currentThread, ?trace1) &*& lock_owner(trace1) == some(currentThread);
-{
-  while(true)
-    //@ invariant [f]cell(c, is_lock) &*& last_seen(c, currentThread, ?trace0);
-  {
-    /*@
-    {
-      lemma void acquire_ok(trace trace)
-        requires is_good_prefix(trace0, trace, currentThread) == true &*& is_lock(trace) == true;
-        ensures is_lock(cas_(currentThread, 0, 1, trace)) == true;
-      {
-        
-      }
-      produce_lemma_function_pointer_chunk(acquire_ok) : cas_allowed(trace0, is_lock, 0, 1)(x) { call(); };
-    }
-    @*/
-  //@ last_seen_allowed(c, currentThread);
-    int read = atomic_cas(c, 0, 1);
-    if(read == 0) {
-      break;
-    }
-  }
-}
 
 /*@
 lemma void execute_steps_locked(trace t)
@@ -180,6 +128,58 @@ lemma void locked_preserved_by_interference(trace t1, trace t2, int ctid)
   }
 }
 @*/
+
+void atomic_dec(int* c);
+  //@ requires [?f]cell(c, ?allowed) &*& last_seen(c, currentThread, ?oldtrace) &*& is_dec_allowed(?lem, oldtrace, allowed, currentThread);
+  //@ ensures [f]cell(c, allowed) &*& last_seen(c, currentThread, dec(currentThread, ?currtrace)) &*& is_good_prefix(oldtrace, currtrace, currentThread) == true;
+  
+int atomic_load(int* c);
+  //@ requires [?f]cell(c, ?allowed) &*& last_seen(c, currentThread, ?oldtrace);
+  //@ ensures [f]cell(c, allowed) &*& last_seen(c, currentThread, ?currtrace) &*& is_good_prefix(oldtrace, currtrace, currentThread) == true &*& execute_trace(currtrace) == result;
+  
+int atomic_cas(int* c, int old, int new);
+  //@ requires [?f]cell(c, ?allowed) &*& last_seen(c, currentThread, ?oldtrace) &*& is_cas_allowed(?lem, oldtrace, allowed, old, new);
+  //@ ensures [f]cell(c, allowed) &*& last_seen(c, currentThread, cas_(currentThread, old, new, ?currtrace)) &*& is_good_prefix(currtrace, currtrace, currentThread) == true &*& result == execute_trace(currtrace);
+
+void only_allow_incrementing(int* c)
+  //@ requires [?f]cell(c, incr_only) &*& last_seen(c, currentThread, ?trace0);
+  //@ ensures [f]cell(c, incr_only) &*& last_seen(c, currentThread, _);
+{
+  int x1 = atomic_load(c);
+  //@ assert last_seen(c, currentThread, ?trace1);
+  //@ last_seen_allowed(c, currentThread);
+  int x2 = atomic_load(c);
+  //@ assert last_seen(c, currentThread, ?trace2);
+  //@ last_seen_allowed(c, currentThread);
+  //@ prefix_smaller(trace1, trace2, currentThread);
+  assert x1 <= x2;
+}
+
+void acquire(int* c)
+  //@ requires [?f]cell(c, is_lock) &*& last_seen(c, currentThread, _);
+  //@ ensures [f]cell(c, is_lock) &*& last_seen(c, currentThread, ?trace1) &*& lock_owner(trace1) == some(currentThread);
+{
+  while(true)
+    //@ invariant [f]cell(c, is_lock) &*& last_seen(c, currentThread, ?trace0);
+  {
+    /*@
+    {
+      lemma void acquire_ok(trace trace)
+        requires is_good_prefix(trace0, trace, currentThread) == true &*& is_lock(trace) == true;
+        ensures is_lock(cas_(currentThread, 0, 1, trace)) == true;
+      {
+        
+      }
+      produce_lemma_function_pointer_chunk(acquire_ok) : cas_allowed(trace0, is_lock, 0, 1)(x) { call(); };
+    }
+    @*/
+  //@ last_seen_allowed(c, currentThread);
+    int read = atomic_cas(c, 0, 1);
+    if(read == 0) {
+      break;
+    }
+  }
+}
 
 void release(int* c)
   //@ requires [?f]cell(c, is_lock) &*& last_seen(c, currentThread, ?trace0) &*& lock_owner(trace0) == some(currentThread);

@@ -1,15 +1,4 @@
 #include "stdlib.h"
-
-/*
-  Destructors
-*/
-
-/*
-destructor function
--params: data
--description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
-*/
-typedef void destructor(void* data);
   
 
 /*
@@ -28,6 +17,30 @@ struct stack
   destructor* destructor;
   int size;
 };
+
+
+/*
+  A few use cases
+*/
+
+struct data
+{
+  int foo;
+  int bar;
+};
+
+
+/*
+  Destructors
+*/
+
+/*
+destructor function
+-params: data
+-description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
+*/
+typedef void destructor(void* data);
+
 
 /* create_empty_stack function
 -params: A destructor
@@ -134,18 +147,6 @@ int size(struct stack* stack)
   int size = stack->size;
   return size;
 }
-
-
-
-/*
-  A few use cases
-*/
-
-struct data
-{
-  int foo;
-  int bar;
-};
 
 /*
   create_data function

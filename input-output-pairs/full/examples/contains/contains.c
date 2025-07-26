@@ -14,10 +14,6 @@ predicate_family equals_pre(void* index)(void* v1, void* v2, fixpoint(unit, void
 predicate_family equals_post(void* index)(void* v1, void* v2,  fixpoint(unit, void*, void*, bool) eq_func);
 @*/
 
-typedef bool equals(void* v1, void* v2);
-  //@ requires equals_pre(this)(v1, v2, ?eq_func);
-  //@ ensures equals_post(this)(v1, v2, eq_func) &*& result == eq_func(unit, v1, v2);
-
 /*@
 predicate_ctor my_pre(equals * index, void* v1, fixpoint(unit, void*, void*, bool) eq_func)(void* v2) =
   equals_pre(index)(v1, v2, eq_func);
@@ -35,6 +31,21 @@ fixpoint bool contains_eq_func(list<void*> vs, void* v, fixpoint(unit, void*, vo
   }
 }
 @*/
+
+/*@
+predicate_family_instance equals_pre(my_equals)(void* v1, void* v2, fixpoint(unit, void*, void*, bool) eq_func) = eq_func == my_eq_func;
+predicate_family_instance equals_post(my_equals)(void* v1, void* v2, fixpoint(unit, void*, void*, bool) eq_func) = true;
+
+fixpoint bool my_eq_func(unit un, void* v1, void* v2) {
+  switch(un) {
+    case unit: return (uintptr_t)v1 == (uintptr_t)v2;
+  }
+}
+@*/
+
+typedef bool equals(void* v1, void* v2);
+  //@ requires equals_pre(this)(v1, v2, ?eq_func);
+  //@ ensures equals_post(this)(v1, v2, eq_func) &*& result == eq_func(unit, v1, v2);
 
 struct node* create_list() 
   //@ requires true;
@@ -86,17 +97,6 @@ bool list_contains(struct node* n, void* v, equals* eq)
     }
   }
 }
-
-/*@
-predicate_family_instance equals_pre(my_equals)(void* v1, void* v2, fixpoint(unit, void*, void*, bool) eq_func) = eq_func == my_eq_func;
-predicate_family_instance equals_post(my_equals)(void* v1, void* v2, fixpoint(unit, void*, void*, bool) eq_func) = true;
-
-fixpoint bool my_eq_func(unit un, void* v1, void* v2) {
-  switch(un) {
-    case unit: return (uintptr_t)v1 == (uintptr_t)v2;
-  }
-}
-@*/
 
 bool my_equals(void* v1, void* v2) //@: equals
   //@ requires equals_pre(my_equals)(v1, v2, ?eq_func);

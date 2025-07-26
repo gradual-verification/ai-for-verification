@@ -6,6 +6,9 @@ struct node {
     void *value;
 };
 
+struct foo {
+    int value;
+};
 
 /**
  * Description:
@@ -89,10 +92,6 @@ bool map_contains_key(struct node *map, void *key, equalsFuncType *equalsFunc)
         }
     }
 }
-
-struct foo {
-    int value;
-};
 
 
 /**

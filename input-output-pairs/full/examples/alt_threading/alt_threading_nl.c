@@ -1,5 +1,7 @@
 #include "stdlib.h"
 
+struct thread;
+
 /***
  * Description:
  * The `thread_run` typedef represents a type of function that can be executed by a thread.
@@ -10,8 +12,6 @@
  * depends on the specific implementation of the thread function.
  */
 typedef void thread_run (void *data);
-
-struct thread;
 
 /***
  * Description:

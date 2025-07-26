@@ -13,10 +13,6 @@ predicate_family equals_state1(void* index)(void* x1, int v1,fixpoint(unit, int,
 predicate_family equals_state2(void* index)(void* x1, int v1,fixpoint(unit, int, int, bool) eq_func);
 @*/
 
-typedef bool equals(void* x1, void* x2);
-  //@ requires equals_state1(this)(x1, ?v1, ?eq_func) &*& equals_state2(this)(x2, ?v2, eq_func);
-  //@ ensures equals_state1(this)(x1, v1, eq_func) &*& equals_state2(this)(x2, v2, eq_func) &*& result == eq_func(unit, v1, v2);
-
 /*@
 predicate_ctor equals_state2_ctor(equals * index, fixpoint(unit, int, int, bool) eq_func)(void* x2, int v2) =
   equals_state2(index)(x2, v2, eq_func);
@@ -45,6 +41,31 @@ predicate foreach2<t1, t2>(list<t1> xs, list<t2> vs, predicate(t1, t2) q) =
 ;
 
 @*/
+
+// specific to cell
+
+struct cell {
+  int val;
+};
+
+/*@
+predicate_family_instance equals_state1(cell_equals)(struct cell* c1, int v, fixpoint (unit, int, int,bool) eq_func) =
+  c1->val |-> v &*& eq_func == cell_eq_func;
+  
+  predicate_family_instance equals_state2(cell_equals)(struct cell* c2, int v, fixpoint (unit, int, int,bool) eq_func) =
+  c2->val |-> v &*& eq_func == cell_eq_func;
+  
+fixpoint bool cell_eq_func(unit un, int v1, int v2) {
+  switch(un) {
+    case unit: return v1 == v2;
+  }
+}
+@*/
+
+typedef bool equals(void* x1, void* x2);
+  //@ requires equals_state1(this)(x1, ?v1, ?eq_func) &*& equals_state2(this)(x2, ?v2, eq_func);
+  //@ ensures equals_state1(this)(x1, v1, eq_func) &*& equals_state2(this)(x2, v2, eq_func) &*& result == eq_func(unit, v1, v2);
+
 struct node* create_list() 
   //@ requires true;
   //@ ensures nodes(result, nil);
@@ -81,11 +102,6 @@ bool list_contains(struct node* n, void* v, equals* eq)
   }
 }
 
-// specific to cell
-
-struct cell {
-  int val;
-};
 
 struct cell* create_cell(int v)
   //@ requires true;
@@ -97,19 +113,6 @@ struct cell* create_cell(int v)
   return c;
 }
 
-/*@
-predicate_family_instance equals_state1(cell_equals)(struct cell* c1, int v, fixpoint (unit, int, int,bool) eq_func) =
-  c1->val |-> v &*& eq_func == cell_eq_func;
-  
-  predicate_family_instance equals_state2(cell_equals)(struct cell* c2, int v, fixpoint (unit, int, int,bool) eq_func) =
-  c2->val |-> v &*& eq_func == cell_eq_func;
-  
-fixpoint bool cell_eq_func(unit un, int v1, int v2) {
-  switch(un) {
-    case unit: return v1 == v2;
-  }
-}
-@*/
 
 bool cell_equals(struct cell* x1, struct cell* x2) //@: equals
   //@ requires equals_state1(cell_equals)(x1, ?v1, ?eq_func) &*& equals_state2(cell_equals)(x2, ?v2, eq_func);

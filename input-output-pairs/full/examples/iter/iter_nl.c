@@ -10,6 +10,10 @@ struct llist {
   struct node *last;
 };
 
+struct iter {
+    struct node *current;
+};
+
 /***
  * Description:
 The create_llist function allocates an empty linked list with a node as both the first and last of the linked list.
@@ -68,11 +72,6 @@ void llist_dispose(struct llist *list)
   free(l);
   free(list);
 }
-
-
-struct iter {
-    struct node *current;
-};
 
 /**
  * Description:

@@ -1,12 +1,4 @@
 #include "stdlib.h"
-
-/*
-  Destructors
-*/
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
   
 
 /*
@@ -160,6 +152,76 @@ lemma void PushNotNil<T>(void* data, T info, Stack<T> Stack)
 
 @*/
 
+/*
+  A few use cases
+*/
+
+struct data
+{
+  int foo;
+  int bar;
+};
+
+/*@
+
+predicate Data(struct data* data, int foo, int bar) =
+  malloc_block_data(data) &*&
+  data->foo |-> foo &*&
+  data->bar |-> bar;
+
+@*/
+
+/*@
+
+inductive DataCarrier =
+  | DataCarrier(int, int);
+
+fixpoint int GetFoo(DataCarrier dc)
+{
+  switch ( dc )
+  {
+    case DataCarrier(x, y):
+      return x;
+  }
+}
+
+fixpoint int GetBar(DataCarrier dc)
+{
+  switch ( dc )
+  {
+    case DataCarrier(x, y):
+      return y;
+  }
+}
+
+predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(DC), GetBar(DC));
+
+@*/
+
+/*@
+
+lemma void CheckPushPop<T>(void* item, T info, Stack<T> S)
+  requires true;
+  ensures Pop( Push( item, info, S ) ) == S;
+{
+}
+
+lemma void CheckSizePush<T>(void* item, T info, Stack<T> S)
+  requires true;
+  ensures Size( Push( item, info, S ) ) == 1 + Size( S );
+{
+}
+
+@*/
+
+/*
+  Destructors
+*/
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
   //@ requires [_]is_destructor<T>(destructor, ?Ownership);
   //@ ensures Stack(result, destructor, Ownership, ?Stack) &*& IsEmpty(Stack) == true;
@@ -293,26 +355,6 @@ int size/*@ <T> @*/(struct stack* stack)
 }
 
 
-
-/*
-  A few use cases
-*/
-
-struct data
-{
-  int foo;
-  int bar;
-};
-
-/*@
-
-predicate Data(struct data* data, int foo, int bar) =
-  malloc_block_data(data) &*&
-  data->foo |-> foo &*&
-  data->bar |-> bar;
-
-@*/
-
 struct data* create_data(int foo, int bar)
   //@ requires true;
   //@ ensures Data(result, foo, bar);
@@ -325,33 +367,6 @@ struct data* create_data(int foo, int bar)
   //@ close Data(data, foo, bar);
   return data;
 }
-
-/*@
-
-inductive DataCarrier =
-  | DataCarrier(int, int);
-
-fixpoint int GetFoo(DataCarrier dc)
-{
-  switch ( dc )
-  {
-    case DataCarrier(x, y):
-      return x;
-  }
-}
-
-fixpoint int GetBar(DataCarrier dc)
-{
-  switch ( dc )
-  {
-    case DataCarrier(x, y):
-      return y;
-  }
-}
-
-predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(DC), GetBar(DC));
-
-@*/
 
 void destroy_data(struct data* data)
   //@ requires Data_Ownership(data, _);
@@ -438,19 +453,3 @@ void check2()
   
   destroy_stack(stack);
 }
-
-/*@
-
-lemma void CheckPushPop<T>(void* item, T info, Stack<T> S)
-  requires true;
-  ensures Pop( Push( item, info, S ) ) == S;
-{
-}
-
-lemma void CheckSizePush<T>(void* item, T info, Stack<T> S)
-  requires true;
-  ensures Size( Push( item, info, S ) ) == 1 + Size( S );
-{
-}
-
-@*/

@@ -1,5 +1,10 @@
 #include "stdlib.h"
 
+struct point {
+    int x;
+    int y;
+};
+
 void swap(int *a, int *b)
 //@ requires integer(a, ?x) &*& integer(b, ?y);
 //@ ensures integer(a, y) &*& integer(b, x);
@@ -8,11 +13,6 @@ void swap(int *a, int *b)
     *a = *b;
     *b = tmp;
 }
-
-struct point {
-    int x;
-    int y;
-};
 
 void point_mirror(struct point *p)
 //@ requires p->x |-> ?x &*& p->y |-> ?y;

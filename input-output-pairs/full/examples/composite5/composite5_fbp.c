@@ -68,6 +68,8 @@ predicate tree(int id) =
 predicate tree_membership_fact(int id, struct node *n) = ghost_list_member_handle(id, n);
 @*/
 
+//@ predicate tree_id(int id) = true;
+
 struct node *create_node(struct node *p, struct node *next)
   //@ requires true;
   /*@
@@ -96,8 +98,6 @@ struct node *create_tree()
   struct node *n = create_node(0, 0);
   return n;
 }
-
-//@ predicate tree_id(int id) = true;
 
 void add_to_count(struct node *p, int delta)
   /*@

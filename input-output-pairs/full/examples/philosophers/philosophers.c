@@ -16,6 +16,8 @@ predicate_family_instance thread_run_data(philosopher_run)(struct philosopher *d
 
 @*/
 
+//@ predicate dummy() = true;
+
 void create_philosopher(struct lock *fork1, struct lock *fork2)
     //@ requires [_]lock(fork1, ?fork1Id, _) &*& [_]lock(fork2, ?fork2Id, _) &*& lock_below(fork1Id, fork2Id) == true;
     //@ ensures true;
@@ -46,8 +48,6 @@ void philosopher_run(void *data) //@ : thread_run
         lock_release(fork1);
     }
 }
-
-//@ predicate dummy() = true;
 
 int main() //@ : main
     //@ requires true;

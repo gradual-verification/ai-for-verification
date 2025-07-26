@@ -4,15 +4,6 @@
 //@ #include "quantifiers.gh"
 //@ #include "target.gh"
 
-int read_int()
-    //@ requires true;
-    //@ ensures true;
-{
-    int x;
-    scanf("%i", &x);
-    return x;
-}
-
 /*@
 
 fixpoint bool is_sorted_between(int l, list<int> xs, int u) {
@@ -39,6 +30,15 @@ fixpoint list<int> sorted(list<int> xs) {
 
 
 @*/
+
+int read_int()
+    //@ requires true;
+    //@ ensures true;
+{
+    int x;
+    scanf("%i", &x);
+    return x;
+}
 
 void merge_sort_core(int *pxs, int *pys, int n)
     //@ requires pxs[0..n] |-> ?vs &*& pys[0..n] |-> _;

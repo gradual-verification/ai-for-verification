@@ -87,6 +87,147 @@ predicate tree(struct node * node, context c, tree subtree) =
 
 @*/
 
+/*@
+
+fixpoint tree combine(context c, tree t) {
+    switch (c) {
+        case root: return t;
+        case left_context(pns, p, right):
+          return combine(pns, tree(p, t, right));
+        case right_context(pns, p, left):
+          return combine(pns, tree(p, left, t));
+    }
+}
+
+inductive path = here | left(path) | right(path);
+
+fixpoint bool contains_at_path(tree nodes, path path, struct node *node) {
+    switch (nodes) {
+        case empty: return false;
+        case tree(rootNode, leftNodes, rightNodes):
+            return
+                switch (path) {
+                    case here: return node == rootNode;
+                    case left(path0): return contains_at_path(leftNodes, path0, node);
+                    case right(path0): return contains_at_path(rightNodes, path0, node);
+                };
+    }
+}
+
+lemma void go_to_root(context contextNodes)
+    requires tree(?node, contextNodes, ?subtreeNodes);
+    ensures tree(?rootNode, root, combine(contextNodes, subtreeNodes));
+{
+    switch (contextNodes) {
+        case root:
+        case left_context(parentContextNodes, parent, rightNodes):
+            open tree(node, contextNodes, subtreeNodes);
+            open context(node, _, _, _);
+            assert context(parent, ?grandparent, _, _);
+            close subtree(parent, grandparent, tree(parent, subtreeNodes, rightNodes));
+            close tree(parent, parentContextNodes, tree(parent, subtreeNodes, rightNodes));
+            go_to_root(parentContextNodes);
+        case right_context(parentContextNodes, parent, leftNodes):
+            open tree(node, contextNodes, subtreeNodes);
+            open context(node, _, _, _);
+            assert context(parent, ?grandparent, _, _);
+            close subtree(parent, grandparent, tree(parent, leftNodes, subtreeNodes));
+            close tree(parent, parentContextNodes, tree(parent, leftNodes, subtreeNodes));
+            go_to_root(parentContextNodes);
+    }
+}
+
+fixpoint path combine_path(context contextNodes, path path) {
+    switch (contextNodes) {
+        case root: return path;
+        case left_context(parentContextNodes, parent, rightNodes): return combine_path(parentContextNodes, left(path));
+        case right_context(parentContextNodes, parent, leftNodes): return combine_path(parentContextNodes, right(path));
+    }
+}
+
+fixpoint context get_context_nodes_at_path(context contextNodes, tree subtreeNodes, path path) {
+    switch (path) {
+        case here: return contextNodes;
+        case left(path0):
+            return
+                switch (subtreeNodes) {
+                    case empty: return contextNodes;
+                    case tree(rootNode, leftNodes, rightNodes):
+                        return get_context_nodes_at_path(left_context(contextNodes, rootNode, rightNodes), leftNodes, path0);
+                };
+        case right(path0):
+            return
+                switch (subtreeNodes) {
+                    case empty: return contextNodes;
+                    case tree(rootNode, leftNodes, rightNodes):
+                        return get_context_nodes_at_path(right_context(contextNodes, rootNode, leftNodes), rightNodes, path0);
+                };
+    }
+}
+
+fixpoint tree get_subtree_nodes_at_path(tree subtreeNodes, path path) {
+    switch (subtreeNodes) {
+        case empty: return empty;
+        case tree(rootNode, leftNodes, rightNodes):
+            return
+                switch (path) {
+                    case here: return subtreeNodes;
+                    case left(path0): return get_subtree_nodes_at_path(leftNodes, path0);
+                    case right(path0): return get_subtree_nodes_at_path(rightNodes, path0);
+                };
+    }
+}
+
+lemma void go_to_descendant(struct node *node0, path path, struct node *node)
+    requires tree(node0, ?contextNodes, ?subtreeNodes) &*& contains_at_path(subtreeNodes, path, node) == true;
+    ensures tree(node, get_context_nodes_at_path(contextNodes, subtreeNodes, path), get_subtree_nodes_at_path(subtreeNodes, path));
+{
+    switch (path) {
+        case here:
+            open tree(node0, contextNodes, subtreeNodes);
+            open subtree(node0, ?parent, subtreeNodes);
+            switch (subtreeNodes) {
+                case empty:
+                case tree(node00, leftNodes, rightNodes):
+                    close subtree(node0, parent, subtreeNodes);
+                    close tree(node0, contextNodes, subtreeNodes);
+            }
+        case left(path0):
+            open tree(node0, contextNodes, subtreeNodes);
+            open subtree(node0, ?parent, subtreeNodes);
+            switch (subtreeNodes) {
+                case empty:
+                case tree(node00, leftNodes, rightNodes):
+                    struct node *left = node0->left;
+                    close context(left, node0, tcount(leftNodes), left_context(contextNodes, node0, rightNodes));
+                    close tree(left, left_context(contextNodes, node0, rightNodes), leftNodes);
+                    go_to_descendant(left, path0, node);
+            }
+        case right(path0):
+            open tree(node0, contextNodes, subtreeNodes);
+            open subtree(node0, ?parent, subtreeNodes);
+            switch (subtreeNodes) {
+                case empty:
+                case tree(node00, leftNodes, rightNodes):
+                    struct node *right = node0->right;
+                    close context(right, node0, tcount(rightNodes), right_context(contextNodes, node0, leftNodes));
+                    close tree(right, right_context(contextNodes, node0, leftNodes), rightNodes);
+                    go_to_descendant(right, path0, node);
+            }
+    }
+}
+
+lemma void change_focus(struct node *node0, path path, struct node *node)
+    requires tree(node0, ?contextNodes, ?subtreeNodes) &*& contains_at_path(combine(contextNodes, subtreeNodes), path, node) == true;
+    ensures tree(node, get_context_nodes_at_path(root, combine(contextNodes, subtreeNodes), path), get_subtree_nodes_at_path(combine(contextNodes, subtreeNodes), path));
+{
+    go_to_root(contextNodes);
+    assert tree(?rootNode, _, _);
+    go_to_descendant(rootNode, path, node);
+}
+
+@*/
+
 struct node * create_node(struct node * p)
   //@ requires true;
   /*@ ensures 
@@ -304,147 +445,6 @@ int main0()
   tree_dispose(node);
   return 0;
 }
-
-/*@
-
-fixpoint tree combine(context c, tree t) {
-    switch (c) {
-        case root: return t;
-        case left_context(pns, p, right):
-          return combine(pns, tree(p, t, right));
-        case right_context(pns, p, left):
-          return combine(pns, tree(p, left, t));
-    }
-}
-
-inductive path = here | left(path) | right(path);
-
-fixpoint bool contains_at_path(tree nodes, path path, struct node *node) {
-    switch (nodes) {
-        case empty: return false;
-        case tree(rootNode, leftNodes, rightNodes):
-            return
-                switch (path) {
-                    case here: return node == rootNode;
-                    case left(path0): return contains_at_path(leftNodes, path0, node);
-                    case right(path0): return contains_at_path(rightNodes, path0, node);
-                };
-    }
-}
-
-lemma void go_to_root(context contextNodes)
-    requires tree(?node, contextNodes, ?subtreeNodes);
-    ensures tree(?rootNode, root, combine(contextNodes, subtreeNodes));
-{
-    switch (contextNodes) {
-        case root:
-        case left_context(parentContextNodes, parent, rightNodes):
-            open tree(node, contextNodes, subtreeNodes);
-            open context(node, _, _, _);
-            assert context(parent, ?grandparent, _, _);
-            close subtree(parent, grandparent, tree(parent, subtreeNodes, rightNodes));
-            close tree(parent, parentContextNodes, tree(parent, subtreeNodes, rightNodes));
-            go_to_root(parentContextNodes);
-        case right_context(parentContextNodes, parent, leftNodes):
-            open tree(node, contextNodes, subtreeNodes);
-            open context(node, _, _, _);
-            assert context(parent, ?grandparent, _, _);
-            close subtree(parent, grandparent, tree(parent, leftNodes, subtreeNodes));
-            close tree(parent, parentContextNodes, tree(parent, leftNodes, subtreeNodes));
-            go_to_root(parentContextNodes);
-    }
-}
-
-fixpoint path combine_path(context contextNodes, path path) {
-    switch (contextNodes) {
-        case root: return path;
-        case left_context(parentContextNodes, parent, rightNodes): return combine_path(parentContextNodes, left(path));
-        case right_context(parentContextNodes, parent, leftNodes): return combine_path(parentContextNodes, right(path));
-    }
-}
-
-fixpoint context get_context_nodes_at_path(context contextNodes, tree subtreeNodes, path path) {
-    switch (path) {
-        case here: return contextNodes;
-        case left(path0):
-            return
-                switch (subtreeNodes) {
-                    case empty: return contextNodes;
-                    case tree(rootNode, leftNodes, rightNodes):
-                        return get_context_nodes_at_path(left_context(contextNodes, rootNode, rightNodes), leftNodes, path0);
-                };
-        case right(path0):
-            return
-                switch (subtreeNodes) {
-                    case empty: return contextNodes;
-                    case tree(rootNode, leftNodes, rightNodes):
-                        return get_context_nodes_at_path(right_context(contextNodes, rootNode, leftNodes), rightNodes, path0);
-                };
-    }
-}
-
-fixpoint tree get_subtree_nodes_at_path(tree subtreeNodes, path path) {
-    switch (subtreeNodes) {
-        case empty: return empty;
-        case tree(rootNode, leftNodes, rightNodes):
-            return
-                switch (path) {
-                    case here: return subtreeNodes;
-                    case left(path0): return get_subtree_nodes_at_path(leftNodes, path0);
-                    case right(path0): return get_subtree_nodes_at_path(rightNodes, path0);
-                };
-    }
-}
-
-lemma void go_to_descendant(struct node *node0, path path, struct node *node)
-    requires tree(node0, ?contextNodes, ?subtreeNodes) &*& contains_at_path(subtreeNodes, path, node) == true;
-    ensures tree(node, get_context_nodes_at_path(contextNodes, subtreeNodes, path), get_subtree_nodes_at_path(subtreeNodes, path));
-{
-    switch (path) {
-        case here:
-            open tree(node0, contextNodes, subtreeNodes);
-            open subtree(node0, ?parent, subtreeNodes);
-            switch (subtreeNodes) {
-                case empty:
-                case tree(node00, leftNodes, rightNodes):
-                    close subtree(node0, parent, subtreeNodes);
-                    close tree(node0, contextNodes, subtreeNodes);
-            }
-        case left(path0):
-            open tree(node0, contextNodes, subtreeNodes);
-            open subtree(node0, ?parent, subtreeNodes);
-            switch (subtreeNodes) {
-                case empty:
-                case tree(node00, leftNodes, rightNodes):
-                    struct node *left = node0->left;
-                    close context(left, node0, tcount(leftNodes), left_context(contextNodes, node0, rightNodes));
-                    close tree(left, left_context(contextNodes, node0, rightNodes), leftNodes);
-                    go_to_descendant(left, path0, node);
-            }
-        case right(path0):
-            open tree(node0, contextNodes, subtreeNodes);
-            open subtree(node0, ?parent, subtreeNodes);
-            switch (subtreeNodes) {
-                case empty:
-                case tree(node00, leftNodes, rightNodes):
-                    struct node *right = node0->right;
-                    close context(right, node0, tcount(rightNodes), right_context(contextNodes, node0, leftNodes));
-                    close tree(right, right_context(contextNodes, node0, leftNodes), rightNodes);
-                    go_to_descendant(right, path0, node);
-            }
-    }
-}
-
-lemma void change_focus(struct node *node0, path path, struct node *node)
-    requires tree(node0, ?contextNodes, ?subtreeNodes) &*& contains_at_path(combine(contextNodes, subtreeNodes), path, node) == true;
-    ensures tree(node, get_context_nodes_at_path(root, combine(contextNodes, subtreeNodes), path), get_subtree_nodes_at_path(combine(contextNodes, subtreeNodes), path));
-{
-    go_to_root(contextNodes);
-    assert tree(?rootNode, _, _);
-    go_to_descendant(rootNode, path, node);
-}
-
-@*/
 
 int main() //@ : main
     //@ requires true;

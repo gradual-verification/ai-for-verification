@@ -17,40 +17,6 @@ predicate map(struct node *n; list<pair<void *, void *> > entries) =
 
 @*/
 
-struct node *map_nil()
-    //@ requires true;
-    //@ ensures map(result, nil);
-{
-    return 0;
-}
-
-struct node *map_cons(void *key, void *value, struct node *tail)
-    //@ requires map(tail, ?tailEntries);
-    //@ ensures map(result, cons(pair(key, value), tailEntries));
-{
-    struct node *n = malloc(sizeof(struct node));
-    if (n == 0) abort();
-    n->key = key;
-    n->value = value;
-    n->next = tail;
-    return n;
-}
-
-void map_dispose(struct node *map)
-    //@ requires map(map, _);
-    //@ ensures true;
-{
-    //@ open map(map, _);
-    if (map != 0) {
-        map_dispose(map->next);
-        free(map);
-    }
-}
-
-typedef bool equalsFuncType/*@ (list<void *> keys, void *key00, list<void *> eqKeys, predicate() p) @*/(void *key, void *key0);
-    //@ requires p() &*& mem(key, keys) == true &*& key0 == key00;
-    //@ ensures p() &*& result == contains(eqKeys, key);
-
 /*@
 
 fixpoint bool eq<t>(unit u, t x, t y) {
@@ -115,25 +81,6 @@ lemma_auto void is_suffix_of_refl<t>(list<t> xs)
 }
 
 @*/
-bool map_contains_key(struct node *map, void *key, equalsFuncType *equalsFunc)
-    //@ requires [_]is_equalsFuncType(equalsFunc, ?keys, key, ?eqKeys, ?p) &*& p() &*& map(map, ?entries) &*& is_suffix_of(map((fst), entries), keys) == true;
-    //@ ensures p() &*& map(map, entries) &*& result == exists(map((fst), entries), (contains)(eqKeys));
-{
-    //@ open map(map, _);
-    if (map == 0)
-        return false;
-    else {
-        //@ is_suffix_of_mem(map((fst), entries), keys, map->key);
-        bool eq = equalsFunc(map->key, key);
-        if (eq)
-            return true;
-        else {
-            //@ assert is_suffix_of(map((fst), tail(entries)), map((fst), entries)) == true;
-            //@ is_suffix_of_trans(map((fst), tail(entries)), map((fst), entries), keys);
-            return map_contains_key(map->next, key, equalsFunc);
-        }
-    }
-}
 
 struct foo {
     int value;
@@ -157,6 +104,61 @@ fixpoint b assoc<a, b>(list<pair<a, b> > xys, a x) {
 }
 
 @*/
+
+struct node *map_nil()
+    //@ requires true;
+    //@ ensures map(result, nil);
+{
+    return 0;
+}
+
+struct node *map_cons(void *key, void *value, struct node *tail)
+    //@ requires map(tail, ?tailEntries);
+    //@ ensures map(result, cons(pair(key, value), tailEntries));
+{
+    struct node *n = malloc(sizeof(struct node));
+    if (n == 0) abort();
+    n->key = key;
+    n->value = value;
+    n->next = tail;
+    return n;
+}
+
+void map_dispose(struct node *map)
+    //@ requires map(map, _);
+    //@ ensures true;
+{
+    //@ open map(map, _);
+    if (map != 0) {
+        map_dispose(map->next);
+        free(map);
+    }
+}
+
+typedef bool equalsFuncType/*@ (list<void *> keys, void *key00, list<void *> eqKeys, predicate() p) @*/(void *key, void *key0);
+    //@ requires p() &*& mem(key, keys) == true &*& key0 == key00;
+    //@ ensures p() &*& result == contains(eqKeys, key);
+
+
+bool map_contains_key(struct node *map, void *key, equalsFuncType *equalsFunc)
+    //@ requires [_]is_equalsFuncType(equalsFunc, ?keys, key, ?eqKeys, ?p) &*& p() &*& map(map, ?entries) &*& is_suffix_of(map((fst), entries), keys) == true;
+    //@ ensures p() &*& map(map, entries) &*& result == exists(map((fst), entries), (contains)(eqKeys));
+{
+    //@ open map(map, _);
+    if (map == 0)
+        return false;
+    else {
+        //@ is_suffix_of_mem(map((fst), entries), keys, map->key);
+        bool eq = equalsFunc(map->key, key);
+        if (eq)
+            return true;
+        else {
+            //@ assert is_suffix_of(map((fst), tail(entries)), map((fst), entries)) == true;
+            //@ is_suffix_of_trans(map((fst), tail(entries)), map((fst), entries), keys);
+            return map_contains_key(map->next, key, equalsFunc);
+        }
+    }
+}
 
 bool foo_equals(struct foo *f1, struct foo *f2)
     //@ requires foreach(?fvs, foo) &*& f2->value |-> ?value &*& mem(pair(f1, assoc(fvs, f1)), fvs) == true;

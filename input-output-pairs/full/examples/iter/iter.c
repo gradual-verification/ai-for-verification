@@ -23,19 +23,6 @@ predicate llist(struct llist *list; list<int> v) =
   list->first |-> ?_f &*& list->last |-> ?_l &*& lseg(_f, _l, v) &*& node(_l, _, _) &*& malloc_block_llist(list);
 @*/
 
-struct llist *create_llist()
-  //@ requires true;
-  //@ ensures llist(result, nil);
-{
-  struct llist *l = malloc(sizeof(struct llist));
-  if (l == 0) abort();
-  struct node *n = calloc(1, sizeof(struct node));
-  if (n == 0) abort();
-  l->first = n;
-  l->last = n;
-  return l;
-}
-
 /*@
 lemma void distinct_nodes(struct node *n1, struct node *n2)
   requires node(n1, ?n1n, ?n1v) &*& node(n2, ?n2n, ?n2v);
@@ -60,22 +47,6 @@ lemma_auto void lseg_add(struct node *n2)
 }
 @*/
 
-void llist_add(struct llist *list, int x)
-  //@ requires llist(list, ?_v);
-  //@ ensures llist(list, append(_v, cons(x, nil)));
-{
-  struct node *l = 0;
-  struct node *n = calloc(1, sizeof(struct node));
-  if (n == 0) {
-    abort();
-  }
-  l = list->last;
-  l->next = n;
-  l->value = x;
-  list->last = n;
-  //@ lseg_add(l);
-}
-
 /*@
 lemma_auto void lseg_append(struct node *n1, struct node *n2, struct node *n3)
   requires lseg(n1, n2, ?_v1) &*& lseg(n2, n3, ?_v2) &*& node(n3, ?n3n, ?n3v);
@@ -90,26 +61,6 @@ lemma_auto void lseg_append(struct node *n1, struct node *n2, struct node *n3)
   }
 }
 @*/
-
-
-void llist_dispose(struct llist *list)
-  //@ requires llist(list, _);
-  //@ ensures true;
-{
-  struct node *n = list->first;
-  struct node *l = list->last;
-  while (n != l)
-    //@ invariant lseg(n, l, ?vs);
-    //@ decreases length(vs);
-  {
-    struct node *next = n->next;
-    free(n);
-    n = next;
-  }
-  //@ if (n != l) pointer_fractions_same_address(&n->next, &l->next);
-  free(l);
-  free(list);
-}
 
 /*@
 
@@ -152,6 +103,74 @@ predicate iter(struct iter *i, real frac, struct llist *l, list<int> v0, list<in
 
 @*/
 
+/*@
+
+lemma void lseg2_lseg_append(struct node *n)
+  requires [?frac]lseg2(?f, n, ?l, ?vs1) &*& [frac]lseg(n, l, ?vs2);
+  ensures [frac]lseg(f, l, append(vs1, vs2));
+{
+  open lseg2(f, n, l, vs1);
+  switch (vs1) {
+    case nil:
+    case cons(h, t):
+      open [frac]node(f, ?next, h);
+      lseg2_lseg_append(n);
+      close [frac]node(f, next, h);
+      close [frac]lseg(f, l, append(vs1, vs2));
+  }
+}
+
+@*/
+
+struct llist *create_llist()
+  //@ requires true;
+  //@ ensures llist(result, nil);
+{
+  struct llist *l = malloc(sizeof(struct llist));
+  if (l == 0) abort();
+  struct node *n = calloc(1, sizeof(struct node));
+  if (n == 0) abort();
+  l->first = n;
+  l->last = n;
+  return l;
+}
+
+void llist_add(struct llist *list, int x)
+  //@ requires llist(list, ?_v);
+  //@ ensures llist(list, append(_v, cons(x, nil)));
+{
+  struct node *l = 0;
+  struct node *n = calloc(1, sizeof(struct node));
+  if (n == 0) {
+    abort();
+  }
+  l = list->last;
+  l->next = n;
+  l->value = x;
+  list->last = n;
+  //@ lseg_add(l);
+}
+
+
+void llist_dispose(struct llist *list)
+  //@ requires llist(list, _);
+  //@ ensures true;
+{
+  struct node *n = list->first;
+  struct node *l = list->last;
+  while (n != l)
+    //@ invariant lseg(n, l, ?vs);
+    //@ decreases length(vs);
+  {
+    struct node *next = n->next;
+    free(n);
+    n = next;
+  }
+  //@ if (n != l) pointer_fractions_same_address(&n->next, &l->next);
+  free(l);
+  free(list);
+}
+
 struct iter *llist_create_iter(struct llist *l)
     //@ requires [?frac]llist(l, ?v);
     //@ ensures [frac/2]llist(l, v) &*& iter(result, frac/2, l, v, v);
@@ -193,25 +212,6 @@ int iter_next(struct iter *i)
     //@ close iter(i, f, l, v0, tail);
     return value;
 }
-
-/*@
-
-lemma void lseg2_lseg_append(struct node *n)
-  requires [?frac]lseg2(?f, n, ?l, ?vs1) &*& [frac]lseg(n, l, ?vs2);
-  ensures [frac]lseg(f, l, append(vs1, vs2));
-{
-  open lseg2(f, n, l, vs1);
-  switch (vs1) {
-    case nil:
-    case cons(h, t):
-      open [frac]node(f, ?next, h);
-      lseg2_lseg_append(n);
-      close [frac]node(f, next, h);
-      close [frac]lseg(f, l, append(vs1, vs2));
-  }
-}
-
-@*/
 
 void iter_dispose(struct iter *i)
     //@ requires iter(i, ?f1, ?l, ?v0, ?v) &*& [?f2]llist(l, v0);

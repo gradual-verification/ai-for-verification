@@ -17,6 +17,42 @@ predicate map(struct node *n; list<pair<void *, void *> > entries) =
 
 @*/
 
+/*@
+fixpoint bool contains<t>(list<t> xs, t x) {
+    switch (xs) {
+        case nil: return false;
+        case cons(x0, xs0): return x0 == x || contains(xs0, x);
+    }
+}
+
+fixpoint bool is_suffix_of<t>(list<t> xs, list<t> ys) {
+    switch (ys) {
+        case nil: return xs == ys;
+        case cons(y, ys0): return xs == ys || is_suffix_of(xs, ys0);
+    }
+}
+@*/
+
+struct foo {
+    int value;
+};
+
+/*@
+
+predicate foo(pair<struct foo *, int> fv;) =
+    switch (fv) {
+        case pair(f, v): return f->value |-> v;
+    };
+
+fixpoint b assoc<a, b>(list<pair<a, b> > xys, a x) {
+    switch (xys) {
+        case nil: return default_value;
+        case cons(xy, xys0): return fst(xy) == x ? snd(xy) : assoc(xys0, x);
+    }
+}
+
+@*/
+
 struct node *map_nil()
     //@ requires true;
     //@ ensures map(result, nil);
@@ -51,21 +87,6 @@ typedef bool equalsFuncType/*@ (list<void *> keys, void *key00, list<void *> eqK
     //@ requires p() &*& mem(key, keys) == true &*& key0 == key00;
     //@ ensures p() &*& result == contains(eqKeys, key);
 
-/*@
-fixpoint bool contains<t>(list<t> xs, t x) {
-    switch (xs) {
-        case nil: return false;
-        case cons(x0, xs0): return x0 == x || contains(xs0, x);
-    }
-}
-
-fixpoint bool is_suffix_of<t>(list<t> xs, list<t> ys) {
-    switch (ys) {
-        case nil: return xs == ys;
-        case cons(y, ys0): return xs == ys || is_suffix_of(xs, ys0);
-    }
-}
-@*/
 
 bool map_contains_key(struct node *map, void *key, equalsFuncType *equalsFunc)
     //@ requires [_]is_equalsFuncType(equalsFunc, ?keys, key, ?eqKeys, ?p) &*& p() &*& map(map, ?entries) &*& is_suffix_of(map((fst), entries), keys) == true;
@@ -86,25 +107,6 @@ bool map_contains_key(struct node *map, void *key, equalsFuncType *equalsFunc)
     }
 }
 
-struct foo {
-    int value;
-};
-
-/*@
-
-predicate foo(pair<struct foo *, int> fv;) =
-    switch (fv) {
-        case pair(f, v): return f->value |-> v;
-    };
-
-fixpoint b assoc<a, b>(list<pair<a, b> > xys, a x) {
-    switch (xys) {
-        case nil: return default_value;
-        case cons(xy, xys0): return fst(xy) == x ? snd(xy) : assoc(xys0, x);
-    }
-}
-
-@*/
 
 bool foo_equals(struct foo *f1, struct foo *f2)
     //@ requires foreach(?fvs, foo) &*& f2->value |-> ?value &*& mem(pair(f1, assoc(fvs, f1)), fvs) == true;

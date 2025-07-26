@@ -4,15 +4,6 @@
 //@ #include "quantifiers.gh"
 //@ #include "target.gh"
 
-int read_int()
-    //@ requires true;
-    //@ ensures true;
-{
-    int x;
-    scanf("%i", &x);
-    return x;
-}
-
 /*@
 
 fixpoint bool is_sorted_between(int l, list<int> xs, int u) {
@@ -262,6 +253,116 @@ lemma void is_sorted_insert_sorted(int x, list<int> xs)
 
 @*/
 
+/*@
+
+lemma void is_sorted_between_index_of(list<int> vs, int x, int i)
+    requires 0 <= i &*& i < length(vs) &*& nth(i, vs) == x &*& is_sorted_between(INT_MIN - 1, take(i, vs), x - 1) == true;
+    ensures index_of(x, vs) == i;
+{
+    switch (vs) {
+        case nil:
+        case cons(v, vs0):
+            if (v == x) {
+                if (i != 0) {
+                    is_sorted_limits(INT_MIN - 1, v, take(i - 1, vs0), x - 1);
+                }
+            } else {
+                is_sorted_weaken(INT_MIN - 1, v, take(i - 1, vs0), x - 1, x - 1);
+                is_sorted_between_index_of(vs0, x, i - 1);
+            }
+    }
+}
+
+lemma void is_sorted_nth_neq_eq(list<int> vs, int k, int x)
+    requires is_sorted_between(INT_MIN, vs, INT_MAX) == true &*& 0 < k &*& k < length(vs) &*& nth(k - 1, vs) != x &*& nth(k, vs) == x;
+    ensures is_sorted_between(INT_MIN - 1, take(k, vs), x - 1) == true;
+{
+    switch (vs) {
+        case nil:
+        case cons(v, vs0):
+            switch (vs0) {
+                case nil:
+                case cons(v0, vs00):
+                    if (k == 1) {
+                    } else {
+                        is_sorted_nth_neq_eq(vs0, k - 1, x);
+                    }
+            }
+    }
+}
+
+lemma void is_sorted_nth_lt(list<int> vs, int k, int x)
+    requires is_sorted_between(INT_MIN, vs, INT_MAX) == true &*& 0 <= k &*& k < length(vs) &*& nth(k, vs) < x;
+    ensures is_sorted_between(INT_MIN - 1, take(k + 1, vs), x - 1) == true;
+{
+    switch (vs) {
+        case nil:
+        case cons(v, vs0):
+            if (k == 0) {
+            } else {
+                is_sorted_weaken(INT_MIN, v, vs0, INT_MAX, INT_MAX);
+                is_sorted_nth_lt(vs0, k - 1, x);
+                switch (vs0) { case nil: case cons(v0, vs00): }
+            }
+    }
+}
+
+lemma void is_sorted_nth_gt(list<int> vs, int k, int x)
+    requires is_sorted_between(INT_MIN, vs, INT_MAX) == true &*& 0 <= k &*& k < length(vs) &*& nth(k, vs) > x;
+    ensures is_sorted_between(x + 1, drop(k, vs), INT_MAX + 1) == true;
+{
+    switch (vs) {
+        case nil:
+        case cons(v, vs0):
+            if (k == 0) {
+                is_sorted_weaken(INT_MIN, INT_MIN, vs, INT_MAX, INT_MAX + 1);
+            } else {
+                is_sorted_weaken(INT_MIN, v, vs0, INT_MAX, INT_MAX);
+                is_sorted_nth_gt(vs0, k - 1, x);
+            }
+    }
+}
+
+lemma void is_sorted_p1_index_of(list<int> vs, int x)
+    requires is_sorted_between(x + 1, vs, INT_MAX + 1) == true;
+    ensures index_of(x, vs) == length(vs);
+{
+    switch (vs) {
+        case nil:
+        case cons(v, vs0):
+            is_sorted_weaken(x + 1, v, vs0, INT_MAX + 1, INT_MAX + 1);
+            is_sorted_p1_index_of(vs0, x);
+    }
+}
+
+lemma void is_sorted_m1_p1_index_of(list<int> vs, int k, int x)
+    requires 0 <= k &*& k <= length(vs) &*& is_sorted_between(INT_MIN - 1, take(k, vs), x - 1) == true &*& is_sorted_between(x + 1, drop(k, vs), INT_MAX + 1) == true;
+    ensures index_of(x, vs) == length(vs);
+{
+    switch (vs) {
+        case nil:
+        case cons(v, vs0):
+            if (k == 0) {
+                is_sorted_p1_index_of(vs, x);
+            } else {
+                is_sorted_weaken(INT_MIN - 1, v, take(k - 1, vs0), x - 1, x - 1);
+                is_sorted_m1_p1_index_of(vs0, k - 1, x);
+                is_sorted_limits(INT_MIN - 1, v, take(k - 1, vs0), x - 1);
+            }
+    }
+}
+
+@*/
+
+int read_int()
+    //@ requires true;
+    //@ ensures true;
+{
+    int x;
+    scanf("%i", &x);
+    return x;
+}
+
 void merge_sort_core(int *pxs, int *pys, int n)
     //@ requires pxs[0..n] |-> ?vs &*& pys[0..n] |-> _;
     //@ ensures pxs[0..n] |-> sorted(vs) &*& pys[0..n] |-> _;
@@ -377,107 +478,6 @@ void merge_sort(int *pxs, int n)
     merge_sort_core(pxs, pys, n);
     free(pys);
 }
-
-/*@
-
-lemma void is_sorted_between_index_of(list<int> vs, int x, int i)
-    requires 0 <= i &*& i < length(vs) &*& nth(i, vs) == x &*& is_sorted_between(INT_MIN - 1, take(i, vs), x - 1) == true;
-    ensures index_of(x, vs) == i;
-{
-    switch (vs) {
-        case nil:
-        case cons(v, vs0):
-            if (v == x) {
-                if (i != 0) {
-                    is_sorted_limits(INT_MIN - 1, v, take(i - 1, vs0), x - 1);
-                }
-            } else {
-                is_sorted_weaken(INT_MIN - 1, v, take(i - 1, vs0), x - 1, x - 1);
-                is_sorted_between_index_of(vs0, x, i - 1);
-            }
-    }
-}
-
-lemma void is_sorted_nth_neq_eq(list<int> vs, int k, int x)
-    requires is_sorted_between(INT_MIN, vs, INT_MAX) == true &*& 0 < k &*& k < length(vs) &*& nth(k - 1, vs) != x &*& nth(k, vs) == x;
-    ensures is_sorted_between(INT_MIN - 1, take(k, vs), x - 1) == true;
-{
-    switch (vs) {
-        case nil:
-        case cons(v, vs0):
-            switch (vs0) {
-                case nil:
-                case cons(v0, vs00):
-                    if (k == 1) {
-                    } else {
-                        is_sorted_nth_neq_eq(vs0, k - 1, x);
-                    }
-            }
-    }
-}
-
-lemma void is_sorted_nth_lt(list<int> vs, int k, int x)
-    requires is_sorted_between(INT_MIN, vs, INT_MAX) == true &*& 0 <= k &*& k < length(vs) &*& nth(k, vs) < x;
-    ensures is_sorted_between(INT_MIN - 1, take(k + 1, vs), x - 1) == true;
-{
-    switch (vs) {
-        case nil:
-        case cons(v, vs0):
-            if (k == 0) {
-            } else {
-                is_sorted_weaken(INT_MIN, v, vs0, INT_MAX, INT_MAX);
-                is_sorted_nth_lt(vs0, k - 1, x);
-                switch (vs0) { case nil: case cons(v0, vs00): }
-            }
-    }
-}
-
-lemma void is_sorted_nth_gt(list<int> vs, int k, int x)
-    requires is_sorted_between(INT_MIN, vs, INT_MAX) == true &*& 0 <= k &*& k < length(vs) &*& nth(k, vs) > x;
-    ensures is_sorted_between(x + 1, drop(k, vs), INT_MAX + 1) == true;
-{
-    switch (vs) {
-        case nil:
-        case cons(v, vs0):
-            if (k == 0) {
-                is_sorted_weaken(INT_MIN, INT_MIN, vs, INT_MAX, INT_MAX + 1);
-            } else {
-                is_sorted_weaken(INT_MIN, v, vs0, INT_MAX, INT_MAX);
-                is_sorted_nth_gt(vs0, k - 1, x);
-            }
-    }
-}
-
-lemma void is_sorted_p1_index_of(list<int> vs, int x)
-    requires is_sorted_between(x + 1, vs, INT_MAX + 1) == true;
-    ensures index_of(x, vs) == length(vs);
-{
-    switch (vs) {
-        case nil:
-        case cons(v, vs0):
-            is_sorted_weaken(x + 1, v, vs0, INT_MAX + 1, INT_MAX + 1);
-            is_sorted_p1_index_of(vs0, x);
-    }
-}
-
-lemma void is_sorted_m1_p1_index_of(list<int> vs, int k, int x)
-    requires 0 <= k &*& k <= length(vs) &*& is_sorted_between(INT_MIN - 1, take(k, vs), x - 1) == true &*& is_sorted_between(x + 1, drop(k, vs), INT_MAX + 1) == true;
-    ensures index_of(x, vs) == length(vs);
-{
-    switch (vs) {
-        case nil:
-        case cons(v, vs0):
-            if (k == 0) {
-                is_sorted_p1_index_of(vs, x);
-            } else {
-                is_sorted_weaken(INT_MIN - 1, v, take(k - 1, vs0), x - 1, x - 1);
-                is_sorted_m1_p1_index_of(vs0, k - 1, x);
-                is_sorted_limits(INT_MIN - 1, v, take(k - 1, vs0), x - 1);
-            }
-    }
-}
-
-@*/
 
 int binary_search(int *xs, int n, int x)
     //@ requires xs[0..n] |-> ?vs &*& is_sorted_between(INT_MIN, vs, INT_MAX) == true;

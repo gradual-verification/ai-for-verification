@@ -27,20 +27,6 @@ predicate create_barrier_ghost_arg(predicate(int k, bool outgoing) inv) = inv(0,
 
 @*/
 
-struct barrier *create_barrier(int n)
-    //@ requires 2 <= n &*& create_barrier_ghost_arg(?inv);
-    //@ ensures barrier(result, n, inv);
-{
-    struct barrier *barrier = malloc(sizeof(struct barrier));
-    if (barrier == 0) abort();
-    barrier->n = n;
-    barrier->k = 0;
-    barrier->outgoing = false;
-    struct mutex *mutex = create_mutex();
-    barrier->mutex = mutex;
-    return barrier;
-}
-
 /*@
 
 predicate_family barrier_incoming(void *lem)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit);
@@ -59,6 +45,91 @@ typedef lemma void barrier_exit(int k);
     requires barrier_inside(this)(?n, ?inv) &*& inv(k, true) &*& 1 <= k &*& k < n;
     ensures barrier_exiting(this)(n, inv) &*& k == 1 ? inv(0, false) : inv(k - 1, true);
 @*/
+
+/*@
+
+inductive phase = writing_x | writing_y;
+
+fixpoint phase next_phase(phase p) {
+    switch (p) {
+        case writing_x: return writing_y;
+        case writing_y: return writing_x;
+    }
+}
+
+@*/
+
+struct data {
+    struct barrier *barrier;
+    //@ phase phase;
+    //@ phase phase1;
+    //@ phase phase2;
+    //@ bool inside1;
+    //@ bool inside2;
+    int x1;
+    int x2;
+    int y1;
+    int y2;
+    int i;
+};
+
+/*@
+
+predicate_ctor my_barrier_inv(struct data *d)(int k, bool exiting) =
+    d->phase |-> ?p &*&
+    [1/2]d->inside1 |-> ?i1 &*&
+    [1/2]d->inside2 |-> ?i2 &*&
+    [1/2]d->phase1 |-> ?p1 &*& p == (exiting && i1 ? next_phase(p1) : p1) &*&
+    [1/2]d->phase2 |-> ?p2 &*& p == (exiting && i2 ? next_phase(p2) : p2) &*&
+    k == (i1 ? 1 : 0) + (i2 ? 1 : 0) &*&
+    switch (p) {
+        case writing_x: return
+            (i1 ? [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> ?_ : true) &*&
+            (i2 ? [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x2 |-> ?_ : true);
+        case writing_y: return
+            (i1 ? [1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y1 |-> ?_ : true) &*&
+            (i2 ? [1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y2 |-> ?_ &*& d->i |-> ?_ : true);
+    };
+
+@*/
+
+/*@
+
+predicate_family_instance thread_run_pre(thread1)(struct data *d, any info) =
+    [1/2]d->phase1 |-> writing_x &*& [1/2]d->inside1 |-> false &*& [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> ?_ &*&
+    [1/3]d->barrier |-> ?barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d));
+
+predicate_family_instance thread_run_post(thread1)(struct data *d, any info) =
+    [1/2]d->phase1 |-> writing_x &*& [1/2]d->inside1 |-> false &*& [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> 0 &*&
+    [1/3]d->barrier |-> ?barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d));
+
+@*/
+
+/*@
+
+predicate_family_instance thread_run_pre(thread2)(struct data *d, any info) =
+    [1/2]d->phase2 |-> writing_x &*& [1/2]d->inside2 |-> false &*& [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x2 |-> ?_ &*&
+    [1/3]d->barrier |-> ?barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d));
+
+predicate_family_instance thread_run_post(thread2)(struct data *d, any info) =
+    [1/2]d->phase2 |-> writing_x &*& [1/2]d->inside2 |-> false &*& [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x2 |-> ?_ &*&
+    [1/3]d->barrier |-> ?barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d));
+
+@*/
+
+struct barrier *create_barrier(int n)
+    //@ requires 2 <= n &*& create_barrier_ghost_arg(?inv);
+    //@ ensures barrier(result, n, inv);
+{
+    struct barrier *barrier = malloc(sizeof(struct barrier));
+    if (barrier == 0) abort();
+    barrier->n = n;
+    barrier->k = 0;
+    barrier->outgoing = false;
+    struct mutex *mutex = create_mutex();
+    barrier->mutex = mutex;
+    return barrier;
+}
 
 void barrier(struct barrier *barrier)
     /*@
@@ -123,64 +194,6 @@ void barrier_dispose(struct barrier *barrier)
     free(barrier);
 }
 
-/*@
-
-inductive phase = writing_x | writing_y;
-
-fixpoint phase next_phase(phase p) {
-    switch (p) {
-        case writing_x: return writing_y;
-        case writing_y: return writing_x;
-    }
-}
-
-@*/
-
-struct data {
-    struct barrier *barrier;
-    //@ phase phase;
-    //@ phase phase1;
-    //@ phase phase2;
-    //@ bool inside1;
-    //@ bool inside2;
-    int x1;
-    int x2;
-    int y1;
-    int y2;
-    int i;
-};
-
-/*@
-
-predicate_ctor my_barrier_inv(struct data *d)(int k, bool exiting) =
-    d->phase |-> ?p &*&
-    [1/2]d->inside1 |-> ?i1 &*&
-    [1/2]d->inside2 |-> ?i2 &*&
-    [1/2]d->phase1 |-> ?p1 &*& p == (exiting && i1 ? next_phase(p1) : p1) &*&
-    [1/2]d->phase2 |-> ?p2 &*& p == (exiting && i2 ? next_phase(p2) : p2) &*&
-    k == (i1 ? 1 : 0) + (i2 ? 1 : 0) &*&
-    switch (p) {
-        case writing_x: return
-            (i1 ? [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> ?_ : true) &*&
-            (i2 ? [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x2 |-> ?_ : true);
-        case writing_y: return
-            (i1 ? [1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y1 |-> ?_ : true) &*&
-            (i2 ? [1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y2 |-> ?_ &*& d->i |-> ?_ : true);
-    };
-
-@*/
-
-/*@
-
-predicate_family_instance thread_run_pre(thread1)(struct data *d, any info) =
-    [1/2]d->phase1 |-> writing_x &*& [1/2]d->inside1 |-> false &*& [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> ?_ &*&
-    [1/3]d->barrier |-> ?barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d));
-
-predicate_family_instance thread_run_post(thread1)(struct data *d, any info) =
-    [1/2]d->phase1 |-> writing_x &*& [1/2]d->inside1 |-> false &*& [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> 0 &*&
-    [1/3]d->barrier |-> ?barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d));
-
-@*/
 
 void thread1(struct data *d) //@ : thread_run_joinable
     //@ requires thread_run_pre(thread1)(d, ?info);
@@ -226,18 +239,6 @@ void thread1(struct data *d) //@ : thread_run_joinable
     d->i = 0;
 
 }
-
-/*@
-
-predicate_family_instance thread_run_pre(thread2)(struct data *d, any info) =
-    [1/2]d->phase2 |-> writing_x &*& [1/2]d->inside2 |-> false &*& [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x2 |-> ?_ &*&
-    [1/3]d->barrier |-> ?barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d));
-
-predicate_family_instance thread_run_post(thread2)(struct data *d, any info) =
-    [1/2]d->phase2 |-> writing_x &*& [1/2]d->inside2 |-> false &*& [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x2 |-> ?_ &*&
-    [1/3]d->barrier |-> ?barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d));
-
-@*/
 
 void thread2(struct data *d) //@ : thread_run_joinable
     //@ requires thread_run_pre(thread2)(d, ?info);
