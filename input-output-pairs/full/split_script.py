@@ -1,0 +1,127 @@
+import subprocess
+import re
+import argparse
+import os
+
+class Function:
+    def __init__(self, name: str, start_line: int, end_line: int, code: str):
+        self.name = name
+        self.start_line = start_line
+        self.end_line = end_line
+        self.code = code
+
+
+# find the line of the function/prototype/typedef declaration using ctags
+def get_function_lines(filename):
+    # Run ctags and get function name and line number
+    result = subprocess.run(
+        ['ctags', '-x', '--c-kinds=fpt', filename],
+        stdout=subprocess.PIPE,
+        universal_newlines=True
+    )
+    lines = result.stdout.strip().split('\n')
+
+    functions = []
+    for line in lines:
+        parts = re.split(r'\s+', line)
+        if len(parts) >= 3:
+            name = parts[0]
+            # the lines start from 0
+            start_line = int(parts[2]) - 1
+            func = Function(name, start_line, -1, "")
+            functions.append(func)
+
+    # Sort by starting line
+    functions.sort(key=lambda x: x.start_line)
+    return functions
+
+
+# find the start line for function&comment (starting from 0)
+def find_final_start_line(lines, func_start_idx):
+    i = func_start_idx - 1  # index in lines
+    if i < 0 or '*/' not in lines[i]:
+        return func_start_idx  # no comment block
+
+    # Look upward for '/*'
+    while i >= 0:
+        if '/*' in lines[i]:
+            return i
+        i -= 1
+
+    return func_start_idx  # fallback if start of comment not found
+
+
+# extract the functions and their comment before them
+def extract_functions_with_comments(filename):
+    with open(filename) as f:
+        all_lines = f.readlines()
+
+    functions = get_function_lines(filename)
+
+    # Find comment start
+    for func in functions:
+        comment_start_line = find_final_start_line(all_lines, func.start_line)
+        func.start_line = comment_start_line
+
+    # Find the end and code block of a function
+    for i, func in enumerate(functions):
+        # End line: 1 less than the start of next function, or end of file
+        if i + 1 < len(functions):
+            end_line = functions[i + 1].start_line - 1
+        else:
+            end_line = len(all_lines)
+
+        func.end_line = end_line
+        # Get function block with comment
+        func.code = ''.join(all_lines[func.start_line : end_line + 1])
+
+    return functions
+
+
+# extract the struct, predicate or fixpoint definitions before the first function
+def extract_other_definition(filename, functions):
+    if len(functions) == 0:
+        print('No functions found.')
+        return ''
+
+    with open(filename) as f:
+        all_lines = f.readlines()
+
+    first_func = functions[0]
+    return ''.join(all_lines[0 : first_func.start_line])
+
+
+# split the functions for the given file in its directory
+# and put those functions into new files in a newly created subdirectory.
+def split_functions(dirpath, filename):
+    base_filename, _ = os.path.splitext(filename)
+    file_prefix, file_suffix = base_filename.rsplit('_', 1)
+
+    file_full_path = os.path.join(dirpath, filename)
+    subdir_full_path = os.path.join(dirpath, base_filename)
+
+    os.makedirs(subdir_full_path, exist_ok=True)
+
+    functions = extract_functions_with_comments(file_full_path)
+    definition = extract_other_definition(file_full_path, functions)
+
+    for func in functions:
+        new_filename = file_prefix + '_' + func.name + '_' + file_suffix + '.c'
+        new_file_full_path = os.path.join(subdir_full_path, new_filename)
+        with open(new_file_full_path, 'w') as f:
+            f.write(definition + '\n\n\n' + func.code)
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Extract functions and preceding comments from (fbp, fb, nl) C files in a directory')
+    parser.add_argument('root_dir', help='The root directory of the C files')
+    args = parser.parse_args()
+
+    for dirpath, _, filenames in os.walk(args.root_dir):
+        for filename in filenames:
+            if filename.endswith('fbp.c') or filename.endswith('fb.c') or filename.endswith('nl.c'):
+                split_functions(dirpath, filename)
+
+
+if __name__ == "__main__":
+    main()
