@@ -127,8 +127,6 @@ void barrier(struct barrier *barrier)
  * pointer must not be used again.
  */
 void barrier_dispose(struct barrier *barrier)
-    //@ requires barrier(barrier, ?n, ?inv);
-    //@ ensures inv(_, _);
 {
   
     mutex_dispose(barrier->mutex);
@@ -150,8 +148,6 @@ void barrier_dispose(struct barrier *barrier)
  * returning.
  */
 void thread1(struct data *d)
-    //@ requires thread_run_pre(thread1)(d, ?info);
-    //@ ensures thread_run_post(thread1)(d, info);
 {
    
     struct barrier *barrier = d->barrier;

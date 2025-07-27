@@ -228,8 +228,6 @@ adding elements to them, removing the element, appending them together,
 looking up the element at each position, and then disposing of the list.
 */
 int main() //@ : main
-  //@ requires true;
-  //@ ensures true;
 {
   struct llist *l1 = create_llist();
   struct llist *l2 = create_llist();

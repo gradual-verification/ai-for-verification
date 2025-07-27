@@ -35,13 +35,10 @@ void incrementor(struct counter *counter) //@ : thread_run
 {
     struct mutex *mutex = counter->mutex;
     for (;;)
-        //@ invariant [1/2]mutex(mutex, lock_invariant(counter));
     {
         mutex_acquire(mutex);
-        //@ open lock_invariant(counter)();
         if (counter->count == INT_MAX) abort();
         counter->count++;
-        //@ close lock_invariant(counter)();
         mutex_release(mutex);
     }
 }
