@@ -3,12 +3,15 @@ import re
 import argparse
 import os
 
+annotation = '// TODO: make this function pass the verification\n'
+
 class Function:
-    def __init__(self, name: str, start_line: int, end_line: int, code: str):
+    def __init__(self, name: str, start_line: int):
         self.name = name
         self.start_line = start_line
-        self.end_line = end_line
-        self.code = code
+        self.end_line = -1
+        self.code = ''
+        self.func_calls = set()
 
 
 # find the line of the function/prototype/typedef declaration using ctags
@@ -28,7 +31,7 @@ def get_function_lines(filename):
             name = parts[0]
             # the lines start from 0
             start_line = int(parts[2]) - 1
-            func = Function(name, start_line, -1, "")
+            func = Function(name, start_line)
             functions.append(func)
 
     # Sort by starting line
@@ -75,13 +78,30 @@ def extract_functions_with_comments(filename):
         # Get function block with comment
         func.code = ''.join(all_lines[func.start_line : end_line + 1])
 
+    # Find the function calls of each function
+    for func in functions:
+        extract_func_calls(func, functions)
+
     return functions
+
+
+# extract the functions called by curr_func
+# here I use simple texture search by "func_name("
+def extract_func_calls(curr_func, functions):
+    curr_func_name = curr_func.name
+    curr_func_code = curr_func.code
+
+    for func in functions:
+        func_name = func.name
+        if curr_func_name != func_name:
+            if func_name + '(' in curr_func_code:
+                curr_func.func_calls.add(func_name)
 
 
 # extract the struct, predicate or fixpoint definitions before the first function
 def extract_other_definition(filename, functions):
     if len(functions) == 0:
-        print('No functions found.')
+        print('No functions found for ' + filename)
         return ''
 
     with open(filename) as f:
@@ -106,10 +126,19 @@ def split_functions(dirpath, filename):
     definition = extract_other_definition(file_full_path, functions)
 
     for func in functions:
+        # write the definition, called functions and the function into a new file
+        new_file_content = definition + '\n'
+        for func_call in func.func_calls:
+            match = next(filter(lambda f: f.name == func_call, functions), None)
+            if match:
+                new_file_content += match.code + '\n'
+        new_file_content += annotation + func.code
+
         new_filename = file_prefix + '_' + func.name + '_' + file_suffix + '.c'
         new_file_full_path = os.path.join(subdir_full_path, new_filename)
+
         with open(new_file_full_path, 'w') as f:
-            f.write(definition + '\n\n\n' + func.code)
+            f.write(new_file_content)
 
 
 def main():
