@@ -1,0 +1,41 @@
+#include "stdlib.h"
+#include "threading.h"
+
+struct counter {
+    struct mutex *mutex;
+    int count;
+};
+
+/*@
+
+predicate_ctor lock_invariant(struct counter *counter)() =
+    counter->count |-> ?c &*& [1/2]counter->oldCount |-> ?oldCount &*& oldCount <= c;
+
+predicate_family_instance thread_run_data(incrementor)(struct counter *counter) =
+    counter->mutex |-> ?mutex &*& [1/2]mutex(mutex, lock_invariant(counter));
+
+@*/
+
+
+// TODO: make this function pass the verification
+int main() //@ : main
+    //@ requires true;
+    //@ ensures true;
+{
+    struct counter *counter = malloc(sizeof(struct counter));
+    if (counter == 0) abort();
+    counter->count = 0;
+    struct mutex *mutex = create_mutex();
+    counter->mutex = mutex;
+    thread_start(incrementor, counter);
+    
+    int oldCount = 0;
+    for (;;)
+    {
+        mutex_acquire(mutex);
+        int count = counter->count;
+        assert(count >= oldCount);
+        oldCount = count;
+        mutex_release(mutex);
+    }
+}

@@ -1,0 +1,34 @@
+/*
+
+Full functional correctness proof of doubly-linked list reversal
+Stephan van Staden, 2009
+
+*/
+
+
+typedef struct node {
+	int item;
+	struct node *next;
+	struct node *prev;
+
+// TODO: make this function pass the verification
+void reverse(dllist arg)
+	//@ requires dll(arg, ?alpha);
+ 	//@ ensures dll(arg, rev(alpha));
+{
+	node ptr = arg->head;
+	node temp1 = 0;
+	node temp2 = 0;
+	while (ptr != 0)
+	{
+		temp1 = ptr->next;
+		temp2 = ptr->prev;
+		ptr->next = temp2;
+		ptr->prev = temp1;
+		ptr = temp1;
+	}
+	temp1 = arg->head;
+	temp2 = arg->tail;
+	arg->head = temp2;
+	arg->tail = temp1;
+}

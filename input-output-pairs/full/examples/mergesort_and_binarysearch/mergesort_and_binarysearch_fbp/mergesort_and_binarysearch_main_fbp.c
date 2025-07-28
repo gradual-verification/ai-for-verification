@@ -1,0 +1,120 @@
+#include "stdlib.h"
+#include "stdio.h"
+//@ #include "arrays.gh"
+//@ #include "quantifiers.gh"
+//@ #include "target.gh"
+
+/*@
+
+fixpoint bool is_sorted_between(int l, list<int> xs, int u) {
+    switch (xs) {
+        case nil: return l <= u;
+        case cons(x, xs0): return l <= x && is_sorted_between(x, xs0, u);
+    }
+}
+
+
+fixpoint list<int> insert_sorted(int x, list<int> xs) {
+    switch (xs) {
+        case nil: return cons(x, nil);
+        case cons(x0, xs0): return x0 < x ? cons(x0, insert_sorted(x, xs0)) : cons(x, xs);
+    }
+}
+
+fixpoint list<int> sorted(list<int> xs) {
+    switch (xs) {
+        case nil: return nil;
+        case cons(x, xs0): return insert_sorted(x, sorted(xs0));
+    }
+}
+
+
+@*/
+
+
+void merge_sort(int *pxs, int n)
+    //@ requires pxs[0..n] |-> ?vs &*& n <= 15000;
+    //@ ensures pxs[0..n] |-> sorted(vs);
+{
+    int *pys = malloc(n * sizeof(int));
+    if (pys == 0) abort();
+    merge_sort_core(pxs, pys, n);
+    free(pys);
+}
+
+
+int binary_search(int *xs, int n, int x)
+    //@ requires xs[0..n] |-> ?vs &*& is_sorted_between(INT_MIN, vs, INT_MAX) == true;
+    //@ ensures xs[0..n] |-> vs &*& result == index_of(x, vs);
+{
+    int l = 0;
+    int r = n;
+    while (l < r)
+    {
+        int k = l + (r - l) / 2;
+        int x0 = xs[k];
+        if (x0 == x) {
+            while (l < k && xs[k - 1] == x)
+            {
+                k--;
+            }
+            return k;
+        } else if (x0 < x) {
+            l = k + 1;
+        } else {
+            r = k;
+        }
+    }
+    return n;
+}
+
+
+int read_int()
+    //@ requires true;
+    //@ ensures true;
+{
+    int x;
+    scanf("%i", &x);
+    return x;
+}
+
+
+// TODO: make this function pass the verification
+int main()
+    //@ requires true;
+    //@ ensures true;
+{
+    int n;
+    int *xs;
+    
+    puts("How many numbers do you want to search?");
+    n = read_int();
+    if (n < 0 || 15000 <= n) abort();
+    xs = malloc(n * sizeof(int));
+    if (xs == 0) abort();
+    for (int i = 0; ; i++)
+    {
+        if (i >= n)
+          break;
+        int x = read_int();
+        xs[i] = x;
+    }
+    
+    merge_sort(xs, n);
+    
+    for (;;)
+    {
+        puts("Enter a number to search for, or -1 to quit.");
+        int x = read_int();
+        if (x == -1) break;
+        int i = binary_search(xs, n, x);
+        if (i == n) {
+            puts("The number does not appear in the list.");
+        } else {
+            printf("%i", i);
+            puts("");
+        }
+    }
+    free(xs);
+    return 0;
+}

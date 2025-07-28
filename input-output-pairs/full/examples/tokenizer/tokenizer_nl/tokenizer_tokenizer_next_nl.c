@@ -1,0 +1,173 @@
+#include "stdio.h"
+#include "stdlib.h"
+#include "stringBuffers.h"
+
+
+struct tokenizer
+{
+	charreader*           next_char;
+	int                   lastread; // the character lastly read. Special: -1 = EOF, -2 = empty buffer
+	int                   lasttoken; // the last token parsed
+	struct string_buffer* buffer;
+};
+
+
+/***
+ * Description:
+The is_symbol_char function checks whether a given character in integer means a symbol in ASCII (except parentheses).
+
+It ensures nothing
+*/
+bool is_symbol_char(int c)
+{
+	return c > 32 && c <= 127 && c != '(' && c != ')'; 
+}
+
+
+/***
+ * Description:
+The tokenizer_skip_whitespace function reads and drops all the whitespace characters that are encountered sequentially by the tokenizer.
+
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
+void tokenizer_skip_whitespace(struct tokenizer* tokenizer)
+{
+	while ( is_whitespace( tokenizer_peek(tokenizer) ) )
+	{
+		tokenizer_drop(tokenizer);
+	}
+}
+
+
+/***
+ * Description:
+The tokenizer_drop function drops the last character of a tokenizer by assigning its lastread field to -2 (meaning empty).
+
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
+void tokenizer_drop(struct tokenizer* tokenizer)
+{
+	tokenizer->lastread = -2;
+}
+
+
+/***
+ * Description:
+The is_digit function checks whether a given character in integer means a digit number.
+
+It ensures nothing.
+*/
+bool is_digit(int c)
+{
+	return c >= '0' && c <= '9';
+}
+
+
+/***
+ * Description:
+The tokenizer_eat_symbol function reads all the ASCII symbol characters that are encountered sequentially by the tokenizer, 
+and adds them into the buffer at the same time.
+If it peeks a non-symbol character, it exits the loop and return the token that represents symbol.
+
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
+int tokenizer_eat_symbol(struct tokenizer* tokenizer)
+{
+	for (;;)
+	{
+		int result;
+		bool isSymbolChar;
+		
+		result = tokenizer_peek(tokenizer);
+		isSymbolChar = is_symbol_char(result);
+		
+		if (!isSymbolChar) break;
+		
+		result = tokenizer_next_char(tokenizer);
+		string_buffer_append_char(tokenizer->buffer, (char)result);
+	}
+
+	return 'S';
+}
+
+
+/***
+ * Description:
+The tokenizer_eat_number function reads all the digit characters that are encountered sequentially by the tokenizer, 
+and adds them into the buffer at the same time.
+If it peeks a non-digit character, it exits the loop and returns the token that represents digit.
+
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
+int tokenizer_eat_number(struct tokenizer* tokenizer)
+{
+	for (;;)
+	{
+		int result;
+		bool isDigit;
+		
+		result = tokenizer_peek(tokenizer);
+		isDigit = is_digit(result);
+		if ( !isDigit ) break;
+		
+	    result = tokenizer_next_char(tokenizer);
+		string_buffer_append_char(tokenizer->buffer, (char)result);
+	}
+
+	return '0';
+}
+
+
+/***
+ * Description:
+The tokenizer_peek function reads the next value character of a tokenizer and returns the updated lastread character.
+
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
+int tokenizer_peek(struct tokenizer* tokenizer)
+{
+	tokenizer_fill_buffer(tokenizer);
+	return tokenizer->lastread;
+}
+
+
+// TODO: make this function pass the verification
+/***
+ * Description:
+The tokenizer_next function gets the next token of the tokenizer by reading the stream sequentially, assigning the token to lasttoken field, and returning it.
+
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
+int tokenizer_next(struct tokenizer* tokenizer)
+{
+	int c;
+	int token;
+
+	string_buffer_clear(tokenizer->buffer);
+	tokenizer_skip_whitespace(tokenizer);
+
+	c = tokenizer_peek(tokenizer);
+
+	if ( c == '(' || c == ')' || c == -1 )
+	{
+		tokenizer_drop(tokenizer);
+		token = c;
+	}
+	else if ( is_digit(c) )
+	{
+		
+		token = tokenizer_eat_number(tokenizer);
+	}
+	else if ( is_symbol_char(c) )
+	{
+		token = tokenizer_eat_symbol(tokenizer);
+	}
+	else
+	{
+		tokenizer_drop(tokenizer);
+		token = 'B'; // bad character
+	}
+	tokenizer->lasttoken = token;
+	return token;
+}
+
