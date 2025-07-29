@@ -58,8 +58,8 @@ void mod_ar2 (void)
   return;
  }
 
-int main(int argc, char **argv) //@ : main_full(static_array)
-//@ requires module(static_array, true);
+int main(int argc, char **argv) //@ : main_full(static_array_fbp)
+//@ requires module(static_array_fbp, true);
 //@ ensures result == 0;
  {
   

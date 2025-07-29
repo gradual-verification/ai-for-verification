@@ -119,7 +119,7 @@ bool foo_equals(struct foo *f1, struct foo *f2)
  * 
  * It makes sure that the return value is a foo structure with the given value.
  */
-struct foo *create_foo(int value);
+struct foo *create_foo(int value)
 {
     struct foo *foo = malloc(sizeof(struct foo));
     if (foo == 0) abort();

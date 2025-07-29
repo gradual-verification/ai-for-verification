@@ -67,7 +67,7 @@ void mod_ar2 (void)
 -description: This function does some checking on global and local structs or array. 
 It makes sure to return 0.
 */
-int main(int argc, char **argv) //@ : main_full(static_array)
+int main(int argc, char **argv) //@ : main_full(static_array_nl)
  {
   
   struct_with_array *bigArrayPtr = bigArray;

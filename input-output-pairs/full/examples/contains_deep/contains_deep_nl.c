@@ -5,6 +5,12 @@ struct node {
   struct node* next;
 };
 
+// specific to cell
+
+struct cell {
+  int val;
+};
+
 /*equals() function
 -params: void* x1, void* x2
 -description: checks whether the elements of two pointers are equal. It doesn't have a concrete definition.
@@ -58,11 +64,6 @@ bool list_contains(struct node* n, void* v, equals* eq)
   }
 }
 
-// specific to cell
-
-struct cell {
-  int val;
-};
 
 /*create_cell() function
 -params: an integer
