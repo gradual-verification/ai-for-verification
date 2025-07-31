@@ -22,6 +22,43 @@ predicate expression(struct expression *expr, int value) =
 @*/
 
 
+struct expression *create_literal(int value)
+    //@ requires true;
+    //@ ensures expression(result, value);
+{
+    struct expression *literal = malloc(sizeof(struct expression));
+    if (literal == 0) abort();
+    literal->tag = 0;
+    literal->value = value;
+    return literal;
+}
+
+
+struct expression *create_negation(struct expression *operand)
+    //@ requires expression(operand, ?operandValue);
+    //@ ensures expression(result, 0 - operandValue);
+{
+    struct expression *negation = malloc(sizeof(struct expression));
+    if (negation == 0) abort();
+    negation->tag = 1;
+    negation->operand_neg = operand;
+    return negation;
+}
+
+
+struct expression *create_addition(struct expression *operand1, struct expression *operand2)
+    //@ requires expression(operand1, ?value1) &*& expression(operand2, ?value2);
+    //@ ensures expression(result, value1 + value2);
+{
+    struct expression *addition = malloc(sizeof(struct expression));
+    if (addition == 0) abort();
+    addition->tag = 2;
+    addition->operand1 = operand1;
+    addition->operand2 = operand2;
+    return addition;
+}
+
+
 int evaluate(struct expression *expression)
     //@ requires expression(expression, ?value);
     //@ ensures expression(expression, value) &*& result == value;
@@ -45,19 +82,6 @@ int evaluate(struct expression *expression)
 }
 
 
-struct expression *create_addition(struct expression *operand1, struct expression *operand2)
-    //@ requires expression(operand1, ?value1) &*& expression(operand2, ?value2);
-    //@ ensures expression(result, value1 + value2);
-{
-    struct expression *addition = malloc(sizeof(struct expression));
-    if (addition == 0) abort();
-    addition->tag = 2;
-    addition->operand1 = operand1;
-    addition->operand2 = operand2;
-    return addition;
-}
-
-
 void dispose_expression(struct expression *expression)
     //@ requires expression(expression, _);
     //@ ensures true;
@@ -73,30 +97,6 @@ void dispose_expression(struct expression *expression)
         dispose_expression(expression->operand2);
         free(expression);
     }
-}
-
-
-struct expression *create_negation(struct expression *operand)
-    //@ requires expression(operand, ?operandValue);
-    //@ ensures expression(result, 0 - operandValue);
-{
-    struct expression *negation = malloc(sizeof(struct expression));
-    if (negation == 0) abort();
-    negation->tag = 1;
-    negation->operand_neg = operand;
-    return negation;
-}
-
-
-struct expression *create_literal(int value)
-    //@ requires true;
-    //@ ensures expression(result, value);
-{
-    struct expression *literal = malloc(sizeof(struct expression));
-    if (literal == 0) abort();
-    literal->tag = 0;
-    literal->value = value;
-    return literal;
 }
 
 

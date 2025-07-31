@@ -80,6 +80,23 @@ predicate context(struct Node* node, context value, int holeCount) =
 @*/
 
 
+struct Node* internalCreate(struct Node* parent)
+  //@ requires true;
+  //@ ensures result!=0 &*& tree(result, tree(result, Nil, Nil)) &*& result->parent |-> parent;
+{
+  struct Node* n = malloc(sizeof(struct Node));
+  if(n==0) {
+    abort();
+  } else {}
+  n->left = 0;
+  n->right = 0;
+  n->parent = parent;
+  n->count = 1;
+
+  return n;
+}
+
+
 struct Node* internalAddLeft(struct Node* node)
   /*@ requires context(node, ?value, 1) &*& node!=0 &*& node->left |-> 0 &*& node->right |-> 0 &*&
                malloc_block_Node(node) &*& node->count |-> 1; @*/
@@ -91,6 +108,25 @@ struct Node* internalAddLeft(struct Node* node)
     node->left = child;
     fix(node);
     return child;
+}
+
+
+void fix(struct Node* node)
+  /*@ requires node->count |-> ?c &*& context(node, ?value, c) &*& node!=0; @*/   
+  /*@ ensures context(node, value, c + 1) &*& node->count |-> c + 1; @*/
+{
+  int tmp = node->count;
+  if (tmp == INT_MAX) {
+    abort();
+  }
+  node->count = tmp + 1;
+
+  struct Node* parent = node->parent;
+  if(parent==0){
+  } else {
+    fix(parent);
+  }
+
 }
 
 

@@ -14,6 +14,33 @@ struct tokenizer
 
 /***
  * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
+
+/***
+ * Description:
+The tokenizer_fill_buffer function reads a character from the next_char reader of the tokenizer and updates the lastread char,
+if the original lastread char is -2 (which means empty).
+
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
+void tokenizer_fill_buffer(struct tokenizer* tokenizer)
+{
+	if ( tokenizer->lastread == -2 )
+	{
+	        charreader *reader = tokenizer->next_char;
+	        int result = reader();
+			if (result < -128 || result > 127)
+				abort();
+		tokenizer->lastread = result;
+	}
+}
+
+
+/***
+ * Description:
 The tokenizer_peek function reads the next value character of a tokenizer and returns the updated lastread character.
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
@@ -22,6 +49,24 @@ int tokenizer_peek(struct tokenizer* tokenizer)
 {
 	tokenizer_fill_buffer(tokenizer);
 	return tokenizer->lastread;
+}
+
+
+/***
+ * Description:
+The tokenizer_next_char function reads the next character of a tokenizer, returns that character 
+and drops that character by assigning the lastread field to -2 (meaning empty).
+
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
+int tokenizer_next_char(struct tokenizer* tokenizer)
+{
+	int c;
+
+	tokenizer_fill_buffer(tokenizer);
+	c = tokenizer->lastread;
+	tokenizer->lastread = -2;
+	return c;
 }
 
 
@@ -47,24 +92,6 @@ void string_buffer_append_char(struct string_buffer *buffer, char c)
 {
 	char cc = c;
 	string_buffer_append_chars(buffer, &cc, 1);
-}
-
-
-/***
- * Description:
-The tokenizer_next_char function reads the next character of a tokenizer, returns that character 
-and drops that character by assigning the lastread field to -2 (meaning empty).
-
-It needs to make sure that the given tokenizer preserves its property of tokenizer. 
-*/
-int tokenizer_next_char(struct tokenizer* tokenizer)
-{
-	int c;
-
-	tokenizer_fill_buffer(tokenizer);
-	c = tokenizer->lastread;
-	tokenizer->lastread = -2;
-	return c;
 }
 
 

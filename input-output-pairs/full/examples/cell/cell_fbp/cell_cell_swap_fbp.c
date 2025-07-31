@@ -10,19 +10,19 @@ predicate cell(struct cell* c, int v) =
 @*/
 
 
-int cell_get(struct cell* c)
-  //@ requires cell(c, ?v);
-  //@ ensures cell(c, v) &*& result == v;
-{
-  return c->x;
-}
-
-
 void cell_set(struct cell* c, int v)
   //@ requires cell(c, _);
   //@ ensures cell(c, v);
 {
   c->x = v;
+}
+
+
+int cell_get(struct cell* c)
+  //@ requires cell(c, ?v);
+  //@ ensures cell(c, v) &*& result == v;
+{
+  return c->x;
 }
 
 

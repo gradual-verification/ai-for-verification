@@ -61,6 +61,18 @@ fixpoint Stack<T> Pop<T>(Stack<T> Stack)
   }
 }
 
+fixpoint bool IsEmpty<T>(Stack<T> S)
+{
+  switch ( S )
+  {
+    case Nil:
+      return true;
+    
+    case Cons(x, y, T):
+      return false;
+  }
+}
+
 fixpoint int Size<T>(Stack<T> S)
 {
   switch ( S )
@@ -130,19 +142,6 @@ typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
 
 
 
-destructor* get_destructor/*@ <T> @*/(struct stack* stack)
-  //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack);
-  /*@
-  ensures Stack(stack, destructor, Ownership, Stack) &*&
-          [_]is_destructor(result, Ownership) &*&
-          result == destructor;
-  @*/
-{
-  destructor* d = stack->destructor;
-  return d;
-}
-
-
 void* pop/*@ <T> @*/(struct stack* stack)
   /*@
   requires Stack<T>(stack, ?destructor, ?Ownership, Cons(?head, ?info, ?tail));
@@ -161,6 +160,19 @@ void* pop/*@ <T> @*/(struct stack* stack)
   }
   stack->size--;
   return data;
+}
+
+
+destructor* get_destructor/*@ <T> @*/(struct stack* stack)
+  //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack);
+  /*@
+  ensures Stack(stack, destructor, Ownership, Stack) &*&
+          [_]is_destructor(result, Ownership) &*&
+          result == destructor;
+  @*/
+{
+  destructor* d = stack->destructor;
+  return d;
 }
 
 

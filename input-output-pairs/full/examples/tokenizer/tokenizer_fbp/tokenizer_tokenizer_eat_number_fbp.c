@@ -28,12 +28,46 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
 @*/
 
 
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
+
+
+void tokenizer_fill_buffer(struct tokenizer* tokenizer)
+ //@ requires Tokenizer(tokenizer);
+ //@ ensures Tokenizer(tokenizer);
+{
+	if ( tokenizer->lastread == -2 )
+	{
+	        charreader *reader = tokenizer->next_char;
+	        int result = reader();
+			if (result < -128 || result > 127)
+				abort();
+		tokenizer->lastread = result;
+	}
+}
+
+
 int tokenizer_peek(struct tokenizer* tokenizer)
  //@ requires Tokenizer(tokenizer);
  //@ ensures Tokenizer(tokenizer);
 {
 	tokenizer_fill_buffer(tokenizer);
 	return tokenizer->lastread;
+}
+
+
+
+int tokenizer_next_char(struct tokenizer* tokenizer)
+ //@ requires Tokenizer(tokenizer);
+ //@ ensures Tokenizer(tokenizer) &*& result >= -128 && result <= 127;
+{
+	int c;
+
+	tokenizer_fill_buffer(tokenizer);
+	c = tokenizer->lastread;
+	tokenizer->lastread = -2;
+	return c;
 }
 
 
@@ -51,19 +85,6 @@ void string_buffer_append_char(struct string_buffer *buffer, char c)
 {
 	char cc = c;
 	string_buffer_append_chars(buffer, &cc, 1);
-}
-
-
-int tokenizer_next_char(struct tokenizer* tokenizer)
- //@ requires Tokenizer(tokenizer);
- //@ ensures Tokenizer(tokenizer) &*& result >= -128 && result <= 127;
-{
-	int c;
-
-	tokenizer_fill_buffer(tokenizer);
-	c = tokenizer->lastread;
-	tokenizer->lastread = -2;
-	return c;
 }
 
 

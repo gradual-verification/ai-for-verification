@@ -10,22 +10,15 @@ predicate cell(struct cell* c, int v) =
 @*/
 
 
-void cell_swap(struct cell* c1, struct cell* c2)
-  //@ requires cell(c1, ?v1) &*& cell(c2, ?v2);
-  //@ ensures cell(c1, v2) &*& cell(c2, v1);
+struct cell* create_cell() 
+  //@ requires true;
+  //@ ensures cell(result, 0);
 {
-  int tmp1 = cell_get(c1);
-  int tmp2 = cell_get(c2);
-  cell_set(c1, tmp2);
-  cell_set(c2, tmp1);
-}
+  struct cell* c = malloc(sizeof(struct cell));
+  if(c == 0) abort();
+  c->x = 0;
 
-
-int cell_get(struct cell* c)
-  //@ requires cell(c, ?v);
-  //@ ensures cell(c, v) &*& result == v;
-{
-  return c->x;
+  return c;
 }
 
 
@@ -37,15 +30,22 @@ void cell_set(struct cell* c, int v)
 }
 
 
-struct cell* create_cell() 
-  //@ requires true;
-  //@ ensures cell(result, 0);
+int cell_get(struct cell* c)
+  //@ requires cell(c, ?v);
+  //@ ensures cell(c, v) &*& result == v;
 {
-  struct cell* c = malloc(sizeof(struct cell));
-  if(c == 0) abort();
-  c->x = 0;
+  return c->x;
+}
 
-  return c;
+
+void cell_swap(struct cell* c1, struct cell* c2)
+  //@ requires cell(c1, ?v1) &*& cell(c2, ?v2);
+  //@ ensures cell(c1, v2) &*& cell(c2, v1);
+{
+  int tmp1 = cell_get(c1);
+  int tmp2 = cell_get(c2);
+  cell_set(c1, tmp2);
+  cell_set(c2, tmp1);
 }
 
 

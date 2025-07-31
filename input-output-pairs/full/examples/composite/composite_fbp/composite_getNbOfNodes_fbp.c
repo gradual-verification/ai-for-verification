@@ -89,6 +89,8 @@ int internalGetNbOfNodes(struct Node* n)
 
   return c;
 }
+
+
 // TODO: make this function pass the verification
 int getNbOfNodes(struct Node* n)
   //@ requires isTree(n, ?value);

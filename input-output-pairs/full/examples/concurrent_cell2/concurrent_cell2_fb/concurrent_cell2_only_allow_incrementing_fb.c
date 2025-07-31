@@ -35,27 +35,24 @@ typedef lemma void dec_allowed(trace pretrace, fixpoint(trace, bool) allowed, in
   ensures allowed(dec(ctid, trace)) == true;
 @*/
 
-
-int atomic_load(int* c);
-  //@ requires [?f]cell(c, ?allowed) &*& last_seen(c, currentThread, ?oldtrace);
-  //@ ensures [f]cell(c, allowed) &*& last_seen(c, currentThread, ?currtrace) &*& is_good_prefix(oldtrace, currtrace, currentThread) == true &*& execute_trace(currtrace) == result;
-  
 /*@
 typedef lemma void cas_allowed(trace pretrace, fixpoint(trace, bool) allowed, int old, int new)(trace trace);
   requires is_good_prefix(pretrace, trace, currentThread) == true &*& allowed(trace) == true;
   ensures allowed(cas_(currentThread, old, new, trace)) == true;
 @*/
-  
 
-// TODO: make this function pass the verification
-void only_allow_incrementing(int* c)
-  //@ requires [?f]cell(c, incr_only) &*& last_seen(c, currentThread, ?trace0);
-  //@ ensures [f]cell(c, incr_only) &*& last_seen(c, currentThread, _);
-{
-  int x1 = atomic_load(c);
-  int x2 = atomic_load(c);
-  assert x1 <= x2;
+
+/*@
+fixpoint bool incr_only(trace trace) {
+  switch(trace) {
+    case zero: return true;
+    case inc(tid, trace0): return incr_only(trace0);
+    case dec(tid, trace0): return false;
+    case cas_(tid, old, new, trace0): return old <= new && incr_only(trace0);
+  }
 }
+@*/
+
 
 /*@
 fixpoint option<int> lock_owner(trace trace) {
@@ -76,4 +73,23 @@ fixpoint bool is_lock(trace trace) {
   }
 }
 @*/
+
+
+
+int atomic_load(int* c);
+  //@ requires [?f]cell(c, ?allowed) &*& last_seen(c, currentThread, ?oldtrace);
+  //@ ensures [f]cell(c, allowed) &*& last_seen(c, currentThread, ?currtrace) &*& is_good_prefix(oldtrace, currtrace, currentThread) == true &*& execute_trace(currtrace) == result;
+  
+  
+
+// TODO: make this function pass the verification
+void only_allow_incrementing(int* c)
+  //@ requires [?f]cell(c, incr_only) &*& last_seen(c, currentThread, ?trace0);
+  //@ ensures [f]cell(c, incr_only) &*& last_seen(c, currentThread, _);
+{
+  int x1 = atomic_load(c);
+  int x2 = atomic_load(c);
+  assert x1 <= x2;
+}
+
 

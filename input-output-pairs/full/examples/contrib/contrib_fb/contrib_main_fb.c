@@ -53,6 +53,25 @@ predicate_family_instance thread_run_post(contribute)(struct session *session, c
 @*/
 
 
+void contribute(void *data) //@ : thread_run_joinable
+    //@ requires thread_run_pre(contribute)(data, ?info) &*& lockset(currentThread, nil);
+    //@ ensures thread_run_post(contribute)(data, info) &*& lockset(currentThread, nil);
+{
+    struct session *session = data;
+    struct lock *lock = session->lock;
+    struct sum *sumObject = session->sum_object;
+    free(session);
+    lock_acquire(lock);
+   
+        {
+            int sum = sumObject->sum;
+            sumObject->sum = sum + 1;
+        }
+      
+    lock_release(lock);
+}
+
+
 // TODO: make this function pass the verification
 int main()
     //@ requires true;

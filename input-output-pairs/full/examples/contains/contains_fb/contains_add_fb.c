@@ -15,14 +15,7 @@ predicate_family equals_post(void* index)(void* v1, void* v2,  fixpoint(unit, vo
 @*/
 
 /*@
-predicate_ctor my_pre(equals * index, void* v1, fixpoint(unit, void*, void*, bool) eq_func)(void* v2) =
-  equals_pre(index)(v1, v2, eq_func);
   
-predicate_ctor my_post(equals * index, void* v1, fixpoint(unit, void*, void*, bool) eq_func)(void* v2) =
-  equals_post(index)(v1, v2, eq_func);
-  
-predicate is_eq_func(equals* eq, fixpoint(unit, void*, void*, bool) eq_func) =
-  true;
   
 fixpoint bool contains_eq_func(list<void*> vs, void* v, fixpoint(unit, void*, void*, bool) eq_func) {
   switch(vs) {
@@ -33,8 +26,6 @@ fixpoint bool contains_eq_func(list<void*> vs, void* v, fixpoint(unit, void*, vo
 @*/
 
 /*@
-predicate_family_instance equals_pre(my_equals)(void* v1, void* v2, fixpoint(unit, void*, void*, bool) eq_func) = eq_func == my_eq_func;
-predicate_family_instance equals_post(my_equals)(void* v1, void* v2, fixpoint(unit, void*, void*, bool) eq_func) = true;
 
 fixpoint bool my_eq_func(unit un, void* v1, void* v2) {
   switch(un) {

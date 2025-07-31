@@ -24,20 +24,17 @@ predicate llist(struct llist *list; list<int> v) =
 @*/
 
 
-void llist_dispose(struct llist *list)
-  //@ requires llist(list, _);
-  //@ ensures true;
+struct llist *create_llist()
+  //@ requires true;
+  //@ ensures llist(result, nil);
 {
-  struct node *n = list->first;
-  struct node *l = list->last;
-  while (n != l)
-  {
-    struct node *next = n->next;
-    free(n);
-    n = next;
-  }
-  free(l);
-  free(list);
+  struct llist *l = malloc(sizeof(struct llist));
+  if (l == 0) abort();
+  struct node *n = calloc(1, sizeof(struct node));
+  if (n == 0) abort();
+  l->first = n;
+  l->last = n;
+  return l;
 }
 
 
@@ -57,6 +54,23 @@ void llist_add(struct llist *list, int x)
 }
 
 
+void llist_dispose(struct llist *list)
+  //@ requires llist(list, _);
+  //@ ensures true;
+{
+  struct node *n = list->first;
+  struct node *l = list->last;
+  while (n != l)
+  {
+    struct node *next = n->next;
+    free(n);
+    n = next;
+  }
+  free(l);
+  free(list);
+}
+
+
 int llist_removeFirst(struct llist *l)
   //@ requires llist(l, ?v) &*& v != nil;
   //@ ensures llist(l, ?t) &*& v == cons(result, t);
@@ -67,20 +81,6 @@ int llist_removeFirst(struct llist *l)
   free(nf);
   l->first = nfn;
   return nfv;
-}
-
-
-struct llist *create_llist()
-  //@ requires true;
-  //@ ensures llist(result, nil);
-{
-  struct llist *l = malloc(sizeof(struct llist));
-  if (l == 0) abort();
-  struct node *n = calloc(1, sizeof(struct node));
-  if (n == 0) abort();
-  l->first = n;
-  l->last = n;
-  return l;
 }
 
 

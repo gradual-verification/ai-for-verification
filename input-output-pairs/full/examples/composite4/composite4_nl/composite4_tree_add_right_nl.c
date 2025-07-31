@@ -9,6 +9,44 @@ struct node {
 
 
 /***
+* Description:
+The create_node function creates a new node in the tree with the specified parent node, and initializes its left and right children as empty.
+
+@param `p` - a pointer to the parent node.
+
+Requires: No specific preconditions.
+Ensures: Returns a pointer to the newly created node, and the subtree rooted at this node is correctly initialized.
+*/
+struct node * create_node(struct node * p)
+{
+  struct node *n = malloc(sizeof(struct node));
+  if (n == 0) { abort(); }
+  n->left = 0;
+  n->right = 0;
+  n->parent = p;
+  n->count = 1;
+  return n;
+}
+
+
+/***
+ * Description:
+The subtree_get_count function retrieves the count of nodes in the subtree rooted at the specified node.
+
+@param `node` - a pointer to the root of the subtree.
+
+Requires: The subtree rooted at `node` is valid.
+Ensures: Returns the count of nodes in the subtree and ensures it is non-negative.
+*/
+int subtree_get_count(struct node *node)
+{
+  int result = 0;
+  if (node != 0) { result = node->count; }
+  return result;
+}
+
+
+/***
  * Description:
 The fixup_ancestors function updates the count of nodes in the subtree for all ancestor nodes starting from the specified node.
 
@@ -44,27 +82,6 @@ void fixup_ancestors(struct node * n, struct node * p, int count)
       fixup_ancestors(p, grandparent, pcount);
     }
   }
-}
-
-
-/***
-* Description:
-The create_node function creates a new node in the tree with the specified parent node, and initializes its left and right children as empty.
-
-@param `p` - a pointer to the parent node.
-
-Requires: No specific preconditions.
-Ensures: Returns a pointer to the newly created node, and the subtree rooted at this node is correctly initialized.
-*/
-struct node * create_node(struct node * p)
-{
-  struct node *n = malloc(sizeof(struct node));
-  if (n == 0) { abort(); }
-  n->left = 0;
-  n->right = 0;
-  n->parent = p;
-  n->count = 1;
-  return n;
 }
 
 

@@ -9,6 +9,24 @@ struct point {
 
 /*** 
  * Description:
+The swap function takes two integer pointers as parameters and swaps the values they point to.
+
+@param a - Pointer to the first integer value to be swapped.
+@param b - Pointer to the second integer value to be swapped.
+
+It makes sure that the values pointed to by a and b are swapped correctly.
+*/
+void swap(int *a, int *b)
+{
+    int tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+
+
+/*** 
+ * Description:
 The point_mirror function takes a pointer to a struct point as a parameter and swaps the x and y values of the point.
 
 @param p - Pointer to the struct point whose x and y values need to be swapped.

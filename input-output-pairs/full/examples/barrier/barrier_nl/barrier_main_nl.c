@@ -61,25 +61,6 @@ struct barrier *create_barrier(int n)
 
 /***
  * Description:
- * Cleans up and deallocates the barrier once it is no longer needed.
- *
- * @param b - A pointer to the `struct barrier` to dispose of.
- *
- * The function disposes the underlying mutex and frees the memory
- * allocated for the barrier. After calling this function, the barrier
- * pointer must not be used again.
- */
-void barrier_dispose(struct barrier *barrier)
-{
-  
-    mutex_dispose(barrier->mutex);
-    
-    free(barrier);
-}
-
-
-/***
- * Description:
  * Waits at the barrier until all `n` threads have arrived. Once all have 
  * arrived, the barrier transitions to release them. After the last thread 
  * leaves, the barrier is exited and reset.
@@ -135,6 +116,134 @@ void barrier(struct barrier *barrier)
         mutex_release(mutex);
     }
 
+}
+
+
+/***
+ * Description:
+ * Cleans up and deallocates the barrier once it is no longer needed.
+ *
+ * @param b - A pointer to the `struct barrier` to dispose of.
+ *
+ * The function disposes the underlying mutex and frees the memory
+ * allocated for the barrier. After calling this function, the barrier
+ * pointer must not be used again.
+ */
+void barrier_dispose(struct barrier *barrier)
+{
+  
+    mutex_dispose(barrier->mutex);
+    
+    free(barrier);
+}
+
+
+/***
+ * Description:
+ * The first worker thread function. It repeatedly uses the barrier to
+ * coordinate with the other thread while manipulating the fields `x1`,
+ * `x2`, `y1`, and `y2` in the shared `struct data`.
+ *
+ * @param d - A pointer to the shared `struct data`.
+ *
+ * The thread checks boundaries on `x1` and `x2`, updates `y1` based on 
+ * calculations, then waits at the barrier. It continues updating `x1` based on `y1` and `y2` and 
+ * synchronizing until it finishes its loop, then sets `d->i` to 0 before
+ * returning.
+ */
+void thread1(struct data *d)
+{
+   
+    struct barrier *barrier = d->barrier;
+    {
+        
+        barrier(barrier);
+
+    }
+    int N = 0;
+    while (N < 30)
+      
+    {
+        int a1 = d->x1;
+        int a2 = d->x2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+        d->y1 = a1 + 2 * a2;
+        {
+            
+            barrier(barrier);
+           
+        }
+        a1 = d->y1;
+        a2 = d->y2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+        d->x1 = a1 + 2 * a2;
+        N = N + 1;
+        d->i = N;
+        {
+            
+            barrier(barrier);
+
+        }
+    }
+    {
+        
+        barrier(barrier);
+
+    }
+    d->i = 0;
+
+}
+
+
+/***
+ * Description:
+ * The second worker thread function. It performs similar operations 
+ * to `thread1` but with different internal calculations on `x1`, `x2`, 
+ * `y1`, and `y2`, also repeatedly waiting at the same barrier to stay 
+ * in sync with the first thread. It first updates `y2` based on `x1` and `x2`,
+ * and then updates `x2` based on `y1` and `y2`
+ *
+ * @param d - A pointer to the shared `struct data`.
+ */
+void thread2(struct data *d)
+{
+   
+    struct barrier *barrier = d->barrier;
+    {
+        
+        barrier(barrier);
+        
+    }
+    int m = 0;
+    while (m < 30)
+        
+    {
+        int a1 = d->x1;
+        int a2 = d->x2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+        d->y2 = a1 + 3 * a2;
+        {
+            
+            barrier(barrier);
+           
+        }
+        a1 = d->y1;
+        a2 = d->y2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+        d->x2 = a1 + 3 * a2;
+        {
+           
+            barrier(barrier);
+          
+        }
+        m = d->i;
+    }
+    {
+        
+        barrier(barrier);
+       
+    }
+    
 }
 
 

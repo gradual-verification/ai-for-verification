@@ -22,6 +22,29 @@ predicate set(struct set* set, int size, fixpoint(void*, bool) elements) =
 @*/
 
 
+struct set* create_set()
+//@ requires true;
+//@ ensures result == 0 ? true : set(result, 0, (empty_set));
+{
+  struct set* set = malloc(sizeof(struct set));
+  if(set == 0) return 0;
+  set->head = 0;
+  return set;
+}
+
+
+void set_add(struct set* set, void* x)
+//@ requires set(set, ?size, ?elems) &*& elems(x) == false;
+//@ ensures set(set, size + 1, fupdate(elems, x, true));
+{
+  struct node* n = malloc(sizeof(struct node));
+  if(n == 0) abort();
+  n->next = set->head;
+  n->val = x;
+  set->head = n;
+}
+
+
 bool set_contains(struct set* set, void* x)
 //@ requires set(set, ?size, ?elems);
 //@ ensures set(set, size, elems) &*& result ? exists<void *>(?elem) &*& elems(elem) == true &*& (uintptr_t)x == (uintptr_t)elem : !elems(x);
@@ -51,29 +74,6 @@ void set_dispose(struct set* set)
     curr = nxt;
   }
   free(set);
-}
-
-
-void set_add(struct set* set, void* x)
-//@ requires set(set, ?size, ?elems) &*& elems(x) == false;
-//@ ensures set(set, size + 1, fupdate(elems, x, true));
-{
-  struct node* n = malloc(sizeof(struct node));
-  if(n == 0) abort();
-  n->next = set->head;
-  n->val = x;
-  set->head = n;
-}
-
-
-struct set* create_set()
-//@ requires true;
-//@ ensures result == 0 ? true : set(result, 0, (empty_set));
-{
-  struct set* set = malloc(sizeof(struct set));
-  if(set == 0) return 0;
-  set->head = 0;
-  return set;
 }
 
 

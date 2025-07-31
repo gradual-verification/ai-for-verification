@@ -8,14 +8,27 @@ struct thread;
 //@ predicate_ctor integer2(int *cell, int value)() = integer(cell, value);
 
 
-void thread_join(struct thread *thread);
-    //@ requires thread(thread, ?post);
+typedef void thread_run/*@(predicate(void *) pre, predicate() post)@*/(void *data);
+    //@ requires pre(data);
     //@ ensures post();
 
 
 struct thread *thread_start(void *run, void *data);
     //@ requires [_]is_thread_run(run, ?pre, ?post) &*& pre(data);
     //@ ensures thread(result, post);
+
+
+void thread_join(struct thread *thread);
+    //@ requires thread(thread, ?post);
+    //@ ensures post();
+
+
+void increment(int *cell)
+    //@ requires integer(cell, ?value) &*& value >= INT_MIN &*& value < INT_MAX;
+    //@ ensures integer(cell, value + 1);
+{
+    (*cell)++;
+}
 
 
 int read_int();

@@ -14,6 +14,13 @@ struct tokenizer
 
 /***
  * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
+
+/***
+ * Description:
 The tokenizer_fill_buffer function reads a character from the next_char reader of the tokenizer and updates the lastread char,
 if the original lastread char is -2 (which means empty).
 

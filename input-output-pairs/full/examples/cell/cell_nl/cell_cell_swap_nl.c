@@ -13,21 +13,6 @@ struct cell {
 
 /***
  * Description:
- * Retrieves the current value of a `cell`.
- *
- * @param c - A pointer to the `cell` object.
- * @returns The integer value stored in the `cell`.
- * 
- * It makes sure that the cell c is not changed and the return value is the x field of c.
- */
-int cell_get(struct cell* c)
-{
-  return c->x;
-}
-
-
-/***
- * Description:
  * Sets the value of a `cell` to the given integer `v`.
  *
  * @param c - A pointer to the `cell` object.
@@ -38,6 +23,21 @@ int cell_get(struct cell* c)
 void cell_set(struct cell* c, int v)
 {
   c->x = v;
+}
+
+
+/***
+ * Description:
+ * Retrieves the current value of a `cell`.
+ *
+ * @param c - A pointer to the `cell` object.
+ * @returns The integer value stored in the `cell`.
+ * 
+ * It makes sure that the cell c is not changed and the return value is the x field of c.
+ */
+int cell_get(struct cell* c)
+{
+  return c->x;
 }
 
 

@@ -28,6 +28,26 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
 @*/
 
 
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
+
+
+void tokenizer_fill_buffer(struct tokenizer* tokenizer)
+ //@ requires Tokenizer(tokenizer);
+ //@ ensures Tokenizer(tokenizer);
+{
+	if ( tokenizer->lastread == -2 )
+	{
+	        charreader *reader = tokenizer->next_char;
+	        int result = reader();
+			if (result < -128 || result > 127)
+				abort();
+		tokenizer->lastread = result;
+	}
+}
+
+
 int tokenizer_peek(struct tokenizer* tokenizer)
  //@ requires Tokenizer(tokenizer);
  //@ ensures Tokenizer(tokenizer);
@@ -37,19 +57,19 @@ int tokenizer_peek(struct tokenizer* tokenizer)
 }
 
 
-bool is_whitespace(int c)
- //@ requires true;
- //@ ensures true;
-{
-	return c == ' ' || c == '\n' || c == '\r' || c == '\t';
-}
-
-
 void tokenizer_drop(struct tokenizer* tokenizer)
  //@ requires Tokenizer(tokenizer);
  //@ ensures Tokenizer(tokenizer);
 {
 	tokenizer->lastread = -2;
+}
+
+
+bool is_whitespace(int c)
+ //@ requires true;
+ //@ ensures true;
+{
+	return c == ' ' || c == '\n' || c == '\r' || c == '\t';
 }
 
 

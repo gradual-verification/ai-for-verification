@@ -49,20 +49,17 @@ predicate iter(struct iter *i, real frac, struct llist *l, list<int> v0, list<in
 @*/
 
 
-void llist_dispose(struct llist *list)
-  //@ requires llist(list, _);
-  //@ ensures true;
+struct llist *create_llist()
+  //@ requires true;
+  //@ ensures llist(result, nil);
 {
-  struct node *n = list->first;
-  struct node *l = list->last;
-  while (n != l)
-  {
-    struct node *next = n->next;
-    free(n);
-    n = next;
-  }
-  free(l);
-  free(list);
+  struct llist *l = malloc(sizeof(struct llist));
+  if (l == 0) abort();
+  struct node *n = calloc(1, sizeof(struct node));
+  if (n == 0) abort();
+  l->first = n;
+  l->last = n;
+  return l;
 }
 
 
@@ -82,11 +79,20 @@ void llist_add(struct llist *list, int x)
 }
 
 
-void iter_dispose(struct iter *i)
-    //@ requires iter(i, ?f1, ?l, ?v0, ?v) &*& [?f2]llist(l, v0);
-    //@ ensures [f1 + f2]llist(l, v0);
+void llist_dispose(struct llist *list)
+  //@ requires llist(list, _);
+  //@ ensures true;
 {
-    free(i);
+  struct node *n = list->first;
+  struct node *l = list->last;
+  while (n != l)
+  {
+    struct node *next = n->next;
+    free(n);
+    n = next;
+  }
+  free(l);
+  free(list);
 }
 
 
@@ -119,17 +125,11 @@ int iter_next(struct iter *i)
 }
 
 
-struct llist *create_llist()
-  //@ requires true;
-  //@ ensures llist(result, nil);
+void iter_dispose(struct iter *i)
+    //@ requires iter(i, ?f1, ?l, ?v0, ?v) &*& [?f2]llist(l, v0);
+    //@ ensures [f1 + f2]llist(l, v0);
 {
-  struct llist *l = malloc(sizeof(struct llist));
-  if (l == 0) abort();
-  struct node *n = calloc(1, sizeof(struct node));
-  if (n == 0) abort();
-  l->first = n;
-  l->last = n;
-  return l;
+    free(i);
 }
 
 

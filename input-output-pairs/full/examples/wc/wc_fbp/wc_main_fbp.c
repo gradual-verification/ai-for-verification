@@ -12,7 +12,7 @@ fixpoint int wcount(list<char> cs, bool inword) {
 
 
 int wc(char* string, bool inword)
-//@ requires [?f]string(string, ?cs) &*& wcount(cs, inword) < INT_MAX;;
+//@ requires [?f]string(string, ?cs) &*& wcount(cs, inword) < INT_MAX;
 //@ ensures [f]string(string, cs) &*& result == wcount(cs, inword);
 {
   char head = * string;

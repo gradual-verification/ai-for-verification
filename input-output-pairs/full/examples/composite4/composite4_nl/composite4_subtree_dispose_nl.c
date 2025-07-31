@@ -8,21 +8,6 @@ struct node {
 };
 
 
-/***
- * Description:
-The tree_dispose function frees all memory associated with the tree rooted at the specified node.
-
-@param `node` - a pointer to the root of the tree to be disposed.
-
-Requires: The tree rooted at `node` is valid.
-Ensures: All memory associated with the tree is freed.
-*/
-void tree_dispose(struct node *node)
-{
-  subtree_dispose(node);
-}
-
-
 // TODO: make this function pass the verification
 /***
  * Description:

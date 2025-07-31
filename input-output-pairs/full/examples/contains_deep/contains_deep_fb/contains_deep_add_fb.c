@@ -14,13 +14,6 @@ predicate_family equals_state2(void* index)(void* x1, int v1,fixpoint(unit, int,
 @*/
 
 /*@
-predicate_ctor equals_state2_ctor(equals * index, fixpoint(unit, int, int, bool) eq_func)(void* x2, int v2) =
-  equals_state2(index)(x2, v2, eq_func);
-  
-
-  
-predicate is_eq_func(equals* eq, fixpoint(unit, int, int, bool) eq_func) =
-  true;
   
 fixpoint bool contains_eq_func(list<int> vs, int v, fixpoint(unit, int, int, bool) eq_func) {
   switch(vs) {
@@ -49,11 +42,6 @@ struct cell {
 };
 
 /*@
-predicate_family_instance equals_state1(cell_equals)(struct cell* c1, int v, fixpoint (unit, int, int,bool) eq_func) =
-  c1->val |-> v &*& eq_func == cell_eq_func;
-  
-  predicate_family_instance equals_state2(cell_equals)(struct cell* c2, int v, fixpoint (unit, int, int,bool) eq_func) =
-  c2->val |-> v &*& eq_func == cell_eq_func;
   
 fixpoint bool cell_eq_func(unit un, int v1, int v2) {
   switch(un) {

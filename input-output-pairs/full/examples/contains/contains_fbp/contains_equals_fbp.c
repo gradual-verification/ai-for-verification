@@ -33,8 +33,6 @@ fixpoint bool contains_eq_func(list<void*> vs, void* v, fixpoint(unit, void*, vo
 @*/
 
 /*@
-predicate_family_instance equals_pre(my_equals)(void* v1, void* v2, fixpoint(unit, void*, void*, bool) eq_func) = eq_func == my_eq_func;
-predicate_family_instance equals_post(my_equals)(void* v1, void* v2, fixpoint(unit, void*, void*, bool) eq_func) = true;
 
 fixpoint bool my_eq_func(unit un, void* v1, void* v2) {
   switch(un) {

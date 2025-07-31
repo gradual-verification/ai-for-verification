@@ -36,39 +36,46 @@ struct data
 
 
 /*
-  create_data function
-  - params: two integers foo and bar
-  - description: This function creates a data structure and initializes its fields by the fiven foo and bar.
+destructor function
+-params: data
+-description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
 */
-struct data* create_data(int foo, int bar)
+typedef void destructor(void* data);
+
+
+
+/* create_empty_stack function
+-params: A destructor
+This function makes sure to create and return an empty stack */
+struct stack* create_empty_stack(destructor* destructor)
 {
-  struct data* data = malloc( sizeof( struct data ) );
-  if ( data == 0 ) abort();
+  struct stack* stack = malloc( sizeof( struct stack ) );
+  if ( stack == 0 ) abort();
   
-  data->foo = foo;
-  data->bar = bar;
-  return data;
+  stack->destructor = destructor;
+  stack->first = 0;
+  stack->size = 0;
+  
+  return stack;
 }
 
 
-/*
-  destroy_data function
-  - params: data stucture
-  - description: This function frees the memory allocated for the data.
-*/
-void destroy_data(struct data* data)
-{
-  free(data);
-}
-
-
-/* size function
+/* destroy_stack function
 -params: A stack
-This function makes sure to return the size of the stack and does not modify the stack. */
-int size(struct stack* stack)
+This function makes sure to destroy the stack by destructing the data of each node and freeing each node. */
+void destroy_stack(struct stack* stack)
 {
-  int size = stack->size;
-  return size;
+  struct node* current = stack->first;
+  destructor* destructor = stack->destructor;
+  
+  while ( current != 0 )
+  {
+    struct node* next = current->next;
+    destructor(current->data);
+    free(current);
+    current = next;
+  }
+  free(stack);
 }
 
 
@@ -109,38 +116,40 @@ void* pop(struct stack* stack)
 }
 
 
-/* create_empty_stack function
--params: A destructor
-This function makes sure to create and return an empty stack */
-struct stack* create_empty_stack(destructor* destructor)
+/* size function
+-params: A stack
+This function makes sure to return the size of the stack and does not modify the stack. */
+int size(struct stack* stack)
 {
-  struct stack* stack = malloc( sizeof( struct stack ) );
-  if ( stack == 0 ) abort();
-  
-  stack->destructor = destructor;
-  stack->first = 0;
-  stack->size = 0;
-  
-  return stack;
+  int size = stack->size;
+  return size;
 }
 
 
-/* destroy_stack function
--params: A stack
-This function makes sure to destroy the stack by destructing the data of each node and freeing each node. */
-void destroy_stack(struct stack* stack)
+/*
+  create_data function
+  - params: two integers foo and bar
+  - description: This function creates a data structure and initializes its fields by the fiven foo and bar.
+*/
+struct data* create_data(int foo, int bar)
 {
-  struct node* current = stack->first;
-  destructor* destructor = stack->destructor;
+  struct data* data = malloc( sizeof( struct data ) );
+  if ( data == 0 ) abort();
   
-  while ( current != 0 )
-  {
-    struct node* next = current->next;
-    destructor(current->data);
-    free(current);
-    current = next;
-  }
-  free(stack);
+  data->foo = foo;
+  data->bar = bar;
+  return data;
+}
+
+
+/*
+  destroy_data function
+  - params: data stucture
+  - description: This function frees the memory allocated for the data.
+*/
+void destroy_data(struct data* data)
+{
+  free(data);
 }
 
 

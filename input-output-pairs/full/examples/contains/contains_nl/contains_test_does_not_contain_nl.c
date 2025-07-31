@@ -6,6 +6,22 @@ struct node {
 };
 
 
+/*equals() function
+-params: void* v1, void* v2
+-description: checks whether two pointers are equal. It doesn't have a concrete definition.
+*/
+typedef bool equals(void* v1, void* v2);
+
+
+/*create_list() function
+-params: none
+-description: return an empty list. */
+struct node* create_list() 
+{
+  return 0;
+}
+
+
 /*add() function
 -params: struct node* n, void* v
 -description: add a new element to the list. 
@@ -19,15 +35,6 @@ struct node* add(struct node* n, void* v)
   nn->value = v;
   nn->next = n;
   return nn;
-}
-
-
-/*create_list() function
--params: none
--description: return an empty list. */
-struct node* create_list() 
-{
-  return 0;
 }
 
 
@@ -52,6 +59,21 @@ bool list_contains(struct node* n, void* v, equals* eq)
       return cont;
     }
   }
+}
+
+
+/*my_equals() function
+-params: void* v1, void* v2
+-description: checks whether two pointers have an equal value.
+*/
+bool my_equals(void* v1, void* v2) //@: equals
+{
+  if((uintptr_t)v1 == (uintptr_t)v2) {
+    return true;
+  } else {
+    return false;
+  }
+  
 }
 
 

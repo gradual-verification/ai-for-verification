@@ -12,6 +12,14 @@ struct tokenizer
 };
 
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
+
+
 // TODO: make this function pass the verification
 /***
  * Description:

@@ -13,34 +13,18 @@ struct cell {
 
 /***
  * Description:
- * Swaps the values of two `cell` objects.
+ * Creates a new `cell` and initializes it with the value `0`.
  *
- * @param c1 - A pointer to the first `cell`.
- * @param c2 - A pointer to the second `cell`.
+ * @returns A pointer to a newly allocated `cell` object.
  *
- * The function makes sure that the x fields in c1 and c2 are swapped.
+ * It makes sure that the return value is a cell with its x field as 0.
  */
-void cell_swap(struct cell* c1, struct cell* c2)
+struct cell* create_cell() 
 {
-  int tmp1 = cell_get(c1);
-  int tmp2 = cell_get(c2);
-  cell_set(c1, tmp2);
-  cell_set(c2, tmp1);
-}
-
-
-/***
- * Description:
- * Retrieves the current value of a `cell`.
- *
- * @param c - A pointer to the `cell` object.
- * @returns The integer value stored in the `cell`.
- * 
- * It makes sure that the cell c is not changed and the return value is the x field of c.
- */
-int cell_get(struct cell* c)
-{
-  return c->x;
+  struct cell* c = malloc(sizeof(struct cell));
+  if (c == 0) abort();
+  c->x = 0;
+  return c;
 }
 
 
@@ -61,18 +45,34 @@ void cell_set(struct cell* c, int v)
 
 /***
  * Description:
- * Creates a new `cell` and initializes it with the value `0`.
+ * Retrieves the current value of a `cell`.
  *
- * @returns A pointer to a newly allocated `cell` object.
- *
- * It makes sure that the return value is a cell with its x field as 0.
+ * @param c - A pointer to the `cell` object.
+ * @returns The integer value stored in the `cell`.
+ * 
+ * It makes sure that the cell c is not changed and the return value is the x field of c.
  */
-struct cell* create_cell() 
+int cell_get(struct cell* c)
 {
-  struct cell* c = malloc(sizeof(struct cell));
-  if (c == 0) abort();
-  c->x = 0;
-  return c;
+  return c->x;
+}
+
+
+/***
+ * Description:
+ * Swaps the values of two `cell` objects.
+ *
+ * @param c1 - A pointer to the first `cell`.
+ * @param c2 - A pointer to the second `cell`.
+ *
+ * The function makes sure that the x fields in c1 and c2 are swapped.
+ */
+void cell_swap(struct cell* c1, struct cell* c2)
+{
+  int tmp1 = cell_get(c1);
+  int tmp2 = cell_get(c2);
+  cell_set(c1, tmp2);
+  cell_set(c2, tmp1);
 }
 
 

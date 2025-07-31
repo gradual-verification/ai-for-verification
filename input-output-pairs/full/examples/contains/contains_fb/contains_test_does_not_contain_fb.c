@@ -44,6 +44,19 @@ fixpoint bool my_eq_func(unit un, void* v1, void* v2) {
 @*/
 
 
+typedef bool equals(void* v1, void* v2);
+  //@ requires equals_pre(this)(v1, v2, ?eq_func);
+  //@ ensures equals_post(this)(v1, v2, eq_func) &*& result == eq_func(unit, v1, v2);
+
+
+struct node* create_list() 
+  //@ requires true;
+  //@ ensures nodes(result, nil);
+{
+  return 0;
+}
+
+
 struct node* add(struct node* n, void* v) 
   //@ requires nodes(n, ?vs);
   //@ ensures nodes(result, cons(v, vs));
@@ -55,14 +68,6 @@ struct node* add(struct node* n, void* v)
   return nn;
 }
 
-
-
-struct node* create_list() 
-  //@ requires true;
-  //@ ensures nodes(result, nil);
-{
-  return 0;
-}
 
 
 bool list_contains(struct node* n, void* v, equals* eq) 
@@ -81,6 +86,19 @@ bool list_contains(struct node* n, void* v, equals* eq)
       return cont;
     }
   }
+}
+
+
+bool my_equals(void* v1, void* v2) //@: equals
+  //@ requires equals_pre(my_equals)(v1, v2, ?eq_func);
+  //@ ensures equals_post(my_equals)(v1, v2, eq_func) &*& result == eq_func(unit, v1, v2);
+{
+  if((uintptr_t)v1 == (uintptr_t)v2) {
+    return true;
+  } else {
+    return false;
+  }
+  
 }
 
 

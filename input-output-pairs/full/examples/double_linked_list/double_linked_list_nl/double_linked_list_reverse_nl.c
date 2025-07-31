@@ -10,6 +10,14 @@ typedef struct node {
 	int item;
 	struct node *next;
 	struct node *prev;
+} *node;
+
+
+typedef struct dllist {
+	node head;
+	node tail;
+} *dllist;
+
 
 // TODO: make this function pass the verification
 /***

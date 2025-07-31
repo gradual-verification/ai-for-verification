@@ -44,17 +44,6 @@ typedef void destructor(void* data);
 
 
 
-/* get_destructor function
--params: A stack
-
-It makes sure to return the destructor of the stack*/
-destructor* get_destructor(struct stack* stack)
-{
-  destructor* d = stack->destructor;
-  return d;
-}
-
-
 /* pop function
 -params: A stack
 -description: Pops the top element from the stack.
@@ -71,6 +60,17 @@ void* pop(struct stack* stack)
   }
   stack->size--;
   return data;
+}
+
+
+/* get_destructor function
+-params: A stack
+
+It makes sure to return the destructor of the stack*/
+destructor* get_destructor(struct stack* stack)
+{
+  destructor* d = stack->destructor;
+  return d;
 }
 
 

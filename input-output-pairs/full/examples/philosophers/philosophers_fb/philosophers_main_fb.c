@@ -28,6 +28,23 @@ void create_philosopher(struct lock *fork1, struct lock *fork2)
 }
 
 
+void philosopher_run(void *data) //@ : thread_run
+    //@ requires thread_run_data(philosopher_run)(data) &*& lockset(currentThread, nil);
+    //@ ensures false;
+{
+    struct philosopher *philosopher = data;
+    struct lock *fork1 = philosopher->fork1;
+    struct lock *fork2 = philosopher->fork2;
+    while (true)
+    {
+        lock_acquire(fork2);
+        lock_acquire(fork1);
+        lock_release(fork2);
+        lock_release(fork1);
+    }
+}
+
+
 // TODO: make this function pass the verification
 int main() //@ : main
     //@ requires true;

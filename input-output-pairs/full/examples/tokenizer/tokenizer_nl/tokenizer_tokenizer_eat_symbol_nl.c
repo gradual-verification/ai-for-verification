@@ -14,13 +14,28 @@ struct tokenizer
 
 /***
  * Description:
-The is_symbol_char function checks whether a given character in integer means a symbol in ASCII (except parentheses).
-
-It ensures nothing
+The charreader is a function that reads a character and returns it in an integer.
 */
-bool is_symbol_char(int c)
+typedef int charreader();
+
+
+/***
+ * Description:
+The tokenizer_fill_buffer function reads a character from the next_char reader of the tokenizer and updates the lastread char,
+if the original lastread char is -2 (which means empty).
+
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
+void tokenizer_fill_buffer(struct tokenizer* tokenizer)
 {
-	return c > 32 && c <= 127 && c != '(' && c != ')'; 
+	if ( tokenizer->lastread == -2 )
+	{
+	        charreader *reader = tokenizer->next_char;
+	        int result = reader();
+			if (result < -128 || result > 127)
+				abort();
+		tokenizer->lastread = result;
+	}
 }
 
 
@@ -39,19 +54,6 @@ int tokenizer_peek(struct tokenizer* tokenizer)
 
 /***
  * Description:
-The string_buffer_append_char function appends a char to a buffer.
-
-It needs to make sure that the property of the buffer holds (i.e., the buffer points to a list of characters) before and after the function.
-*/
-void string_buffer_append_char(struct string_buffer *buffer, char c)
-{
-	char cc = c;
-	string_buffer_append_chars(buffer, &cc, 1);
-}
-
-
-/***
- * Description:
 The tokenizer_next_char function reads the next character of a tokenizer, returns that character 
 and drops that character by assigning the lastread field to -2 (meaning empty).
 
@@ -65,6 +67,31 @@ int tokenizer_next_char(struct tokenizer* tokenizer)
 	c = tokenizer->lastread;
 	tokenizer->lastread = -2;
 	return c;
+}
+
+
+/***
+ * Description:
+The string_buffer_append_char function appends a char to a buffer.
+
+It needs to make sure that the property of the buffer holds (i.e., the buffer points to a list of characters) before and after the function.
+*/
+void string_buffer_append_char(struct string_buffer *buffer, char c)
+{
+	char cc = c;
+	string_buffer_append_chars(buffer, &cc, 1);
+}
+
+
+/***
+ * Description:
+The is_symbol_char function checks whether a given character in integer means a symbol in ASCII (except parentheses).
+
+It ensures nothing
+*/
+bool is_symbol_char(int c)
+{
+	return c > 32 && c <= 127 && c != '(' && c != ')'; 
 }
 
 

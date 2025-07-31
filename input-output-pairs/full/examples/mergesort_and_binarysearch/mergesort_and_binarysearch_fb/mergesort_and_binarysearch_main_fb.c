@@ -31,6 +31,69 @@ fixpoint list<int> sorted(list<int> xs) {
 @*/
 
 
+int read_int()
+    //@ requires true;
+    //@ ensures true;
+{
+    int x;
+    scanf("%i", &x);
+    return x;
+}
+
+
+void merge_sort_core(int *pxs, int *pys, int n)
+    //@ requires pxs[0..n] |-> ?vs &*& pys[0..n] |-> _;
+    //@ ensures pxs[0..n] |-> sorted(vs) &*& pys[0..n] |-> _;
+{
+    if (n >= 2) {
+        int *left = pxs;
+        int nleft = n / 2;
+        int *right = pxs + nleft;
+        int nright = n - n / 2;
+        merge_sort_core(left, pys, nleft);
+        merge_sort_core(right, pys, nright);
+        int i = 0;
+        int j = 0;
+        int k = 0;
+        for (;;)
+        {
+            if (i == nleft) {
+                if (j == nright) {
+                    break;
+                } else {
+                    pys[k] = right[j];
+                    j++;
+                    k++;
+                }
+            } else {
+                if (j == nright) {
+                    pys[k] = left[i];
+                    i++;
+                    k++;
+                } else {
+                    if (left[i] <= right[j]) {
+                        pys[k] = left[i];
+                        i++;
+                        k++;
+                    } else {
+                        pys[k] = right[j];
+                        j++;
+                        k++;
+                    }
+                }
+            }
+        }
+        for (int p = 0; ;)
+        {
+            if (p >= n) break;
+            pxs[p] = pys[p];
+            p++;
+            
+        }
+    }
+}
+
+
 void merge_sort(int *pxs, int n)
     //@ requires pxs[0..n] |-> ?vs;
     //@ ensures pxs[0..n] |-> sorted(vs);
@@ -65,16 +128,6 @@ int binary_search(int *xs, int n, int x)
         }
     }
     return n;
-}
-
-
-int read_int()
-    //@ requires true;
-    //@ ensures true;
-{
-    int x;
-    scanf("%i", &x);
-    return x;
 }
 
 

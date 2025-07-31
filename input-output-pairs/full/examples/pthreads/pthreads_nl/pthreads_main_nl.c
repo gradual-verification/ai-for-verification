@@ -20,6 +20,30 @@ pthread_spinlock_t g_lock;
 
 
 /***
+ * Function: threadfn
+ *
+ * Description:
+ * Function executed by each thread.
+ * Acquires the spinlock, increments `g` if it is less than 1024, and then releases the lock.
+ *
+@param _unused - placeholder argument, not used.
+@return NULL pointer on completion.
+
+It requires and ensures g is within the range [0, 1024].
+ */
+void *threadfn(void* _unused)
+ {
+  pthread_spin_lock(&g_lock);
+
+  if (g < 1024) { g = g + 1; }
+
+  pthread_spin_unlock(&g_lock);
+
+  return ((void *) 0);
+ }
+
+
+/***
  * Function: run_instance
  *
  * Description:

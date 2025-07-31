@@ -76,14 +76,6 @@ predicate tree(struct node * node, context c, tree subtree) =
 @*/
 
 
-void tree_dispose(struct node *node)
-  //@ requires tree(node, root, _);
-  //@ ensures true;
-{
-  subtree_dispose(node);
-}
-
-
 // TODO: make this function pass the verification
 void subtree_dispose(struct node *node)
   //@ requires subtree(node, _, _);

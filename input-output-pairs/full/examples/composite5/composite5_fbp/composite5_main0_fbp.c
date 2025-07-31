@@ -71,6 +71,28 @@ predicate tree_membership_fact(int id, struct node *n) = ghost_list_member_handl
 //@ predicate tree_id(int id) = true;
 
 
+struct node *create_node(struct node *p, struct node *next)
+  //@ requires true;
+  /*@
+  ensures
+    result != 0 &*&
+    [_]result->childrenGhostListId |-> ?childrenGhostListId &*& ghost_list<struct node *>(childrenGhostListId, nil) &*&
+    result->firstChild |-> 0 &*&
+    result->nextSibling |-> next &*&
+    result->parent |-> p &*&
+    result->count |-> 1;
+  @*/
+{
+  struct node *n = malloc(sizeof(struct node));
+  if (n == 0) abort();
+  n->firstChild = 0;
+  n->nextSibling = next;
+  n->parent = p;
+  n->count = 1;
+  return n;
+}
+
+
 struct node *create_tree()
   //@ requires true;
   //@ ensures tree(?id) &*& [_]tree_membership_fact(id, result);
@@ -80,12 +102,41 @@ struct node *create_tree()
 }
 
 
-struct node *tree_get_parent(struct node *node)
-  //@ requires tree(?id) &*& [_]tree_membership_fact(id, node);
-  //@ ensures tree(id) &*& (result == 0 ? true : [_]tree_membership_fact(id, result));
+void add_to_count(struct node *p, int delta)
+  /*@
+  requires
+    p != 0 &*&
+    tree_id(?id) &*&
+    ghost_list(id, ?nodes) &*& mem(p, nodes) == true &*& foreach(remove(p, nodes), node(id)) &*&   // All nodes satisfy the 'node(id)' predicate, except 'p'.
+    [_]p->childrenGhostListId |-> ?childrenId &*&
+    p->firstChild |-> ?firstChild &*&
+    children(firstChild, ?children) &*&
+    ghost_list(childrenId, children) &*&
+    foreach2(children, ?childrenCounts, child(id, p)) &*& delta > 0 &*&
+    [1/2]p->count |-> 1 + sum(childrenCounts) - delta &*& // Here's the rub.
+    [1/2]p->parent |-> ?parent &*&
+    parent == 0 ?
+      [1/2]p->parent |-> 0 &*& p->nextSibling |-> _ &*& [1/2]p->count |-> _
+    :
+      parent != p &*&
+      [_]ghost_list_member_handle(id, parent) &*&
+      [_]parent->childrenGhostListId |-> ?parentChildrenId &*&
+      [_]ghost_list_member_handle(parentChildrenId, p);
+  @*/
+  //@ ensures tree(id);
 {
-  struct node *p = node->parent;
-  return p;
+  struct node *pp = p->parent;
+  if (p->count > INT_MAX - delta)
+    abort();
+  if (pp == 0) {
+    p->count += delta;
+
+  } else {
+    
+    p->count += delta;
+    
+    add_to_count(pp, delta);
+  }
 }
 
 
@@ -100,6 +151,15 @@ struct node *tree_add(struct node *node)
   add_to_count(node, 1);
 
   return n;
+}
+
+
+struct node *tree_get_parent(struct node *node)
+  //@ requires tree(?id) &*& [_]tree_membership_fact(id, node);
+  //@ ensures tree(id) &*& (result == 0 ? true : [_]tree_membership_fact(id, result));
+{
+  struct node *p = node->parent;
+  return p;
 }
 
 

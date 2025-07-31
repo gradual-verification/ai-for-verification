@@ -26,6 +26,11 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
 @*/
 
 
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
+
+
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
  //@ requires Tokenizer(tokenizer);
  //@ ensures Tokenizer(tokenizer);

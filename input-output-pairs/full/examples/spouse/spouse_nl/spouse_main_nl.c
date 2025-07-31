@@ -8,16 +8,16 @@ struct person {
 
 /***
  * Description:
-The `divorce` function divorces two married `person` instances by setting their spouse pointers to `0`.
+The `create_person` function allocates and initializes a new `person` struct with no spouse.
 
-@param `this` - Pointer to one `person` in the marriage
-
-It makes sure that `this` person and its original spouse has their spouses as null. 
+It makes sure that the return value is a non-null person with its spouse as null. 
 */
-void divorce(struct person* this)
+struct person *create_person()
 {
-  this->spouse->spouse = 0;
-  this->spouse = 0;
+  struct person *p = malloc(sizeof(struct person));
+  if(p == 0) abort();
+  p->spouse = 0;
+  return p;
 }
 
 
@@ -39,16 +39,16 @@ void marry(struct person *this, struct person *other)
 
 /***
  * Description:
-The `create_person` function allocates and initializes a new `person` struct with no spouse.
+The `divorce` function divorces two married `person` instances by setting their spouse pointers to `0`.
 
-It makes sure that the return value is a non-null person with its spouse as null. 
+@param `this` - Pointer to one `person` in the marriage
+
+It makes sure that `this` person and its original spouse has their spouses as null. 
 */
-struct person *create_person()
+void divorce(struct person* this)
 {
-  struct person *p = malloc(sizeof(struct person));
-  if(p == 0) abort();
-  p->spouse = 0;
-  return p;
+  this->spouse->spouse = 0;
+  this->spouse = 0;
 }
 
 

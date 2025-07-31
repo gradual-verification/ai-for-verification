@@ -61,6 +61,18 @@ fixpoint Stack<T> Pop<T>(Stack<T> Stack)
   }
 }
 
+fixpoint bool IsEmpty<T>(Stack<T> S)
+{
+  switch ( S )
+  {
+    case Nil:
+      return true;
+    
+    case Cons(x, y, T):
+      return false;
+  }
+}
+
 fixpoint int Size<T>(Stack<T> S)
 {
   switch ( S )

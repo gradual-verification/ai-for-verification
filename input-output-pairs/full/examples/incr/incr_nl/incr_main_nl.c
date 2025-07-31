@@ -22,6 +22,29 @@ struct counter {
 };
 
 
+/***
+ * Function: incrementor
+
+Description:
+A thread function that loops infinitely, incrementing the shared counter.
+It acquires the mutex before accessing the counter. 
+The verification invariant guarantees safe concurrent access (i.e., the count in the counter doesn't decrease).
+
+@param counter - A pointer to a shared counter object.
+ */
+void incrementor(struct counter *counter) //@ : thread_run
+{
+    struct mutex *mutex = counter->mutex;
+    for (;;)
+    {
+        mutex_acquire(mutex);
+        if (counter->count == INT_MAX) abort();
+        counter->count++;
+        mutex_release(mutex);
+    }
+}
+
+
 // TODO: make this function pass the verification
 /***
  * Function: main

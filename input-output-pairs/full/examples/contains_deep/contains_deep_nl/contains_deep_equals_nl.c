@@ -5,6 +5,12 @@ struct node {
   struct node* next;
 };
 
+// specific to cell
+
+struct cell {
+  int val;
+};
+
 
 // TODO: make this function pass the verification
 /*equals() function

@@ -36,64 +36,6 @@ struct data {
 };
 
 
-/***
- * Description:
- * Waits at the barrier until all `n` threads have arrived. Once all have 
- * arrived, the barrier transitions to release them. After the last thread 
- * leaves, the barrier is exited and reset.
- *
- * @param b - A pointer to the `struct barrier` on which to wait.
- *
- * This function uses a mutex to coordinate increments of the arrival counter 
- * (`k`) and to handle the barrier’s `outgoing` flag. Threads spin inside 
- * critical sections (by releasing and reacquiring the mutex) until the 
- * barrier state changes appropriately.
- * 
- * It requires that the barrier is incoming at the beginning, and makes sure that
- * the barrier is exiting at the end.
- */
-void barrier(struct barrier *barrier)
-{
-
-    struct mutex *mutex = barrier->mutex;
-    mutex_acquire(mutex);
-
-    {
-        while (barrier->outgoing)
-
-        {
-
-            mutex_release(mutex);
-            mutex_acquire(mutex);
-
-        }
-    }
-
-    barrier->k++;
-    if (barrier->k == barrier->n) {
-        barrier->outgoing = true;
-        barrier->k--;
-     
-        mutex_release(barrier->mutex);
-    } else {
-        while (!barrier->outgoing)
-       
-        {
-          
-            mutex_release(mutex);
-            mutex_acquire(mutex);
-  
-        }
-
-        barrier->k--;
-        if (barrier->k == 0) {
-            barrier->outgoing = false;
-        }
-      
-        mutex_release(mutex);
-    }
-
-}
 
 
 // TODO: make this function pass the verification

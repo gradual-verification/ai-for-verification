@@ -56,15 +56,6 @@ predicate tree(struct node *node, context contextNodes, tree subtreeNodes)
 
 
 
-int tree_get_count(struct node *node)
-    //@ requires tree(node, ?contextNodes, ?subtreeNodes);
-    //@ ensures tree(node, contextNodes, subtreeNodes) &*& result == tree_count(subtreeNodes);
-{
-    int result = subtree_get_count(node);
-    return result;
-}
-
-
 int subtree_get_count(struct node *node)
     //@ requires subtree(node, ?parent, ?nodes);
     //@ ensures subtree(node, parent, nodes) &*& result == tree_count(nodes);

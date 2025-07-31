@@ -12,12 +12,14 @@ predicate person(struct person *p, struct person *spouse) =
 @*/
 
 
-void divorce(struct person* this)
-//@ requires person(this, ?other) &*& person(other, this);
-//@ ensures person(this, 0) &*& person(other, 0);
+struct person *create_person()
+//@ requires true;
+//@ ensures person(result, 0) &*& result != 0;
 {
-  this->spouse->spouse = 0;
-  this->spouse = 0;
+  struct person *p = malloc(sizeof(struct person));
+  if(p == 0) abort();
+  p->spouse = 0;
+  return p;
 }
 
 
@@ -30,14 +32,12 @@ void marry(struct person *this, struct person *other)
 }
 
 
-struct person *create_person()
-//@ requires true;
-//@ ensures person(result, 0) &*& result != 0;
+void divorce(struct person* this)
+//@ requires person(this, ?other) &*& person(other, this);
+//@ ensures person(this, 0) &*& person(other, 0);
 {
-  struct person *p = malloc(sizeof(struct person));
-  if(p == 0) abort();
-  p->spouse = 0;
-  return p;
+  this->spouse->spouse = 0;
+  this->spouse = 0;
 }
 
 

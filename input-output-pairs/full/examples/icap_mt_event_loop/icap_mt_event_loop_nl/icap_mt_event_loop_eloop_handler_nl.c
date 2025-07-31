@@ -4,6 +4,16 @@
 #include "gotsmanlock.h"
 
 
+typedef struct eloop *eloop;
+
+struct eloop {
+    int lock;
+    int signalCount;
+    eloop_handler *handler;
+    void *handlerData;
+};
+
+
 // TODO: make this function pass the verification
 /***
  * Description:

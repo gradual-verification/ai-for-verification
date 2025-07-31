@@ -11,6 +11,44 @@ struct arraylist {
 
 /***
  * Description:
+The create_arraylist function allocates memory for a new array list structure.
+
+@param none
+
+The function initializes an array list whose the data points to a newly allocated array and has no element.
+*/
+struct arraylist *create_arraylist()  
+{
+  struct arraylist *a = malloc(sizeof(struct arraylist));
+  void *data = 0;
+  if(a == 0) abort();
+  a->size = 0;
+  data = malloc(100 * sizeof(void*));
+  if(data == 0) abort();
+  a->data = data;
+  a->capacity = 100;
+  return a; 
+}
+
+
+/***
+ * Description:
+The list_get function gets the element of the arraylist whose index is i. 
+It requires that i is within the range of the arraylist.
+
+@param a - the arraylist to be accessed.
+@param i - the index of the element to be returned.
+
+The function ensures that the arraylist is not modified at the end, and the return value is the i-th of the arraylist.
+*/
+void *list_get(struct arraylist *a, int i)
+{
+  return a->data[i];
+}
+
+
+/***
+ * Description:
 The list_add function adds a new element to the end of the dynamic array list (struct arraylist).
 
 @param a - the arraylist to be added to.
@@ -39,44 +77,6 @@ void list_add(struct arraylist *a, void *v)
   data = a->data;
   data[size] = v;
   a->size += 1;
-}
-
-
-/***
- * Description:
-The list_get function gets the element of the arraylist whose index is i. 
-It requires that i is within the range of the arraylist.
-
-@param a - the arraylist to be accessed.
-@param i - the index of the element to be returned.
-
-The function ensures that the arraylist is not modified at the end, and the return value is the i-th of the arraylist.
-*/
-void *list_get(struct arraylist *a, int i)
-{
-  return a->data[i];
-}
-
-
-/***
- * Description:
-The create_arraylist function allocates memory for a new array list structure.
-
-@param none
-
-The function initializes an array list whose the data points to a newly allocated array and has no element.
-*/
-struct arraylist *create_arraylist()  
-{
-  struct arraylist *a = malloc(sizeof(struct arraylist));
-  void *data = 0;
-  if(a == 0) abort();
-  a->size = 0;
-  data = malloc(100 * sizeof(void*));
-  if(data == 0) abort();
-  a->data = data;
-  a->capacity = 100;
-  return a; 
 }
 
 

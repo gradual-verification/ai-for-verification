@@ -24,6 +24,56 @@ predicate llist(struct llist *list; list<int> v) =
 @*/
 
 
+struct llist *create_llist()
+  //@ requires true;
+  //@ ensures llist(result, nil);
+{
+  struct llist *l = malloc(sizeof(struct llist));
+  if (l == 0) abort();
+  struct node *n = calloc(1, sizeof(struct node));
+  if (n == 0) abort();
+  l->first = n;
+  l->last = n;
+  return l;
+}
+
+
+void llist_add(struct llist *list, int x)
+  //@ requires llist(list, ?_v);
+  //@ ensures llist(list, append(_v, cons(x, nil)));
+{
+  struct node *l = 0;
+  struct node *n = calloc(1, sizeof(struct node));
+  if (n == 0) {
+    abort();
+  }
+  l = list->last;
+  l->next = n;
+  l->value = x;
+  list->last = n;
+}
+
+
+void llist_append(struct llist *list1, struct llist *list2)
+  //@ requires llist(list1, ?_v1) &*& llist(list2, ?_v2);
+  //@ ensures llist(list1, append(_v1, _v2));
+{
+  struct node *l1 = list1->last;
+  struct node *f2 = list2->first;
+  struct node *l2 = list2->last;
+  if (f2 == l2) {
+    free(l2);
+    free(list2);
+  } else {
+    l1->next = f2->next;
+    l1->value = f2->value;
+    list1->last = l2;
+    free(f2);
+    free(list2);
+  }
+}
+
+
 void llist_dispose(struct llist *list)
   //@ requires llist(list, _);
   //@ ensures true;
@@ -60,52 +110,18 @@ int llist_length_iterative(struct llist *list)
 }
 
 
-void llist_append(struct llist *list1, struct llist *list2)
-  //@ requires llist(list1, ?_v1) &*& llist(list2, ?_v2);
-  //@ ensures llist(list1, append(_v1, _v2));
+int llist_length_recursive_helper(struct node *n1, struct node *n2)
+  //@ requires lseg(n1, n2, ?vs) &*& node(n2, _, _);
+  //@ ensures lseg(n1, n2, vs) &*& node(n2, _, _) &*& result == length(vs);
 {
-  struct node *l1 = list1->last;
-  struct node *f2 = list2->first;
-  struct node *l2 = list2->last;
-  if (f2 == l2) {
-    free(l2);
-    free(list2);
+  int len;
+  if(n1 == n2) {
+    len = 0;
   } else {
-    l1->next = f2->next;
-    l1->value = f2->value;
-    list1->last = l2;
-    free(f2);
-    free(list2);
+    len = llist_length_recursive_helper(n1->next, n2);
+    len = len + 1;
   }
-}
-
-
-int llist_removeFirst(struct llist *l)
-  //@ requires llist(l, ?v) &*& v != nil;
-  //@ ensures llist(l, ?t) &*& v == cons(result, t);
-{
-  struct node *nf = l->first;
-  struct node *nfn = nf->next;
-  int nfv = nf->value;
-  free(nf);
-  l->first = nfn;
-  return nfv;
-}
-
-
-void llist_add(struct llist *list, int x)
-  //@ requires llist(list, ?_v);
-  //@ ensures llist(list, append(_v, cons(x, nil)));
-{
-  struct node *l = 0;
-  struct node *n = calloc(1, sizeof(struct node));
-  if (n == 0) {
-    abort();
-  }
-  l = list->last;
-  l->next = n;
-  l->value = x;
-  list->last = n;
+  return len;
 }
 
 
@@ -136,17 +152,16 @@ int llist_lookup(struct llist *list, int index)
 }
 
 
-struct llist *create_llist()
-  //@ requires true;
-  //@ ensures llist(result, nil);
+int llist_removeFirst(struct llist *l)
+  //@ requires llist(l, ?v) &*& v != nil;
+  //@ ensures llist(l, ?t) &*& v == cons(result, t);
 {
-  struct llist *l = malloc(sizeof(struct llist));
-  if (l == 0) abort();
-  struct node *n = calloc(1, sizeof(struct node));
-  if (n == 0) abort();
-  l->first = n;
-  l->last = n;
-  return l;
+  struct node *nf = l->first;
+  struct node *nfn = nf->next;
+  int nfv = nf->value;
+  free(nf);
+  l->first = nfn;
+  return nfv;
 }
 
 

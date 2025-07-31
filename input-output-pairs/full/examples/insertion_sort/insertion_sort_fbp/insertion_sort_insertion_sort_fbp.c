@@ -14,6 +14,20 @@ struct list_node {
 @*/
 
 
+static int compare(struct list_node* n0, struct list_node* n1)
+//@ requires n0->value |-> ?v0 &*& n1->value |-> ?v1;
+//@ ensures n0->value |-> v0 &*& n1->value |-> v1 &*& result == (v0 < v1 ? -1 : v0 > v1 ? 1 : 0);
+{
+  if (n0->value < n1->value) {
+    return -1;
+  } else if (n0->value > n1->value) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+
 void insertion_sort_core(struct list_node** pfirst)
 //@ requires *pfirst |-> ?l &*& list_pred(l);
 //@ ensures *pfirst |-> ?l0 &*& list_pred(l0);

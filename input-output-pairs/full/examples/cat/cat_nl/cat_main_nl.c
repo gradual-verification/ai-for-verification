@@ -21,7 +21,7 @@ int main(int argc, char** argv) //@ : main
   res = 0;
   if(fp == 0 || buffer == 0) { abort(); }
   res = fgets(buffer, 100, fp);
-  while(res != 0) d
+  while(res != 0)
   {
     puts(buffer);
     res = fgets(buffer, 100, fp);

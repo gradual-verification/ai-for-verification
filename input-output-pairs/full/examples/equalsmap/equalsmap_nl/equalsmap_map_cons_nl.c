@@ -11,12 +11,6 @@ struct foo {
 };
 
 
-    if (foo == 0) abort();
-    foo->value = value;
-    return foo;
-}
-
-
 // TODO: make this function pass the verification
 /**
  * Description:

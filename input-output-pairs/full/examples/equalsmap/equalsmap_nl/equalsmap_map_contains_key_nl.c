@@ -11,6 +11,15 @@ struct foo {
 };
 
 
+/**
+ * Description:
+ * The `equalsFuncType` function checks if the two given keys equal.
+ * 
+ * It can have different implementations.
+ */
+typedef bool equalsFuncType(void *key, void *key0);
+
+
 // TODO: make this function pass the verification
 /**
  * Description:

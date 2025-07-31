@@ -34,6 +34,19 @@ predicate tree(struct node *node) =
 
 
 
+int subtree_get_count(struct node *node)
+    //@ requires subtree(node, ?parent, ?count);
+    //@ ensures subtree(node, parent, count) &*& result == count;
+{
+    int result = 0;
+    if (node == 0) {
+    } else {
+        result = node->count;
+    }
+    return result;
+}
+
+
 void fixup_ancestors(struct node *node, struct node *parent, int count)
     //@ requires context(node, parent, ?oldCount);
     //@ ensures context(node, parent, count);

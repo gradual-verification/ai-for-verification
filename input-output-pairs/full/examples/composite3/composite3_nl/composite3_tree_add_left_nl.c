@@ -9,6 +9,24 @@ struct node {
 
 
 
+/*subtree_get_count function
+-param: struct node *node
+-description: The function gets the count of the current node,
+which is the number of nodes in the subtree rooted at the node.
+
+It makes sure that the subtree is unchanged and the returned value is the count of the subtree.
+*/
+int subtree_get_count(struct node *node)
+{
+    int result = 0;
+    if (node == 0) {
+    } else {
+        result = node->count;
+    }
+    return result;
+}
+
+
 /*fixup_ancestors function
 -param: struct node *node, struct node *parent, int count
 -description: The function fixes the count of the ancestors

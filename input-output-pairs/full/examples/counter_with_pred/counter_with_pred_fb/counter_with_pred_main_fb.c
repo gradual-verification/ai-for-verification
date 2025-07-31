@@ -10,34 +10,6 @@ predicate Counter(struct Counter* c, int v) =
 @*/
 
 
-void swap(struct Counter* c1, struct Counter* c2)
-  //@ requires Counter(c1, ?v1) &*& Counter(c2, ?v2);
-  //@ ensures Counter(c1, v2) &*& Counter(c2, v1); 
-{
-  int tmp1 = c1->value;
-  int tmp2 = c2->value;
-  c2->value = tmp1;
-  c1->value = tmp2;
-}
-
-
-void dispose(struct Counter* c)
-  //@ requires Counter(c, _);
-  //@ ensures true;
-{
-  free(c);
-}
-
-
-int get(struct Counter* c)
-  //@ requires Counter(c, ?v);
-  //@ ensures Counter(c, v) &*& result==v; 
-{
-  int tmp = c->value;
-  return tmp;
-}
-
-
 struct Counter* init(int v)
   //@ requires true;
   //@ ensures Counter(result, v);
@@ -58,6 +30,34 @@ void increment(struct Counter* c)
 {
   int tmp = c->value;
   c->value = tmp + 1;
+}
+
+
+void dispose(struct Counter* c)
+  //@ requires Counter(c, _);
+  //@ ensures true;
+{
+  free(c);
+}
+
+
+void swap(struct Counter* c1, struct Counter* c2)
+  //@ requires Counter(c1, ?v1) &*& Counter(c2, ?v2);
+  //@ ensures Counter(c1, v2) &*& Counter(c2, v1); 
+{
+  int tmp1 = c1->value;
+  int tmp2 = c2->value;
+  c2->value = tmp1;
+  c1->value = tmp2;
+}
+
+
+int get(struct Counter* c)
+  //@ requires Counter(c, ?v);
+  //@ ensures Counter(c, v) &*& result==v; 
+{
+  int tmp = c->value;
+  return tmp;
 }
 
 

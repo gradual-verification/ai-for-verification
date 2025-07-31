@@ -14,6 +14,33 @@ struct tokenizer
 
 /***
  * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
+
+/***
+ * Description:
+The tokenizer_fill_buffer function reads a character from the next_char reader of the tokenizer and updates the lastread char,
+if the original lastread char is -2 (which means empty).
+
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
+void tokenizer_fill_buffer(struct tokenizer* tokenizer)
+{
+	if ( tokenizer->lastread == -2 )
+	{
+	        charreader *reader = tokenizer->next_char;
+	        int result = reader();
+			if (result < -128 || result > 127)
+				abort();
+		tokenizer->lastread = result;
+	}
+}
+
+
+/***
+ * Description:
 The tokenizer_peek function reads the next value character of a tokenizer and returns the updated lastread character.
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
@@ -27,18 +54,6 @@ int tokenizer_peek(struct tokenizer* tokenizer)
 
 /***
  * Description:
-The is_whitespace function checks whether a given character in integer means a whitespace.
-
-This function ensures nothing. 
-*/
-bool is_whitespace(int c)
-{
-	return c == ' ' || c == '\n' || c == '\r' || c == '\t';
-}
-
-
-/***
- * Description:
 The tokenizer_drop function drops the last character of a tokenizer by assigning its lastread field to -2 (meaning empty).
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
@@ -46,6 +61,18 @@ It needs to make sure that the given tokenizer preserves its property of tokeniz
 void tokenizer_drop(struct tokenizer* tokenizer)
 {
 	tokenizer->lastread = -2;
+}
+
+
+/***
+ * Description:
+The is_whitespace function checks whether a given character in integer means a whitespace.
+
+This function ensures nothing. 
+*/
+bool is_whitespace(int c)
+{
+	return c == ' ' || c == '\n' || c == '\r' || c == '\t';
 }
 
 

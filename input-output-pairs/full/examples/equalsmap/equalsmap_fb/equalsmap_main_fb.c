@@ -54,6 +54,27 @@ fixpoint b assoc<a, b>(list<pair<a, b> > xys, a x) {
 @*/
 
 
+struct node *map_nil()
+    //@ requires true;
+    //@ ensures map(result, nil);
+{
+    return 0;
+}
+
+
+struct node *map_cons(void *key, void *value, struct node *tail)
+    //@ requires map(tail, ?tailEntries);
+    //@ ensures map(result, cons(pair(key, value), tailEntries));
+{
+    struct node *n = malloc(sizeof(struct node));
+    if (n == 0) abort();
+    n->key = key;
+    n->value = value;
+    n->next = tail;
+    return n;
+}
+
+
 void map_dispose(struct node *map)
     //@ requires map(map, _);
     //@ ensures true;
@@ -66,23 +87,10 @@ void map_dispose(struct node *map)
 }
 
 
-struct foo *create_foo(int value)
-    //@ requires true;
-    //@ ensures result->value |-> value;
-{
-    struct foo *foo = malloc(sizeof(struct foo));
-    if (foo == 0) abort();
-    foo->value = value;
-    return foo;
-}
+typedef bool equalsFuncType/*@ (list<void *> keys, void *key00, list<void *> eqKeys, predicate() p) @*/(void *key, void *key0);
+    //@ requires p() &*& mem(key, keys) == true &*& key0 == key00;
+    //@ ensures p() &*& result == contains(eqKeys, key);
 
-
-struct node *map_nil()
-    //@ requires true;
-    //@ ensures map(result, nil);
-{
-    return 0;
-}
 
 
 bool map_contains_key(struct node *map, void *key, equalsFuncType *equalsFunc)
@@ -106,16 +114,24 @@ bool map_contains_key(struct node *map, void *key, equalsFuncType *equalsFunc)
 
 
 
-struct node *map_cons(void *key, void *value, struct node *tail)
-    //@ requires map(tail, ?tailEntries);
-    //@ ensures map(result, cons(pair(key, value), tailEntries));
+bool foo_equals(struct foo *f1, struct foo *f2)
+    //@ requires foreach(?fvs, foo) &*& f2->value |-> ?value &*& mem(pair(f1, assoc(fvs, f1)), fvs) == true;
+    //@ ensures foreach(fvs, foo) &*& f2->value |-> value &*& result == (assoc(fvs, f1) == value);
 {
-    struct node *n = malloc(sizeof(struct node));
-    if (n == 0) abort();
-    n->key = key;
-    n->value = value;
-    n->next = tail;
-    return n;
+
+    return f1->value == f2->value;
+
+}
+
+
+struct foo *create_foo(int value)
+    //@ requires true;
+    //@ ensures result->value |-> value;
+{
+    struct foo *foo = malloc(sizeof(struct foo));
+    if (foo == 0) abort();
+    foo->value = value;
+    return foo;
 }
 
 

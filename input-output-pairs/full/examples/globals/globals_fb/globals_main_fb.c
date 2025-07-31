@@ -20,8 +20,8 @@ void m()
 
 
 // TODO: make this function pass the verification
-int main() //@ : main_full(globals_fb)
-//@ requires module(globals_fb, true);
+int main() //@ : main_full(globals_main_fb)
+//@ requires module(globals_main_fb, true);
 //@ ensures true;
 {
     x = 7;

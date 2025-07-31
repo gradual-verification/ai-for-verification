@@ -35,6 +35,14 @@ struct data
 */
 
 
+/*
+destructor function
+-params: data
+-description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
+*/
+typedef void destructor(void* data);
+
+
 // TODO: make this function pass the verification
 /* is_empty function
 -params: A stack

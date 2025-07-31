@@ -37,6 +37,16 @@ fixpoint int memp<t>(t x) { return 0; }
 @*/
 
 
+void swap (int *a, int i, int j)
+  //@ requires a[i] |-> ?vi &*& a[j] |-> ?vj;
+  //@ ensures a[i] |-> vj &*& a[j] |-> vi;
+{
+  int aj = a[j];
+  a[j] = a[i];
+  a[i] = aj;
+}
+
+
 int partition(int *a, int lo, int hi)
   //@ requires a[lo..hi + 1] |-> ?vs &*& lo <= hi &*& lo >= 0;
   /*@

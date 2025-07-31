@@ -4,6 +4,7 @@
 struct counter {
     struct mutex *mutex;
     int count;
+    //@ int oldCount;
 };
 
 /*@

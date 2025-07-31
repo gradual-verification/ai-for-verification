@@ -13,6 +13,40 @@ struct foo {
 
 /**
  * Description:
+ * The `map_nil` function returns a null pointer.
+ *
+ * It makes sure that the return value is a null pointer (representing an empty map).
+ */
+struct node *map_nil()
+{
+    return 0;
+}
+
+
+/**
+ * Description:
+ * The `map_cons` function creates a new node with the given key and value, and attaches it to the provided tail node.
+ *
+ * @param key The key to be stored in the new node.
+ * @param value The value to be stored in the new node.
+ * @param tail The tail node to which the new node will be attached.
+ * 
+ * It makes sure that the return value is a pointer to the newly created node, 
+ * which contains the key and value and is the head of the map.
+ */
+struct node *map_cons(void *key, void *value, struct node *tail)
+{
+    struct node *n = malloc(sizeof(struct node));
+    if (n == 0) abort();
+    n->key = key;
+    n->value = value;
+    n->next = tail;
+    return n;
+}
+
+
+/**
+ * Description:
  * The `map_dispose` function frees of all nodes in the map.
  *
  * @param map The head node of the map to be disposed of
@@ -31,28 +65,11 @@ void map_dispose(struct node *map)
 
 /**
  * Description:
- * The `create_foo` function dynamically allocates memory for a foo structure
- * and initializes its `value` member with the provided value.
- *
- * @param value The value to be assigned to the `value` member of the created foo structure.
- * @return Pointer to the newly created foo structure.
+ * The `equalsFuncType` function checks if the two given keys equal.
  * 
- * It makes sure that the return value is a foo structure with the given value.
+ * It can have different implementations.
  */
-struct foo *create_foo(int value);
-{
-    struct foo *foo = malloc(sizeof(struct foo));
-
-/**
- * Description:
- * The `map_nil` function returns a null pointer.
- *
- * It makes sure that the return value is a null pointer (representing an empty map).
- */
-struct node *map_nil()
-{
-    return 0;
-}
+typedef bool equalsFuncType(void *key, void *key0);
 
 
 /**
@@ -85,23 +102,36 @@ bool map_contains_key(struct node *map, void *key, equalsFuncType *equalsFunc)
 
 /**
  * Description:
- * The `map_cons` function creates a new node with the given key and value, and attaches it to the provided tail node.
+ * The `foo_equals` function compares two foo structures for equality based on their `value` members.
  *
- * @param key The key to be stored in the new node.
- * @param value The value to be stored in the new node.
- * @param tail The tail node to which the new node will be attached.
- * 
- * It makes sure that the return value is a pointer to the newly created node, 
- * which contains the key and value and is the head of the map.
+ * @param f1 Pointer to the first foo structure.
+ * @param f2 Pointer to the second foo structure.
+ * @return True if the `value` members of the two foo structures are equal, otherwise false.
  */
-struct node *map_cons(void *key, void *value, struct node *tail)
+bool foo_equals(struct foo *f1, struct foo *f2)
 {
-    struct node *n = malloc(sizeof(struct node));
-    if (n == 0) abort();
-    n->key = key;
-    n->value = value;
-    n->next = tail;
-    return n;
+    
+    return f1->value == f2->value;
+   
+}
+
+
+/**
+ * Description:
+ * The `create_foo` function dynamically allocates memory for a foo structure
+ * and initializes its `value` member with the provided value.
+ *
+ * @param value The value to be assigned to the `value` member of the created foo structure.
+ * @return Pointer to the newly created foo structure.
+ * 
+ * It makes sure that the return value is a foo structure with the given value.
+ */
+struct foo *create_foo(int value)
+{
+    struct foo *foo = malloc(sizeof(struct foo));
+    if (foo == 0) abort();
+    foo->value = value;
+    return foo;
 }
 
 

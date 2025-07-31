@@ -9,20 +9,6 @@ struct node {
 
 
 
-/*tree_get_count function
--param: struct node *node
--description: The function gets the count of the current node,
-which is the number of nodes in the subtree rooted at the node.
-
-It makes sure that the tree is unchanged and the returned value is the count of the tree.
-*/
-int tree_get_count(struct node *node)
-{
-    int result = subtree_get_count(node);
-    return result;
-}
-
-
 /*subtree_get_count function
 -param: struct node *node
 -description: The function gets the count of the current node,

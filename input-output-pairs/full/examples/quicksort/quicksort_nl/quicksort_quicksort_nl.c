@@ -1,6 +1,29 @@
 
 /*** 
  * Description:
+The swap function exchanges the values at indices i and j in the integer array `a`.
+
+@param - 
+a - A pointer to an integer array in memory.
+i - A valid index within the array.
+j - A valid index within the array.
+
+@requires - 
+Indices i and j must be within the bounds of the array.
+
+@ensures - 
+Exchanges the values at positions i and j in the array. No value is returned.
+*/
+void swap(int *a, int i, int j)
+{
+    int aj = a[j];
+    a[j] = a[i];
+    a[i] = aj;
+}
+
+
+/*** 
+ * Description:
 The partition function rearranges the subrange of the array `a` from indices `lo` to `hi` around a pivot value (chosen from `a[hi]`), 
 ensuring elements less than the pivot end up before it, and elements greater than or equal to it come after it.
 

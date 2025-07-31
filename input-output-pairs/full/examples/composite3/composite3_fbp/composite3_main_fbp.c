@@ -56,47 +56,6 @@ predicate tree(struct node *node, context contextNodes, tree subtreeNodes)
 
 
 
-struct node *tree_add_right(struct node *node)
-    /*@ requires
-            tree(node, ?contextNodes, ?subtreeNodes) &*&
-            switch (subtreeNodes) {
-                case empty: return false;
-                case tree(node0, leftNodes, rightNodes): return rightNodes == empty;
-            };
-    @*/
-    /*@ ensures
-            switch (subtreeNodes) {
-                case empty: return false;
-                case tree(node0, leftNodes, rightNodes):
-                    return tree(result, right_context(contextNodes, node, leftNodes), tree(result, empty, empty));
-            };
-    @*/
-{
-    struct node *n = malloc(sizeof(struct node));
-    if (n == 0) {
-        abort();
-    }
-    n->left = 0;
-    n->right = 0;
-    n->parent = node;
-    n->count = 1;
-    {
-        struct node *nodeRight = node->right;
-        node->right = n;
-        fixup_ancestors(n, node, 1);
-    }
-    return n;
-}
-
-
-void tree_dispose(struct node *node)
-    //@ requires tree(node, root, _);
-    //@ ensures true;
-{
-    dispose_node(node);
-}
-
-
 struct node *create_tree()
     //@ requires true;
     //@ ensures tree(result, root, tree(result, empty, empty));
@@ -113,22 +72,46 @@ struct node *create_tree()
 }
 
 
-struct node *tree_get_parent(struct node *node)
-    /*@ requires
-            tree(node, ?contextNodes, ?subtreeNodes) &*& contextNodes != root &*& subtreeNodes != empty;
-    @*/
-    /*@ ensures
-            switch (contextNodes) {
-                case root: return false;
-                case left_context(parentContextNodes, parent, rightNodes):
-                    return result == parent &*& tree(parent, parentContextNodes, tree(parent, subtreeNodes, rightNodes));
-                case right_context(parentContextNodes, parent, leftNodes):
-                    return result == parent &*& tree(parent, parentContextNodes, tree(parent, leftNodes, subtreeNodes));
-            };
-    @*/
+int subtree_get_count(struct node *node)
+    //@ requires subtree(node, ?parent, ?nodes);
+    //@ ensures subtree(node, parent, nodes) &*& result == tree_count(nodes);
 {
-    struct node *parent = node->parent;
-    return parent;
+    int result = 0;
+    if (node == 0) {
+    } else {
+        result = node->count;
+    }
+    return result;
+}
+
+
+void fixup_ancestors(struct node *node, struct node *parent, int count)
+    //@ requires context(node, parent, _, ?contextNodes);
+    //@ ensures context(node, parent, count, contextNodes);
+{
+    if (parent == 0) {
+    } else {
+        struct node *left = parent->left;
+        struct node *right = parent->right;
+        struct node *grandparent = parent->parent;
+        int leftCount = 0;
+        int rightCount = 0;
+        if (node == left && node != right) {
+            leftCount = count;
+            rightCount = subtree_get_count(right);
+        } else if (node == right && node != left) {
+            leftCount = subtree_get_count(left);
+            rightCount = count;
+        } else {
+            abort();
+        }
+        {
+            if (rightCount < 0 || leftCount > INT_MAX - 1 -rightCount) { abort();}
+            int parentCount = 1 + leftCount + rightCount;
+            parent->count = parentCount;
+            fixup_ancestors(parent, grandparent, parentCount);
+        }
+    }
 }
 
 
@@ -162,6 +145,85 @@ struct node *tree_add_left(struct node *node)
         fixup_ancestors(n, node, 1);
     }
     return n;
+}
+
+
+struct node *tree_add_right(struct node *node)
+    /*@ requires
+            tree(node, ?contextNodes, ?subtreeNodes) &*&
+            switch (subtreeNodes) {
+                case empty: return false;
+                case tree(node0, leftNodes, rightNodes): return rightNodes == empty;
+            };
+    @*/
+    /*@ ensures
+            switch (subtreeNodes) {
+                case empty: return false;
+                case tree(node0, leftNodes, rightNodes):
+                    return tree(result, right_context(contextNodes, node, leftNodes), tree(result, empty, empty));
+            };
+    @*/
+{
+    struct node *n = malloc(sizeof(struct node));
+    if (n == 0) {
+        abort();
+    }
+    n->left = 0;
+    n->right = 0;
+    n->parent = node;
+    n->count = 1;
+    {
+        struct node *nodeRight = node->right;
+        node->right = n;
+        fixup_ancestors(n, node, 1);
+    }
+    return n;
+}
+
+
+struct node *tree_get_parent(struct node *node)
+    /*@ requires
+            tree(node, ?contextNodes, ?subtreeNodes) &*& contextNodes != root &*& subtreeNodes != empty;
+    @*/
+    /*@ ensures
+            switch (contextNodes) {
+                case root: return false;
+                case left_context(parentContextNodes, parent, rightNodes):
+                    return result == parent &*& tree(parent, parentContextNodes, tree(parent, subtreeNodes, rightNodes));
+                case right_context(parentContextNodes, parent, leftNodes):
+                    return result == parent &*& tree(parent, parentContextNodes, tree(parent, leftNodes, subtreeNodes));
+            };
+    @*/
+{
+    struct node *parent = node->parent;
+    return parent;
+}
+
+
+void dispose_node(struct node *node)
+    //@ requires subtree(node, _, _);
+    //@ ensures true;
+{
+    if (node == 0) {
+    } else {
+        {
+            struct node *left = node->left;
+            dispose_node(left);
+        }
+        {
+            struct node *right = node->right;
+            dispose_node(right);
+        }
+        free(node);
+    }
+}
+
+
+void tree_dispose(struct node *node)
+    //@ requires tree(node, root, _);
+    //@ ensures true;
+{
+    dispose_node(node);
 }
 
 

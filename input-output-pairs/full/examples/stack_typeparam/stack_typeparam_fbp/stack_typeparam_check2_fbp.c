@@ -63,6 +63,18 @@ fixpoint Stack<T> Pop<T>(Stack<T> Stack)
   }
 }
 
+fixpoint bool IsEmpty<T>(Stack<T> S)
+{
+  switch ( S )
+  {
+    case Nil:
+      return true;
+    
+    case Cons(x, y, T):
+      return false;
+  }
+}
+
 fixpoint int Size<T>(Stack<T> S)
 {
   switch ( S )
@@ -127,25 +139,41 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 */
 
 
-struct data* create_data(int foo, int bar)
-  //@ requires true;
-  //@ ensures Data(result, foo, bar);
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
+
+struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
+  //@ requires [_]is_destructor<T>(destructor, ?Ownership);
+  //@ ensures Stack(result, destructor, Ownership, ?Stack) &*& IsEmpty(Stack) == true;
 {
-  struct data* data = malloc( sizeof( struct data ) );
-  if ( data == 0 ) abort();
+  struct stack* stack = malloc( sizeof( struct stack ) );
+  if ( stack == 0 ) abort();
   
-  data->foo = foo;
-  data->bar = bar;
-  return data;
+  stack->destructor = destructor;
+  stack->first = 0;
+  stack->size = 0;
+  
+  return stack;
 }
 
 
-
-void destroy_data(struct data* data)
-  //@ requires Data_Ownership(data, _);
+void destroy_stack/*@ <T> @*/(struct stack* stack)
+  //@ requires Stack<T>(stack, _, _, ?S);
   //@ ensures true;
 {
-  free(data);
+  struct node* current = stack->first;
+  destructor* destructor = stack->destructor;
+  
+  while ( current != 0 )
+  {
+    struct node* next = current->next;
+    destructor(current->data);
+    free(current);
+    current = next;
+  }
+  free(stack);
 }
 
 
@@ -187,36 +215,25 @@ void* pop/*@ <T> @*/(struct stack* stack)
 }
 
 
-struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
-  //@ requires [_]is_destructor<T>(destructor, ?Ownership);
-  //@ ensures Stack(result, destructor, Ownership, ?Stack) &*& IsEmpty(Stack) == true;
+struct data* create_data(int foo, int bar)
+  //@ requires true;
+  //@ ensures Data(result, foo, bar);
 {
-  struct stack* stack = malloc( sizeof( struct stack ) );
-  if ( stack == 0 ) abort();
+  struct data* data = malloc( sizeof( struct data ) );
+  if ( data == 0 ) abort();
   
-  stack->destructor = destructor;
-  stack->first = 0;
-  stack->size = 0;
-  
-  return stack;
+  data->foo = foo;
+  data->bar = bar;
+  return data;
 }
 
 
-void destroy_stack/*@ <T> @*/(struct stack* stack)
-  //@ requires Stack<T>(stack, _, _, ?S);
+
+void destroy_data(struct data* data)
+  //@ requires Data_Ownership(data, _);
   //@ ensures true;
 {
-  struct node* current = stack->first;
-  destructor* destructor = stack->destructor;
-  
-  while ( current != 0 )
-  {
-    struct node* next = current->next;
-    destructor(current->data);
-    free(current);
-    current = next;
-  }
-  free(stack);
+  free(data);
 }
 
 

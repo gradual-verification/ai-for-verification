@@ -5,6 +5,12 @@ struct node {
   struct node* next;
 };
 
+// specific to cell
+
+struct cell {
+  int val;
+};
+
 
 /*equals() function
 -params: void* x1, void* x2

@@ -22,6 +22,11 @@ struct foo {
  * 
  * It makes sure that the return value is a foo structure with the given value.
  */
-struct foo *create_foo(int value);
+struct foo *create_foo(int value)
 {
     struct foo *foo = malloc(sizeof(struct foo));
+    if (foo == 0) abort();
+    foo->value = value;
+    return foo;
+}
+

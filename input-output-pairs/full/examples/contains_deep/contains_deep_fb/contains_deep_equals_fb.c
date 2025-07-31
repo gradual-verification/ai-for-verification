@@ -49,11 +49,6 @@ struct cell {
 };
 
 /*@
-predicate_family_instance equals_state1(cell_equals)(struct cell* c1, int v, fixpoint (unit, int, int,bool) eq_func) =
-  c1->val |-> v &*& eq_func == cell_eq_func;
-  
-  predicate_family_instance equals_state2(cell_equals)(struct cell* c2, int v, fixpoint (unit, int, int,bool) eq_func) =
-  c2->val |-> v &*& eq_func == cell_eq_func;
   
 fixpoint bool cell_eq_func(unit un, int v1, int v2) {
   switch(un) {

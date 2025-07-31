@@ -6,6 +6,13 @@ struct node {
 };
 
 
+/*equals() function
+-params: void* v1, void* v2
+-description: checks whether two pointers are equal. It doesn't have a concrete definition.
+*/
+typedef bool equals(void* v1, void* v2);
+
+
 // TODO: make this function pass the verification
 /*list_contains() function
 -params: struct node* n, void* v, equals* eq

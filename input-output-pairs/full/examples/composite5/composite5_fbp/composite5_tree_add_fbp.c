@@ -71,6 +71,28 @@ predicate tree_membership_fact(int id, struct node *n) = ghost_list_member_handl
 //@ predicate tree_id(int id) = true;
 
 
+struct node *create_node(struct node *p, struct node *next)
+  //@ requires true;
+  /*@
+  ensures
+    result != 0 &*&
+    [_]result->childrenGhostListId |-> ?childrenGhostListId &*& ghost_list<struct node *>(childrenGhostListId, nil) &*&
+    result->firstChild |-> 0 &*&
+    result->nextSibling |-> next &*&
+    result->parent |-> p &*&
+    result->count |-> 1;
+  @*/
+{
+  struct node *n = malloc(sizeof(struct node));
+  if (n == 0) abort();
+  n->firstChild = 0;
+  n->nextSibling = next;
+  n->parent = p;
+  n->count = 1;
+  return n;
+}
+
+
 void add_to_count(struct node *p, int delta)
   /*@
   requires
@@ -106,28 +128,6 @@ void add_to_count(struct node *p, int delta)
     
     add_to_count(pp, delta);
   }
-}
-
-
-struct node *create_node(struct node *p, struct node *next)
-  //@ requires true;
-  /*@
-  ensures
-    result != 0 &*&
-    [_]result->childrenGhostListId |-> ?childrenGhostListId &*& ghost_list<struct node *>(childrenGhostListId, nil) &*&
-    result->firstChild |-> 0 &*&
-    result->nextSibling |-> next &*&
-    result->parent |-> p &*&
-    result->count |-> 1;
-  @*/
-{
-  struct node *n = malloc(sizeof(struct node));
-  if (n == 0) abort();
-  n->firstChild = 0;
-  n->nextSibling = next;
-  n->parent = p;
-  n->count = 1;
-  return n;
 }
 
 

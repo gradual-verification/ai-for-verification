@@ -32,6 +32,12 @@ predicate eloop(eloop x) =
 @*/
 
 
+typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
+    //@ requires eloop(x) &*& [_]dataPred(data);
+    //@ ensures eloop(x) &*& [_]dataPred(data);
+    
+
+
 // TODO: make this function pass the verification
 void eloop_loop(eloop x)
     //@ requires eloop(x);

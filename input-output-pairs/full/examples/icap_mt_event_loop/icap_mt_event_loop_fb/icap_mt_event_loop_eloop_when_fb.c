@@ -4,12 +4,6 @@
 #include "gotsmanlock.h"
 
 
-typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
-    //@ requires eloop(x) &*& [_]dataPred(data);
-    //@ ensures eloop(x) &*& [_]dataPred(data);
-
-
-
 typedef struct eloop *eloop;
 
 struct eloop {
@@ -36,6 +30,12 @@ predicate_ctor I(eloop x)() =
 predicate eloop(eloop x) =
     [_]lock(&x->lock, I(x));
 @*/
+
+
+typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
+    //@ requires eloop(x) &*& [_]dataPred(data);
+    //@ ensures eloop(x) &*& [_]dataPred(data);
+
 
 
 // TODO: make this function pass the verification

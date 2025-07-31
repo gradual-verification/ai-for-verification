@@ -5,6 +5,18 @@ struct thread;
 
 /***
  * Description:
+ * The `thread_start` function creates a new thread and starts executing the given function (`run`)
+ * with the provided data. It doesn't have an implementation. 
+ *
+ * @param run - A pointer to the function to execute in the thread.
+ * @param data - A pointer to the data required by the thread function.
+ *
+ */
+struct thread *thread_start(void *run, void *data);
+
+
+/***
+ * Description:
  * The `thread_join` function waits for a given thread to finish execution. It doesn't have an implementation. 
  *
  * @param thread - A pointer to the thread to join.
@@ -14,16 +26,19 @@ struct thread;
 void thread_join(struct thread *thread);
 
 
-/***
+/**
  * Description:
- * The `thread_start` function creates a new thread and starts executing the given function (`run`)
- * with the provided data. It doesn't have an implementation. 
+ * The `increment` function increments the value stored at the memory location pointed to by `cell`.
  *
- * @param run - A pointer to the function to execute in the thread.
- * @param data - A pointer to the data required by the thread function.
+ * @param cell - A pointer to an integer.
  *
+ * The function retrieves the integer value at `cell`, increments it by 1, and stores the result back
+ * in the same memory location.
  */
-struct thread *thread_start(void *run, void *data);
+void increment(int *cell)
+{
+    (*cell)++;
+}
 
 
 /***

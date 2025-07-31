@@ -63,17 +63,9 @@ fixpoint bool cell_eq_func(unit un, int v1, int v2) {
 @*/
 
 
-struct node* add(struct node* n, void* v) 
-  //@ requires nodes(n, ?vs);
-  //@ ensures nodes(result, cons(v, vs));
-{
-  struct node* nn = malloc(sizeof(struct node));
-  if(nn == 0) abort();
-  nn->value = v;
-  nn->next = n;
-  return nn;
-}
-
+typedef bool equals(void* x1, void* x2);
+  //@ requires equals_state1(this)(x1, ?v1, ?eq_func) &*& equals_state2(this)(x2, ?v2, eq_func);
+  //@ ensures equals_state1(this)(x1, v1, eq_func) &*& equals_state2(this)(x2, v2, eq_func) &*& result == eq_func(unit, v1, v2);
 
 
 struct node* create_list() 
@@ -84,14 +76,15 @@ struct node* create_list()
 }
 
 
-struct cell* create_cell(int v)
-  //@ requires true;
-  //@ ensures result->val |-> v;
+struct node* add(struct node* n, void* v) 
+  //@ requires nodes(n, ?vs);
+  //@ ensures nodes(result, cons(v, vs));
 {
-  struct cell* c = malloc(sizeof(struct cell));
-  if(c == 0) abort();
-  c->val = v;
-  return c;
+  struct node* nn = malloc(sizeof(struct node));
+  if(nn == 0) abort();
+  nn->value = v;
+  nn->next = n;
+  return nn;
 }
 
 
@@ -113,6 +106,26 @@ bool list_contains(struct node* n, void* v, equals* eq)
   }
 }
 
+
+
+struct cell* create_cell(int v)
+  //@ requires true;
+  //@ ensures result->val |-> v;
+{
+  struct cell* c = malloc(sizeof(struct cell));
+  if(c == 0) abort();
+  c->val = v;
+  return c;
+}
+
+
+
+bool cell_equals(struct cell* x1, struct cell* x2) //@: equals
+  //@ requires equals_state1(cell_equals)(x1, ?v1, ?eq_func) &*& equals_state2(cell_equals)(x2, ?v2, eq_func);
+  //@ ensures equals_state1(cell_equals)(x1, v1, eq_func) &*& equals_state2(cell_equals)(x2, v2, eq_func) &*& result == eq_func(unit, v1, v2);
+{
+  return x1->val == x2->val;
+}
 
 
 // TODO: make this function pass the verification

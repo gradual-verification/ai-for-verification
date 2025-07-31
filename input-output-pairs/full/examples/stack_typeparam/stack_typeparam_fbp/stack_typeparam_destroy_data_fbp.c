@@ -63,6 +63,18 @@ fixpoint Stack<T> Pop<T>(Stack<T> Stack)
   }
 }
 
+fixpoint bool IsEmpty<T>(Stack<T> S)
+{
+  switch ( S )
+  {
+    case Nil:
+      return true;
+    
+    case Cons(x, y, T):
+      return false;
+  }
+}
+
 fixpoint int Size<T>(Stack<T> S)
 {
   switch ( S )
@@ -125,6 +137,10 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 /*
   Destructors
 */
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
 
 
 // TODO: make this function pass the verification

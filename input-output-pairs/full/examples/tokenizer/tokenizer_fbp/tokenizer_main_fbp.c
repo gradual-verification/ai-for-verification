@@ -28,63 +28,140 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
 @*/
 
 
-void tokenizer_dispose(struct tokenizer *tokenizer)
-	//@ requires Tokenizer(tokenizer);
-	//@ ensures true;
-{
-	string_buffer_dispose(tokenizer->buffer);
-	free(tokenizer);
-}
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
 
 
-void print_token(struct tokenizer* tokenizer)
+void tokenizer_fill_buffer(struct tokenizer* tokenizer)
  //@ requires Tokenizer(tokenizer);
  //@ ensures Tokenizer(tokenizer);
 {
-	switch ( tokenizer->lasttoken )
+	if ( tokenizer->lastread == -2 )
 	{
-	case '(':
-		puts("LPAREN");
-		break;
-
-	case ')':
-		puts("RPAREN");
-		break;
-
-	case '0':
-		putchar('N');
-		print_string_buffer(tokenizer->buffer);
-		puts("");
-		break;
-
-	case 'S':
-		putchar('S');
-		print_string_buffer(tokenizer->buffer);
-		puts("");
-		break;
-	
-	case 'B':
-		puts("BADCHAR");
-		break;
+	        charreader *reader = tokenizer->next_char;
+	        int result = reader();
+			if (result < -128 || result > 127)
+				abort();
+		tokenizer->lastread = result;
 	}
 }
 
 
-struct tokenizer* tokenizer_create(charreader* reader)
- //@ requires is_charreader(reader) == true;
- //@ ensures Tokenizer(result);
+int tokenizer_peek(struct tokenizer* tokenizer)
+ //@ requires Tokenizer(tokenizer);
+ //@ ensures Tokenizer(tokenizer);
 {
-	struct tokenizer* tokenizer;
-	struct string_buffer *buffer;
-	
-	tokenizer = (struct tokenizer*) malloc( sizeof( struct tokenizer ) );
-	if ( tokenizer == 0 ) abort();
+	tokenizer_fill_buffer(tokenizer);
+	return tokenizer->lastread;
+}
+
+
+void tokenizer_drop(struct tokenizer* tokenizer)
+ //@ requires Tokenizer(tokenizer);
+ //@ ensures Tokenizer(tokenizer);
+{
 	tokenizer->lastread = -2;
-	tokenizer->lasttoken = 0;
-	tokenizer->next_char = reader;
-	buffer = create_string_buffer();
-	tokenizer->buffer = buffer;
-	return tokenizer;
+}
+
+
+int tokenizer_next_char(struct tokenizer* tokenizer)
+ //@ requires Tokenizer(tokenizer);
+ //@ ensures Tokenizer(tokenizer) &*& result >= -128 && result <= 127;
+{
+	int c;
+
+	tokenizer_fill_buffer(tokenizer);
+	c = tokenizer->lastread;
+	tokenizer->lastread = -2;
+	return c;
+}
+
+
+bool is_whitespace(int c)
+ //@ requires true;
+ //@ ensures true;
+{
+	return c == ' ' || c == '\n' || c == '\r' || c == '\t';
+}
+
+
+void tokenizer_skip_whitespace(struct tokenizer* tokenizer)
+ //@ requires Tokenizer(tokenizer);
+ //@ ensures Tokenizer(tokenizer);
+{
+	while ( is_whitespace( tokenizer_peek(tokenizer) ) )
+	{
+		tokenizer_drop(tokenizer);
+	}
+}
+
+
+bool is_digit(int c)
+ //@ requires true;
+ //@ ensures true;
+{
+	return c >= '0' && c <= '9';
+}
+
+
+void string_buffer_append_char(struct string_buffer *buffer, char c)
+ //@ requires string_buffer(buffer, _);
+ //@ ensures string_buffer(buffer, _);
+{
+	char cc = c;
+	string_buffer_append_chars(buffer, &cc, 1);
+}
+
+
+int tokenizer_eat_number(struct tokenizer* tokenizer)
+ //@ requires Tokenizer(tokenizer);
+ //@ ensures Tokenizer(tokenizer);
+{
+	for (;;)
+	{
+		int result;
+		bool isDigit;
+		
+		result = tokenizer_peek(tokenizer);
+		isDigit = is_digit(result);
+		if ( !isDigit ) break;
+		
+	    result = tokenizer_next_char(tokenizer);
+		string_buffer_append_char(tokenizer->buffer, (char)result);
+	}
+
+	return '0';
+}
+
+
+bool is_symbol_char(int c)
+ //@ requires true;
+ //@ ensures true;
+{
+	return c > 32 && c <= 127 && c != '(' && c != ')'; 
+}
+
+
+int tokenizer_eat_symbol(struct tokenizer* tokenizer)
+ //@ requires Tokenizer(tokenizer);
+ //@ ensures Tokenizer(tokenizer);
+{
+	for (;;)
+	{
+		int result;
+		bool isSymbolChar;
+		
+		result = tokenizer_peek(tokenizer);
+		isSymbolChar = is_symbol_char(result);
+		
+		if (!isSymbolChar) break;
+		
+		result = tokenizer_next_char(tokenizer);
+		string_buffer_append_char(tokenizer->buffer, (char)result);
+	}
+
+	return 'S';
 }
 
 
@@ -121,6 +198,88 @@ int tokenizer_next(struct tokenizer* tokenizer)
 	}
 	tokenizer->lasttoken = token;
 	return token;
+}
+
+
+struct tokenizer* tokenizer_create(charreader* reader)
+ //@ requires is_charreader(reader) == true;
+ //@ ensures Tokenizer(result);
+{
+	struct tokenizer* tokenizer;
+	struct string_buffer *buffer;
+	
+	tokenizer = (struct tokenizer*) malloc( sizeof( struct tokenizer ) );
+	if ( tokenizer == 0 ) abort();
+	tokenizer->lastread = -2;
+	tokenizer->lasttoken = 0;
+	tokenizer->next_char = reader;
+	buffer = create_string_buffer();
+	tokenizer->buffer = buffer;
+	return tokenizer;
+}
+
+
+void tokenizer_dispose(struct tokenizer *tokenizer)
+	//@ requires Tokenizer(tokenizer);
+	//@ ensures true;
+{
+	string_buffer_dispose(tokenizer->buffer);
+	free(tokenizer);
+}
+
+
+void print_string_buffer(struct string_buffer *buffer)
+	//@ requires [?f]string_buffer(buffer, ?cs);
+	//@ ensures [f]string_buffer(buffer, cs);
+{
+	int n = string_buffer_get_length(buffer);
+	char *pcs = string_buffer_get_chars(buffer);
+	int i;
+	for (i = 0; i < n; i++)
+	{
+		putchar(pcs[i]);
+	}
+}
+
+
+void print_token(struct tokenizer* tokenizer)
+ //@ requires Tokenizer(tokenizer);
+ //@ ensures Tokenizer(tokenizer);
+{
+	switch ( tokenizer->lasttoken )
+	{
+	case '(':
+		puts("LPAREN");
+		break;
+
+	case ')':
+		puts("RPAREN");
+		break;
+
+	case '0':
+		putchar('N');
+		print_string_buffer(tokenizer->buffer);
+		puts("");
+		break;
+
+	case 'S':
+		putchar('S');
+		print_string_buffer(tokenizer->buffer);
+		puts("");
+		break;
+	
+	case 'B':
+		puts("BADCHAR");
+		break;
+	}
+}
+
+
+int my_getchar() //@ : charreader
+	//@ requires true;
+	//@ ensures true;
+{
+	return getchar();
 }
 
 

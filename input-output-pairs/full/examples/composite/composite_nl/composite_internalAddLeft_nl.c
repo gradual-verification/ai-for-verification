@@ -27,6 +27,29 @@ struct Node {
 
 /***
  * Description:
+ * The `create` function creates and returns a new tree node with no children.
+ *
+ * @returns A pointer to a newly allocated `Node`.
+ *
+ * This function makes sure to return a tree with one node. 
+ */
+struct Node* create() 
+{
+    struct Node* n = malloc(sizeof(struct Node));
+    if(n == 0) {
+        abort();
+    }
+    n->parent = 0;
+    n->left = 0;
+    n->right = 0;
+    n->count = 1;
+  
+    return n;
+}
+
+
+/***
+ * Description:
  * The `internalCreate` function creates a new node with a given parent.
  *
  * @param parent - A pointer to the parent node.

@@ -14,6 +14,13 @@ struct tokenizer
 
 /***
  * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
+
+/***
+ * Description:
 The print_string_buffer function prints the content in a string buffer.
 
 It needs to make sure that the property of the buffer holds (i.e., the buffer points to a list of characters) before and after the function.

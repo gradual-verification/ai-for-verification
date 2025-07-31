@@ -6,6 +6,16 @@ struct point {
 };
 
 
+void swap(int *a, int *b)
+//@ requires *a |-> ?x &*& *b |-> ?y;
+//@ ensures *a |-> y &*& *b |-> x;
+{
+    int tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+
 void point_mirror(struct point *p)
 //@ requires p->x |-> ?x &*& p->y |-> ?y;
 //@ ensures p->x |-> y &*& p->y |-> x;

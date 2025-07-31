@@ -9,19 +9,6 @@ struct node {
 
 
 
-/*`tree_get_count()` Function:
-- Parameters: Takes a node pointer as input.
-- Description: This function is used to get the 
-count value of the tree starting from the given node.
-
-This function makes sure that the tree of node is not changed. */
-int tree_get_count(struct node *node)
-{
-    int result = subtree_get_count(node);
-    return result;
-}
-
-
 /*`subtree_get_count()` Function:
 - Parameters: Takes a node pointer as input.
 - Description: This function retrieves the count

@@ -78,6 +78,25 @@ predicate context(struct Node* node, context value, int holeCount) =
 @*/
 
 
+struct Node* create() 
+  //@ requires true;
+  //@ ensures isTree(result, tree(result, Nil, Nil));
+{
+  struct Node* n = malloc(sizeof(struct Node));
+  if(n==0){
+    abort();
+  } else {
+  }
+  n->parent = 0;
+  n->left = 0;
+  n->right = 0;
+  n->count = 1;
+  
+
+  return n;
+}
+
+
 struct Node* addLeft(struct Node* node)
   //@ requires isTree(node, ?v) &*& valueOf(v, node) == tree(node, Nil, Nil);
   /*@ ensures isTree(node, replace(v, node, tree(node, tree(result, Nil, Nil), Nil))) &*& uniqueNodes(replace(v, node, tree(node, tree(result, Nil, Nil), Nil)))==true; @*/
@@ -100,22 +119,62 @@ int getNbOfNodes(struct Node* n)
 }
 
 
-struct Node* create() 
+struct Node* internalCreate(struct Node* parent)
   //@ requires true;
-  //@ ensures isTree(result, tree(result, Nil, Nil));
+  //@ ensures result!=0 &*& tree(result, tree(result, Nil, Nil)) &*& result->parent |-> parent;
 {
   struct Node* n = malloc(sizeof(struct Node));
-  if(n==0){
+  if(n==0) {
     abort();
-  } else {
-  }
-  n->parent = 0;
+  } else {}
   n->left = 0;
   n->right = 0;
+  n->parent = parent;
   n->count = 1;
-  
 
   return n;
+}
+
+
+struct Node* internalAddLeft(struct Node* node)
+  /*@ requires context(node, ?value, 1) &*& node!=0 &*& node->left |-> 0 &*& node->right |-> 0 &*& node->count |-> 1; @*/
+  /*@ ensures context(node, value, 2) &*& node!=0 &*& node->left |-> result &*& node->right |-> 0 &*& node->count |-> 2 &*& 
+               tree(result, tree(result, Nil, Nil)) &*& result->parent |-> node; @*/
+{
+    struct Node* child = internalCreate(node);
+    node->left = child;
+    fix(node);
+    return child;
+}
+
+
+void fix(struct Node* node)
+  /*@ requires node->count |-> ?c &*& context(node, ?value, c) &*& node!=0; @*/   
+  /*@ ensures context(node, value, c + 1) &*& node->count |-> c + 1; @*/
+{
+  int tmp = node->count;
+  if (tmp == INT_MAX) {
+    abort();
+  }
+  node->count = tmp + 1;
+
+  struct Node* parent = node->parent;
+  if(parent==0){
+  } else {
+    fix(parent);
+  }
+
+}
+
+
+int internalGetNbOfNodes(struct Node* n)
+  //@ requires tree(n, ?value);
+  //@ ensures tree(n, value) &*& result == size(value);
+{
+
+  int c = n->count;
+
+  return c;
 }
 
 

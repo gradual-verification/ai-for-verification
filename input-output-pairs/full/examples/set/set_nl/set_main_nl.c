@@ -11,6 +11,42 @@ struct set {
 };
 
 
+/*** 
+ * Description:
+The create_set function creates a new, empty set.
+
+@param - None.
+@requires - No specific preconditions.
+@ensures - Returns a pointer to a newly allocated set if successful, or 0. The set is initially empty.
+*/
+struct set* create_set()
+{
+  struct set* set = malloc(sizeof(struct set));
+  if(set == 0) return 0;
+  set->head = 0;
+  return set;
+}
+
+
+/*** 
+ * Description:
+The set_add function adds a new element to the set.
+
+@param set - A pointer to the set.
+@param x - A pointer to the element to be added.
+@requires - The set must be valid and x must not already be in the set.
+@ensures - The set is updated to include x, and the size of the set is incremented by one.
+*/
+void set_add(struct set* set, void* x)
+{
+  struct node* n = malloc(sizeof(struct node));
+  if(n == 0) abort();
+  n->next = set->head;
+  n->val = x;
+  set->head = n;
+}
+
+
 /***
  * Description: 
 The set_contains function checks whether a given element is present in the set.
@@ -52,42 +88,6 @@ void set_dispose(struct set* set)
     curr = nxt;
   }
   free(set);
-}
-
-
-/*** 
- * Description:
-The set_add function adds a new element to the set.
-
-@param set - A pointer to the set.
-@param x - A pointer to the element to be added.
-@requires - The set must be valid and x must not already be in the set.
-@ensures - The set is updated to include x, and the size of the set is incremented by one.
-*/
-void set_add(struct set* set, void* x)
-{
-  struct node* n = malloc(sizeof(struct node));
-  if(n == 0) abort();
-  n->next = set->head;
-  n->val = x;
-  set->head = n;
-}
-
-
-/*** 
- * Description:
-The create_set function creates a new, empty set.
-
-@param - None.
-@requires - No specific preconditions.
-@ensures - Returns a pointer to a newly allocated set if successful, or 0. The set is initially empty.
-*/
-struct set* create_set()
-{
-  struct set* set = malloc(sizeof(struct set));
-  if(set == 0) return 0;
-  set->head = 0;
-  return set;
 }
 
 

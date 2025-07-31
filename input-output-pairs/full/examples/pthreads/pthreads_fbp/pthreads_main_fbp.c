@@ -39,6 +39,27 @@ predicate_family_instance pthread_run_post(threadfn)
   @*/
 
 
+void *threadfn(void* _unused) //@ : pthread_run_joinable
+/*@ requires
+        pthread_run_pre(threadfn)(_unused, ?x)
+    &*& lockset(currentThread, nil);
+  @*/
+/*@ ensures
+        pthread_run_post(threadfn)(_unused, x)
+    &*& lockset(currentThread, nil)
+    &*& result == 0;
+  @*/
+ {
+  pthread_spin_lock(&g_lock);
+
+  if (g < 1024) { g = g + 1; }
+
+  pthread_spin_unlock(&g_lock);
+
+  return ((void *) 0);
+ }
+
+
 void run_instance(void)
 /*@ requires
         integer(&g, ?vf_g0)
@@ -84,7 +105,7 @@ void run_instance(void)
 // TODO: make this function pass the verification
 int main (int argc, char** argv) //@ : custom_main_spec
 /*@ requires
-        module(pthreads_fbp, true) &*& lockset(currentThread, nil);
+        module(pthreads_main_fbp, true) &*& lockset(currentThread, nil);
   @*/
 /*@ ensures lockset(currentThread, nil);
   @*/

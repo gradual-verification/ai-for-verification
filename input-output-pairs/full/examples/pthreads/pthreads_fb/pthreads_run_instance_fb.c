@@ -39,6 +39,27 @@ predicate_family_instance pthread_run_post(threadfn)
   @*/
 
 
+void *threadfn(void* _unused) //@ : pthread_run_joinable
+/*@ requires
+        pthread_run_pre(threadfn)(_unused, ?x)
+    &*& lockset(currentThread, nil);
+  @*/
+/*@ ensures
+        pthread_run_post(threadfn)(_unused, x)
+    &*& lockset(currentThread, nil)
+    &*& result == 0;
+  @*/
+ {
+  pthread_spin_lock(&g_lock);
+
+  if (g < 1024) { g = g + 1; }
+
+  pthread_spin_unlock(&g_lock);
+
+  return ((void *) 0);
+ }
+
+
 // TODO: make this function pass the verification
 void run_instance(void)
 /*@ requires

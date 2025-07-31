@@ -4,6 +4,7 @@
 struct counter {
     struct mutex *mutex;
     int count;
+    //@ int oldCount;
 };
 
 /*@
@@ -15,6 +16,21 @@ predicate_family_instance thread_run_data(incrementor)(struct counter *counter) 
     counter->mutex |-> ?mutex &*& [1/2]mutex(mutex, lock_invariant(counter));
 
 @*/
+
+
+void incrementor(struct counter *counter) //@ : thread_run
+    //@ requires thread_run_data(incrementor)(counter);
+    //@ ensures true;
+{
+    struct mutex *mutex = counter->mutex;
+    for (;;)
+    {
+        mutex_acquire(mutex);
+        if (counter->count == INT_MAX) abort();
+        counter->count++;
+        mutex_release(mutex);
+    }
+}
 
 
 // TODO: make this function pass the verification

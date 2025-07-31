@@ -6,6 +6,16 @@
 static int cell;
 
 
+/*m function
+- param data: pointer to data
+- description: reads the value of the global variable cell, making sure that the data is not changed. 
+*/
+void m(void *data) //@ : thread_run_joinable
+{
+    int x = cell;
+}
+
+
 // TODO: make this function pass the verification
 /*process function
 -param n: number of threads to be created

@@ -17,22 +17,19 @@ struct iter {
 
 /***
  * Description:
-The llist_dispose function frees a list by iteratively freeing the nodes.
+The create_llist function allocates an empty linked list with a node as both the first and last of the linked list.
 
-@param list: a single linked list to be freed
+It makes sure that the return value is an empty list. 
 */
-void llist_dispose(struct llist *list)
+struct llist *create_llist()
 {
-  struct node *n = list->first;
-  struct node *l = list->last;
-  while (n != l)
-  {
-    struct node *next = n->next;
-    free(n);
-    n = next;
-  }
-  free(l);
-  free(list);
+  struct llist *l = malloc(sizeof(struct llist));
+  if (l == 0) abort();
+  struct node *n = calloc(1, sizeof(struct node));
+  if (n == 0) abort();
+  l->first = n;
+  l->last = n;
+  return l;
 }
 
 
@@ -61,13 +58,22 @@ void llist_add(struct llist *list, int x)
 
 /***
  * Description:
-The `iter_dispose` function deallocates the memory associated with the iterator.
+The llist_dispose function frees a list by iteratively freeing the nodes.
 
-@param i - Iterator of the linked list
+@param list: a single linked list to be freed
 */
-void iter_dispose(struct iter *i)
+void llist_dispose(struct llist *list)
 {
-    free(i);
+  struct node *n = list->first;
+  struct node *l = list->last;
+  while (n != l)
+  {
+    struct node *next = n->next;
+    free(n);
+    n = next;
+  }
+  free(l);
+  free(list);
 }
 
 
@@ -116,19 +122,13 @@ int iter_next(struct iter *i)
 
 /***
  * Description:
-The create_llist function allocates an empty linked list with a node as both the first and last of the linked list.
+The `iter_dispose` function deallocates the memory associated with the iterator.
 
-It makes sure that the return value is an empty list. 
+@param i - Iterator of the linked list
 */
-struct llist *create_llist()
+void iter_dispose(struct iter *i)
 {
-  struct llist *l = malloc(sizeof(struct llist));
-  if (l == 0) abort();
-  struct node *n = calloc(1, sizeof(struct node));
-  if (n == 0) abort();
-  l->first = n;
-  l->last = n;
-  return l;
+    free(i);
 }
 
 

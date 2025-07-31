@@ -73,6 +73,33 @@ predicate tree(struct node * node, context c, tree subtree) =
 @*/
 
 
+struct node * create_node(struct node * p)
+  //@ requires true;
+  /*@ ensures 
+       subtree(result, p, tree(result, empty, empty));
+  @*/
+{
+  struct node *n = malloc(sizeof(struct node));
+  if (n == 0) { abort(); }
+  n->left = 0;
+  n->right = 0;
+  n->parent = p;
+  n->count = 1;
+  return n;
+}
+
+
+int subtree_get_count(struct node *node)
+  //@ requires subtree(node, ?parent, ?nodes);
+  /*@ ensures subtree(node, parent, nodes) &*&
+              result == tcount(nodes) &*& 0 <= result; @*/
+{
+  int result = 0;
+  if (node != 0) { result = node->count; }
+  return result;
+}
+
+
 void fixup_ancestors(struct node * n, struct node * p, int count)
   //@ requires context(n, p, _, ?c) &*& 0 <= count;
   //@ ensures context(n, p, count, c);
@@ -100,22 +127,6 @@ void fixup_ancestors(struct node * n, struct node * p, int count)
       fixup_ancestors(p, grandparent, pcount);
     }
   }
-}
-
-
-struct node * create_node(struct node * p)
-  //@ requires true;
-  /*@ ensures 
-       subtree(result, p, tree(result, empty, empty));
-  @*/
-{
-  struct node *n = malloc(sizeof(struct node));
-  if (n == 0) { abort(); }
-  n->left = 0;
-  n->right = 0;
-  n->parent = p;
-  n->count = 1;
-  return n;
 }
 
 

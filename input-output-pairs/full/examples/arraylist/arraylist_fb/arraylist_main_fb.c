@@ -15,6 +15,30 @@ predicate arraylist(struct arraylist *a; list<void*> vs) =
 @*/
 
 
+struct arraylist *create_arraylist() 
+  //@ requires true;
+  //@ ensures arraylist(result, nil);
+{
+  struct arraylist *a = malloc(sizeof(struct arraylist));
+  void *data = 0;
+  if(a == 0) abort();
+  a->size = 0;
+  data = malloc(100 * sizeof(void*));
+  if(data == 0) abort();
+  a->data = data;
+  a->capacity = 100;
+  return a; 
+}
+
+
+void *list_get(struct arraylist *a, int i)
+//@ requires arraylist(a, ?vs) &*& i >= 0 &*& i < length(vs);
+//@ ensures arraylist(a, vs) &*& result == nth(i, vs);
+{
+  return a->data[i];
+}
+
+
 void list_add(struct arraylist *a, void *v)
 //@ requires arraylist(a, ?vs);
 //@ ensures arraylist(a, append(vs, cons(v, nil)));
@@ -38,30 +62,6 @@ void list_add(struct arraylist *a, void *v)
   data = a->data;
   data[size] = v;
   a->size += 1;
-}
-
-
-void *list_get(struct arraylist *a, int i)
-//@ requires arraylist(a, ?vs) &*& i >= 0 &*& i < length(vs);
-//@ ensures arraylist(a, vs) &*& result == nth(i, vs);
-{
-  return a->data[i];
-}
-
-
-struct arraylist *create_arraylist() 
-  //@ requires true;
-  //@ ensures arraylist(result, nil);
-{
-  struct arraylist *a = malloc(sizeof(struct arraylist));
-  void *data = 0;
-  if(a == 0) abort();
-  a->size = 0;
-  data = malloc(100 * sizeof(void*));
-  if(data == 0) abort();
-  a->data = data;
-  a->capacity = 100;
-  return a; 
 }
 
 

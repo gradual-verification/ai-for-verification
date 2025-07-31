@@ -28,7 +28,7 @@ void m()
  * Description:
 The main function tests the property of global variables. 
 */
-int main() //@ : main_full(globals_nl)
+int main() //@ : main_full(globals_main_nl)
 {
     x = 7;
     struct counter *ctr = malloc(sizeof(struct counter));

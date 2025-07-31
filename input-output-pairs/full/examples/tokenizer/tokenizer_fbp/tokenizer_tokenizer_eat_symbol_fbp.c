@@ -28,11 +28,23 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
 @*/
 
 
-bool is_symbol_char(int c)
- //@ requires true;
- //@ ensures true;
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
+
+
+void tokenizer_fill_buffer(struct tokenizer* tokenizer)
+ //@ requires Tokenizer(tokenizer);
+ //@ ensures Tokenizer(tokenizer);
 {
-	return c > 32 && c <= 127 && c != '(' && c != ')'; 
+	if ( tokenizer->lastread == -2 )
+	{
+	        charreader *reader = tokenizer->next_char;
+	        int result = reader();
+			if (result < -128 || result > 127)
+				abort();
+		tokenizer->lastread = result;
+	}
 }
 
 
@@ -42,15 +54,6 @@ int tokenizer_peek(struct tokenizer* tokenizer)
 {
 	tokenizer_fill_buffer(tokenizer);
 	return tokenizer->lastread;
-}
-
-
-void string_buffer_append_char(struct string_buffer *buffer, char c)
- //@ requires string_buffer(buffer, _);
- //@ ensures string_buffer(buffer, _);
-{
-	char cc = c;
-	string_buffer_append_chars(buffer, &cc, 1);
 }
 
 
@@ -64,6 +67,23 @@ int tokenizer_next_char(struct tokenizer* tokenizer)
 	c = tokenizer->lastread;
 	tokenizer->lastread = -2;
 	return c;
+}
+
+
+void string_buffer_append_char(struct string_buffer *buffer, char c)
+ //@ requires string_buffer(buffer, _);
+ //@ ensures string_buffer(buffer, _);
+{
+	char cc = c;
+	string_buffer_append_chars(buffer, &cc, 1);
+}
+
+
+bool is_symbol_char(int c)
+ //@ requires true;
+ //@ ensures true;
+{
+	return c > 32 && c <= 127 && c != '(' && c != ')'; 
 }
 
 

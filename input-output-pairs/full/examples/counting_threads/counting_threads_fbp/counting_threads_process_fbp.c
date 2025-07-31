@@ -15,6 +15,14 @@ predicate thread_info(struct thread *t) = thread(t, m, _, _);
 @*/
 
 
+void m(void *data) //@ : thread_run_joinable
+    //@ requires thread_run_pre(m)(data, ?info);
+    //@ ensures thread_run_post(m)(data, info);
+{
+    int x = cell;
+}
+
+
 // TODO: make this function pass the verification
 void process(int n)
     //@ requires integer(&cell, ?v) &*& 0 <= n &*& 0 <= n * sizeof(struct thread *) &*& n * sizeof(struct thread *) <= INT_MAX;

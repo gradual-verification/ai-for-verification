@@ -133,18 +133,6 @@ struct barrier *create_barrier(int n)
 }
 
 
-void barrier_dispose(struct barrier *barrier)
-    //@ requires barrier(barrier, ?n, ?inv);
-    //@ ensures inv(_, _);
-{
-  
-    mutex_dispose(barrier->mutex);
-    
-    free(barrier);
-}
-
-
-
 void barrier(struct barrier *barrier)
     /*@
     requires
@@ -196,6 +184,108 @@ void barrier(struct barrier *barrier)
         mutex_release(mutex);
     }
 
+}
+
+
+void barrier_dispose(struct barrier *barrier)
+    //@ requires barrier(barrier, ?n, ?inv);
+    //@ ensures inv(_, _);
+{
+  
+    mutex_dispose(barrier->mutex);
+    
+    free(barrier);
+}
+
+
+
+void thread1(struct data *d) //@ : thread_run_joinable
+    //@ requires thread_run_pre(thread1)(d, ?info);
+    //@ ensures thread_run_post(thread1)(d, info);
+{
+   
+    struct barrier *barrier = d->barrier;
+    {
+        
+        barrier(barrier);
+
+    }
+    int N = 0;
+    while (N < 30)
+      
+    {
+        int a1 = d->x1;
+        int a2 = d->x2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+        d->y1 = a1 + 2 * a2;
+        {
+            
+            barrier(barrier);
+           
+        }
+        a1 = d->y1;
+        a2 = d->y2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+        d->x1 = a1 + 2 * a2;
+        N = N + 1;
+        d->i = N;
+        {
+            
+            barrier(barrier);
+
+        }
+    }
+    {
+        
+        barrier(barrier);
+
+    }
+    d->i = 0;
+
+}
+
+
+void thread2(struct data *d) //@ : thread_run_joinable
+    //@ requires thread_run_pre(thread2)(d, ?info);
+    //@ ensures thread_run_post(thread2)(d, info);
+{
+   
+    struct barrier *barrier = d->barrier;
+    {
+        
+        barrier(barrier);
+        
+    }
+    int m = 0;
+    while (m < 30)
+        
+    {
+        int a1 = d->x1;
+        int a2 = d->x2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+        d->y2 = a1 + 3 * a2;
+        {
+            
+            barrier(barrier);
+           
+        }
+        a1 = d->y1;
+        a2 = d->y2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+        d->x2 = a1 + 3 * a2;
+        {
+           
+            barrier(barrier);
+          
+        }
+        m = d->i;
+    }
+    {
+        
+        barrier(barrier);
+       
+    }
+    
 }
 
 

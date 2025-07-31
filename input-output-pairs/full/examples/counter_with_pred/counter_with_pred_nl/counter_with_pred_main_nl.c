@@ -7,52 +7,6 @@ struct Counter {
 
 /***
  * Description:
-The swap function swaps the values of the two Counters.
-
-@param c1, c2: pointers to two Counter
-
-The function makes sure that the two counters have their values swapped.
-*/
-void swap(struct Counter* c1, struct Counter* c2)
-{
-  int tmp1 = c1->value;
-  int tmp2 = c2->value;
-  c2->value = tmp1;
-  c1->value = tmp2;
-}
-
-
-/***
- * Description:
-The dispose function frees the memory allocated for the Counter.
-
-@param c: a pointer to a Counter
-
-The function makes sure that the counter c is freed.
-*/
-void dispose(struct Counter* c)
-{
-  free(c);
-}
-
-
-/***
- * Description:
-The get function gets the values of the given counter.
-
-@param c: pointer to a Counter
-
-The function makes sure that the counter c is unchanged and the return value is the value of c.
-*/
-int get(struct Counter* c)
-{
-  int tmp = c->value;
-  return tmp;
-}
-
-
-/***
- * Description:
 The init function creates a new counter with the given value.
 
 @param v: the given value to be set
@@ -83,6 +37,52 @@ void increment(struct Counter* c)
 {
   int tmp = c->value;
   c->value = tmp + 1;
+}
+
+
+/***
+ * Description:
+The dispose function frees the memory allocated for the Counter.
+
+@param c: a pointer to a Counter
+
+The function makes sure that the counter c is freed.
+*/
+void dispose(struct Counter* c)
+{
+  free(c);
+}
+
+
+/***
+ * Description:
+The swap function swaps the values of the two Counters.
+
+@param c1, c2: pointers to two Counter
+
+The function makes sure that the two counters have their values swapped.
+*/
+void swap(struct Counter* c1, struct Counter* c2)
+{
+  int tmp1 = c1->value;
+  int tmp2 = c2->value;
+  c2->value = tmp1;
+  c1->value = tmp2;
+}
+
+
+/***
+ * Description:
+The get function gets the values of the given counter.
+
+@param c: pointer to a Counter
+
+The function makes sure that the counter c is unchanged and the return value is the value of c.
+*/
+int get(struct Counter* c)
+{
+  int tmp = c->value;
+  return tmp;
 }
 
 
