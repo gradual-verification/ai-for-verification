@@ -46,7 +46,6 @@ predicate_ctor child(int id, struct node *parent)(struct node *c, int count) =
   [1/2]c->parent |-> parent;   // I am my child's parent.
 
 predicate_ctor node(int id)(struct node *n) =
-  n != 0 &*&
   [_]n->childrenGhostListId |-> ?childrenId &*&
   n->firstChild |-> ?firstChild &*&
   children(firstChild, ?children) &*&
@@ -74,7 +73,6 @@ struct node *create_node(struct node *p, struct node *next)
   //@ requires true;
   /*@
   ensures
-    result != 0 &*&
     [_]result->childrenGhostListId |-> ?childrenGhostListId &*& ghost_list<struct node *>(childrenGhostListId, nil) &*&
     result->firstChild |-> 0 &*&
     result->nextSibling |-> next &*&
@@ -102,7 +100,6 @@ struct node *create_tree()
 void add_to_count(struct node *p, int delta)
   /*@
   requires
-    p != 0 &*&
     tree_id(?id) &*&
     ghost_list(id, ?nodes) &*& mem(p, nodes) == true &*& foreach(remove(p, nodes), node(id)) &*&   // All nodes satisfy the 'node(id)' predicate, except 'p'.
     [_]p->childrenGhostListId |-> ?childrenId &*&

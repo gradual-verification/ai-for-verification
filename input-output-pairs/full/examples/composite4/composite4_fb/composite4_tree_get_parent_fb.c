@@ -26,7 +26,7 @@ predicate subtree(struct node * root, struct node * parent, tree t) =
     case empty: return root == 0;
     case tree(root0, leftNodes, rightNodes):
       return
-        root == root0 &*& root != 0 &*&
+        root == root0 &*&
         root->left |-> ?left &*&
         root->right |-> ?right &*&
         root->parent |-> parent &*&
@@ -46,7 +46,7 @@ predicate context(struct node * node, struct node * parent,
     case root: return parent == 0;
     case left_context(pns, parent0, rightNodes):
       return
-        parent == parent0 &*& parent != 0 &*&
+        parent == parent0 &*&
         parent->left |-> node &*&
         parent->right |-> ?right &*&
         parent->parent |-> ?gp &*&
@@ -56,7 +56,7 @@ predicate context(struct node * node, struct node * parent,
         pcount == 1 + count + tcount(rightNodes);
     case right_context(pns, parent0, leftNodes):
       return
-        parent == parent0 &*& parent != 0 &*&
+        parent == parent0 &*&
         parent->left |-> ?left &*&
         parent->right |-> node &*&
         parent->parent |-> ?gp &*&

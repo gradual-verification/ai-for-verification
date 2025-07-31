@@ -27,8 +27,7 @@ inductive Stack<T> =
 predicate Node<T>(predicate(void *, T) Ownership, struct node* node, void *data, T info, struct node* next) =
   node->data |-> data &*&
   node->next |-> next &*&
-  Ownership(data, info) &*&
-  node != 0;
+  Ownership(data, info);
 
 predicate StackItems<T>(predicate(void *, T) Ownership, struct node* head, Stack<T> S) =
   head == 0 ? S == Nil :

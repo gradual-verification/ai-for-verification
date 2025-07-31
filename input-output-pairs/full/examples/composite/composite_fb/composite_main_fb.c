@@ -57,22 +57,22 @@ struct Node {
 predicate tree(struct Node* node, tree value) =
   switch(value) { 
     case Nil: return false;
-    case tree(node2, lhs, rhs): return node!=0 &*& node==node2 &*& node->count |-> ?c &*& c == size(value) &*&
+    case tree(node2, lhs, rhs): return node==node2 &*& node->count |-> ?c &*& c == size(value) &*&
                                        node->left |-> ?l &*& node->right |-> ?r &*& (l==0 ? lhs==Nil : tree(l, lhs) &*& l->parent |-> node) &*&
                                        (r==0 ? rhs==Nil : tree(r, rhs) &*& r->parent |-> node); 
   };
 
 predicate isTree(struct Node* n, tree value) =
-  tree(?root, value) &*& root!=0 &*& root->parent |-> 0 &*& contains(value, n) == true;
+  tree(?root, value) &*& root->parent |-> 0 &*& contains(value, n) == true;
 
 inductive context = | lcontext(struct Node*, context, tree) | rcontext(struct Node*, tree, context) | Root; 
 
 predicate context(struct Node* node, context value, int holeCount) =
   switch(value) {
     case Root: return node->parent |-> 0;
-    case lcontext(n, cont, t): return n!=0 &*& n->left |-> node &*& node != 0 &*& n->right |-> ?r &*& n->count |-> ?c &*&
+    case lcontext(n, cont, t): return n->left |-> node &*& n->right |-> ?r &*& n->count |-> ?c &*&
                                       (r==0 ? t==Nil : tree(r, t) &*& r->parent |-> n) &*& context(n, cont, c) &*& c== holeCount + 1 + size(t) &*& node->parent |-> n;
-    case rcontext(n, t, cont): return n!=0 &*& n->right |-> node &*& node!=0 &*& n->left |-> ?l &*& n->count |-> ?c &*&
+    case rcontext(n, t, cont): return n->right |-> node &*& n->left |-> ?l &*& n->count |-> ?c &*&
                                       (l==0 ? t==Nil : tree(l, t) &*& l->parent |-> n) &*& context(n, cont, c) &*& c== holeCount + 1 + size(t) &*& node->parent |-> n;
   };
 @*/
@@ -121,7 +121,7 @@ int getNbOfNodes(struct Node* n)
 
 struct Node* internalCreate(struct Node* parent)
   //@ requires true;
-  //@ ensures result!=0 &*& tree(result, tree(result, Nil, Nil)) &*& result->parent |-> parent;
+  //@ ensures tree(result, tree(result, Nil, Nil)) &*& result->parent |-> parent;
 {
   struct Node* n = malloc(sizeof(struct Node));
   if(n==0) {
@@ -137,8 +137,8 @@ struct Node* internalCreate(struct Node* parent)
 
 
 struct Node* internalAddLeft(struct Node* node)
-  /*@ requires context(node, ?value, 1) &*& node!=0 &*& node->left |-> 0 &*& node->right |-> 0 &*& node->count |-> 1; @*/
-  /*@ ensures context(node, value, 2) &*& node!=0 &*& node->left |-> result &*& node->right |-> 0 &*& node->count |-> 2 &*& 
+  /*@ requires context(node, ?value, 1) &*& node->left |-> 0 &*& node->right |-> 0 &*& node->count |-> 1; @*/
+  /*@ ensures context(node, value, 2) &*& node->left |-> result &*& node->right |-> 0 &*& node->count |-> 2 &*& 
                tree(result, tree(result, Nil, Nil)) &*& result->parent |-> node; @*/
 {
     struct Node* child = internalCreate(node);
@@ -149,7 +149,7 @@ struct Node* internalAddLeft(struct Node* node)
 
 
 void fix(struct Node* node)
-  /*@ requires node->count |-> ?c &*& context(node, ?value, c) &*& node!=0; @*/   
+  /*@ requires node->count |-> ?c &*& context(node, ?value, c) @*/   
   /*@ ensures context(node, value, c + 1) &*& node->count |-> c + 1; @*/
 {
   int tmp = node->count;
