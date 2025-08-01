@@ -1,4 +1,0 @@
-.provides .\ghostlist.gh#create_ghost_list
-.provides .\ghostlist.gh#ghost_list_add
-.provides .\ghostlist.gh#ghost_list_remove
-.provides .\ghostlist.gh#ghost_list_member_handle_lemma
