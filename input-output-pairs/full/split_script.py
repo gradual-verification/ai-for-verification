@@ -11,7 +11,7 @@ class Function:
         self.start_line = start_line
         self.end_line = -1
         self.code = ''
-        self.func_calls = set()
+        self.func_calls = []
 
 
 # find the line of the function/prototype/typedef declaration using ctags
@@ -94,8 +94,8 @@ def extract_func_calls(curr_func, functions):
     for func in functions:
         func_name = func.name
         if curr_func_name != func_name:
-            if func_name + '(' in curr_func_code:
-                curr_func.func_calls.add(func_name)
+            if func_name in curr_func_code:
+                curr_func.func_calls.append(func_name)
 
 
 # extract the struct, predicate or fixpoint definitions before the first function
@@ -109,6 +109,33 @@ def extract_other_definition(filename, functions):
 
     first_func = functions[0]
     return ''.join(all_lines[0 : first_func.start_line])
+
+
+# get the function calls that the curr_func depends on
+def get_dependent_func_calls(functions, curr_func):
+    dependent_func_calls = curr_func.func_calls.copy()
+
+    while True:
+        funcs_to_append = []
+        for func_call1 in dependent_func_calls:
+            match = next(filter(lambda f: f.name == func_call1, functions), None)
+            # suppose the match always succeeds
+            func1 = match
+            if match is None:
+                print("no")
+            for func2 in func1.func_calls:
+                if func2 not in dependent_func_calls and func2 not in funcs_to_append:
+                    funcs_to_append.append(func2)
+
+        if len(funcs_to_append) == 0:
+            break
+        else:
+            dependent_func_calls.extend(funcs_to_append)
+
+    rank = {f.name: f.start_line for f in functions}
+    sorted_dependent_func_calls = sorted(dependent_func_calls, key=lambda f: rank.get(f, float('inf')))
+
+    return sorted_dependent_func_calls
 
 
 # split the functions for the given file in its directory
@@ -128,7 +155,10 @@ def split_functions(dirpath, filename):
     for func in functions:
         # write the definition, called functions and the function into a new file
         new_file_content = definition + '\n'
-        for func_call in func.func_calls:
+
+        dependent_funcs = get_dependent_func_calls(functions, func)
+
+        for func_call in dependent_funcs:
             match = next(filter(lambda f: f.name == func_call, functions), None)
             if match:
                 new_file_content += match.code + '\n'
