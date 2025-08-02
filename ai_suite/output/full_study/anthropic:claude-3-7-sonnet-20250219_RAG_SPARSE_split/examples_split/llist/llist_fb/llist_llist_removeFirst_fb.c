@@ -1,0 +1,54 @@
+#include "stdlib.h"
+
+struct node {
+  struct node *next;
+  int value;
+};
+
+struct llist {
+  struct node *first;
+  struct node *last;
+};
+
+/*@
+predicate node(struct node *node; struct node *next, int value) =
+  node->next |-> next &*& node->value |-> value;
+@*/
+
+/*@
+predicate lseg(struct node *n1, struct node *n2; list<int> v) =
+  n1 == n2 ? true &*& v == nil : node(n1, ?_n, ?h) &*& lseg(_n, n2, ?t) &*& v == cons(h, t);
+
+predicate llist(struct llist *list; list<int> v) =
+  list->first |-> ?_f &*& list->last |-> ?_l &*& lseg(_f, _l, v) &*& node(_l, _, _);
+@*/
+
+
+// TODO: make this function pass the verification
+int llist_removeFirst(struct llist *l)
+  //@ requires llist(l, ?v) &*& v != nil;
+  //@ ensures llist(l, ?t) &*& v == cons(result, t);
+{
+  //@ open llist(l, v);
+  struct node *nf = l->first;
+  //@ open lseg(nf, ?_l, v);
+  //@ assert node(nf, ?nfn, ?nfv);
+  //@ open node(nf, nfn, nfv);
+  struct node *nfn = nf->next;
+  int nfv = nf->value;
+  
+  // Check if we're removing the last node
+  //@ if (nfn == _l) {
+  //@   // If nfn is the last node, we need to update the list structure
+  //@   assert v == cons(nfv, nil);
+  //@ } else {
+  //@   // Otherwise, we have more nodes in the list
+  //@   assert v == cons(nfv, ?t);
+  //@ }
+  
+  free(nf);
+  l->first = nfn;
+  
+  //@ close llist(l, tail(v));
+  return nfv;
+}

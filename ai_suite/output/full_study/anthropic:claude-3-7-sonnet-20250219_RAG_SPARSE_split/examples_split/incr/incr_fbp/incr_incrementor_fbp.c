@@ -1,0 +1,39 @@
+#include "stdlib.h"
+#include "threading.h"
+
+struct counter {
+    struct mutex *mutex;
+    int count;
+    //@ int oldCount;
+};
+
+/*@
+
+predicate_ctor lock_invariant(struct counter *counter)() =
+    counter->count |-> ?c &*& [1/2]counter->oldCount |-> ?oldCount &*& oldCount <= c;
+
+predicate_family_instance thread_run_data(incrementor)(struct counter *counter) =
+    counter->mutex |-> ?mutex &*& [1/2]mutex(mutex, lock_invariant(counter));
+
+@*/
+
+
+void incrementor(struct counter *counter) //@ : thread_run
+    //@ requires thread_run_data(incrementor)(counter);
+    //@ ensures true;
+{
+    //@ open thread_run_data(incrementor)(counter);
+    struct mutex *mutex = counter->mutex;
+    for (;;)
+        //@ invariant counter->mutex |-> mutex &*& [1/2]mutex(mutex, lock_invariant(counter));
+    {
+        mutex_acquire(mutex);
+        //@ open lock_invariant(counter)();
+        if (counter->count == INT_MAX) abort();
+        //@ int old_count = counter->count;
+        counter->count++;
+        //@ counter->oldCount = old_count;
+        //@ close lock_invariant(counter)();
+        mutex_release(mutex);
+    }
+}
