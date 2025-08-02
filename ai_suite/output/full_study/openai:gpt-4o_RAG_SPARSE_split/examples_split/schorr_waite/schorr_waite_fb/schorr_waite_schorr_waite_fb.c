@@ -1,0 +1,53 @@
+#include <stdbool.h>
+#include <stdlib.h>
+#include "verifast.h"
+
+struct node {
+  bool m; // marked
+  bool c; // which child is explored
+  struct node* l;
+  struct node* r;
+};
+
+/*@
+predicate tree(struct node* t) = 
+  t == 0 ? true : t->m |-> _ &*& t->c |-> _ &*& t->l |-> ?l &*& t->r |-> ?r &*& tree(l) &*& tree(r);
+@*/
+
+// TODO: make this function pass the verification
+void schorr_waite(struct node* root) 
+  //@ requires tree(root);
+  //@ ensures tree(root);
+{
+  struct node* t = root; 
+  struct node* p = 0;
+
+  while(p != 0 || (t != 0 && !t->m))
+  /*@ invariant tree(t) &*& tree(p) &*&
+        (p == 0 ? true : p->c |-> _ &*& p->l |-> _ &*& p->r |-> _ &*& p->m |-> true) &*&
+        (t == 0 ? true : t->m |-> _ &*& t->c |-> _ &*& t->l |-> _ &*& t->r |-> _);
+  @*/
+  {
+    if(t == 0 || t->m) {
+      if(p->c) { 
+        struct node* q = t;
+        t = p;
+        p = p->r;
+        t->r = q;
+      } else { 
+        struct node* q = t;
+        t = p->r;
+        p->r = p->l;
+        p->l = q;
+        p->c = true;
+      }
+    } else {
+      struct node* q = p;
+      p = t;
+      t = t->l;
+      p->l = q;
+      p->m = true;
+      p->c = false;
+    }
+  }
+}

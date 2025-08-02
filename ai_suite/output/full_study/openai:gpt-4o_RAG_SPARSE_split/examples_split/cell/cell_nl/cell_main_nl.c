@@ -1,0 +1,132 @@
+#include "stdlib.h"
+
+/***
+ * Description:
+ * This program defines a `cell` structure, a set of operations for managing its state,
+ * and a demonstration of these operations in the `main` function. The `cell` is a simple wrapper
+ * around an integer value with support for creation, updating, swapping, and disposal.
+ */
+struct cell {
+  int x;
+};
+
+/*@
+predicate cell(struct cell* c; int v) =
+  c->x |-> v &*& malloc_block(c, sizeof(struct cell));
+@*/
+
+/***
+ * Description:
+ * Creates a new `cell` and initializes it with the value `0`.
+ *
+ * @returns A pointer to a newly allocated `cell` object.
+ *
+ * It makes sure that the return value is a cell with its x field as 0.
+ */
+struct cell* create_cell() 
+  //@ requires true;
+  //@ ensures cell(result, 0);
+{
+  struct cell* c = malloc(sizeof(struct cell));
+  if (c == 0) abort();
+  c->x = 0;
+  //@ close cell(c, 0);
+  return c;
+}
+
+/***
+ * Description:
+ * Sets the value of a `cell` to the given integer `v`.
+ *
+ * @param c - A pointer to the `cell` object.
+ * @param v - The integer value to set.
+ * 
+ * It makes sures that c has its x field set as v.
+ */
+void cell_set(struct cell* c, int v)
+  //@ requires cell(c, _);
+  //@ ensures cell(c, v);
+{
+  //@ open cell(c, _);
+  c->x = v;
+  //@ close cell(c, v);
+}
+
+/***
+ * Description:
+ * Retrieves the current value of a `cell`.
+ *
+ * @param c - A pointer to the `cell` object.
+ * @returns The integer value stored in the `cell`.
+ * 
+ * It makes sure that the cell c is not changed and the return value is the x field of c.
+ */
+int cell_get(struct cell* c)
+  //@ requires cell(c, ?v);
+  //@ ensures cell(c, v) &*& result == v;
+{
+  //@ open cell(c, v);
+  return c->x;
+  //@ close cell(c, v);
+}
+
+/***
+ * Description:
+ * Swaps the values of two `cell` objects.
+ *
+ * @param c1 - A pointer to the first `cell`.
+ * @param c2 - A pointer to the second `cell`.
+ *
+ * The function makes sure that the x fields in c1 and c2 are swapped.
+ */
+void cell_swap(struct cell* c1, struct cell* c2)
+  //@ requires cell(c1, ?v1) &*& cell(c2, ?v2);
+  //@ ensures cell(c1, v2) &*& cell(c2, v1);
+{
+  int tmp1 = cell_get(c1);
+  int tmp2 = cell_get(c2);
+  cell_set(c1, tmp2);
+  cell_set(c2, tmp1);
+}
+
+/***
+ * Description:
+ * Disposes of a `cell` object and frees its allocated memory.
+ *
+ * @param c - A pointer to the `cell` object.
+ *
+ * The function releases the memory allocated for the `cell` to avoid memory leaks.
+ */
+void cell_dispose(struct cell* c) 
+  //@ requires cell(c, _);
+  //@ ensures true;
+{
+  //@ open cell(c, _);
+  free(c);
+}
+
+// TODO: make this function pass the verification
+/***
+ * Description:
+ * Demonstrates the creation and manipulation of `cell` objects.
+ */
+int main() 
+  //@ requires true;
+  //@ ensures true;
+{
+  struct cell* c1 = create_cell();
+  struct cell* c2 = create_cell();
+  
+  cell_set(c1, 5);
+  cell_set(c2, 10);
+  
+  cell_swap(c1, c2); 
+  
+  int tmp = cell_get(c1);
+  assert(tmp == 10);
+  
+  cell_dispose(c1);
+  cell_dispose(c2);
+  
+  return 0;
+}

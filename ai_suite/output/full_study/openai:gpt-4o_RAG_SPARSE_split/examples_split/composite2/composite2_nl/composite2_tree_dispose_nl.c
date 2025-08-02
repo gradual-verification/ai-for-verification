@@ -1,0 +1,65 @@
+#include "stdlib.h"
+
+struct node {
+    struct node *left;
+    struct node *right;
+    struct node *parent;
+    int count;
+};
+
+/*@
+
+predicate tree(struct node *n, struct node *parent) =
+    n == 0 ?
+        true
+    :
+        n->parent |-> parent &*& n->left |-> ?left &*& n->right |-> ?right &*&
+        malloc_block_node(n) &*&
+        tree(left, n) &*& tree(right, n);
+
+@*/
+
+/*`dispose_node()` Function:
+- Parameters: Takes a node pointer as input.
+- Description: This function frees the memory allocated for the node and its subtree
+
+It makes sure that the subtree of the node is freed. */
+void dispose_node(struct node *node)
+    //@ requires tree(node, _);
+    //@ ensures true;
+{
+    if (node == 0) {
+    } else {
+        {
+            struct node *left = node->left;
+            dispose_node(left);
+        }
+        {
+            struct node *right = node->right;
+            dispose_node(right);
+        }
+        free(node);
+    }
+}
+
+// TODO: make this function pass the verification
+/*`tree_dispose()` Function:
+- Parameters: Takes a node pointer as input.
+- Description: This function disposes of the tree
+
+It makes sure that the tree is freed. */
+void tree_dispose(struct node *node)
+    //@ requires tree(node, 0);
+    //@ ensures true;
+{
+    if (node == 0) {
+        abort();
+    }
+    {
+        struct node *parent = node->parent;
+        if (parent != 0) {
+            abort();
+        }
+    }
+    dispose_node(node);
+}
