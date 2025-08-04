@@ -1,0 +1,25 @@
+#include "stdlib.h"
+
+struct person {
+  char* name;
+  struct person* spouse;
+};
+
+/*@
+predicate person(struct person *p, struct person *spouse) =
+  malloc_block_person(p) &*&
+  p->name |-> _ &*& (spouse == 0 ? p->spouse |-> 0 : p!=spouse 
+  &*& [1/2] p->spouse |-> spouse &*& [1/2] spouse->spouse |-> p);
+@*/
+
+
+// TODO: make this function pass the verification
+struct person *create_person()
+//@ requires true;
+//@ ensures person(result, 0);
+{
+  struct person *p = malloc(sizeof(struct person));
+  if(p == 0) abort();
+  p->spouse = 0;
+  return p;
+}
