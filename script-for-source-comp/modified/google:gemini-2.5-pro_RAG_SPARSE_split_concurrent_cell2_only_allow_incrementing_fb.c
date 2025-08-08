@@ -1,0 +1,24 @@
+
+
+
+
+
+
+
+
+
+int atomic_load(int* c);
+  
+  
+
+void only_allow_incrementing(int* c)
+{
+  int x1 = atomic_load(c);
+  int x2 = atomic_load(c);
+  
+  
+  last_seen_allowed(c, currentThread);
+  incr_only_monotonic(trace1, trace2, currentThread);
+  
+  assert x1 <= x2;
+}

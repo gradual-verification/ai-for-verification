@@ -1,0 +1,40 @@
+
+struct counter {
+    struct mutex *mutex;
+    int count;
+};
+
+
+void incrementor(struct counter *counter) //@ : thread_run
+{
+    struct mutex *mutex = counter->mutex;
+    for (;;)
+    {
+        mutex_acquire(mutex);
+        if (counter->count == INT_MAX) abort();
+        counter->count++;
+        mutex_release(mutex);
+    }
+}
+
+int main() //@ : main
+{
+    struct counter *counter = malloc(sizeof(struct counter));
+    if (counter == 0) abort();
+    counter->count = 0;
+    counter->oldCount = 0;
+    struct mutex *mutex = create_mutex();
+    counter->mutex = mutex;
+    thread_start(incrementor, counter);
+    
+    int oldCount = 0;
+    for (;;)
+    {
+        mutex_acquire(mutex);
+        int count = counter->count;
+        assert(count >= oldCount);
+        oldCount = count;
+        counter->oldCount = oldCount;
+        mutex_release(mutex);
+    }
+}

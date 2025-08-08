@@ -1,0 +1,13 @@
+
+struct thread;
+
+
+
+typedef void thread_run/*@(predicate(void *) pre, predicate() post)@*/(void *data);
+
+
+typedef void thread_run/*@(predicate(void *) pre, predicate() post)@*/(void *data);
+
+void example_thread_run(void *data) //@ : thread_run
+{
+}

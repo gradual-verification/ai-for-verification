@@ -1,0 +1,28 @@
+
+struct expression {
+    int tag;
+    int value;
+    struct expression *operand_neg;
+    struct expression *operand1;
+    struct expression *operand2;
+};
+
+
+void dispose_expression(struct expression *expression)
+{
+    if (expression == 0) {
+        return;
+    }
+    
+    int tag = expression->tag;
+    if (tag == 0) {
+        free(expression);
+    } else if (tag == 1) {
+        dispose_expression(expression->operand_neg);
+        free(expression);
+    } else {
+        dispose_expression(expression->operand1);
+        dispose_expression(expression->operand2);
+        free(expression);
+    }
+}

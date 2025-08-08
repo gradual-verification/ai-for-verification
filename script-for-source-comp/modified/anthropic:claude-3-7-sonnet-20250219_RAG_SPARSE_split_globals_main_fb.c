@@ -1,0 +1,33 @@
+
+static int x;
+
+struct counter {
+    int f;
+};
+
+
+static struct counter *c;
+
+
+void m()
+{
+    int y = x;
+    x = y + 1;
+    c->f = c->f + 1;
+}
+
+
+int main() //@ : main_full(globals_main_fb)
+{
+    x = 7;
+    struct counter *ctr = malloc(sizeof(struct counter));
+    if (ctr == 0) abort();
+    ctr->f = 42;
+    c = ctr;
+    
+    m();
+    int ctr_f = ctr->f;
+    assert(ctr_f == 43);
+    free(ctr);
+    return 0;
+}

@@ -1,0 +1,15 @@
+
+struct node {
+    struct node *next;
+};
+
+
+void dispose_list(struct node *head)
+{
+    if (head != 0) {
+        struct node *next = head->next;
+        dispose_list(next);
+        free(head);
+    } else {
+    }
+}

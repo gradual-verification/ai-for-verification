@@ -1,0 +1,101 @@
+
+
+
+struct barrier {
+    struct mutex *mutex;
+    int n;
+    int k;
+    bool outgoing;
+};
+
+
+
+
+struct data {
+    struct barrier *barrier;
+    int x1;
+    int x2;
+    int y1;
+    int y2;
+    int i;
+};
+
+
+
+
+
+void barrier(struct barrier *barrier)
+{
+
+    struct mutex *mutex = barrier->mutex;
+    mutex_acquire(mutex);
+
+    {
+        while (barrier->outgoing)
+
+        {
+
+            mutex_release(mutex);
+            mutex_acquire(mutex);
+
+        }
+    }
+
+    barrier->k++;
+    if (barrier->k == barrier->n) {
+        barrier->outgoing = true;
+        barrier->k--;
+     
+        mutex_release(barrier->mutex);
+    } else {
+        while (!barrier->outgoing)
+       
+        {
+          
+            mutex_release(mutex);
+            mutex_acquire(mutex);
+  
+        }
+
+        barrier->k--;
+        if (barrier->k == 0) {
+            barrier->outgoing = false;
+        }
+      
+        mutex_release(mutex);
+    }
+
+}
+
+
+void thread1(struct data *d) //@ : thread_run_joinable
+{
+    struct barrier *barrier = d->barrier;
+    
+    barrier(barrier);
+
+    int N = 0;
+    while (N < 30)
+    {
+        int a1 = d->x1;
+        int a2 = d->x2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) { /*@ assume(false); @*/ abort();}
+        d->y1 = a1 + 2 * a2;
+        
+        barrier(barrier);
+        
+        a1 = d->y1;
+        a2 = d->y2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) { /*@ assume(false); @*/ abort();}
+        d->x1 = a1 + 2 * a2;
+        N = N + 1;
+        d->i = N;
+        
+        barrier(barrier);
+    }
+    
+    barrier(barrier);
+    
+    d->i = 0;
+    
+}

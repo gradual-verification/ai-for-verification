@@ -1,0 +1,21 @@
+
+struct expression {
+    int tag;
+    int value;
+    struct expression *operand_neg;
+    struct expression *operand1;
+    struct expression *operand2;
+};
+
+
+struct expression *create_literal(int value)
+{
+    struct expression *literal = malloc(sizeof(struct expression));
+    if (literal == 0) abort();
+    literal->tag = 0;
+    literal->value = value;
+    literal->operand_neg = 0;
+    literal->operand1 = 0;
+    literal->operand2 = 0;
+    return literal;
+}

@@ -1,0 +1,30 @@
+
+struct sum {
+    int sum;
+};
+
+struct session {
+    struct sum *sum_object;
+    struct lock *lock;
+};
+
+
+
+void contribute(void *data) //@ : thread_run_joinable
+{
+    struct session *session = data;
+
+    struct lock *lock = session->lock;
+    struct sum *sumObject_ptr = session->sum_object;
+    free(session);
+
+    lock_acquire(lock);
+
+            int sum_val = sumObject_ptr->sum;
+            sumObject_ptr->sum = sum_val + 1;
+            int sum_val = sumObject_ptr->sum;
+            sumObject_ptr->sum = sum_val + 1;
+
+    lock_release(lock);
+
+}

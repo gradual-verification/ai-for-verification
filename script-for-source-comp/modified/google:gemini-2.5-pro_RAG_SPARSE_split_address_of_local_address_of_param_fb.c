@@ -1,0 +1,17 @@
+
+void inc(int* i)
+{
+  (*i) = (*i) + 1;
+}
+
+
+void address_of_param(int x) 
+{
+    x = 5;
+    int x_local = x;
+    int* ptr = &x_local; 
+    inc(ptr);
+    x = x_local;
+    int z = x;
+    assert(z == 6);
+}

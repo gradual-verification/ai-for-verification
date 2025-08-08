@@ -1,0 +1,10 @@
+
+
+
+
+
+
+int atomic_load(int* c)
+{
+    return atomic_load_primitive(c);
+}

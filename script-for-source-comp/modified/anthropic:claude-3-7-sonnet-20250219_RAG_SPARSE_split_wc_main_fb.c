@@ -1,0 +1,44 @@
+
+
+
+int wc(char* string, bool inword)
+{
+  char head = * string;
+  if(head == 0) {
+    return inword ? 1 : 0;
+  } else {
+    if(head == ' ') {
+      int result = wc(string + 1, false);
+      return inword ? 1 + result: result;
+    } else {
+      int result = wc(string + 1, true);
+      return result;
+    }
+  }
+}
+
+
+
+int main(int argc, char** argv) //@ : main
+{
+  bool inword = false; struct file* fp = 0; char* buff = 0; int total = 0; char* res = 0;
+  if(argc < 2) { puts("No input file specified."); return -1; }
+  fp = fopen(argv[1], "r");
+  if(fp == 0) { abort(); }
+  buff = malloc(100);
+  if(buff == 0) { abort(); }
+  res = fgets(buff, 100, fp);
+  while(res != 0)
+  {
+    int tmp = wc(buff, inword);
+    if (total > INT_MAX - tmp) {
+      break;
+    }
+    total = total + tmp;
+    res = fgets(buff, 100, fp);
+  }
+  printf("%i", total);
+  free(buff);
+  fclose(fp);
+  return 0;
+}

@@ -1,0 +1,81 @@
+
+struct arraylist {
+  void **data;
+  int size;
+  int capacity;
+};
+
+
+
+struct arraylist *create_arraylist() 
+{
+  struct arraylist *a = malloc(sizeof(struct arraylist));
+  if(a == 0) abort();
+  a->size = 0;
+  void **data = malloc(100 * sizeof(void*));
+  if(data == 0) abort();
+  a->data = data;
+  a->capacity = 100;
+  return a; 
+}
+
+
+void *list_get(struct arraylist *a, int i)
+{
+  void *res = a->data[i];
+  return res;
+}
+
+
+void list_add(struct arraylist *a, void *v)
+{
+  int size = a->size;
+  int capacity = a->capacity;
+  void** data = a->data;
+  if(capacity <= size) {
+    int new_capacity = capacity * 2 + 1;
+    if (SIZE_MAX / sizeof(void *) < (size_t)new_capacity) abort();
+    void** newData = malloc((size_t)new_capacity * sizeof(void*));
+    if(newData == 0) abort();
+    
+    memcpy(newData, data, (size_t)size * sizeof(void*));
+    
+    a->data = newData;
+    if (INT_MAX / 2 - 1 < capacity) abort();
+    a->capacity = new_capacity;
+    
+    free(data);
+    
+    data = newData;
+  }
+  
+  size = a->size;
+  data = a->data;
+  
+  data[size] = v;
+  a->size += 1;
+  
+}
+
+
+void list_dispose(struct arraylist* a)
+{
+  void** data = a->data;
+  free(data);
+  free(a);
+}
+
+
+int main()
+{
+  struct arraylist* a = create_arraylist();
+  void* tmp = 0;
+  list_add(a, (void *)10);
+  list_add(a, (void *)20);
+  
+  tmp = list_get(a, 1);
+  assert(tmp == (void*) 20);
+  list_dispose(a);
+
+  return 0;
+}

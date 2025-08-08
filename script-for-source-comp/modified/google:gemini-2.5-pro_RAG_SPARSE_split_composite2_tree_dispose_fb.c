@@ -1,0 +1,44 @@
+
+struct node {
+    struct node *left;
+    struct node *right;
+    struct node *parent;
+    int count;
+};
+
+
+
+
+void dispose_node(struct node *node)
+{
+    if (node == 0) {
+    } else {
+        {
+            struct node *left = node->left;
+            dispose_node(left);
+        }
+        {
+            struct node *right = node->right;
+            dispose_node(right);
+        }
+        free(node);
+    }
+}
+
+
+void tree_dispose(struct node *node)
+{
+
+    if (node == 0) { // This is unreachable because node->parent |-> 0 implies node != 0.
+        abort();
+    }
+    {
+        struct node *parent = node->parent;
+        if (parent != 0) { // This is unreachable because parent is 0.
+            abort();
+        }
+    }
+    
+    dispose_node(node);
+    
+}

@@ -1,0 +1,19 @@
+struct node {
+    struct node *next;
+    int value;
+};
+
+
+
+int list_length(struct node *node)
+{
+    struct node *head = node;
+    int i = 0;
+    while (node != 0)
+    {
+        struct node *next_node = node->next;
+        i++;
+        node = next_node;
+    }
+    return i;
+}

@@ -1,0 +1,50 @@
+
+
+
+struct node {
+  void* data;
+  struct node* next;
+};
+
+struct stack {
+  struct node* first;
+  destructor* destructor;
+  int size;
+};
+
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+
+
+
+void* pop/*@ <T> @*/(struct stack* stack)
+{
+  struct node* first = stack->first;
+  void* data = first->data;
+  stack->first = first->next;
+  free(first);
+  if (stack->size == INT_MIN) {
+    abort();  // or handle error as necessary
+  }
+  stack->size--;
+  return data;
+}
+
+
+destructor* get_destructor/*@ <T> @*/(struct stack* stack)
+{
+  destructor* d = stack->destructor;
+  return d;
+}
+
+
+void pop_destroy/*@ <T> @*/(struct stack* stack)
+{
+  
+  void* data = pop(stack);
+  
+  destructor* d = get_destructor(stack);
+  
+  d(data);
+}

@@ -1,0 +1,37 @@
+
+struct arraylist {
+    void ** data;
+    int size;
+    int capacity;
+};
+
+
+
+void list_add(struct arraylist * a, void * v)
+{
+    if (a->capacity <= a->size) {
+        void **data = a->data;
+        int capacity = a->capacity;
+        
+        if (SIZE_MAX / sizeof(void *) < (size_t)capacity * 2 + 1) abort();
+        int new_capacity = capacity * 2 + 1;
+        if (INT_MAX / 2 - 1 < capacity) abort();
+        
+        void **newData = malloc((size_t)new_capacity * sizeof(void *));
+        if (newData == 0) {
+            abort();
+        }
+        
+        memcpy(newData, data, copy_size);
+        
+        
+        a->data = newData;
+        a->capacity = new_capacity;
+        
+        free(data);
+    }
+    
+    a->data[a->size] = v;
+    a->size += 1;
+    
+}

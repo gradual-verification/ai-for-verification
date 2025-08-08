@@ -1,0 +1,11 @@
+
+struct int_array {
+    int values[10];
+};
+
+
+int get(struct int_array *arr, int index)
+{
+    int result = arr->values[index];
+    return result;
+}

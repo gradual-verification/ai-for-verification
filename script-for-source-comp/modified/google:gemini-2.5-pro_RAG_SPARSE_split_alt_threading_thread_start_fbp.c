@@ -1,0 +1,22 @@
+
+struct thread;
+
+
+
+
+typedef void thread_run/*@(predicate(void *) pre, predicate() post)@*/(void *data);
+
+
+struct thread *thread_start(void *run, void *data)
+{
+    struct thread *t = malloc(sizeof(struct thread));
+    if (t == 0) {
+        abort();
+    }
+    
+    thread_fork_axiom(run, data, t);
+    
+    close thread(t, post);
+    
+    return t;
+}

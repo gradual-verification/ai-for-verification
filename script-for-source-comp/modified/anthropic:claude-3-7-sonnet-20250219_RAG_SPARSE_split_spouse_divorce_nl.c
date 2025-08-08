@@ -1,0 +1,13 @@
+
+struct person {
+  char* name;
+  struct person* spouse;
+};
+
+
+void divorce(struct person* this)
+{
+  struct person* spouse = this->spouse;
+  spouse->spouse = 0;
+  this->spouse = 0;
+}

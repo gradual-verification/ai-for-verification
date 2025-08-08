@@ -1,0 +1,26 @@
+
+
+int binary_search(int *xs, int n, int x)
+{
+    int l = 0;
+    int r = n;
+    while (l < r)
+    {
+        int k = l + (r - l) / 2;
+        int x0 = xs[k];
+        if (x0 == x) {
+            int temp_r = k + 1;
+            while (l < k && xs[k - 1] == x)
+            {
+                temp_r = k;
+                k--;
+            }
+            return k;
+        } else if (x0 < x) {
+            l = k + 1;
+        } else { // x0 > x
+            r = k;
+        }
+    }
+    return n;
+}

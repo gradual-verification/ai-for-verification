@@ -1,0 +1,8 @@
+
+struct node {
+  void* value;
+  struct node* next;
+};
+
+
+typedef bool equals(void* v1, void* v2);

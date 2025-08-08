@@ -1,0 +1,28 @@
+
+struct node {
+  void* val;
+  struct node* next;
+};
+
+struct set {
+  struct node* head;
+};
+
+
+bool set_contains(struct set* set, void* x)
+{
+  struct node* curr = set->head;
+  bool found = false;
+  
+  while(curr != 0 && !found) 
+  {
+    if(curr->val == x) {
+      found = true;
+    } else {
+      struct node* old_next = curr->next;
+      curr = curr->next;
+    }
+  }
+  
+  return found;
+}

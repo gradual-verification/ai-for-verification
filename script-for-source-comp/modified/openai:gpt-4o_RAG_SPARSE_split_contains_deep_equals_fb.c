@@ -1,0 +1,23 @@
+
+struct node {
+    void* value;
+    struct node* next;
+};
+
+
+
+
+struct cell {
+  int val;
+};
+
+
+typedef bool equals(void* x1, void* x2);
+
+bool equals(void* x1, void* x2)
+{
+  struct cell* c1 = x1;
+  struct cell* c2 = x2;
+  bool result = c1->val == c2->val;
+  return result;
+}

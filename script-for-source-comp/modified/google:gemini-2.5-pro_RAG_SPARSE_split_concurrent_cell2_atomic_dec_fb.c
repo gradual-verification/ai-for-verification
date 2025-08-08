@@ -1,0 +1,13 @@
+
+
+
+
+
+
+
+
+
+void atomic_dec(int* c)
+{
+  atomic_dec_primitive(c);
+}

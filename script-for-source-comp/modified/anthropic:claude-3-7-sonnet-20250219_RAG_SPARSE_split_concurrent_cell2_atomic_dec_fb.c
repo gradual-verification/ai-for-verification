@@ -1,0 +1,12 @@
+
+void atomic_dec(int* c)
+{
+  
+  int val = *c;
+  
+  *c = val - 1;
+  
+  
+  
+  
+}

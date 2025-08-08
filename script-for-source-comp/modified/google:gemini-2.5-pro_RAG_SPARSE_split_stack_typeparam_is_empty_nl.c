@@ -1,0 +1,36 @@
+  
+
+
+struct node
+{
+  void* data;
+  struct node* next;
+};
+
+struct stack
+{
+  struct node* first;
+  destructor* destructor;
+  int size;
+};
+
+
+
+struct data
+{
+  int foo;
+  int bar;
+};
+
+
+
+
+typedef void destructor(void* data);
+
+
+
+bool is_empty(struct stack* stack)
+{
+  struct node* first = stack->first;
+  return first == 0;
+}

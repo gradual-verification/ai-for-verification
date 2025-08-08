@@ -1,0 +1,14 @@
+
+struct thread;
+
+
+
+
+void increment(int *cell)
+{
+    int current = *cell;
+    
+    current = current + 1;
+    
+    *cell = current;
+}

@@ -1,0 +1,124 @@
+  
+
+
+struct node
+{
+  void* data;
+  struct node* next;
+};
+
+struct stack
+{
+  struct node* first;
+  destructor* destructor;
+  int size;
+};
+
+
+
+struct data
+{
+  int foo;
+  int bar;
+};
+
+
+
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+
+
+struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
+{
+  struct stack* stack = malloc( sizeof( struct stack ) );
+  if ( stack == 0 ) abort();
+  
+  stack->destructor = destructor;
+  stack->first = 0;
+  stack->size = 0;
+  
+  return stack;
+}
+
+
+void destroy_stack/*@ <T> @*/(struct stack* stack)
+{
+  struct node* current = stack->first;
+  
+  while ( current != 0 )
+  {
+    struct node* next = current->next;
+    destructor(current->data);
+    free(current);
+    current = next;
+  }
+  free(stack);
+}
+
+
+void push/*@ <T> @*/(struct stack* stack, void* data)
+{
+  struct node* node = malloc( sizeof( struct node ) );
+  if ( node == 0 ) abort();
+
+  node->data = data;
+  node->next = stack->first;
+  stack->first = node;
+  if (stack->size == INT_MAX) {
+    abort();
+  }
+  stack->size++;
+}
+
+
+void* pop/*@ <T> @*/(struct stack* stack)
+{
+  struct node* first_node = stack->first;
+  void* data = first_node->data;
+  stack->first = first_node->next;
+  free(first_node);
+  if (stack->size == INT_MIN) {
+    abort();
+  }
+  stack->size--;
+  return data;
+}
+
+
+struct data* create_data(int foo, int bar)
+{
+  struct data* data = malloc( sizeof( struct data ) );
+  if ( data == 0 ) abort();
+  
+  data->foo = foo;
+  data->bar = bar;
+  return data;
+}
+
+
+
+void destroy_data(struct data* data)
+{
+  free(data);
+}
+
+
+void check2()
+{
+  struct stack* stack = create_empty_stack<DataCarrier>(destroy_data);
+  struct data* d1 = create_data(1, 1);
+  struct data* d2 = create_data(2, 2);
+  
+  push(stack, d1);
+  push(stack, d2);
+
+  struct data* d = pop(stack);
+  destroy_data(d);
+
+  d = pop(stack);
+  
+  destroy_data(d);
+  
+  destroy_stack(stack);
+}

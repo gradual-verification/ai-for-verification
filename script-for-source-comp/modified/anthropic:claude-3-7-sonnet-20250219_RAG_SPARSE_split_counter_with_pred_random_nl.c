@@ -1,0 +1,10 @@
+
+struct Counter {
+  int value;
+};
+
+
+bool random()
+{
+    return false; // Arbitrary choice for implementation
+}

@@ -1,0 +1,23 @@
+
+
+
+typedef struct eloop *eloop;
+
+struct eloop {
+    int lock;
+    int signalCount;
+    eloop_handler *handler;
+    void *handlerData;
+};
+
+
+typedef void eloop_handler(void *data);
+
+
+void eloop_signal(eloop x)
+{
+    acquire(&x->lock);
+    if (x->signalCount == INT_MAX) abort();
+    x->signalCount++;
+    release(&x->lock);
+}

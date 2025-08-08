@@ -1,0 +1,24 @@
+
+struct node {
+  struct node *next;
+  int value;
+};
+
+struct llist {
+  struct node *first;
+  struct node *last;
+};
+
+
+void llist_add(struct llist *list, int x)
+{
+  struct node *l = list->last;
+  struct node *n = calloc(1, sizeof(struct node));
+  if (n == 0) {
+    abort();
+  }
+  l->next = n;
+  n->value = x;  // Fixed: assign value to the new node
+  n->next = 0;   // Explicitly set next to 0 (though calloc already did this)
+  list->last = n;
+}

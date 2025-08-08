@@ -1,0 +1,23 @@
+
+
+
+
+
+
+
+
+int atomic_cas(int* c, int old, int new)
+{
+    
+    int result = *c;
+    if (result == old) {
+        *c = new;
+        
+        
+        
+        return new;
+    }
+    
+    
+    return result;
+}

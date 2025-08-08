@@ -1,0 +1,88 @@
+
+struct node {
+  void* value;
+  struct node* next;
+};
+
+
+
+
+struct cell {
+  int val;
+};
+
+
+
+typedef bool equals(void* x1, void* x2);
+
+
+struct node* create_list() 
+{
+  return 0;
+}
+
+
+struct node* add(struct node* n, void* v) 
+{
+  struct node* nn = malloc(sizeof(struct node));
+  if(nn == 0) abort();
+  nn->value = v;
+  nn->next = n;
+  return nn;
+}
+
+
+
+bool list_contains(struct node* n, void* v, equals* eq) 
+{
+  if(n == 0) {
+    return false;
+  } else {
+    bool cont = eq(v, n->value);
+    if(cont) {
+      return true;
+    } else {
+      cont = list_contains(n->next, v, eq);
+      return cont;
+    }
+  }
+}
+
+
+
+struct cell* create_cell(int v)
+{
+  struct cell* c = malloc(sizeof(struct cell));
+  if(c == 0) abort();
+  c->val = v;
+  return c;
+}
+
+
+bool cell_equals(struct cell* x1, struct cell* x2) //@: equals
+{
+  bool result = x1->val == x2->val;
+  return result;
+}
+
+
+void test() 
+{
+  struct node* n = create_list();
+  struct cell* c1 = create_cell(1);
+  n = add(n, c1);
+  struct cell* c2 = create_cell(2);
+  n = add(n, c2);
+  struct cell* c3 = create_cell(3);
+  n = add(n, c3);
+  struct cell* c4 = create_cell(3);
+  
+  
+  
+  
+  
+  
+  bool cont = list_contains(n, c4, cell_equals);
+  
+  
+}

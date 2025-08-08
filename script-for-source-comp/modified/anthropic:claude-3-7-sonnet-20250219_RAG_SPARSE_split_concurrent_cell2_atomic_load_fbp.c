@@ -1,0 +1,10 @@
+
+
+
+
+
+int atomic_load(int* c)
+{
+    int result = *c;
+    return result;
+}

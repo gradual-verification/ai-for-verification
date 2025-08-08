@@ -1,0 +1,55 @@
+
+
+static int g;
+
+pthread_spinlock_t g_lock;
+
+
+
+void *threadfn(void* _unused) //@ : pthread_run_joinable
+{
+    pthread_spin_lock(&g_lock);
+
+    if (g < 1024) {
+        g = g + 1;
+    }
+
+    pthread_spin_unlock(&g_lock);
+
+    return ((void *) 0);
+}
+
+
+void run_instance(void) //@ : pre_post(run_instance_pre, run_instance_post)
+{
+    void *data = (void *) 0;
+    pthread_t pthr1, pthr2;
+
+    g = 41;
+    pthread_spin_init(&g_lock, 0);
+
+    pthread_create(&pthr2, (void *) 0, &threadfn, data);
+    pthread_create(&pthr1, (void *) 0, &threadfn, data);
+
+    sleep(600);
+    pthread_spin_lock(&g_lock);
+    g = 55;
+    pthread_spin_unlock(&g_lock);
+    sleep(600);
+
+    pthread_join(pthr2, (void *) 0);
+
+    pthread_join(pthr1, (void *) 0);
+
+    pthread_spin_destroy(&g_lock);
+
+    exit(0);
+}
+
+
+int main (int argc, char** argv) //@ : custom_main_spec
+{
+    run_instance();
+
+    return (0); // This line is unreachable.
+}

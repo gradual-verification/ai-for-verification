@@ -1,0 +1,136 @@
+  
+
+
+struct node
+{
+  void* data;
+  struct node* next;
+};
+
+struct stack
+{
+  struct node* first;
+  destructor* destructor;
+  int size;
+};
+
+
+
+struct data
+{
+  int foo;
+  int bar;
+};
+
+
+
+
+
+typedef void destructor(void* data);
+
+
+
+struct stack* create_empty_stack(destructor* destructor)
+{
+  struct stack* stack = malloc( sizeof( struct stack ) );
+  if ( stack == 0 ) abort();
+  
+  stack->destructor = destructor;
+  stack->first = 0;
+  stack->size = 0;
+  
+  return stack;
+}
+
+
+void destroy_stack(struct stack* stack)
+{
+  struct node* current = stack->first;
+  destructor* destructor = stack->destructor;
+  
+  while ( current != 0 )
+  {
+    struct node* next = current->next;
+    destructor(current->data);
+    free(current);
+    current = next;
+  }
+  free(stack);
+}
+
+
+void push(struct stack* stack, void* data)
+{
+  struct node* node = malloc( sizeof( struct node ) );
+  if ( node == 0 ) abort();
+
+  node->data = data;
+  node->next = stack->first;
+  stack->first = node;
+  if (stack->size == INT_MAX) {
+    abort();  // or handle error as necessary
+  }
+  stack->size++;
+}
+
+
+void* pop(struct stack* stack)
+{
+  struct node* first = stack->first;
+  void* data = first->data;
+  stack->first = first->next;
+  free(first);
+  if (stack->size == INT_MIN) {
+    abort();  // or handle error as necessary
+  }
+  stack->size--;
+  return data;
+}
+
+
+int size(struct stack* stack)
+{
+  int size = stack->size;
+  return size;
+}
+
+
+struct data* create_data(int foo, int bar)
+{
+  struct data* data = malloc( sizeof( struct data ) );
+  if ( data == 0 ) abort();
+  
+  data->foo = foo;
+  data->bar = bar;
+  return data;
+}
+
+
+void destroy_data(struct data* data) //@ : destructor
+{
+  free(data);
+}
+
+
+void check()
+{
+  struct stack* stack = create_empty_stack(destroy_data);
+  int s = size(stack);
+  assert(s == 0);
+  
+  struct data* data = create_data(1, 2);
+  push(stack, data);
+  
+  s = size(stack);
+  
+  data = create_data(2, 3);
+  push(stack, data);
+
+  s = size(stack);
+  assert(s == 2);
+  
+  struct data* popped = pop(stack);
+  destroy_data(popped);
+
+  destroy_stack(stack);
+}

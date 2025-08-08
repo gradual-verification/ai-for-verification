@@ -1,0 +1,27 @@
+void swap(int *a, int i, int j)
+{
+    int aj = a[j];
+    a[j] = a[i];
+    a[i] = aj;
+}
+
+
+int partition(int *a, int lo, int hi)
+{
+    int pivot = a[hi];
+    int i = lo - 1;
+    int j;
+
+
+
+
+    for (j = lo; j < hi; j++) {
+        if (a[j] < pivot) {
+            i++;
+            swap(a, i, j);
+        }
+    }
+    i++;
+    swap(a, i, hi);
+    return i;
+}

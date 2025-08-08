@@ -1,0 +1,11 @@
+
+
+
+int read_int()
+{
+    int x;
+    int scanf_result = scanf("%i", &x);
+    if (scanf_result != 1)
+        abort();
+    return x;
+}

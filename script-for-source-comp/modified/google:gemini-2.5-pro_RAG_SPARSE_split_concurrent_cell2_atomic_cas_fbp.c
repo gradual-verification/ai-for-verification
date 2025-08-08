@@ -1,0 +1,11 @@
+
+
+
+
+
+
+
+int atomic_cas(int* c, int old, int new)
+{
+    abort();
+}

@@ -1,0 +1,43 @@
+
+
+
+typedef struct eloop *eloop;
+
+struct eloop {
+    int lock;
+    int signalCount;
+    eloop_handler *handler;
+    void *handlerData;
+};
+
+
+
+typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
+    
+
+
+void eloop_loop(eloop x)
+{
+    for (;;)
+    {
+        eloop_handler *handler = 0;
+        void *handlerData;
+        
+        acquire(&x->lock);
+        
+        
+        if (x->signalCount > 0) {
+            x->signalCount--;
+            handler = x->handler;
+            if (handler) {
+                handlerData = x->handlerData;
+            }
+        }
+        
+        release(&x->lock);
+        
+        if (handler) {
+            handler(handlerData);
+        }
+    }
+}

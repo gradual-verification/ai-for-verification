@@ -1,0 +1,10 @@
+
+
+int atomic_load(int* c);
+
+void only_allow_incrementing(int* c)
+{
+  int x1 = atomic_load(c);
+  int x2 = atomic_load(c);
+  assert(x1 <= x2);
+}

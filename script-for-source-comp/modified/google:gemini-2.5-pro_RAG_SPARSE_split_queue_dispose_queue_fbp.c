@@ -1,0 +1,22 @@
+    predicate queue(struct queue *q, int count) =
+        q->head |-> ?head &*& q->tail |-> ?tail &*& malloc_block_queue(q) &*&
+        (count == 0 ?
+            tail == 0
+        :
+            ...);
+
+struct node {
+    struct node *next;
+    int value;
+};
+
+struct queue {
+    struct node *head;
+    struct node *tail;
+};
+
+
+void dispose_queue(struct queue *q)
+{
+    free(q);
+}

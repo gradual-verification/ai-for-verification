@@ -1,0 +1,5 @@
+
+struct thread;
+
+
+typedef void thread_run (void *data);

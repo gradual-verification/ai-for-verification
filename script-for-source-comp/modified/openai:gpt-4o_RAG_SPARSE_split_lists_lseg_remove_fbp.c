@@ -1,0 +1,19 @@
+
+
+void lseg_remove(void *phead, void *element)
+{
+    void **pnext = phead;
+    while (*pnext != element)
+    {
+        void **next = *pnext;
+        pnext = next;
+    }
+    {
+        void *nextNext = *((void **)*pnext);
+        *pnext = nextNext;
+    }
+}
+
+int main() {
+    return 0;
+}

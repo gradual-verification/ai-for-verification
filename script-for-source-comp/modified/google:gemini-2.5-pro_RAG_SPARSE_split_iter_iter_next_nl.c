@@ -1,0 +1,25 @@
+
+struct node {
+  struct node *next;
+  int value;
+};
+
+struct llist {
+  struct node *first;
+  struct node *last;
+};
+
+struct iter {
+    struct node *current;
+};
+
+
+
+int iter_next(struct iter *i)
+{
+    struct node *current_node = i->current;
+    int value = current_node->value;
+    struct node *next_node = current_node->next;
+    i->current = next_node;
+    return value;
+}

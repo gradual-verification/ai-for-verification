@@ -1,0 +1,25 @@
+
+
+struct Node {
+    struct Node* left;
+    struct Node* right;
+    struct Node* parent;
+    int count;
+};
+
+
+int internalGetNbOfNodes(struct Node* n)
+{
+    int c = n->count;
+    return c;
+}
+
+int getNbOfNodes(struct Node* n)
+{
+    if (n == 0) {
+        return 0;
+    } else {
+        int c = internalGetNbOfNodes(n);
+        return c;
+    }
+}

@@ -1,0 +1,20 @@
+
+struct expression {
+    int tag;
+    int value;
+    struct expression *operand_neg;
+    struct expression *operand1;
+    struct expression *operand2;
+};
+
+
+struct expression *create_addition(struct expression *operand1, struct expression *operand2)
+{
+    struct expression *addition = malloc(sizeof(struct expression));
+    if (addition == 0) abort();
+    addition->tag = 2;
+    addition->operand1 = operand1;
+    addition->operand2 = operand2;
+    addition->value = value1 + value2; // Ensure the value field is set correctly
+    return addition;
+}

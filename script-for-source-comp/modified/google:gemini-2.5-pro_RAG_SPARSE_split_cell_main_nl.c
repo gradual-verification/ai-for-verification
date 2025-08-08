@@ -1,0 +1,62 @@
+
+struct cell {
+  int x;
+};
+
+
+
+struct cell* create_cell()
+{
+  struct cell* c = malloc(sizeof(struct cell));
+  if (c == 0) abort();
+  c->x = 0;
+  return c;
+}
+
+
+void cell_set(struct cell* c, int v)
+{
+  c->x = v;
+}
+
+
+int cell_get(struct cell* c)
+{
+  int res = c->x;
+  return res;
+}
+
+
+void cell_swap(struct cell* c1, struct cell* c2)
+{
+  int tmp1 = cell_get(c1);
+  int tmp2 = cell_get(c2);
+  cell_set(c1, tmp2);
+  cell_set(c2, tmp1);
+}
+
+
+void cell_dispose(struct cell* c)
+{
+  free(c);
+}
+
+
+int main()
+{
+  struct cell* c1 = create_cell();
+  struct cell* c2 = create_cell();
+  
+  cell_set(c1, 5);
+  cell_set(c2, 10);
+  
+  cell_swap(c1, c2); 
+  
+  int tmp = cell_get(c1);
+  assert(tmp == 10);
+  
+  cell_dispose(c1);
+  cell_dispose(c2);
+  
+  return 0;
+}

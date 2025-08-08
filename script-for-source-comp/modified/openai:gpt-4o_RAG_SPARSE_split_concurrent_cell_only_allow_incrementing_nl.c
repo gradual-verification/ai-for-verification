@@ -1,0 +1,22 @@
+
+struct cell {
+  int x;
+  struct mutex* mutex;
+};
+
+
+int get(struct cell* c)
+{
+  int res;
+  mutex_acquire(c->mutex);
+  res = c->x;
+  mutex_release(c->mutex);
+  return res;
+}
+
+void only_allow_incrementing(struct cell* c)
+{
+  int x1 = get(c);
+  int x2 = get(c);
+  assert(x1 <= x2);
+}

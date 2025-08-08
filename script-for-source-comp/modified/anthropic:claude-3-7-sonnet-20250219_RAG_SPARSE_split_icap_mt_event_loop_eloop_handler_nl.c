@@ -1,0 +1,15 @@
+
+
+
+typedef struct eloop *eloop;
+
+struct eloop {
+    int lock;
+    int signalCount;
+    eloop_handler *handler;
+    void *handlerData;
+};
+
+
+
+typedef void eloop_handler(void *data);

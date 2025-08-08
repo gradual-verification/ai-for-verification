@@ -1,0 +1,32 @@
+
+
+
+struct barrier {
+    struct mutex *mutex;
+    int n;
+    int k;
+    bool outgoing;
+};
+
+
+
+
+struct data {
+    struct barrier *barrier;
+    int x1;
+    int x2;
+    int y1;
+    int y2;
+    int i;
+};
+
+
+void barrier_dispose(struct barrier *barrier)
+{
+    struct mutex *mutex = barrier->mutex;
+    
+    mutex_dispose(mutex);
+    
+    free(barrier);
+    
+}

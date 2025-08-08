@@ -1,0 +1,14 @@
+
+struct node {
+    struct node *next;
+    void *key;
+    void *value;
+};
+
+struct foo {
+    int value;
+};
+
+
+
+typedef bool equalsFuncType(void *key, void *key0);

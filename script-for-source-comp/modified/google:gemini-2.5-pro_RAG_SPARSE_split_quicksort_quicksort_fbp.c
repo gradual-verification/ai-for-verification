@@ -1,0 +1,70 @@
+
+
+
+void swap (int *a, int i, int j)
+{
+  int aj = a[j];
+  a[j] = a[i];
+  a[i] = aj;
+}
+
+
+int partition(int *a, int lo, int hi)
+{
+  
+  int pivot = a[hi];
+  
+  int i = lo - 1;
+  int j;
+
+  for (j = lo; j < hi; j++)
+  {
+   
+    int aj = a[j];
+    if (aj < pivot) {
+      i++;
+      if (i < j) {
+        swap(a, i, j);
+  
+      } else {
+  
+      }
+    } else {
+  
+    }
+  }
+
+  i++;
+
+  if (i < hi) {
+    swap(a, i, hi);
+
+  } else {
+
+  }
+  return i;
+}
+
+
+
+void quicksort(int *a, int lo, int hi)
+{
+  if (lo >= hi) {
+    if (lo > hi) {
+    } else { // lo == hi
+    }
+    return;
+  } else {
+    int p = partition(a, lo, hi);
+    
+
+    quicksort(a, lo, p - 1);
+
+    quicksort(a, p + 1, hi);
+
+    
+    
+
+
+  }
+}

@@ -1,0 +1,22 @@
+        predicate subtree(struct node *root, ..., tree nodes) =
+            switch (nodes) {
+                case empty: return root == 0;
+                ...
+            };
+
+struct node {
+    struct node *left;
+    struct node *right;
+    struct node *parent;
+    int count;
+};
+
+
+
+
+bool tree_has_right(struct node *node)
+{
+    struct node *right = node->right;
+    bool res = right != 0;
+    return res;
+}

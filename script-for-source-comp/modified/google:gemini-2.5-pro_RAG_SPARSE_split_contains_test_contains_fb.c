@@ -1,0 +1,86 @@
+
+struct node {
+  void* value;
+  struct node* next;
+};
+
+
+
+
+
+
+typedef bool equals(void* v1, void* v2);
+
+
+struct node* create_list() 
+{
+  return 0;
+}
+
+
+struct node* add(struct node* n, void* v) 
+{
+  struct node* nn = malloc(sizeof(struct node));
+  if(nn == 0) abort();
+  nn->value = v;
+  nn->next = n;
+  return nn;
+}
+
+
+
+bool list_contains(struct node* n, void* v, equals* eq) 
+{
+  if(n == 0) {
+    return false;
+  } else {
+    bool cont = eq(v, n->value);
+    if(cont) {
+      list_contains(n->next, v, eq); // hack: just to get my_post for the remaining elements
+      return true;
+    } else {
+      cont = list_contains(n->next, v, eq);
+      return cont;
+    }
+  }
+}
+
+
+bool my_equals(void* v1, void* v2) //@: equals
+{
+  if((uintptr_t)v1 == (uintptr_t)v2) {
+    return true;
+  } else {
+    return false;
+  }
+  
+}
+
+
+void dispose_list(struct node* n)
+{
+  struct node* current = n;
+  while(current != 0)
+  {
+    struct node* next = current->next;
+    free(current);
+    current = next;
+  }
+}
+
+void test_contains() 
+{
+  struct node* n = create_list();
+  n = add(n, (void*) 1);
+  n = add(n, (void*) 2);
+  n = add(n, (void*) 3);
+  
+  
+  
+  bool cont = list_contains(n, (void*) 2, my_equals);
+  
+  assert(cont == true);
+  
+  
+  dispose_list(n);
+}

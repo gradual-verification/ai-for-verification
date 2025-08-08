@@ -1,0 +1,15 @@
+
+
+int atomic_cas(int* c, int old, int new)
+{
+    
+    int current = *c;
+    
+    if (current == old) {
+        *c = new;
+    }
+    
+    
+    
+    return current;
+}

@@ -1,0 +1,42 @@
+
+struct node {
+    struct node *next;
+    int value;
+};
+
+
+int list_length_rec(struct node *node)
+{
+    if (node == 0) {
+        return 0;
+    } else {
+        int length0 = list_length_rec(node->next);
+        return 1 + length0;
+    }
+}
+
+int main()
+{
+    struct node *n3 = malloc(sizeof(struct node));
+    if (n3 == 0) { abort(); }
+    n3->value = 3;
+    n3->next = 0;
+
+    struct node *n2 = malloc(sizeof(struct node));
+    if (n2 == 0) { abort(); }
+    n2->value = 2;
+    n2->next = n3;
+
+    struct node *n1 = malloc(sizeof(struct node));
+    if (n1 == 0) { abort(); }
+    n1->value = 1;
+    n1->next = n2;
+
+    int length = list_length_rec(n1);
+
+    free(n1);
+    free(n2);
+    free(n3);
+
+    return 0;
+}

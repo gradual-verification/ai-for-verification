@@ -1,0 +1,55 @@
+
+struct node {
+    struct node *next;
+    void *key;
+    void *value;
+};
+
+struct foo {
+    int value;
+};
+
+
+typedef bool equalsFuncType(void *key, void *key0);
+
+
+bool foo_equals(void *key1, void *key2) //@ : equalsFuncType
+{
+    struct foo *f1 = (struct foo *)key1;
+    struct foo *f2 = (struct foo *)key2;
+    
+    return f1 == f2;
+}
+
+bool foo_value_equals(void *key1, void *key2) //@ : equalsFuncType
+{
+    struct foo *f1 = (struct foo *)key1;
+    struct foo *f2 = (struct foo *)key2;
+    
+    return f1->value == f2->value;
+}
+
+bool find_node(struct node *head, void *search_key, equalsFuncType *equals_func, void **result_value)
+{
+    struct node *current = head;
+    bool found = false;
+    
+    while (current != 0 && !found)
+    {
+        if (equals_func(current->key, search_key)) {
+            *result_value = current->value;
+            found = true;
+        } else {
+            struct node *next = current->next;
+            current = next;
+            if (current != 0) {
+            }
+        }
+    }
+    
+    if (!found) {
+        *result_value = 0;
+    }
+    
+    return found;
+}

@@ -1,0 +1,47 @@
+
+typedef int charreader();
+
+struct tokenizer
+{
+    charreader*           next_char;
+    int                   lastread; // the character lastly read. Special: -1 = EOF, -2 = empty buffer
+    int                   lasttoken; // the last token parsed
+    struct string_buffer* buffer;
+};
+
+
+void tokenizer_fill_buffer(struct tokenizer* tokenizer)
+{
+    if (tokenizer->lastread == -2)
+    {
+        charreader *reader = tokenizer->next_char;
+        int result = reader();
+        if (result < -128 || result > 127)
+            abort();
+        tokenizer->lastread = result;
+    }
+}
+
+int tokenizer_peek(struct tokenizer* tokenizer)
+{
+    tokenizer_fill_buffer(tokenizer);
+    return tokenizer->lastread;
+}
+
+void tokenizer_drop(struct tokenizer* tokenizer)
+{
+    tokenizer->lastread = -2;
+}
+
+bool is_whitespace(int c)
+{
+    return c == ' ' || c == '\n' || c == '\r' || c == '\t';
+}
+
+void tokenizer_skip_whitespace(struct tokenizer* tokenizer)
+{
+    while (is_whitespace(tokenizer_peek(tokenizer)))
+    {
+        tokenizer_drop(tokenizer);
+    }
+}

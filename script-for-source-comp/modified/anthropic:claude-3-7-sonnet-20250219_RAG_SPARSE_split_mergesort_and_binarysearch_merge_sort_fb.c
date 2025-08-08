@@ -1,0 +1,67 @@
+
+
+
+void merge_sort_core(int *pxs, int *pys, int n)
+{
+    if (n >= 2) {
+        int *left = pxs;
+        int nleft = n / 2;
+        int *right = pxs + nleft;
+        int nright = n - n / 2;
+        merge_sort_core(left, pys, nleft);
+        merge_sort_core(right, pys, nright);
+        int i = 0;
+        int j = 0;
+        int k = 0;
+        for (;;)
+        {
+            if (i == nleft) {
+                if (j == nright) {
+                    break;
+                } else {
+                    pys[k] = right[j];
+                    j++;
+                    k++;
+                }
+            } else {
+                if (j == nright) {
+                    pys[k] = left[i];
+                    i++;
+                    k++;
+                } else {
+                    if (left[i] <= right[j]) {
+                        pys[k] = left[i];
+                        i++;
+                        k++;
+                    } else {
+                        pys[k] = right[j];
+                        j++;
+                        k++;
+                    }
+                }
+            }
+        }
+        for (int p = 0; ;)
+        {
+            if (p >= n) break;
+            pxs[p] = pys[p];
+            p++;
+            
+        }
+    }
+}
+
+
+void merge_sort(int *pxs, int n)
+{
+    if (n <= 1) {
+        return;
+    }
+    
+    int *pys = malloc(n * sizeof(int));
+    if (pys == 0) abort();
+    
+    merge_sort_core(pxs, pys, n);
+    
+    free(pys);
+}

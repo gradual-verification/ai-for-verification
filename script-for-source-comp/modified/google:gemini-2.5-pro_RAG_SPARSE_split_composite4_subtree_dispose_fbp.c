@@ -1,0 +1,18 @@
+
+struct node {
+  struct node *left;
+  struct node *right;
+  struct node *parent;
+  int count;
+};
+
+
+
+void subtree_dispose(struct node *node)
+{
+  if (node != 0) {
+    subtree_dispose(node->left);
+    subtree_dispose(node->right);
+    free(node);
+  }
+}

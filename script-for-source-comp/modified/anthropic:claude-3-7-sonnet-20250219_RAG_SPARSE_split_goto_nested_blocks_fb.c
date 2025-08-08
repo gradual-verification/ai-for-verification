@@ -1,0 +1,31 @@
+
+struct node {
+    struct node *next;
+    int value;
+};
+
+
+
+void nested_blocks(struct node *n1, struct node *n2)
+{
+    
+    if (n1 == 0) {
+    } else {
+    }
+    
+    if (n2 == 0) {
+    } else {
+    }
+    
+    while (true)
+    {
+        
+        goto l1;
+    l2:
+        goto l3;
+    l1:
+        goto l2;
+    }
+l3:
+    return;
+}

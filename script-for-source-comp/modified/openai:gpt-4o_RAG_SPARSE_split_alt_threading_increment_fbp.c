@@ -1,0 +1,10 @@
+
+struct thread;
+
+
+
+void increment(int *cell)
+{
+    if (value == INT_MAX) abort(); // Prevent overflow
+    (*cell)++;
+}

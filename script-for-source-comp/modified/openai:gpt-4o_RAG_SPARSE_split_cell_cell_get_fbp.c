@@ -1,0 +1,11 @@
+
+struct cell {
+  int x;
+};
+
+
+int cell_get(struct cell* c)
+{
+  int result = c->x;
+  return result;
+}
