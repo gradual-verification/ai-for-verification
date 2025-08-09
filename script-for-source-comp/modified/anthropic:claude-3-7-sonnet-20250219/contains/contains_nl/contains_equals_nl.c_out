@@ -1,0 +1,10 @@
+struct node {
+void* value;
+struct node* next;
+};
+typedef bool equals(void* v1, void* v2);
+bool pointer_equals(void* v1, void* v2)
+{
+bool result = (v1 == v2);
+return result;
+}

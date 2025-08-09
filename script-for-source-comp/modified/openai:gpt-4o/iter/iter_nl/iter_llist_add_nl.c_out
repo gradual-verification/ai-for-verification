@@ -1,0 +1,28 @@
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};
+struct iter {
+struct node *current;
+};
+void llist_add(struct llist *list, int x)
+{
+struct node *l = 0;
+struct node *n = calloc(1, sizeof(struct node));
+if (n == 0) {
+abort();
+}
+n->value = x;
+n->next = 0;
+l = list->last;
+if (l != 0) {
+l->next = n;
+} else {
+list->first = n;
+}
+list->last = n;
+}

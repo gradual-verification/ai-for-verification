@@ -1,0 +1,12 @@
+void inc(int* i)
+{
+(*i) = (*i) + 1;
+}
+void address_of_param(int x)
+{
+x = 5;
+int* ptr = &x;
+inc(ptr);
+int z = x;
+assert(z == 6);
+}

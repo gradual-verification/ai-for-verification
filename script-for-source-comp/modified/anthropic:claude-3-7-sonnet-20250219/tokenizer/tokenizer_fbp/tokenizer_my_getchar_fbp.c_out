@@ -1,0 +1,16 @@
+int my_getchar()
+{
+return getchar();
+}
+struct tokenizer
+{
+charreader*           next_char;
+int                   lastread;
+int                   lasttoken;
+struct string_buffer* buffer;
+};
+typedef int charreader();
+int my_getchar()
+{
+return getchar();
+}

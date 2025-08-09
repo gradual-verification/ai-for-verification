@@ -1,0 +1,39 @@
+struct tokenizer* tokenizer_create(charreader* reader)
+{
+struct tokenizer* tokenizer;
+struct string_buffer *buffer;
+tokenizer = (struct tokenizer*) malloc( sizeof( struct tokenizer ) );
+if ( tokenizer == 0 ) abort();
+tokenizer->lastread = -2;
+tokenizer->lasttoken = 0;
+tokenizer->next_char = reader;
+buffer = create_string_buffer();
+tokenizer->buffer = buffer;
+return tokenizer;
+}
+predicate Tokenizer(struct tokenizer* t;) =
+t->next_char |-> ?nc &*& is_charreader(nc) == true &*&
+t->lastread |-> ?lastread &*&
+t->lasttoken |-> ?lasttoken &*&
+t->buffer |-> ?b &*& string_buffer(b, _);
+struct tokenizer
+{
+charreader*           next_char;
+int                   lastread;
+int                   lasttoken;
+struct string_buffer* buffer;
+};
+typedef int charreader();
+struct tokenizer* tokenizer_create(charreader* reader)
+{
+struct tokenizer* tokenizer;
+struct string_buffer *buffer;
+tokenizer = (struct tokenizer*) malloc( sizeof( struct tokenizer ) );
+if ( tokenizer == 0 ) abort();
+tokenizer->lastread = -2;
+tokenizer->lasttoken = 0;
+tokenizer->next_char = reader;
+buffer = create_string_buffer();
+tokenizer->buffer = buffer;
+return tokenizer;
+}

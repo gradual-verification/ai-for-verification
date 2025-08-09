@@ -1,0 +1,12 @@
+struct arraylist {
+void ** data;
+int size;
+int capacity;
+};
+void list_remove_nth(struct arraylist * a, int n)
+{
+void ** data = a->data;
+int size = a->size;
+memmove(data + n, data + n + 1, (unsigned int)(size - n - 1) * sizeof(void * ));
+a->size = a->size - 1;
+}

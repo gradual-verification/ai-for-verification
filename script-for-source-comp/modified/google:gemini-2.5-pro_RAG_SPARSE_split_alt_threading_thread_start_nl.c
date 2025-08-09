@@ -1,9 +1,0 @@
-
-
-typedef void thread_run(void *data);
-
-struct thread;
-
-
-struct thread *thread_start(void *run, void *data)
-;

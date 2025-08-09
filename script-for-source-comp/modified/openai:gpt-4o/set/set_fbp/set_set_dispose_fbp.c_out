@@ -1,0 +1,48 @@
+struct node {
+void* val;
+struct node* next;
+};
+struct set {
+struct node* head;
+};
+lemma void lseg_to_nil(struct node* first)
+requires lseg(first, 0, nil);
+ensures first == 0;
+{
+open lseg(first, 0, nil);
+if (first != 0) {
+open lseg(first->next, 0, nil);
+lseg_to_nil(first->next);
+}
+}
+lemma void lseg_to_nodes(struct node* first)
+requires lseg(first, 0, ?vs);
+ensures nodes(first, vs);
+{
+open lseg(first, 0, vs);
+if (first != 0) {
+lseg_to_nodes(first->next);
+close nodes(first, vs);
+}
+}
+lemma void nodes_to_lseg(struct node* first)
+requires nodes(first, ?vs);
+ensures lseg(first, 0, vs);
+{
+open nodes(first, vs);
+if (first != 0) {
+nodes_to_lseg(first->next);
+close lseg(first, 0, vs);
+}
+}
+void set_dispose(struct set* set)
+{
+struct node* curr = set->head;
+while(curr != 0)
+{
+struct node* nxt = curr->next;
+free(curr);
+curr = nxt;
+}
+free(set);
+}

@@ -1,0 +1,18 @@
+struct student {
+char name[100];
+int age;
+};
+struct point {
+int x;
+int y;
+};
+int main()
+{
+struct point *points = malloc(2 * sizeof(struct point));
+points[0].x = 10;
+points[0].y = 20;
+points[1].x = 30;
+points[1].y = 40;
+free((void *)points);
+return 0;
+}

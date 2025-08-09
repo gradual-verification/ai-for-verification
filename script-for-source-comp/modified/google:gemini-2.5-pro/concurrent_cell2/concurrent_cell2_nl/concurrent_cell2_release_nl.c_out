@@ -1,0 +1,6 @@
+void atomic_dec(int* c)
+;
+void release(int* c)
+{
+atomic_dec(c);
+}

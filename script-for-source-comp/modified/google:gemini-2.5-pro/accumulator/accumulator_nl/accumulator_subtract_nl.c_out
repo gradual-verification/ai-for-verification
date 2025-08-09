@@ -1,0 +1,14 @@
+void subtract(struct Accumulator* a, int x)
+{
+a->total -= x;
+a->count += 1;
+}
+struct Accumulator {
+int total;
+int count;
+};
+void subtract(struct Accumulator* a, int x)
+{
+a->total -= x;
+a->count += 1;
+}

@@ -1,0 +1,11 @@
+struct person {
+char* name;
+struct person* spouse;
+};
+struct person *create_person()
+{
+struct person *p = malloc(sizeof(struct person));
+if(p == 0) abort();
+p->spouse = 0;
+return p;
+}

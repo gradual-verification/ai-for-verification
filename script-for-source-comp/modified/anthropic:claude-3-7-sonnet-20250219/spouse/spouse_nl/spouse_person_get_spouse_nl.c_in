@@ -1,0 +1,8 @@
+struct person {
+char* name;
+struct person* spouse;
+};
+struct person* person_get_spouse(struct person* this)
+{
+return this->spouse;
+}

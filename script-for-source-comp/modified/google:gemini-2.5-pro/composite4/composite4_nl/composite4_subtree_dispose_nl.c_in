@@ -1,0 +1,20 @@
+struct node {
+struct node *left;
+struct node *right;
+struct node *parent;
+int count;
+};
+void subtree_dispose(struct node *node)
+{
+if (node != 0) {
+{
+struct node *left = node->left;
+subtree_dispose(left);
+}
+{
+struct node *right = node->right;
+subtree_dispose(right);
+}
+free(node);
+}
+}

@@ -1,0 +1,12 @@
+typedef int charreader();
+bool is_symbol_char(int c)
+{
+return c > 32 && c <= 127 && c != '(' && c != ')';
+}
+struct tokenizer
+{
+charreader*           next_char;
+int                   lastread;
+int                   lasttoken;
+struct string_buffer* buffer;
+};

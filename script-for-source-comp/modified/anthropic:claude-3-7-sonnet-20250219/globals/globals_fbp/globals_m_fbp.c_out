@@ -1,0 +1,15 @@
+static int x;
+struct counter {
+int f;
+};
+static struct counter *c;
+void m()
+{
+int y = x;
+x = y + 1;
+int old_f = c->f;
+if (old_f == INT_MAX) {
+abort();
+}
+c->f = old_f + 1;
+}

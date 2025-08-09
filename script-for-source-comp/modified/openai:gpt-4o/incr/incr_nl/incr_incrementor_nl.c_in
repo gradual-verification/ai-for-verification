@@ -1,0 +1,15 @@
+struct counter {
+struct mutex *mutex;
+int count;
+};
+void incrementor(struct counter *counter)
+{
+struct mutex *mutex = counter->mutex;
+for (;;)
+{
+mutex_acquire(mutex);
+if (counter->count == INT_MAX) abort();
+counter->count++;
+mutex_release(mutex);
+}
+}

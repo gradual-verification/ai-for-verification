@@ -1,0 +1,46 @@
+struct node {
+struct node *left;
+struct node *right;
+struct node *parent;
+int count;
+};
+int subtree_get_count(struct node *node)
+{
+int result = 0;
+if (node != 0) { result = node->count; }
+return result;
+}
+void fixup_ancestors(struct node * n, struct node * p, int count)
+{
+if (p == 0) {
+} else {
+struct node *left = p->left;
+struct node *right = p->right;
+struct node *grandparent = p->parent;
+int leftCount = 0;
+int rightCount = 0;
+if (n == left) {
+leftCount = count;
+rightCount = subtree_get_count(right);
+if (INT_MAX - 1 - leftCount < rightCount) {
+abort();
+}
+{
+int pcount = 1 + leftCount + rightCount;
+p->count = pcount;
+fixup_ancestors(p, grandparent, pcount);
+}
+} else {
+leftCount = subtree_get_count(left);
+rightCount = count;
+if (INT_MAX - 1 - leftCount < rightCount) {
+abort();
+}
+{
+int pcount = 1 + leftCount + rightCount;
+p->count = pcount;
+fixup_ancestors(p, grandparent, pcount);
+}
+}
+}
+}

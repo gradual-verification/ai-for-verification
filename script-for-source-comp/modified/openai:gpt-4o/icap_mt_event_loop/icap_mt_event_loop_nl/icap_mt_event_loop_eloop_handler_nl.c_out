@@ -1,0 +1,19 @@
+typedef void eloop_handler(void *data);
+typedef struct eloop *eloop;
+struct eloop {
+int lock;
+int signalCount;
+eloop_handler *handler;
+void *handlerData;
+};
+void example_handler(void *data)
+{
+}
+int main()
+{
+struct eloop loop;
+loop.handler = example_handler;
+loop.handlerData = NULL;
+loop.handler(loop.handlerData);
+return 0;
+}

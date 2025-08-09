@@ -1,0 +1,35 @@
+struct philosopher {
+struct lock *fork1;
+struct lock *fork2;
+};
+void create_philosopher(struct lock *fork1, struct lock *fork2)
+{
+struct philosopher *philosopher = malloc(sizeof(struct philosopher));
+if (philosopher == 0) abort();
+philosopher->fork1 = fork1;
+philosopher->fork2 = fork2;
+thread_start(philosopher_run, philosopher);
+}
+void philosopher_run(void *data)
+{
+struct philosopher *philosopher = data;
+struct lock *fork1 = philosopher->fork1;
+struct lock *fork2 = philosopher->fork2;
+while (true)
+{
+lock_acquire(fork2);
+lock_acquire(fork1);
+lock_release(fork2);
+lock_release(fork1);
+}
+}
+int main()
+{
+struct lock *forkA = create_lock();
+struct lock *forkB = create_lock();
+struct lock *forkC = create_lock();
+create_philosopher(forkA, forkB);
+create_philosopher(forkB, forkC);
+create_philosopher(forkA, forkC);
+return 0;
+}

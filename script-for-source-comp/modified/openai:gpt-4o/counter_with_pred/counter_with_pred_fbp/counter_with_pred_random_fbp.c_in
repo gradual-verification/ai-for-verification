@@ -1,0 +1,4 @@
+struct Counter {
+int value;
+};
+bool random();

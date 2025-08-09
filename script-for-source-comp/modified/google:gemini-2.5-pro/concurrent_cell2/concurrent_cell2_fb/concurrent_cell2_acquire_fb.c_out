@@ -1,0 +1,12 @@
+int atomic_cas(int* c, int old, int new);
+void acquire(int* c)
+{
+last_seen_allowed(c, currentThread);
+while(true)
+{
+int read = atomic_cas(c, 0, 1);
+if(read == 0) {
+break;
+}
+}
+}

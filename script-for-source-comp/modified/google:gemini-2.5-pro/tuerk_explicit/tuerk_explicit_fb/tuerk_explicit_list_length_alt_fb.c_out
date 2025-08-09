@@ -1,0 +1,13 @@
+struct node {
+struct node *next;
+int value;
+};
+int list_length_alt(struct node *head)
+{
+struct node *node = head;
+int i;
+for (i = 0; node != 0; node = node->next, i++)
+{
+}
+return i;
+}

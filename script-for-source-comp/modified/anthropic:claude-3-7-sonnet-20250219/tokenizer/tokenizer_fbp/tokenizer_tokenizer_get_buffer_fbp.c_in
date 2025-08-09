@@ -1,0 +1,12 @@
+struct tokenizer
+{
+charreader*           next_char;
+int                   lastread;
+int                   lasttoken;
+struct string_buffer* buffer;
+};
+typedef int charreader();
+struct string_buffer *tokenizer_get_buffer(struct tokenizer *tokenizer)
+{
+return tokenizer->buffer;
+}

@@ -1,0 +1,60 @@
+struct barrier {
+struct mutex *mutex;
+int n;
+int k;
+bool outgoing;
+};
+struct data {
+struct barrier *barrier;
+int x1;
+int x2;
+int y1;
+int y2;
+int i;
+};
+struct barrier *create_barrier(int n)
+{
+struct barrier *barrier = malloc(sizeof(struct barrier));
+if (barrier == 0) abort();
+barrier->n = n;
+barrier->k = 0;
+barrier->outgoing = false;
+struct mutex *mutex = create_mutex();
+barrier->mutex = mutex;
+return barrier;
+}
+void barrier_wait(struct barrier *barrier)
+{
+struct mutex *mutex = barrier->mutex;
+mutex_acquire(mutex);
+int k = barrier->k;
+barrier->k = k + 1;
+if (k + 1 == barrier->n) {
+barrier->outgoing = true;
+} else {
+while (!barrier->outgoing) {
+mutex_release(mutex);
+mutex_acquire(mutex);
+}
+}
+k = barrier->k;
+barrier->k = k - 1;
+if (k - 1 == 0) {
+barrier->outgoing = false;
+} else {
+}
+mutex_release(mutex);
+}
+void barrier_destroy(struct barrier *barrier)
+{
+mutex_dispose(barrier->mutex);
+free(barrier);
+}
+int main()
+{
+struct barrier *b = create_barrier(2);
+if (b == 0) abort();
+barrier_wait(b);
+barrier_destroy(b);
+return 0;
+}

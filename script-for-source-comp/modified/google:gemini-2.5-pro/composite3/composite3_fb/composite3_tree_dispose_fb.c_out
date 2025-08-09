@@ -1,0 +1,21 @@
+struct node {
+struct node *left;
+struct node *right;
+struct node *parent;
+int count;
+};
+void dispose_node(struct node *node)
+{
+if (node == 0) {
+} else {
+struct node *left = node->left;
+dispose_node(left);
+struct node *right = node->right;
+dispose_node(right);
+free(node);
+}
+}
+void tree_dispose(struct node *node)
+{
+dispose_node(node);
+}

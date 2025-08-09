@@ -1,0 +1,2 @@
+struct thread;
+int read_int();

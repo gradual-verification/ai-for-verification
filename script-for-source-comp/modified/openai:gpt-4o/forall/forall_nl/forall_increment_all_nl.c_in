@@ -1,0 +1,9 @@
+void increment_all(int* a, int N)
+{
+int k = 0;
+while(k < N)
+{
+a[k] = a[k] + 1;
+k++;
+}
+}

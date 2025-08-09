@@ -1,0 +1,12 @@
+struct node {
+struct node *next;
+void *key;
+void *value;
+};
+void map_dispose(struct node *map)
+{
+if (map != 0) {
+map_dispose(map->next);
+free(map);
+}
+}

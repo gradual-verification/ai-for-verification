@@ -1,0 +1,5 @@
+struct thread;
+void increment(int *cell)
+{
+(*cell)++;
+}

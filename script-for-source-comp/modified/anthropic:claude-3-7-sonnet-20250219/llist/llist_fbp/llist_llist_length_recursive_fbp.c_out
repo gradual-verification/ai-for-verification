@@ -1,0 +1,24 @@
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};
+int llist_length_recursive_helper(struct node *n1, struct node *n2)
+{
+int len;
+if(n1 == n2) {
+len = 0;
+} else {
+len = llist_length_recursive_helper(n1->next, n2);
+len = len + 1;
+}
+return len;
+}
+int llist_length_recursive(struct llist *l)
+{
+int result = llist_length_recursive_helper(l->first, l->last);
+return result;
+}

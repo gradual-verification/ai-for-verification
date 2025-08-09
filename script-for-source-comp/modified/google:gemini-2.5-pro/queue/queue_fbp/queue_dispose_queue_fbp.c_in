@@ -1,0 +1,12 @@
+struct node {
+struct node *next;
+int value;
+};
+struct queue {
+struct node *head;
+struct node *tail;
+};
+void dispose_queue(struct queue *q)
+{
+free(q);
+}

@@ -1,0 +1,11 @@
+struct node {
+struct node *left;
+struct node *right;
+struct node *parent;
+int count;
+};
+bool tree_has_parent(struct node *node)
+{
+struct node *parent1 = node->parent;
+return parent1 != 0;
+}

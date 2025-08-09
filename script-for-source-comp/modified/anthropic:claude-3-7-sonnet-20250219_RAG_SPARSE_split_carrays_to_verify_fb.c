@@ -1,8 +1,0 @@
-int to_verify(int* arr)
-{
-  
-  int result = arr[3]++;
-  
-  
-  return result;
-}

@@ -1,0 +1,15 @@
+struct node {
+struct node *left;
+struct node *right;
+struct node *parent;
+int count;
+};
+void dispose_node(struct node *node)
+{
+if (node == 0) {
+} else {
+dispose_node(node->left);
+dispose_node(node->right);
+free(node);
+}
+}

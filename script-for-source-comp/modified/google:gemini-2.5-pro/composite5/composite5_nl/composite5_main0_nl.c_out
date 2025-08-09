@@ -1,0 +1,56 @@
+struct node {
+struct node *firstChild;
+struct node *nextSibling;
+struct node *parent;
+int count;
+};
+struct node *create_node(struct node *p, struct node *next)
+{
+struct node *n = malloc(sizeof(struct node));
+if (n == 0) abort();
+n->firstChild = 0;
+n->nextSibling = next;
+n->parent = p;
+n->count = 1;
+return n;
+}
+struct node *create_tree()
+{
+struct node *n = create_node(0, 0);
+return n;
+}
+void add_to_count(struct node *p, int delta)
+{
+struct node *pp = p->parent;
+p->count += delta;
+if (pp != 0) {
+add_to_count(pp, delta);
+}
+}
+struct node *tree_add(struct node *node)
+{
+struct node* old_fc = node->firstChild;
+struct node *n = create_node(node, old_fc);
+node->firstChild = n;
+add_to_count(node, 1);
+return n;
+}
+struct node *tree_get_parent(struct node *node)
+{
+struct node *p_val = node->parent;
+return p_val;
+}
+int main0()
+{
+struct node *root = create_tree();
+struct node *n1 = tree_add(root);
+struct node *n2 = tree_add(n1);
+struct node *p1 = tree_get_parent(n2);
+if (p1 == 0) abort();
+struct node *n3 = tree_add(p1);
+struct node *p2 = tree_get_parent(n3);
+if (p2 == 0) abort();
+struct node *p3 = tree_get_parent(p2);
+if (p3 == 0) abort();
+return 0;
+}

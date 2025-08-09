@@ -1,0 +1,11 @@
+static int g;
+pthread_spinlock_t g_lock;
+void *threadfn(void* _unused)
+{
+pthread_spin_lock(&g_lock);
+if (g < 1024) {
+g = g + 1;
+}
+pthread_spin_unlock(&g_lock);
+return ((void *) 0);
+}

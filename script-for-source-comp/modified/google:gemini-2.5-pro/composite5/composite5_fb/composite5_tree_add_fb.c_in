@@ -1,0 +1,35 @@
+struct node {
+struct node *firstChild;
+struct node *nextSibling;
+struct node *parent;
+int count;
+};
+struct node *create_node(struct node *p, struct node *next)
+{
+struct node *n = malloc(sizeof(struct node));
+if (n == 0) abort();
+n->firstChild = 0;
+n->nextSibling = next;
+n->parent = p;
+n->count = 1;
+return n;
+}
+void add_to_count(struct node *p, int delta)
+{
+struct node *pp = p->parent;
+if (p->count > INT_MAX - delta)
+abort();
+if (pp == 0) {
+p->count += delta;
+} else {
+p->count += delta;
+add_to_count(pp, delta);
+}
+}
+struct node *tree_add(struct node *node)
+{
+struct node *n = create_node(node, node->firstChild);
+node->firstChild = n;
+add_to_count(node, 1);
+return n;
+}

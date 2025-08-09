@@ -1,0 +1,27 @@
+struct heap_node {
+int value;
+struct heap_node *left;
+struct heap_node *right;
+};
+struct heap_node *heap_merge(struct heap_node *h1, struct heap_node *h2)
+{
+if (h1 == 0) {
+return h2;
+} else if (h2 == 0) {
+return h1;
+}
+struct heap_node *smaller;
+int smaller_val;
+if (h1->value <= h2->value) {
+smaller = h1;
+smaller_val = h1->value;
+struct heap_node *merged_right = heap_merge(h1->right, h2);
+smaller->right = merged_right;
+} else {
+smaller = h2;
+smaller_val = h2->value;
+struct heap_node *merged_right = heap_merge(h1, h2->right);
+smaller->right = merged_right;
+}
+return smaller;
+}

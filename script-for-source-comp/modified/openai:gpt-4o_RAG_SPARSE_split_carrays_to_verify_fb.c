@@ -1,6 +1,0 @@
-int to_verify(int* arr)
-{
-    int result = arr[3];
-    arr[3] = result + 1;
-    return result;
-}

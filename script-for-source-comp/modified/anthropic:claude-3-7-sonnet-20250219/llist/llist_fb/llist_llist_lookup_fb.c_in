@@ -1,0 +1,23 @@
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};
+int llist_lookup(struct llist *list, int index)
+{
+struct node *f = list->first;
+struct node *l = list->last;
+struct node *n = f;
+int i = 0;
+while (i < index)
+{
+struct node *next = n->next;
+n = next;
+i = i + 1;
+}
+int value = n->value;
+return value;
+}

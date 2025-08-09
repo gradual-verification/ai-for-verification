@@ -1,0 +1,24 @@
+struct bst_node {
+struct bst_node *left;
+struct bst_node *right;
+int value;
+};
+bool bst_search(struct bst_node *node, int value)
+{
+if (node == 0) {
+return false;
+}
+else {
+if (node->value == value) {
+return true;
+}
+else if (value < node->value) {
+bool result = bst_search(node->left, value);
+return result;
+}
+else {
+bool result = bst_search(node->right, value);
+return result;
+}
+}
+}

@@ -1,0 +1,5 @@
+struct thread;
+void thread_join(struct thread *thread);
+void thread_join(struct thread *thread)
+{
+}

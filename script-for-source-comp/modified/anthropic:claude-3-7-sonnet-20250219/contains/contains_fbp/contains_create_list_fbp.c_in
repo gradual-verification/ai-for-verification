@@ -1,0 +1,8 @@
+struct node {
+void* value;
+struct node* next;
+};
+struct node* create_list()
+{
+return 0;
+}

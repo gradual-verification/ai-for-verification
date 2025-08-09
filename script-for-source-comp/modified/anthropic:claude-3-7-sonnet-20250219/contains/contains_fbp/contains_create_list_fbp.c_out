@@ -1,0 +1,10 @@
+predicate nodes(struct node* n, list<void*> vs) =
+n == 0 ? vs == nil : n->value |-> ?v &*& n->next |-> ?nxt &*& malloc_block_node(n) &*& nodes(nxt, ?vs2) &*& vs == cons(v, vs2);
+struct node {
+void* value;
+struct node* next;
+};
+struct node* create_list()
+{
+return 0;
+}

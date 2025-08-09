@@ -1,0 +1,74 @@
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};
+int llist_removeFirst(struct llist *l)
+{
+struct node *nf = l->first;
+struct node *nfn = nf->next;
+int nfv = nf->value;
+free(nf);
+l->first = nfn;
+return nfv;
+}
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};
+int llist_removeFirst(struct llist *l)
+{
+struct node *nf = l->first;
+struct node *nfn = nf->next;
+int nfv = nf->value;
+free(nf);
+l->first = nfn;
+return nfv;
+}
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};
+int llist_removeFirst(struct llist *l)
+{
+struct node *nf = l->first;
+struct node *nfn = nf->next;
+int nfv = nf->value;
+free(nf);
+l->first = nfn;
+if (nfn == 0) {
+l->last = 0;
+}
+return nfv;
+}
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};
+int llist_removeFirst(struct llist *l)
+{
+struct node *nf = l->first;
+struct node *nfn = nf->next;
+int nfv = nf->value;
+free(nf);
+l->first = nfn;
+if (nfn == 0) {
+l->last = 0;
+}
+return nfv;
+}
