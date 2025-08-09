@@ -4,7 +4,7 @@ output_path="../ai_suite/output/full_study"
 input_path="../input-output-pairs/full/split"
 cleaned_path="./modified"
 funcs=60
-changed=0
+unchanged=0
 modified=0
 
 mkdir -p "$cleaned_path"
@@ -71,7 +71,7 @@ for model in "${models[@]}"; do
             fi
 
             if [ "$align" = true ]; then
-                ((changed++))    
+                ((unchanged++))    
                 rm -f "$temp_out"             
                 rm -f "$temp_in"
             else
@@ -83,5 +83,5 @@ for model in "${models[@]}"; do
     done
 done
 
-echo $changed
+echo $unchanged
 echo $modified
