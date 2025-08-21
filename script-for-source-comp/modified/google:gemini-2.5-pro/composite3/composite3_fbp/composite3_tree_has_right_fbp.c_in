@@ -1,0 +1,11 @@
+struct node {
+struct node *left;
+struct node *right;
+struct node *parent;
+int count;
+};
+bool tree_has_right(struct node *node)
+{
+struct node *right = node->right;
+return right != 0;
+}

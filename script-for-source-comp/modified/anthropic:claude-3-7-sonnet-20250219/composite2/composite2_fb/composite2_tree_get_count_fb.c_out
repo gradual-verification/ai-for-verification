@@ -1,0 +1,60 @@
+struct node {
+struct node *left;
+struct node *right;
+struct node *parent;
+int count;
+};
+int subtree_get_count(struct node *node)
+{
+int result = 0;
+if (node == 0) {
+} else {
+result = node->count;
+}
+return result;
+}
+int tree_get_count(struct node *node)
+{
+int result = subtree_get_count(node);
+return result;
+}
+struct node {
+struct node *left;
+struct node *right;
+struct node *parent;
+int count;
+};
+int subtree_get_count(struct node *node)
+{
+int result = 0;
+if (node == 0) {
+} else {
+result = node->count;
+}
+return result;
+}
+int tree_get_count(struct node *node)
+{
+int result = subtree_get_count(node);
+return result;
+}
+struct node {
+struct node *left;
+struct node *right;
+struct node *parent;
+int count;
+};
+int subtree_get_count(struct node *node)
+{
+int result = 0;
+if (node == 0) {
+} else {
+result = node->count;
+}
+return result;
+}
+int tree_get_count(struct node *node)
+{
+int result = subtree_get_count(node);
+return result;
+}

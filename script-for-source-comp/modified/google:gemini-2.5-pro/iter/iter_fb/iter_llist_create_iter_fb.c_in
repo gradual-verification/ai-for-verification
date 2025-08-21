@@ -1,0 +1,23 @@
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};
+struct iter {
+struct node *current;
+};
+struct iter *llist_create_iter(struct llist *l)
+{
+struct iter *i = 0;
+struct node *f = 0;
+i = malloc(sizeof(struct iter));
+if (i == 0) {
+abort();
+}
+f = l->first;
+i->current = f;
+return i;
+}

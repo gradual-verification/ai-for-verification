@@ -1,0 +1,24 @@
+predicate tree(struct Node* node, tree value) =
+switch(value) {
+case Nil: return false;
+case tree(node2, lhs, rhs): return node==node2 &*& node->count |-> ?c &*& c == size(value) &*&
+node->left |-> ?l &*& node->right |-> ?r &*& (l==0 ? lhs==Nil : tree(l, lhs) &*& l->parent |-> node) &*&
+(r==0 ? rhs==Nil : tree(r, rhs) &*& r->parent |-> node);
+};
+int internalGetNbOfNodes(struct Node* n)
+int internalGetNbOfNodes(struct Node* n)
+{
+int c = n->count;
+return c;
+}
+struct Node {
+struct Node* left;
+struct Node* right;
+struct Node* parent;
+int count;
+};
+int internalGetNbOfNodes(struct Node* n)
+{
+int c = n->count;
+return c;
+}

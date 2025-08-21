@@ -1,0 +1,16 @@
+struct node {
+struct node *left;
+struct node *right;
+struct node *parent;
+int count;
+};
+struct node *tree_get_right(struct node *node)
+{
+if (node == 0) {
+abort();
+}
+{
+struct node *right = node->right;
+return right;
+}
+}

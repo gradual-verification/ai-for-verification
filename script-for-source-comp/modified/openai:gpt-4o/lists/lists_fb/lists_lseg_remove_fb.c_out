@@ -1,0 +1,38 @@
+lemma void lseg_split(void *first, void *node, void *last, list<void *> xs, predicate(void *) p)
+requires lseg(first, last, xs, p) &*& mem(node, xs) == true;
+ensures lseg(first, node, ?xs1, p) &*& lseg(node, last, ?xs2, p) &*& xs == append(xs1, xs2) &*& mem(node, xs1) == false;
+{
+open lseg(first, last, xs, p);
+if (first != last) {
+if (first == node) {
+close lseg(first, node, nil, p);
+close lseg(node, last, xs, p);
+} else {
+lseg_split((void *)*((int *)first), node, last, ?xs0, p);
+close lseg(first, node, cons(first, xs0), p);
+}
+}
+}
+lemma void lseg_merge(void *first, void *node, void *last, list<void *> xs1, list<void *> xs2, predicate(void *) p)
+requires lseg(first, node, xs1, p) &*& lseg(node, last, xs2, p);
+ensures lseg(first, last, append(xs1, xs2), p);
+{
+open lseg(first, node, xs1, p);
+if (first != node) {
+lseg_merge((void *)*((int *)first), node, last, ?xs10, xs2, p);
+close lseg(first, last, cons(first, append(xs10, xs2)), p);
+}
+}
+void lseg_remove(void *phead, void *element)
+{
+void **pnext = phead;
+while (*pnext != element)
+{
+void **next = *pnext;
+pnext = next;
+}
+{
+void *nextNext = *((void **)*pnext);
+*pnext = nextNext;
+}
+}

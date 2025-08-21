@@ -1,0 +1,16 @@
+struct node {
+void* value;
+struct node* next;
+};
+typedef bool equals(void* v1, void* v2);
+bool my_equals(void* v1, void* v2)
+{
+open equals_pre(my_equals)(v1, v2, eq_func);
+if((uintptr_t)v1 == (uintptr_t)v2) {
+close equals_post(my_equals)(v1, v2, eq_func);
+return true;
+} else {
+close equals_post(my_equals)(v1, v2, eq_func);
+return false;
+}
+}

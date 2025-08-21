@@ -1,0 +1,15 @@
+static int counter = 0;
+struct shared {
+struct mutex *mtx;
+};
+void worker(struct shared *data)
+{
+struct shared *s = data;
+mutex_acquire(s->mtx);
+int tmp = counter;
+if (tmp == INT_MAX) {
+abort();
+}
+counter = tmp + 1;
+mutex_release(s->mtx);
+}

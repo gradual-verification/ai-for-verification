@@ -1,0 +1,4 @@
+struct thread;
+void thread_join(struct thread *thread);
+struct thread;
+void thread_join(struct thread *thread);

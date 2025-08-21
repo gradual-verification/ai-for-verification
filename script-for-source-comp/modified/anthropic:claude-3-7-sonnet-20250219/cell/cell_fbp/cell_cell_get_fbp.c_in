@@ -1,0 +1,7 @@
+struct cell {
+int x;
+};
+int cell_get(struct cell* c)
+{
+return c->x;
+}

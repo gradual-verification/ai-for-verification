@@ -1,0 +1,8 @@
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};

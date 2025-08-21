@@ -1,0 +1,20 @@
+struct sum {
+int sum;
+};
+struct session {
+struct sum *sum_object;
+struct lock *lock;
+};
+void contribute(void *data)
+{
+struct session *session = data;
+struct lock *lock = session->lock;
+struct sum *sumObject = session->sum_object;
+free(session);
+lock_acquire(lock);
+{
+int sum = sumObject->sum;
+sumObject->sum = sum + 1;
+}
+lock_release(lock);
+}

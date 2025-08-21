@@ -1,0 +1,14 @@
+struct Accumulator {
+int total;
+int count;
+};
+void add_multiple(struct Accumulator* a, int n, int x)
+{
+int i = 0;
+while (i < n)
+{
+a->total += x;
+a->count += 1;
+i++;
+}
+}

@@ -1,0 +1,14 @@
+struct node {
+struct node *next;
+int value;
+};
+int list_length_alt(struct node *node)
+{
+int i = 0;
+while (node != 0)
+{
+node = node->next;
+i++;
+}
+return i;
+}

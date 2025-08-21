@@ -1,0 +1,26 @@
+struct tokenizer
+{
+charreader*           next_char;
+int                   lastread;
+int                   lasttoken;
+struct string_buffer* buffer;
+};
+typedef int charreader();
+void string_buffer_append_char(struct string_buffer *buffer, char c)
+{
+char cc = c;
+string_buffer_append_chars(buffer, &cc, 1);
+}
+struct tokenizer
+{
+charreader*           next_char;
+int                   lastread;
+int                   lasttoken;
+struct string_buffer* buffer;
+};
+typedef int charreader();
+void string_buffer_append_char(struct string_buffer *buffer, char c)
+{
+char cc = c;
+string_buffer_append_chars(buffer, &cc, 1);
+}

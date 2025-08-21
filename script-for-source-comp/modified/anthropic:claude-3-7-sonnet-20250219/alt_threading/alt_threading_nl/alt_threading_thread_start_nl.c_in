@@ -1,0 +1,2 @@
+struct thread;
+struct thread *thread_start(void *run, void *data);

@@ -1,0 +1,23 @@
+struct node {
+void* value;
+struct node* next;
+};
+typedef bool equals(void* v1, void* v2);
+bool example_equals(void* v1, void* v2)
+{
+return v1 == v2;
+}
+int main()
+{
+struct node* n1 = malloc(sizeof(struct node));
+struct node* n2 = malloc(sizeof(struct node));
+if (n1 == 0 || n2 == 0) abort();
+n1->value = (void*)1;
+n1->next = 0;
+n2->value = (void*)1;
+n2->next = 0;
+bool result = example_equals(n1, n2);
+free(n1);
+free(n2);
+return 0;
+}

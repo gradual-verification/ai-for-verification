@@ -1,0 +1,3 @@
+void atomic_dec(int* c)
+{
+}

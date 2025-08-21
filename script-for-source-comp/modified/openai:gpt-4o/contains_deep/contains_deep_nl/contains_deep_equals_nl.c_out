@@ -1,0 +1,39 @@
+struct node {
+void* value;
+struct node* next;
+};
+struct cell {
+int val;
+};
+typedef bool equals(void* x1, void* x2);
+bool equals_impl(void* x1, void* x2)
+{
+return x1 == x2;
+}
+bool list_equals(struct node *n1, struct node *n2, equals *eq)
+{
+if (n1 == 0) {
+return n2 == 0;
+} else if (n2 == 0) {
+return false;
+} else {
+if (!eq(n1->value, n2->value)) {
+return false;
+}
+return list_equals(n1->next, n2->next, eq);
+}
+}
+int main()
+{
+struct node *n1 = malloc(sizeof(struct node));
+struct node *n2 = malloc(sizeof(struct node));
+if (n1 == 0 || n2 == 0) abort();
+n1->value = (void *)1;
+n1->next = 0;
+n2->value = (void *)1;
+n2->next = 0;
+bool result = list_equals(n1, n2, equals_impl);
+free(n1);
+free(n2);
+return 0;
+}

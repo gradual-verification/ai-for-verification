@@ -1,0 +1,9 @@
+struct person {
+char* name;
+struct person* spouse;
+};
+void marry(struct person *this, struct person *other)
+{
+this->spouse = other;
+other->spouse = this;
+}

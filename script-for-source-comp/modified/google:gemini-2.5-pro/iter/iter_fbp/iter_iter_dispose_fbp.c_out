@@ -1,0 +1,17 @@
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};
+struct iter {
+struct node *current;
+};
+void iter_dispose(struct iter *i)
+{
+open iter(i, f1, l, v0, v);
+llist_with_node_to_llist(l);
+free(i);
+}

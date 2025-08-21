@@ -1,0 +1,15 @@
+struct bst_node {
+struct bst_node *left;
+struct bst_node *right;
+int value;
+};
+void bst_dispose(struct bst_node *node)
+{
+if (node != 0) {
+struct bst_node *left = node->left;
+struct bst_node *right = node->right;
+bst_dispose(left);
+bst_dispose(right);
+free(node);
+}
+}

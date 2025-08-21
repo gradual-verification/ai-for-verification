@@ -1,0 +1,12 @@
+typedef int charreader();
+struct tokenizer
+{
+charreader*           next_char;
+int                   lastread;
+int                   lasttoken;
+struct string_buffer* buffer;
+};
+bool is_whitespace(int c)
+{
+return c == ' ' || c == '\n' || c == '\r' || c == '\t';
+}

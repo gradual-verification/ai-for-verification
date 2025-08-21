@@ -1,0 +1,17 @@
+struct rwlock {
+struct mutex *mutex;
+int readers;
+};
+void writer(struct rwlock *l)
+{
+for (;;)
+{
+mutex_acquire(l->mutex);
+if (l->readers == 0) {
+mutex_release(l->mutex);
+break;
+}
+mutex_release(l->mutex);
+}
+mutex_release(l->mutex);
+}

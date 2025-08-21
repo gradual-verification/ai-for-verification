@@ -1,0 +1,11 @@
+void lseg_remove(void *phead, void *element)
+{
+void **pnext = phead;
+while (*pnext != element)
+{
+void* current_node = *pnext;
+pnext = (void **)(current_node);
+}
+void *nextNext = *((void **)element);
+*pnext = nextNext;
+}

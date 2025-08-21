@@ -1,0 +1,16 @@
+struct node {
+struct node *next;
+int value;
+};
+void nested_blocks(struct node *n1, struct node *n2)
+{
+while (true)
+{
+goto l1;
+l2:
+goto l3;
+l1:
+goto l2;
+}
+l3:
+}

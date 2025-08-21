@@ -1,0 +1,9 @@
+typedef struct eloop *eloop;
+typedef void eloop_handler(void *data);
+struct eloop {
+int lock;
+int signalCount;
+eloop_handler *handler;
+void *handlerData;
+};
+typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);

@@ -1,0 +1,17 @@
+struct arraylist {
+void ** data;
+int size;
+int capacity;
+};
+struct arraylist * create_arraylist()
+{
+struct arraylist * a = malloc(sizeof(struct arraylist));
+void * data = 0;
+if (a == 0) abort();
+a -> size = 0;
+data = malloc(100 * sizeof(void * ));
+if (data == 0) abort();
+a -> data = data;
+a -> capacity = 100;
+return a;
+}

@@ -1,0 +1,22 @@
+struct node {
+struct node *next;
+int value;
+};
+struct queue {
+struct node *head;
+struct node *tail;
+};
+void enqueue(struct queue *q, int val)
+{
+struct node *n = malloc(sizeof(struct node));
+if (n == 0) abort();
+n->value = val;
+n->next = 0;
+if (q->tail == 0) {
+q->head = n;
+q->tail = n;
+} else {
+q->tail->next = n;
+q->tail = n;
+}
+}

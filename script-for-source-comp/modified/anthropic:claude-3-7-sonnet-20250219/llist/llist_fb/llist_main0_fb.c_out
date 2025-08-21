@@ -1,0 +1,63 @@
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};
+struct llist *create_llist()
+{
+struct llist *l = malloc(sizeof(struct llist));
+if (l == 0) abort();
+struct node *n = calloc(1, sizeof(struct node));
+if (n == 0) abort();
+l->first = n;
+l->last = n;
+return l;
+}
+void llist_add(struct llist *list, int x)
+{
+struct node *l = 0;
+struct node *n = calloc(1, sizeof(struct node));
+if (n == 0) {
+abort();
+}
+l = list->last;
+l->next = n;
+l->value = x;
+list->last = n;
+}
+void llist_dispose(struct llist *list)
+{
+struct node *n = list->first;
+struct node *l = list->last;
+while (n != l)
+{
+struct node *next = n->next;
+free(n);
+n = next;
+}
+free(l);
+free(list);
+}
+int llist_removeFirst(struct llist *l)
+{
+struct node *nf = l->first;
+struct node *nfn = nf->next;
+int nfv = nf->value;
+free(nf);
+l->first = nfn;
+return nfv;
+}
+void main0()
+{
+struct llist *l = create_llist();
+llist_add(l, 10);
+llist_add(l, 20);
+llist_add(l, 30);
+llist_add(l, 40);
+int x1 = llist_removeFirst(l);
+int x2 = llist_removeFirst(l);
+llist_dispose(l);
+}

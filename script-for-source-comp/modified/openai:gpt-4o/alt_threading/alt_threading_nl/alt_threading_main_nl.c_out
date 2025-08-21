@@ -1,0 +1,22 @@
+struct thread;
+void increment(int *cell)
+{
+(*cell)++;
+}
+int read_int();
+int main()
+{
+int *cell = malloc(sizeof(int));
+if (cell == 0) abort();
+int n = read_int();
+if (n >= INT_MAX) {
+abort();
+}
+*cell = n;
+struct thread *t = thread_start(increment, cell);
+thread_join(t);
+int n1 = *cell;
+free(cell);
+assert(n1 == n + 1);
+return 0;
+}

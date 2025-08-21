@@ -1,0 +1,24 @@
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};
+struct iter {
+struct node *current;
+};
+void llist_dispose(struct llist *list)
+{
+struct node *n = list->first;
+struct node *l = list->last;
+while (n != l)
+{
+struct node *next = n->next;
+free(n);
+n = next;
+}
+free(l);
+free(list);
+}

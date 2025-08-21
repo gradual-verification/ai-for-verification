@@ -1,0 +1,17 @@
+struct node {
+struct node *firstChild;
+struct node *nextSibling;
+struct node *parent;
+int count;
+};
+struct node *create_node(struct node *p, struct node *next)
+{
+struct node *n = malloc(sizeof(struct node));
+if (n == 0) abort();
+n->childrenGhostListId = childrenGhostListId;
+n->firstChild = 0;
+n->nextSibling = next;
+n->parent = p;
+n->count = 1;
+return n;
+}

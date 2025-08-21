@@ -1,0 +1,15 @@
+struct node {
+struct node *left;
+struct node *right;
+struct node *parent;
+int count;
+};
+int subtree_get_count(struct node *node)
+{
+int result = 0;
+if (node != 0) {
+result = node->count;
+} else {
+}
+return result;
+}

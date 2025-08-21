@@ -1,0 +1,21 @@
+static int cell;
+void m(void *data)
+{
+int x = cell;
+}
+void process(int n)
+{
+struct thread **threads = malloc(n * sizeof(struct thread *));
+if (threads == 0) abort();
+for (int i = 0; i < n; i++)
+{
+struct thread *t = thread_start_joinable(m, 0);
+threads[i] = t;
+}
+for (int i = 0; i < n; i++)
+{
+struct thread *t = threads[i];
+thread_join(t);
+}
+free(threads);
+}

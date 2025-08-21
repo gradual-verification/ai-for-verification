@@ -1,0 +1,6 @@
+int read_int()
+{
+int x;
+scanf("%i", &x);
+return x;
+}

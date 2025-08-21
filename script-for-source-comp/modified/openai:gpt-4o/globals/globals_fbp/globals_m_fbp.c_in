@@ -1,0 +1,11 @@
+static int x;
+struct counter {
+int f;
+};
+static struct counter *c;
+void m()
+{
+int y = x;
+x = y + 1;
+c->f = c->f + 1;
+}

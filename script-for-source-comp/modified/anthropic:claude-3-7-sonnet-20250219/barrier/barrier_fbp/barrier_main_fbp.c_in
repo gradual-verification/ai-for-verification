@@ -1,0 +1,133 @@
+struct barrier {
+struct mutex *mutex;
+int n;
+int k;
+bool outgoing;
+};
+struct data {
+struct barrier *barrier;
+int x1;
+int x2;
+int y1;
+int y2;
+int i;
+};
+struct barrier *create_barrier(int n)
+{
+struct barrier *barrier = malloc(sizeof(struct barrier));
+if (barrier == 0) abort();
+barrier->n = n;
+barrier->k = 0;
+barrier->outgoing = false;
+struct mutex *mutex = create_mutex();
+barrier->mutex = mutex;
+return barrier;
+}
+void barrier(struct barrier *barrier)
+{
+struct mutex *mutex = barrier->mutex;
+mutex_acquire(mutex);
+{
+while (barrier->outgoing)
+{
+mutex_release(mutex);
+mutex_acquire(mutex);
+}
+}
+barrier->k++;
+if (barrier->k == barrier->n) {
+barrier->outgoing = true;
+barrier->k--;
+mutex_release(barrier->mutex);
+} else {
+while (!barrier->outgoing)
+{
+mutex_release(mutex);
+mutex_acquire(mutex);
+}
+barrier->k--;
+if (barrier->k == 0) {
+barrier->outgoing = false;
+}
+mutex_release(mutex);
+}
+}
+void barrier_dispose(struct barrier *barrier)
+{
+mutex_dispose(barrier->mutex);
+free(barrier);
+}
+void thread1(struct data *d)
+{
+struct barrier *barrier = d->barrier;
+{
+barrier(barrier);
+}
+int N = 0;
+while (N < 30)
+{
+int a1 = d->x1;
+int a2 = d->x2;
+if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+d->y1 = a1 + 2 * a2;
+{
+barrier(barrier);
+}
+a1 = d->y1;
+a2 = d->y2;
+if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+d->x1 = a1 + 2 * a2;
+N = N + 1;
+d->i = N;
+{
+barrier(barrier);
+}
+}
+{
+barrier(barrier);
+}
+d->i = 0;
+}
+void thread2(struct data *d)
+{
+struct barrier *barrier = d->barrier;
+{
+barrier(barrier);
+}
+int m = 0;
+while (m < 30)
+{
+int a1 = d->x1;
+int a2 = d->x2;
+if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+d->y2 = a1 + 3 * a2;
+{
+barrier(barrier);
+}
+a1 = d->y1;
+a2 = d->y2;
+if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+d->x2 = a1 + 3 * a2;
+{
+barrier(barrier);
+}
+m = d->i;
+}
+{
+barrier(barrier);
+}
+}
+int main()
+{
+struct data *d = calloc(1, sizeof(struct data));
+if (d == 0) abort();
+struct barrier *barrier = create_barrier(2);
+d->barrier = barrier;
+struct thread *t1 = thread_start_joinable(thread1, d);
+struct thread *t2 = thread_start_joinable(thread2, d);
+thread_join(t1);
+thread_join(t2);
+barrier_dispose(d->barrier);
+free(d);
+return 0;
+}

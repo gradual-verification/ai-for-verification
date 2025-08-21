@@ -1,0 +1,19 @@
+struct node {
+struct node *left;
+struct node *right;
+struct node *parent;
+int count;
+};
+struct node *tree_get_parent(struct node *node)
+{
+if (node == 0) {
+abort();
+}
+{
+struct node *parent = node->parent;
+if (parent == 0) {
+abort();
+}
+return parent;
+}
+}

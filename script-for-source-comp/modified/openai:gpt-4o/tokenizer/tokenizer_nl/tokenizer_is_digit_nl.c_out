@@ -1,0 +1,12 @@
+typedef int charreader();
+struct tokenizer
+{
+charreader*           next_char;
+int                   lastread;
+int                   lasttoken;
+struct string_buffer* buffer;
+};
+bool is_digit(int c)
+{
+return c >= '0' && c <= '9';
+}

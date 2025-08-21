@@ -1,0 +1,78 @@
+typedef int ElementType;
+struct heap
+{
+int capacity;
+int size;
+ElementType *elems;
+};
+struct heap* heap_create(int capacity)
+{
+struct heap* q;
+q = malloc(sizeof ( struct heap));
+if (q == 0) abort();
+int acapacity = capacity + 1;
+int *array = malloc(acapacity * sizeof(int));
+if (array == 0) abort();
+q->elems = array;
+q->capacity = capacity + 1;
+q->size = 0;
+q->elems[0] = 0;
+return q;
+}
+bool heap_is_empty(struct heap* heap)
+{
+return heap->size == 0;
+}
+void heap_insert(struct heap* heap, ElementType x)
+{
+if(heap->size + 1 == heap->capacity) {
+abort();
+}
+int in = ++heap->size;
+heap->elems[in] = x;
+swim(heap->elems, heap->size + 1, in);
+}
+void swim(int* arr, int N, int k)
+{
+if(k == 1) {
+return;
+}
+if(arr[k/2] >= arr[k]) {
+return;
+}
+int tmp = arr[k];
+arr[k] = arr[k/2];
+arr[k/2] = tmp;
+swim(arr, N, k/2);
+}
+ElementType heap_max(struct heap* heap)
+{
+return heap->elems[1];
+}
+int heap_size(struct heap* heap)
+{
+return heap->size;
+}
+void heap_dispose(struct heap* heap)
+{
+free(heap->elems);
+free(heap);
+}
+int main()
+{
+ElementType max;
+struct heap* q = heap_create(6);
+bool empty = heap_is_empty(q);
+assert(empty);
+heap_insert(q,2);
+empty = heap_is_empty(q);
+assert(!empty);
+heap_insert(q,5);
+heap_insert(q,3);
+heap_insert(q,6);
+heap_insert(q,9);
+heap_insert(q,10);
+max = heap_max(q);
+heap_dispose(q);
+return 0;
+}

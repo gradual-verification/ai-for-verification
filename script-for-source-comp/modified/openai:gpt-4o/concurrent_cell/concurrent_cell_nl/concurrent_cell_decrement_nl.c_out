@@ -1,0 +1,13 @@
+struct cell {
+int x;
+struct mutex* mutex;
+};
+void decrement(struct cell* c)
+{
+mutex_acquire(c->mutex);
+if (c->x == INT_MIN) {
+abort();
+}
+c->x--;
+mutex_release(c->mutex);
+}

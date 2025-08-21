@@ -1,0 +1,13 @@
+predicate sorted_list(struct node *n, int lower_bound, int upper_bound) =
+n == 0 ?
+lower_bound <= upper_bound
+:
+...
+struct node {
+int value;
+struct node *next;
+};
+struct node *create_list()
+{
+return 0;
+}

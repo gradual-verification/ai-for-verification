@@ -1,0 +1,6 @@
+void m()
+{
+int y = x;
+x = y + 1;
+c->f = c->f + 1;
+}

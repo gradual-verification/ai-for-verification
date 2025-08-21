@@ -1,0 +1,53 @@
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};
+struct iter {
+struct node *current;
+};
+void iter_dispose(struct iter *i)
+{
+free(i);
+}
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};
+struct iter {
+struct node *current;
+};
+void iter_dispose(struct iter *i)
+{
+free(i);
+}
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};
+struct iter {
+struct node *current;
+};
+void iter_dispose(struct iter *i)
+{
+free(i);
+}
+struct node {
+struct node *next;
+int value;
+};
+struct llist {
+struct node *first;
+struct node *last;
+};

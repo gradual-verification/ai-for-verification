@@ -1,0 +1,5 @@
+static int cell;
+void m(void *data)
+{
+int x = cell;
+}

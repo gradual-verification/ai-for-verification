@@ -1,0 +1,50 @@
+struct sum {
+int sum;
+};
+struct session {
+struct sum *sum_object;
+struct lock *lock;
+};
+void contribute(void *data)
+{
+struct session *session = data;
+struct lock *lock = session->lock;
+struct sum *sumObject = session->sum_object;
+free(session);
+lock_acquire(lock);
+{
+int sum = sumObject->sum;
+sumObject->sum = sum + 1;
+}
+lock_release(lock);
+}
+int main()
+{
+struct sum *sumObject = malloc(sizeof(struct sum));
+if (sumObject == 0) {
+abort();
+}
+sumObject->sum = 0;
+struct lock *lock = create_lock();
+struct session *session1 = malloc(sizeof(struct session));
+if (session1 == 0) {
+abort();
+}
+session1->sum_object = sumObject;
+session1->lock = lock;
+struct thread *thread1 = thread_start_joinable(contribute, session1);
+struct session *session2 = malloc(sizeof(struct session));
+if (session2 == 0) {
+abort();
+}
+session2->sum_object = sumObject;
+session2->lock = lock;
+struct thread *thread2 = thread_start_joinable(contribute, session2);
+thread_join(thread1);
+thread_join(thread2);
+lock_dispose(lock);
+int sum = sumObject->sum;
+assert(sum == 2);
+free(sumObject);
+return 0;
+}
