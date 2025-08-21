@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import Tuple, Optional
 
@@ -144,6 +145,9 @@ def get_func_decl(func: Function) -> str:
     offset = func.sig_start_line - 0
 
     # change the content by lines (note the offset between content and original source file)
+    # remove the "//@ :" at the signature
+    if "//@ :" in content_lines[0]:
+        content_lines[0] = re.sub(r"//@\s*:.*$", "", content_lines[0]).rstrip()
     # add ";" at the end of signature
     if not content_lines[0].rstrip().endswith(";"):
         content_lines[0] = content_lines[0] + ";"
