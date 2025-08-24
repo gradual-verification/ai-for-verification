@@ -98,3 +98,6 @@ struct llist {
 struct node *first;
 struct node *last;
 };
+/*@
+predicate lseg(struct node *n1, struct node *n2; list<int> v) =
+n1 == n2 ? true &*& v == nil : node(n1, ?_n, ?h) &*&

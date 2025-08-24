@@ -5,4 +5,4 @@ int signalCount;
 eloop_handler *handler;
 void *handlerData;
 };
-typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
+typedef void eloop_handler(void *data);

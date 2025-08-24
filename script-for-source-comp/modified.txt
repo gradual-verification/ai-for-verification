@@ -66,7 +66,6 @@
 ./modified/google:gemini-2.5-pro/composite/composite_fb/composite_addLeft_fb.c_out
 ./modified/google:gemini-2.5-pro/composite/composite_fbp/composite_create_fbp.c_out
 ./modified/google:gemini-2.5-pro/composite/composite_fbp/composite_getNbOfNodes_fbp.c_out
-./modified/google:gemini-2.5-pro/composite/composite_fbp/composite_addLeft_fbp.c_out
 ./modified/google:gemini-2.5-pro/composite/composite_fbp/composite_internalAddLeft_fbp.c_out
 ./modified/google:gemini-2.5-pro/composite/composite_nl/composite_addLeft_nl.c_out
 ./modified/google:gemini-2.5-pro/composite/composite_nl/composite_main_nl.c_out
@@ -412,7 +411,6 @@
 ./modified/openai:gpt-4o/counter_with_pred/counter_with_pred_nl/counter_with_pred_main_nl.c_out
 ./modified/openai:gpt-4o/counter_with_pred/counter_with_pred_nl/counter_with_pred_main2_nl.c_out
 ./modified/openai:gpt-4o/cp/cp_nl/cp_main_nl.c_out
-./modified/openai:gpt-4o/double_linked_list/double_linked_list_nl/double_linked_list_reverse_nl.c_out
 ./modified/openai:gpt-4o/equalsmap/equalsmap_fbp/equalsmap_map_contains_key_fbp.c_out
 ./modified/openai:gpt-4o/equalsmap/equalsmap_fbp/equalsmap_foo_equals_fbp.c_out
 ./modified/openai:gpt-4o/equalsmap/equalsmap_nl/equalsmap_map_dispose_nl.c_out
@@ -595,6 +593,7 @@
 ./modified/anthropic:claude-3-7-sonnet-20250219/composite/composite_fb/composite_main_fb.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/composite/composite_fb/composite_addLeft_fb.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/composite/composite_fbp/composite_create_fbp.c_out
+./modified/anthropic:claude-3-7-sonnet-20250219/composite/composite_fbp/composite_addLeft_fbp.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/composite/composite_fbp/composite_fix_fbp.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/composite/composite_nl/composite_getNbOfNodes_nl.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/composite/composite_nl/composite_main_nl.c_out
@@ -721,7 +720,6 @@
 ./modified/anthropic:claude-3-7-sonnet-20250219/philosophers/philosophers_fbp/philosophers_main_fbp.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/philosophers/philosophers_nl/philosophers_main_nl.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/pthreads/pthreads_nl/pthreads_threadfn_nl.c_out
-./modified/anthropic:claude-3-7-sonnet-20250219/pthreads/pthreads_nl/pthreads_main_nl.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/quicksort/quicksort_fb/quicksort_quicksort_fb.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/quicksort/quicksort_fbp/quicksort_quicksort_fbp.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/schorr_waite/schorr_waite_nl/schorr_waite_schorr_waite_nl.c_out
@@ -737,7 +735,6 @@
 ./modified/anthropic:claude-3-7-sonnet-20250219/spouse/spouse_fb/spouse_create_person_fb.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/stack_typeparam/stack_typeparam_nl/stack_typeparam_is_empty_nl.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/stack_typeparam/stack_typeparam_nl/stack_typeparam_check_nl.c_out
-./modified/anthropic:claude-3-7-sonnet-20250219/stack_typeparam/stack_typeparam_nl/stack_typeparam_size_nl.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/stack_typeparam/stack_typeparam_nl/stack_typeparam_destroy_stack_nl.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/stack_typeparam/stack_typeparam_fb/stack_typeparam_create_data_fb.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/stack_typeparam/stack_typeparam_fb/stack_typeparam_push_fb.c_out
@@ -770,7 +767,6 @@
 ./modified/anthropic:claude-3-7-sonnet-20250219/tokenizer/tokenizer_nl/tokenizer_charreader_nl.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/tokenizer/tokenizer_nl/tokenizer_my_getchar_nl.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/tokenizer/tokenizer_nl/tokenizer_tokenizer_get_buffer_nl.c_out
-./modified/anthropic:claude-3-7-sonnet-20250219/tokenizer/tokenizer_nl/tokenizer_tokenizer_eat_symbol_nl.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/tokenizer/tokenizer_nl/tokenizer_tokenizer_eat_number_nl.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/tokenizer/tokenizer_nl/tokenizer_tokenizer_peek_nl.c_out
 ./modified/anthropic:claude-3-7-sonnet-20250219/tokenizer/tokenizer_nl/tokenizer_print_token_nl.c_out

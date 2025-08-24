@@ -48,3 +48,15 @@ close context(node, value, c + 1);
 }
 }
 struct Node* addLeft(struct Node* node)
+{
+isTree_to_context(node, v);
+open tree(node, tree(node, Nil, Nil));
+struct Node* newChild = internalAddLeft(node);
+tree new_subtree = tree(node, tree(newChild, Nil, Nil), Nil);
+close tree(node, new_subtree);
+context_to_isTree(node, ctx, new_subtree);
+tree v_new = build_tree(ctx, node, new_subtree);
+build_tree_is_replace(v, ctx, node, new_subtree);
+uniqueNodes_replace_leaf_with_branch(v, node, newChild);
+return newChild;
+}

@@ -52,3 +52,26 @@ int a1 = d->x1;
 int a2 = d->x2;
 if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
 d->y1 = a1 + 2 * a2;
+/*@
+predicate_family_instance barrier_incoming(enter2)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit) =
+n == 2 &*& inv == my_barrier_inv(d) &*& exit == exit2_ &*&
+[1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_x &*&
+[1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_;
+predicate_family_instance barrier_inside(exit2_)(int n, predicate(int k, bool outgoing) inv) =
+n == 2 &*& inv == my_barrier_inv(d) &*&
+[1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_y &*&
+[1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y1 |-> ?_;
+predicate_family_instance barrier_exiting(exit2_)(int n, predicate(int k, bool outgoing) inv) =
+n == 2 &*& inv == my_barrier_inv(d) &*&
+[1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_y &*&
+[1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y1 |-> ?_;
+lemma void enter2(int k) : barrier_enter
+requires barrier_incoming(enter2)(?n, ?inv, ?exit) &*& inv(k, false) &*& 0 <= k &*& k < n;
+ensures
+k == n - 1 ?
+barrier_exiting(exit)(n, inv) &*& inv(k, true)
+:
+barrier_inside(exit)(n, inv) &*& inv(k + 1, false);
+{
+open barrier_incoming(enter2)(n, inv, exit);
+d->phase1 = writing

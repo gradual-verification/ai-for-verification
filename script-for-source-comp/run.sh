@@ -46,22 +46,28 @@ for model in "${models[@]}"; do
             prompt=$(basename "$out" | sed -E 's/.*_([^.]*)\..*/\1/')
             temp_out="$cleaned_model/$func/${func}_$prompt/$(basename "$out")_out"
             in=$(find $input_path -type f -name "$(basename "$out")")
-
             temp_in="$cleaned_model/$func/${func}_$prompt/$(basename "$out")_in"
 
-            # clean output file to remove comments
-            sed -E -e '/^[[:space:]]*\/\*/,/[[:space:]]*\*\//d' \
-                   -e 's/[[:space:]]*\/\/.*$//' \
-                   -e '/^[[:space:]]*#.*$/d' \
-                   -e 's/^[[:space:]]*//' \
-                   -e 's/[[:space:]]*$//' "$out" | awk 'NF' > "$temp_out"
+            # clean output file
+            perl -0777 -pe '
+                s{/\*.*?\*/}{}gs;     # remove /* ... */ including multiline
+                s{//.*$}{}gm;         # remove // comments
+                s{^\s*#.*$}{}gm;      # remove preprocessor directives
+                s/^\s+//gm;           # trim leading spaces
+                s/\s+$//gm;           # trim trailing spaces
+                s/^\s*\n//gm;         # remove empty lines
+            ' "$out" > "$temp_out"
 
-            # clean input file to remove comments
-            sed -E -e '/^[[:space:]]*\/\*/,/[[:space:]]*\*\//d' \
-                   -e 's/[[:space:]]*\/\/.*$//' \
-                   -e '/^[[:space:]]*#.*$/d' \
-                   -e 's/^[[:space:]]*//' \
-                   -e 's/[[:space:]]*$//' "$in" | awk 'NF' > "$temp_in"
+            # clean input file
+            perl -0777 -pe '
+                s{/\*.*?\*/}{}gs;
+                s{//.*$}{}gm;
+                s{^\s*#.*$}{}gm;
+                s/^\s+//gm;
+                s/\s+$//gm;
+                s/^\s*\n//gm;
+            ' "$in" > "$temp_in"
+
 
             # diff comparison
             if diff -q "$temp_in" "$temp_out" >/dev/null; then

@@ -34,3 +34,107 @@ typedef struct dllist {
 node head;
 node tail;
 } *dllist;
+/*@
+fixpoint intlist app(intlist l1, intlist l2) {
+switch (l1) {
+case inil: return l2;
+case icons(x, v): return icons(x, app(v, l2));
+}
+}
+fixpoint intlist rev(intlist l) {
+switch (l) {
+case inil: return inil;
+case icons(x, v): return app(rev(v), icons(x, inil));
+}
+}
+lemma void app_assoc(intlist l1, intlist l2, intlist l3)
+requires true;
+ensures app(app(l1, l2), l3) == app(l1, app(l2, l3));
+{
+switch(l1) {
+case inil:
+case icons(x, xs):
+app_assoc(xs, l2, l3);
+}
+}
+lemma void rev_app(intlist l1, intlist l2)
+requires true;
+ensures rev(app(l1, l2)) == app(rev(l2), rev(l1));
+{
+switch(l1) {
+case inil:
+switch(l2) {
+case inil:
+case icons(y, ys):
+}
+case icons(x, xs):
+rev_app(xs, l2);
+app_assoc(rev(l2), rev(xs), icons(x, inil));
+}
+}
+lemma void rev_rev(intlist l)
+requires true;
+ensures rev(rev(l)) == l;
+{
+switch(l) {
+case inil:
+case icons(x, xs):
+rev_rev(xs);
+rev_app(rev(xs), icons(x, inil));
+}
+}
+fixpoint nodeptrlist reverse_nodeptrlist(nodeptrlist l) {
+switch(l) {
+case nnil: return nnil;
+case ncons(x, xs): return append_nodeptrlist(reverse_nodeptrlist(xs), ncons(x, nnil));
+}
+}
+fixpoint nodeptrlist append_nodeptrlist(nodeptrlist l1, nodeptrlist l2) {
+switch(l1) {
+case nnil: return l2;
+case ncons(x, xs): return ncons(x, append_nodeptrlist(xs, l2));
+}
+}
+lemma void append_nodeptrlist_assoc(nodeptrlist l1, nodeptrlist l2, nodeptrlist l3)
+requires true;
+ensures append_nodeptrlist(append_nodeptrlist(l1, l2), l3) == append_nodeptrlist(l1, append_nodeptrlist(l2, l3));
+{
+switch(l1) {
+case nnil:
+case ncons(x, xs):
+append_nodeptrlist_assoc(xs, l2, l3);
+}
+}
+lemma void reverse_nodeptrlist_append(nodeptrlist l1, nodeptrlist l2)
+requires true;
+ensures reverse_nodeptrlist(append_nodeptrlist(l1, l2)) == append_nodeptrlist(reverse_nodeptrlist(l2), reverse_nodeptrlist(l1));
+{
+switch(l1) {
+case nnil:
+switch(l2) {
+case nnil:
+case ncons(y, ys):
+}
+case ncons(x, xs):
+reverse_nodeptrlist_append(xs, l2);
+append_nodeptrlist_assoc(reverse_nodeptrlist(l2), reverse_nodeptrlist(xs), ncons(x, nnil));
+}
+}
+lemma void linked_reverse(node l2, nodeptrlist lambda1, nodeptrlist lambda2, node l3)
+requires linked(l2, lambda1, lambda2, l3);
+ensures linked(l3, reverse_nodeptrlist(lambda2), reverse_nodeptrlist(lambda1), l2);
+{
+open linked(l2, lambda1, lambda2, l3);
+if (lambda1 == nnil) {
+close linked(l3, reverse_nodeptrlist(lambda2), reverse_nodeptrlist(lambda1), l2);
+} else {
+linked_reverse(?l, ?lambda1p, ?lambda2p, l3);
+close linked(l3, reverse_nodeptrlist(lambda2), reverse_nodeptrlist(lambda1), l2);
+}
+}
+lemma void list_reverse_pointers(node ptr, intlist alpha_rest, nodeptrlist lambda1_rest, nodeptrlist lambda2_rest,
+intlist alpha_done, nodeptrlist lambda1_done, nodeptrlist lambda2_done)
+requires list(ptr, alpha_rest, lambda1_rest, lambda2_rest) &*& ptr != 0;
+ensures list(ptr, alpha_rest, lambda1_rest, lambda2_rest);
+{
+open list(ptr, alpha_rest, lambda1_rest,

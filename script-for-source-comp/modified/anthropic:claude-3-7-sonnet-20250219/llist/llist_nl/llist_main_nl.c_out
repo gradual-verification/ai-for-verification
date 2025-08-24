@@ -88,3 +88,33 @@ int llist_length_recursive(struct llist *l)
 int result = llist_length_recursive_helper(l->first, l->last);
 return result;
 }
+/*@
+lemma void nodes_to_lseg(struct node *first, struct node *last, list<int> values)
+requires nodes(first, values) &*& last != 0;
+ensures lseg(first, last, values);
+{
+open nodes(first, values);
+if (first == 0) {
+close lseg(first, last, nil);
+} else if (first == last) {
+close lseg(first, last, nil);
+} else {
+assert first->next |-> ?next;
+assert first->value |-> ?v;
+assert nodes(next, ?tail_values);
+nodes_to_lseg(next, last, tail_values);
+close lseg(first, last, values);
+}
+}
+lemma void lseg_to_nodes(struct node *first, struct node *last, list<int> values)
+requires lseg(first, last, values) &*& last != 0;
+ensures nodes(first, values);
+{
+open lseg(first, last, values);
+if (first == last) {
+close nodes(first, nil);
+} else {
+assert first->next |-> ?next;
+assert first->value |-> ?v;
+assert lseg(next, last, ?tail_values);
+lseg_to_nodes(next, last, tail_values);

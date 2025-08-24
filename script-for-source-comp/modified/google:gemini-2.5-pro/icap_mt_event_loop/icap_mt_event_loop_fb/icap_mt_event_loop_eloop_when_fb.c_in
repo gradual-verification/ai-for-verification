@@ -5,7 +5,7 @@ int signalCount;
 eloop_handler *handler;
 void *handlerData;
 };
-typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
+typedef void eloop_handler(void *data);
 void eloop_when(eloop x, eloop_handler *h, void *data)
 {
 acquire(&x->lock);

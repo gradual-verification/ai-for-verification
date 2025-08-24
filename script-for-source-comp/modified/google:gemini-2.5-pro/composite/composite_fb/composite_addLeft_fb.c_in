@@ -37,3 +37,7 @@ fix(parent);
 }
 }
 struct Node* addLeft(struct Node* node)
+{
+struct Node* newChild = internalAddLeft(node);
+return newChild;
+}
