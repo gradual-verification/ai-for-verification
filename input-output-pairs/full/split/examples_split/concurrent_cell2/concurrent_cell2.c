@@ -107,10 +107,6 @@ lemma void locked_preserved_by_interference(trace t1, trace t2, int ctid)
   switch(t2) {
     case zero:
     case inc(tid, trace0):
-      if(t1 == t2) {
-      } else {
-        test(t1, trace0, ctid);
-      }
     case dec(tid, trace0):
       if(t1 == t2) {
       } else {
@@ -152,7 +148,7 @@ void only_allow_incrementing(int* c)
   //@ assert last_seen(c, currentThread, ?trace2);
   //@ last_seen_allowed(c, currentThread);
   //@ prefix_smaller(trace1, trace2, currentThread);
-  assert x1 <= x2;
+  assert(x1 <= x2);
 }
 
 void acquire(int* c)

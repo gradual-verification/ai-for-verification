@@ -12,5 +12,5 @@ The random function generates a random boolean value.
 
 The function does not modify the state of any variables, and we don't need to implement it.
 */
-bool random();
+bool my_random();
 

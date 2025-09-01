@@ -762,21 +762,23 @@ lemma void replaceItself(tree value, struct Node* node)
 
 // client code
 
-int main() //@ : main
+// client visible definitions - lemma's
+struct Node* internalCreate(struct Node* parent)
   //@ requires true;
-  //@ ensures true;
+  //@ ensures result!=0 &*& tree(result, tree(result, Nil, Nil)) &*& result->parent |-> parent;
 {
-  struct Node* mytree = create();
-  struct Node* child = addLeft(mytree);
-  //@ rotate(child);
-  struct Node* child2 = addLeft(child);
-  //@ rotate(child2);
-  int c = getNbOfNodes(child2);
-  assert(c==1);
-  abort();
+  struct Node* n = malloc(sizeof(struct Node));
+  if(n==0) {
+    abort();
+  } else {}
+  n->left = 0;
+  n->right = 0;
+  n->parent = parent;
+  n->count = 1;
+  //@ close tree(n, tree(n, Nil, Nil)); 
+  return n;
 }
 
-// client visible definitions - lemma's
 
 struct Node* create() 
   //@ requires true;
@@ -796,6 +798,40 @@ struct Node* create()
   //@ close isTree(n, tree(n, Nil, Nil));
   return n;
 }
+
+
+void fix(struct Node* node)
+  /*@ requires node->count |-> ?c &*& context(node, ?value, c) &*& node!=0; @*/   
+  /*@ ensures context(node, value, c + 1) &*& node->count |-> c + 1; @*/
+{
+  int tmp = node->count;
+  if (tmp == INT_MAX) {
+    abort();
+  }
+  node->count = tmp + 1;
+  //@ open context(node, value, c);
+  struct Node* parent = node->parent;
+  if(parent==0){
+  } else {
+    fix(parent);
+  }
+  //@ close context(node, value, c+1);
+}
+
+
+struct Node* internalAddLeft(struct Node* node)
+  /*@ requires context(node, ?value, 1) &*& node!=0 &*& node->left |-> 0 &*& node->right |-> 0 &*&
+               malloc_block_Node(node) &*& node->count |-> 1; @*/
+  /*@ ensures context(node, value, 2) &*& node!=0 &*& node->left |-> result &*& node->right |-> 0 &*&
+               malloc_block_Node(node) &*& node->count |-> 2 &*& 
+               tree(result, tree(result, Nil, Nil)) &*& result->parent |-> node; @*/
+{
+    struct Node* child = internalCreate(node);
+    node->left = child;
+    fix(node);
+    return child;
+}
+
 
 struct Node* addLeft(struct Node* node)
   //@ requires isTree(node, ?v) &*& valueOf(v, node) == tree(node, Nil, Nil);
@@ -829,6 +865,18 @@ struct Node* addLeft(struct Node* node)
   return newChild;
 }
 
+
+int internalGetNbOfNodes(struct Node* n)
+  //@ requires tree(n, ?value);
+  //@ ensures tree(n, value) &*& result == size(value);
+{
+  //@ open tree(n, value);
+  int c = n->count;
+  //@ close tree(n, value);
+  return c;
+}
+
+
 int getNbOfNodes(struct Node* n)
   //@ requires isTree(n, ?value);
   //@ ensures isTree(n, value) &*& size(valueOf(value, n))==result; 
@@ -846,60 +894,17 @@ int getNbOfNodes(struct Node* n)
     return c;
 }
 
-struct Node* internalCreate(struct Node* parent)
+
+int main() //@ : main
   //@ requires true;
-  //@ ensures result!=0 &*& tree(result, tree(result, Nil, Nil)) &*& result->parent |-> parent;
+  //@ ensures true;
 {
-  struct Node* n = malloc(sizeof(struct Node));
-  if(n==0) {
-    abort();
-  } else {}
-  n->left = 0;
-  n->right = 0;
-  n->parent = parent;
-  n->count = 1;
-  //@ close tree(n, tree(n, Nil, Nil)); 
-  return n;
-}
-
-struct Node* internalAddLeft(struct Node* node)
-  /*@ requires context(node, ?value, 1) &*& node!=0 &*& node->left |-> 0 &*& node->right |-> 0 &*&
-               malloc_block_Node(node) &*& node->count |-> 1; @*/
-  /*@ ensures context(node, value, 2) &*& node!=0 &*& node->left |-> result &*& node->right |-> 0 &*&
-               malloc_block_Node(node) &*& node->count |-> 2 &*& 
-               tree(result, tree(result, Nil, Nil)) &*& result->parent |-> node; @*/
-{
-    struct Node* child = internalCreate(node);
-    node->left = child;
-    fix(node);
-    return child;
-}
-
-void fix(struct Node* node)
-  /*@ requires node->count |-> ?c &*& context(node, ?value, c) &*& node!=0; @*/   
-  /*@ ensures context(node, value, c + 1) &*& node->count |-> c + 1; @*/
-{
-  int tmp = node->count;
-  if (tmp == INT_MAX) {
-    abort();
-  }
-  node->count = tmp + 1;
-  //@ open context(node, value, c);
-  struct Node* parent = node->parent;
-  if(parent==0){
-  } else {
-    fix(parent);
-  }
-  //@ close context(node, value, c+1);
-}
-
-
-int internalGetNbOfNodes(struct Node* n)
-  //@ requires tree(n, ?value);
-  //@ ensures tree(n, value) &*& result == size(value);
-{
-  //@ open tree(n, value);
-  int c = n->count;
-  //@ close tree(n, value);
-  return c;
+  struct Node* mytree = create();
+  struct Node* child = addLeft(mytree);
+  //@ rotate(child);
+  struct Node* child2 = addLeft(child);
+  //@ rotate(child2);
+  int c = getNbOfNodes(child2);
+  assert(c==1);
+  abort();
 }

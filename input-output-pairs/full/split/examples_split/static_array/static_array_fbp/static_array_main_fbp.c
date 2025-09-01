@@ -86,7 +86,7 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_fbp)
   if (ar1[i] == 7)
    { t = ar1[2]; }
    else
-   { assert false; }
+   { assert(false); }
 
   assert (ar1[26] == 2);
 
@@ -103,7 +103,7 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_fbp)
   if (s->ar[i] == 7)
    { t += s->ar[2]; }
    else
-   { assert false; }
+   { assert(false); }
 
   assert (s->ar[0] == 1);
   free (s);
@@ -119,7 +119,7 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_fbp)
   if (ar2[i] == 7)
    { t += ar2[2]; }
    else
-   { assert false; }
+   { assert(false); }
 
   assert (ar2[1] == 7);
 

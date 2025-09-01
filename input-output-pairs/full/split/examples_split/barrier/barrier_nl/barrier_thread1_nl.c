@@ -113,10 +113,10 @@ void barrier(struct barrier *barrier)
 void thread1(struct data *d)
 {
    
-    struct barrier *barrier = d->barrier;
+    struct barrier *b = d->barrier;
     {
         
-        barrier(barrier);
+        barrier(b);
 
     }
     int N = 0;
@@ -129,7 +129,7 @@ void thread1(struct data *d)
         d->y1 = a1 + 2 * a2;
         {
             
-            barrier(barrier);
+            barrier(b);
            
         }
         a1 = d->y1;
@@ -140,13 +140,13 @@ void thread1(struct data *d)
         d->i = N;
         {
             
-            barrier(barrier);
+            barrier(b);
 
         }
     }
     {
         
-        barrier(barrier);
+        barrier(b);
 
     }
     d->i = 0;

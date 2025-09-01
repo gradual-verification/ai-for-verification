@@ -11,7 +11,7 @@ predicate Counter(struct Counter* c, int v) =
 
 
 // TODO: make this function pass the verification
-bool random();
+bool my_random();
 //@ requires true;
 //@ ensures true;
 

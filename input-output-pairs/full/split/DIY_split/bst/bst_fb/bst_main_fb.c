@@ -103,7 +103,7 @@ int main()
     bool found8 = bst_search(tree, 8);
     bool found20 = bst_search(tree, 20);
 
-    tree_traverse(tree);
+    bst_traverse(tree);
 
     bst_dispose(tree);
     return 0;

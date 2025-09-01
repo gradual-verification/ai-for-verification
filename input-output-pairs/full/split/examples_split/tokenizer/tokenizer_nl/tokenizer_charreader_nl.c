@@ -2,6 +2,13 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+// TODO: make this function pass the verification
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
 
 struct tokenizer
 {
@@ -11,11 +18,4 @@ struct tokenizer
 	struct string_buffer* buffer;
 };
 
-
-// TODO: make this function pass the verification
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
 
