@@ -9,7 +9,7 @@ struct rwlock {
 
 /*@
 
-predicate rwlock_inv(struct rwlock *l) =
+predicate_ctor rwlock_inv(struct rwlock *l)() =
     l->readers |-> ?r &*& 0 <= r;
 
 predicate rwlock(struct rwlock *l) =
@@ -33,7 +33,7 @@ struct rwlock *rwlock_init()
     struct rwlock *l = malloc(sizeof(struct rwlock));
     if (l == 0) abort();
     l->readers = 0;
-    //@ close rwlock_inv(l);
+    //@ close rwlock_inv(l)();
     //@ close create_mutex_ghost_arg(rwlock_inv(l));
     l->mutex = create_mutex();
     //@ close rwlock(l);

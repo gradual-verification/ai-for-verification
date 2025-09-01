@@ -110,22 +110,25 @@ fixpoint bool incr_only(trace trace) {
 
 /*@
 lemma void incr_only_monotonic(trace t1, trace t2)
-    requires is_prefix(t1, t2) == true &*& incr_only(t2) == true;
-    ensures execute_trace(t1) <= execute_trace(t2);
+  requires is_prefix(t1, t2) == true &*& incr_only(t2) == true;
+  ensures execute_trace(t1) <= execute_trace(t2);
 {
-    switch (t2) {
-        case zero:
-        case inc(t2_0):
-            if (t1 != t2) {
-                incr_only_monotonic(t1, t2_0);
-            }
-        case dec(t2_0):
-            assert false;
-        case cas_(old, new, t2_0):
-            if (t1 != t2) {
-                incr_only_monotonic(t1, t2_0);
-            }
-    }
+  switch(t2) {
+    case zero:
+    case inc(t2_prime):
+      if (t1 != t2) {
+        incr_only_monotonic(t1, t2_prime);
+      }
+    case dec(t2_prime):
+      assert false;
+    case cas_(old, new, t2_prime):
+      if (t1 != t2) {
+        incr_only_monotonic(t1, t2_prime);
+        if (execute_trace(t2_prime) == old) {
+        } else {
+        }
+      }
+  }
 }
 @*/
 
@@ -136,21 +139,30 @@ int get(struct cell* c)
   int res;
   mutex_acquire(c->mutex);
   //@ open lock_invariant(c, allowed)();
-  //@ assert c->x |-> ?v &*& [_]c->id |-> ?id &*& exists(?trace_lock) &*& trace_extension(id, trace_lock) &*& execute_trace(trace_lock) == v &*& allowed(trace_lock) == true;
-  //@ open observed(c, trace0);
-  //@ assert is_prefix_handle(?h, id, trace0);
+  //@ assert c->x |-> ?v &*& [_]c->id |-> ?id &*& exists(?trace_current) &*& trace_extension(id, trace_current) &*& execute_trace(trace_current) == v &*& allowed(trace_current) == true;
   res = c->x;
   {
     /*@
-    consuming_box_predicate trace_extension(id, trace_lock)
+    open observed(c, trace0);
+    assert is_prefix_handle(?h, id, trace0);
+    
+    consuming_box_predicate trace_extension(id, trace_current)
     consuming_handle_predicate is_prefix_handle(h, trace0)
     perform_action read() {
-      open is_prefix_handle_invariant(h, trace0);
+        is_prefix_handle_preserved_by_read();
     }
-    producing_box_predicate trace_extension(trace_lock)
-    producing_handle_predicate is_prefix_handle(h, trace_lock);
+    producing_box_predicate trace_extension(trace_current)
+    producing_handle_predicate is_prefix_handle(trace0);
+    
+    is_prefix_handle_invariant(h);
+    
+    handle h_new = create_handle is_prefix_handle(trace_current);
+    is_prefix_refl(trace_current);
+    
+    close observed(c, trace_current);
+    
+    dispose_handle is_prefix_handle(h, trace0);
     @*/
-    //@ close observed(c, trace_lock);
   }
   //@ close lock_invariant(c, allowed)();
   mutex_release(c->mutex);
@@ -164,14 +176,13 @@ void only_allow_incrementing(struct cell* c)
   //@ ensures [f]cell(c, incr_only);
 {
   int x1 = get(c);
-  //@ assert observed(c, ?trace1) &*& execute_trace(trace1) == x1;
+  //@ assert observed(c, ?trace1) &*& incr_only(trace1) == true &*& execute_trace(trace1) == x1 &*& is_prefix(trace0, trace1) == true;
   int x2 = get(c);
-  //@ assert observed(c, ?trace2) &*& execute_trace(trace2) == x2 &*& incr_only(trace2) == true &*& is_prefix(trace1, trace2) == true;
+  //@ assert observed(c, ?trace2) &*& incr_only(trace2) == true &*& execute_trace(trace2) == x2 &*& is_prefix(trace1, trace2) == true;
   
   //@ incr_only_monotonic(trace1, trace2);
-  
-  assert x1 <= x2;
+  assert(x1 <= x2);
   
   //@ open observed(c, trace2);
-  //@ leak is_prefix_handle(_, _, _);
+  //@ dispose_handle is_prefix_handle(_, trace2);
 }

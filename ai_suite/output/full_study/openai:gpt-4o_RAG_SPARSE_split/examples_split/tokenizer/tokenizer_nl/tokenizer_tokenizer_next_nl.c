@@ -2,6 +2,13 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
+
 struct tokenizer
 {
     charreader*           next_char;
@@ -10,18 +17,13 @@ struct tokenizer
     struct string_buffer* buffer;
 };
 
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-
 /*@
-predicate tokenizer(struct tokenizer* tokenizer) =
-    tokenizer->next_char |-> ?next_char &*&
-    tokenizer->lastread |-> ?lastread &*&
-    tokenizer->lasttoken |-> ?lasttoken &*&
-    tokenizer->buffer |-> ?buffer &*&
+predicate tokenizer(struct tokenizer* tokenizer, charreader* reader, int lastread, int lasttoken, struct string_buffer* buffer) =
+    tokenizer->next_char |-> reader &*&
+    tokenizer->lastread |-> lastread &*&
+    tokenizer->lasttoken |-> lasttoken &*&
+    tokenizer->buffer |-> buffer &*&
+    malloc_block_tokenizer(tokenizer) &*&
     string_buffer(buffer, _);
 @*/
 
@@ -33,8 +35,8 @@ if the original lastread char is -2 (which means empty).
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer);
-    //@ ensures tokenizer(tokenizer);
+    //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
+    //@ ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& (lastread == -2 ? -128 <= new_lastread && new_lastread <= 127 : new_lastread == lastread);
 {
     if (tokenizer->lastread == -2)
     {
@@ -53,8 +55,8 @@ The tokenizer_peek function reads the next value character of a tokenizer and re
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_peek(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer);
-    //@ ensures tokenizer(tokenizer) &*& result == tokenizer->lastread;
+    //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
+    //@ ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& result == new_lastread;
 {
     tokenizer_fill_buffer(tokenizer);
     return tokenizer->lastread;
@@ -67,8 +69,8 @@ The tokenizer_drop function drops the last character of a tokenizer by assigning
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 void tokenizer_drop(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer);
-    //@ ensures tokenizer(tokenizer);
+    //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
+    //@ ensures tokenizer(tokenizer, reader, -2, lasttoken, buffer);
 {
     tokenizer->lastread = -2;
 }
@@ -81,8 +83,8 @@ and drops that character by assigning the lastread field to -2 (meaning empty).
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_next_char(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer);
-    //@ ensures tokenizer(tokenizer);
+    //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
+    //@ ensures tokenizer(tokenizer, reader, -2, lasttoken, buffer) &*& result == lastread;
 {
     int c;
 
@@ -112,8 +114,8 @@ The tokenizer_skip_whitespace function reads and drops all the whitespace charac
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 void tokenizer_skip_whitespace(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer);
-    //@ ensures tokenizer(tokenizer);
+    //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
+    //@ ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& (is_whitespace(new_lastread) == false);
 {
     while (is_whitespace(tokenizer_peek(tokenizer)))
     {
@@ -157,8 +159,8 @@ If it peeks a non-digit character, it exits the loop and returns the token that 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_eat_number(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer);
-    //@ ensures tokenizer(tokenizer);
+    //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
+    //@ ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& result == '0';
 {
     for (;;)
     {
@@ -198,8 +200,8 @@ If it peeks a non-symbol character, it exits the loop and return the token that 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_eat_symbol(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer);
-    //@ ensures tokenizer(tokenizer);
+    //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
+    //@ ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& result == 'S';
 {
     for (;;)
     {
@@ -226,8 +228,8 @@ The tokenizer_next function gets the next token of the tokenizer by reading the 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_next(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer);
-    //@ ensures tokenizer(tokenizer);
+    //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
+    //@ ensures tokenizer(tokenizer, reader, ?new_lastread, ?new_lasttoken, buffer) &*& result == new_lasttoken;
 {
     int c;
     int token;

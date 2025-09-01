@@ -2,6 +2,12 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
 struct tokenizer
 {
     charreader*           next_char;
@@ -10,11 +16,12 @@ struct tokenizer
     struct string_buffer* buffer;
 };
 
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
+//@ predicate tokenizer(struct tokenizer *tokenizer, charreader *next_char, int lastread, int lasttoken, struct string_buffer *buffer) =
+//@     tokenizer->next_char |-> next_char &*&
+//@     tokenizer->lastread |-> lastread &*&
+//@     tokenizer->lasttoken |-> lasttoken &*&
+//@     tokenizer->buffer |-> buffer &*&
+//@     string_buffer(buffer, _);
 
 // TODO: make this function pass the verification
 /***
@@ -24,12 +31,9 @@ The tokenizer_get_buffer function returns the buffer of a given tokenizer
 It needs to make sure that the given tokenizer preserves its property of tokenizer, and 
 the return value is a string buffer.
 */
-//@ predicate tokenizer(struct tokenizer *tokenizer, struct string_buffer *buffer) = 
-//@     tokenizer->buffer |-> buffer &*& string_buffer(buffer);
-
+//@ requires tokenizer(tokenizer, ?next_char, ?lastread, ?lasttoken, ?buffer);
+//@ ensures tokenizer(tokenizer, next_char, lastread, lasttoken, buffer) &*& result == buffer;
 struct string_buffer *tokenizer_get_buffer(struct tokenizer *tokenizer)
-    //@ requires tokenizer(tokenizer, ?buffer);
-    //@ ensures tokenizer(tokenizer, buffer) &*& result == buffer;
 {
     return tokenizer->buffer;
 }

@@ -1,6 +1,13 @@
 #include "stdio.h"
-#include "stdlib.h"
+#include "stdlib.hh"
 #include "stringBuffers.h"
+
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+//@ predicate is_charreader(charreader *f);
 
 
 struct tokenizer
@@ -11,23 +18,30 @@ struct tokenizer
 	struct string_buffer* buffer;
 };
 
-
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-//@ predicate_family is_charreader(void* f)();
-
 /*@
-predicate tokenizer(struct tokenizer *t; charreader *next_char, int lastread, int lasttoken, struct string_buffer *buffer, list<char> buffer_cs) =
-    t->next_char |-> next_char &*&
-    is_charreader(next_char)() &*&
-    t->lastread |-> lastread &*&
-    t->lasttoken |-> lasttoken &*&
-    t->buffer |-> buffer &*&
-    string_buffer(buffer, buffer_cs) &*&
-    malloc_block_tokenizer(t);
+// Predicate for the core data of a tokenizer, without owning the string_buffer's content.
+// It is parameterized by the buffer pointer `sb` to link it to the string_buffer predicate.
+predicate tokenizer_core(struct tokenizer *tok; struct string_buffer *sb) =
+    tok->next_char |-> ?f &*& is_charreader(f) == true &*&
+    tok->lastread |-> _ &*&
+    tok->lasttoken |-> _ &*&
+    tok->buffer |-> sb &*&
+    malloc_block_tokenizer(tok);
+
+// Predicate for a fully-owned tokenizer, including its string buffer.
+predicate tokenizer(struct tokenizer *tok; list<char> cs) =
+    exists(?sb) &*&
+    tokenizer_core(tok, sb) &*&
+    string_buffer(sb, cs);
+
+// Lemma to re-assemble a tokenizer from its parts.
+lemma void tokenizer_unsplit(struct tokenizer *tok);
+    requires tokenizer_core(tok, ?sb) &*& string_buffer(sb, ?cs);
+    ensures tokenizer(tok, cs);
+{
+    close exists(sb);
+    close tokenizer(tok, cs);
+}
 @*/
 
 
@@ -40,8 +54,13 @@ It needs to make sure that the given tokenizer preserves its property of tokeniz
 the return value is a string buffer.
 */
 struct string_buffer *tokenizer_get_buffer(struct tokenizer *tokenizer)
-    //@ requires [?f]tokenizer(tokenizer, ?nc, ?lr, ?lt, ?b, ?cs);
-    //@ ensures [f]tokenizer(tokenizer, nc, lr, lt, b, cs) &*& result == b;
+    //@ requires tokenizer(tokenizer, ?cs);
+    //@ ensures tokenizer_core(tokenizer, result) &*& string_buffer(result, cs);
 {
-    return tokenizer->buffer;
+    //@ open tokenizer(tokenizer, cs);
+    //@ open exists(?sb);
+    //@ open tokenizer_core(tokenizer, sb);
+    struct string_buffer *b = tokenizer->buffer;
+    //@ close tokenizer_core(tokenizer, b);
+    return b;
 }

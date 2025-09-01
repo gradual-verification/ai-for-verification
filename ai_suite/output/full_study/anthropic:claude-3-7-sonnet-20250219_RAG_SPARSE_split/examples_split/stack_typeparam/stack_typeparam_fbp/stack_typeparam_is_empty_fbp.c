@@ -1,5 +1,14 @@
 #include "stdlib.h"
   
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -30,14 +39,6 @@ predicate Node<T>(predicate(void *, T) Ownership, struct node* node, void *data,
   node->next |-> next &*&
   Ownership(data, info) &*&
   node != 0;
-
-predicate lseg<T>(predicate(void *, T) Ownership, struct node* first, struct node* last, Stack<T> S) =
-  first == last ?
-    S == Nil
-  :
-    Node(Ownership, first, ?data, ?info, ?next) &*&
-    lseg(Ownership, next, last, ?S0) &*&
-    S == Cons(data, info, S0);
 
 predicate StackItems<T>(predicate(void *, T) Ownership, struct node* head, Stack<T> S) =
   head == 0 ? S == Nil :
@@ -90,7 +91,7 @@ fixpoint int Size<T>(Stack<T> S)
     case Nil:
       return 0;
     
-    case Cons(h, t, T):
+    case Cons(x, y, T):
       return 1 + Size(T);
   }
 }
@@ -142,15 +143,6 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
 
 bool is_empty/*@ <T> @*/(struct stack* stack)
   //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack);
@@ -158,9 +150,9 @@ bool is_empty/*@ <T> @*/(struct stack* stack)
 {
   //@ open Stack<T>(stack, destructor, Ownership, Stack);
   struct node* first = stack->first;
-  //@ open StackItems<T>(Ownership, first, Stack);
+  //@ open StackItems(Ownership, first, Stack);
   bool result = first == 0;
-  //@ close StackItems<T>(Ownership, first, Stack);
+  //@ close StackItems(Ownership, first, Stack);
   //@ close Stack<T>(stack, destructor, Ownership, Stack);
   return result;
 }

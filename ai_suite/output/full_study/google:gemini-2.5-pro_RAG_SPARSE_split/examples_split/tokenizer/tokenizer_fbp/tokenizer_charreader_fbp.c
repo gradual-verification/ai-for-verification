@@ -2,6 +2,10 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+typedef int charreader();
+    //@ requires true;
+    //@ ensures result >= -128 && result <= 127;
+
 
 struct tokenizer
 {
@@ -26,9 +30,3 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
   t->lasttoken |-> ?lasttoken &*&
   t->buffer |-> buffer;
 @*/
-
-
-// TODO: make this function pass the verification
-typedef int charreader();
-    //@ requires true;
-    //@ ensures -128 <= result &*& result <= 127;

@@ -4,8 +4,7 @@
 //@ #include "arrays.gh"
 //@ #include "listex.gh"
 
-typedef struct
-{
+typedef struct {
   int x;
   int ar[7];
   int y;
@@ -15,12 +14,6 @@ struct mystruct {
   struct_with_array s1;
   int s2;
 };
-
-//@ predicate struct_with_array(struct_with_array *s, int x, list<int> ar, int y) =
-//@   s->x |-> x &*& s->ar |-> ?ar_array &*& ints(ar_array, 7, ar) &*& s->y |-> y;
-
-//@ predicate mystruct(struct mystruct *s, struct_with_array s1, int s2) =
-//@   struct_with_array(&s->s1, ?x, ?ar, ?y) &*& s1 == (struct_with_array){x, ar, y} &*& s->s2 |-> s2;
 
 struct mystruct my_global_nested_struct = {{42, {420, 421, 422, 423, 424, 425, 426}, -3}, -99};
 
@@ -37,9 +30,9 @@ struct point points[] = { { 10, 20 }, { 30, 40 } };
 -description: This function checks if the global struct is different from the local structs.
 It makes sure that my_global_nested_struct still keeps the structure of mystruct. 
 */
-//@ requires true;
-//@ ensures true;
 static void foo()
+  //@ requires true;
+  //@ ensures true;
 {
   struct mystruct my_local_nested_struct;
   memset(&my_local_nested_struct, 0, sizeof(struct mystruct));
@@ -62,11 +55,11 @@ static void foo()
 It requires that the first and 26-th elements are in the range of 0 ~ 50.
 It ensures that the first element is updated to the sum of the first and 26-th elements.
 */
-//@ requires ar2[0] |-> ?v0 &*& ar2[26] |-> ?v26 &*& 0 <= v0 &*& v0 <= 50 &*& 0 <= v26 &*& v26 <= 50;
-//@ ensures ar2[0] |-> v0 + v26 &*& ar2[26] |-> v26;
-void mod_ar2 (void)
+void mod_ar2(void)
+  //@ requires ar2[0..55] |-> ?vals &*& 0 <= nth(0, vals) &*& nth(0, vals) <= 50 &*& 0 <= nth(26, vals) &*& nth(26, vals) <= 50;
+  //@ ensures ar2[0..55] |-> update(1, nth(1, vals) + nth(26, vals), vals);
 {
-  ar2[0] = ar2[0] + ar2[26];
+  ar2[1] = ar2[1] + ar2[26];
   return;
 }
 
@@ -76,9 +69,9 @@ void mod_ar2 (void)
 -description: This function does some checking on global and local structs or array. 
 It makes sure to return 0.
 */
-//@ requires true;
-//@ ensures result == 0;
 int main(int argc, char **argv) //@ : main_full(static_array_main_nl)
+  //@ requires module(static_array_main_nl, true) &*& 0 <= argc &*& [_]argv(argv, argc, ?arguments);
+  //@ ensures junk();
 {
   struct_with_array *bigArrayPtr = bigArray;
   
@@ -99,12 +92,12 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_nl)
   if (ar1[i] == 7)
   { t = ar1[2]; }
   else
-  { assert false; }
+  { assert(false); }
 
-  assert (ar1[26] == 2);
+  assert(ar1[26] == 2);
 
   /* array inside a struct */
-  s = malloc (sizeof (struct_with_array));
+  s = malloc(sizeof(struct_with_array));
   if (s == 0) { abort(); }
 
   s->ar[0] = 1;
@@ -116,32 +109,32 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_nl)
   if (s->ar[i] == 7)
   { t += s->ar[2]; }
   else
-  { assert false; }
+  { assert(false); }
 
-  assert (s->ar[0] == 1);
-  free (s);
+  assert(s->ar[0] == 1);
+  free(s);
 
   /* global array */
   ar2[0] = 1;
   ar2[1] = 5;
   ar2[2] = 0;
   ar2[26] = 2;
-  mod_ar2 ();
+  mod_ar2();
 
   if (ar2[i] == 7)
   { t += ar2[2]; }
   else
-  { assert false; }
+  { assert(false); }
 
-  assert (ar2[0] == 7);
+  assert(ar2[1] == 7);
 
-  assert (points[1].y == 40);
+  assert(points[1].y == 40);
   
   int xs[] = {1, 2, 3}, ys[] = {4, 5, 6, 7};
   xs[1] = xs[2];
-  assert (xs[1] == 3);
+  assert(xs[1] == 3);
   ys[2] = ys[3];
-  assert (ys[2] == 7);
+  assert(ys[2] == 7);
 
   return (t);
 }

@@ -2,10 +2,22 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
-// Forward declaration of charreader function type
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
 typedef int charreader();
 
-// Definition of the tokenizer structure
+/*@
+predicate tokenizer(struct tokenizer *tokenizer, charreader *next_char, int lastread, int lasttoken, struct string_buffer *buffer) =
+    tokenizer->next_char |-> next_char &*&
+    tokenizer->lastread |-> lastread &*&
+    tokenizer->lasttoken |-> lasttoken &*&
+    tokenizer->buffer |-> buffer &*&
+    malloc_block_tokenizer(tokenizer) &*&
+    (lastread == -2 ? true : -128 <= lastread && lastread <= 127);
+@*/
+
 struct tokenizer
 {
     charreader*           next_char;
@@ -14,22 +26,19 @@ struct tokenizer
     struct string_buffer* buffer;
 };
 
-// Predicate to describe the state of a tokenizer
-/*@
-predicate tokenizer(struct tokenizer* tokenizer, charreader* reader, int lastread, int lasttoken, struct string_buffer* buffer) =
-    tokenizer->next_char |-> reader &*&
-    tokenizer->lastread |-> lastread &*&
-    tokenizer->lasttoken |-> lasttoken &*&
-    tokenizer->buffer |-> buffer &*&
-    malloc_block_tokenizer(tokenizer) &*&
-    (lastread == -2 ? true : -128 <= lastread && lastread <= 127) &*&
-    string_buffer(buffer, _);
-@*/
+/***
+ * Description:
+The tokenizer_fill_buffer function reads a character from the next_char reader of the tokenizer and updates the lastread char,
+if the original lastread char is -2 (which means empty).
 
-// Function to fill the tokenizer buffer
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
+/*@
+requires tokenizer(tokenizer, ?next_char, ?lastread, ?lasttoken, ?buffer);
+ensures tokenizer(tokenizer, next_char, ?new_lastread, lasttoken, buffer) &*&
+        (lastread == -2 ? -128 <= new_lastread && new_lastread <= 127 : new_lastread == lastread);
+@*/
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
-    //@ ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& (lastread == -2 ? -128 <= new_lastread && new_lastread <= 127 : new_lastread == lastread);
 {
     if (tokenizer->lastread == -2)
     {
@@ -41,11 +50,20 @@ void tokenizer_fill_buffer(struct tokenizer* tokenizer)
     }
 }
 
-// Function to peek the next character in the tokenizer
 // TODO: make this function pass the verification
+/***
+ * Description:
+The tokenizer_peek function reads the next value character of a tokenizer and returns the updated lastread character.
+
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
+/*@
+requires tokenizer(tokenizer, ?next_char, ?lastread, ?lasttoken, ?buffer);
+ensures tokenizer(tokenizer, next_char, ?new_lastread, lasttoken, buffer) &*&
+        result == new_lastread &*&
+        (lastread == -2 ? -128 <= new_lastread && new_lastread <= 127 : new_lastread == lastread);
+@*/
 int tokenizer_peek(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
-    //@ ensures tokenizer(tokenizer, reader, result, lasttoken, buffer) &*& -128 <= result && result <= 127;
 {
     tokenizer_fill_buffer(tokenizer);
     return tokenizer->lastread;

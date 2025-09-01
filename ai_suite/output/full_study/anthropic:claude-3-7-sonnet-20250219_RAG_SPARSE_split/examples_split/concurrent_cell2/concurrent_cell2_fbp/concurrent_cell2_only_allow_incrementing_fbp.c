@@ -88,17 +88,61 @@ void only_allow_incrementing(int* c)
   int x2 = atomic_load(c);
   //@ last_seen_allowed(c, currentThread);
   
+  //@ assert last_seen(c, currentThread, ?trace2);
+  //@ assert is_good_prefix(trace0, trace2, currentThread) == true;
+  //@ assert incr_only(trace2) == true;
+  //@ assert execute_trace(trace2) == x2;
+  
+  // We need to prove that x1 <= x2
+  // This follows from the fact that the trace only allows increments
+  // Let's prove this by induction on the trace
+  
   /*@
-  // Get the current trace after the second load
-  assert last_seen(c, currentThread, ?trace2);
-  
-  // Prove that the trace satisfies incr_only
-  assert incr_only(trace2) == true;
-  
-  // Prove that x1 <= x2 using the properties of incr_only
-  // Since incr_only only allows increments and CAS operations where old <= new,
-  // the value can only increase or stay the same
+  // Helper lemma to prove that execute_trace is monotonically increasing for incr_only traces
+  lemma void incr_only_monotonic(trace t1, trace t2)
+    requires incr_only(t1) == true &*& incr_only(t2) == true &*& is_good_prefix(t1, t2, currentThread) == true;
+    ensures execute_trace(t1) <= execute_trace(t2);
+  {
+    switch(t2) {
+      case zero:
+        // Base case: t1 must be zero too
+        assert t1 == zero;
+        break;
+      case inc(tid, t2_0):
+        if(t1 == t2) {
+          // If t1 equals t2, then execute_trace(t1) == execute_trace(t2)
+        } else {
+          // Otherwise, t1 is a good prefix of t2_0
+          assert tid != currentThread;
+          assert is_good_prefix(t1, t2_0, currentThread) == true;
+          incr_only_monotonic(t1, t2_0);
+          // execute_trace(t2) = execute_trace(t2_0) + 1
+          // So execute_trace(t1) <= execute_trace(t2_0) < execute_trace(t2)
+        }
+        break;
+      case dec(tid, t2_0):
+        // This case is impossible because incr_only(t2) would be false
+        assert false;
+        break;
+      case cas_(tid, old, new, t2_0):
+        if(t1 == t2) {
+          // If t1 equals t2, then execute_trace(t1) == execute_trace(t2)
+        } else {
+          // Otherwise, t1 is a good prefix of t2_0
+          assert tid != currentThread;
+          assert is_good_prefix(t1, t2_0, currentThread) == true;
+          incr_only_monotonic(t1, t2_0);
+          // For incr_only, we know old <= new
+          assert old <= new;
+          // So execute_trace(t2) >= execute_trace(t2_0)
+          // Therefore execute_trace(t1) <= execute_trace(t2_0) <= execute_trace(t2)
+        }
+        break;
+    }
+  }
   @*/
   
-  assert x1 <= x2;
+  //@ incr_only_monotonic(trace0, trace2);
+  
+  assert(x1 <= x2);
 }

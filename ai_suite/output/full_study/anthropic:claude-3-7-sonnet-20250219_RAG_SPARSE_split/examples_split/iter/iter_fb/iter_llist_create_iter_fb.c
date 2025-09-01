@@ -41,13 +41,37 @@ struct iter {
 /*@
 
 predicate llist_with_node(struct llist *list, list<int> v0, struct node *n, list<int> vn) =
-  list->first |-> ?f &*& list->last |-> ?l &*& malloc_block_llist(list) &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
+  list->first |-> ?f &*& list->last |-> ?l &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
 
 predicate iter(struct iter *i, real frac, struct llist *l, list<int> v0, list<int> v) =
   i->current |-> ?n &*& [frac]llist_with_node(l, v0, n, v);
 
 @*/
 
+/*@
+// Helper lemma to convert from lseg to lseg2 and llist to llist_with_node
+lemma void lseg_to_lseg2(struct node *first, struct node *last, list<int> v)
+  requires lseg(first, last, v);
+  ensures lseg2(first, last, last, v);
+{
+  open lseg(first, last, v);
+  if (first != last) {
+    lseg_to_lseg2(_n, last, t);
+    close lseg2(first, last, last, v);
+  } else {
+    close lseg2(first, last, last, nil);
+  }
+}
+
+lemma void llist_to_llist_with_node(struct llist *list, list<int> v)
+  requires llist(list, v);
+  ensures llist_with_node(list, v, list->first, v);
+{
+  open llist(list, v);
+  lseg_to_lseg2(_f, _l, v);
+  close llist_with_node(list, v, _f, v);
+}
+@*/
 
 // TODO: make this function pass the verification
 struct iter *llist_create_iter(struct llist *l)
@@ -56,25 +80,28 @@ struct iter *llist_create_iter(struct llist *l)
 {
     struct iter *i = 0;
     struct node *f = 0;
+    i = malloc(sizeof(struct iter));
+    if (i == 0) {
+      abort();
+    }
+
     //@ open [frac]llist(l, v);
     //@ assert l->first |-> ?_f;
     //@ assert l->last |-> ?_l;
     //@ assert lseg(_f, _l, v);
     //@ assert node(_l, _, _);
     
-    i = malloc(sizeof(struct iter));
-    if (i == 0) {
-      abort();
-    }
-    
     f = l->first;
     i->current = f;
     
-    //@ close lseg2(f, f, _l, nil);
-    //@ assert lseg(f, _l, v);
+    //@ close [frac/2]lseg(_f, _l, v);
+    //@ close [frac/2]node(_l, _, _);
+    //@ close [frac/2]llist(l, v);
+    
+    //@ lseg_to_lseg2(_f, _l, v);
+    //@ close llist_with_node(l, v, f, v);
     //@ close [frac/2]llist_with_node(l, v, f, v);
     //@ close iter(i, frac/2, l, v, v);
-    //@ close [frac/2]llist(l, v);
     
     return i;
 }

@@ -42,38 +42,6 @@ typedef lemma void cas_allowed(trace pretrace, fixpoint(trace, bool) allowed, in
 @*/
 
 /*@
-fixpoint bool is_prefix(trace pref, trace t) {
-  switch (t) {
-    case zero: return pref == zero;
-    case inc(tid, t0): return pref == t || is_prefix(pref, t0);
-    case dec(tid, t0): return pref == t || is_prefix(pref, t0);
-    case cas_(tid, old, new, t0): return pref == t || is_prefix(pref, t0);
-  }
-}
-
-lemma void is_good_prefix_is_prefix(trace pref, trace t, int ctid)
-  requires is_good_prefix(pref, t, ctid) == true;
-  ensures is_prefix(pref, t) == true;
-{
-  switch(t) {
-    case zero:
-    case inc(tid, t0):
-      if (pref != t) {
-        is_good_prefix_is_prefix(pref, t0, ctid);
-      }
-    case dec(tid, t0):
-      if (pref != t) {
-        is_good_prefix_is_prefix(pref, t0, ctid);
-      }
-    case cas_(tid, old, new, t0):
-      if (pref != t) {
-        is_good_prefix_is_prefix(pref, t0, ctid);
-      }
-  }
-}
-@*/
-
-/*@
 fixpoint bool incr_only(trace trace) {
   switch(trace) {
     case zero: return true;
@@ -82,27 +50,26 @@ fixpoint bool incr_only(trace trace) {
     case cas_(tid, old, new, trace0): return old <= new && incr_only(trace0);
   }
 }
-@*/
 
-/*@
-lemma void execute_incr_only_prefix(trace t1, trace t2)
-  requires is_prefix(t1, t2) == true &*& incr_only(t2) == true;
-  ensures execute_trace(t1) <= execute_trace(t2);
+lemma void execute_incr_only_prefix(trace trace1, trace trace2)
+  requires incr_only(trace2) == true &*& is_good_prefix(trace1, trace2, ?ctid) == true;
+  ensures execute_trace(trace1) <= execute_trace(trace2);
 {
-  switch(t2) {
+  switch(trace2) {
     case zero:
-    case inc(tid, t2_0):
-      if (t1 == t2) {
+      assert trace1 == zero;
+    case inc(tid, trace2_0):
+      if (trace1 == trace2) {
       } else {
-        execute_incr_only_prefix(t1, t2_0);
+        execute_incr_only_prefix(trace1, trace2_0);
       }
-    case dec(tid, t2_0):
-      // This case is impossible because incr_only(t2) is true.
+    case dec(tid, trace2_0):
       assert false;
-    case cas_(tid, old, new, t2_0):
-      if (t1 == t2) {
+    case cas_(tid, old, new, trace2_0):
+      if (trace1 == trace2) {
       } else {
-        execute_incr_only_prefix(t1, t2_0);
+        execute_incr_only_prefix(trace1, trace2_0);
+        assert execute_trace(trace2_0) <= execute_trace(trace2);
       }
   }
 }
@@ -134,15 +101,17 @@ int atomic_load(int* c);
   //@ ensures [f]cell(c, allowed) &*& last_seen(c, currentThread, ?currtrace) &*& is_good_prefix(oldtrace, currtrace, currentThread) == true &*& execute_trace(currtrace) == result;
   
 
+// TODO: make this function pass the verification
 void only_allow_incrementing(int* c)
   //@ requires [?f]cell(c, incr_only) &*& last_seen(c, currentThread, ?trace0);
   //@ ensures [f]cell(c, incr_only) &*& last_seen(c, currentThread, _);
 {
   int x1 = atomic_load(c);
-  int x2 = atomic_load(c);
-  //@ assert last_seen(c, currentThread, ?trace2) &*& is_good_prefix(?trace1, trace2, currentThread) == true;
   //@ last_seen_allowed(c, currentThread);
-  //@ is_good_prefix_is_prefix(trace1, trace2, currentThread);
+
+  int x2 = atomic_load(c);
+  //@ last_seen_allowed(c, currentThread);
+
   //@ execute_incr_only_prefix(trace1, trace2);
-  assert x1 <= x2;
+  assert(x1 <= x2);
 }

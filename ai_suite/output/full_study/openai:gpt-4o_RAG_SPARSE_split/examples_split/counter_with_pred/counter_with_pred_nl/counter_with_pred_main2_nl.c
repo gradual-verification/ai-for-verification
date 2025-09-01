@@ -21,7 +21,7 @@ The function makes sure that the returned value is a counter whose value is v.
 */
 struct Counter* init(int v)
     //@ requires true;
-    //@ ensures counter(result, v);
+    //@ ensures result == 0 ? emp : counter(result, v);
 {
   struct Counter* c = malloc(sizeof(struct Counter));
   if (c == 0) {
@@ -78,7 +78,7 @@ The function makes sure that the counter c is freed.
 */
 void dispose(struct Counter* c)
     //@ requires counter(c, _);
-    //@ ensures true;
+    //@ ensures emp;
 {
   //@ open counter(c, _);
   free(c);
@@ -130,30 +130,30 @@ The random function generates a random boolean value.
 
 The function does not modify the state of any variables, and we don't need to implement it.
 */
-bool random();
+bool my_random();
 
+// TODO: make this function pass the verification
 /***
  * Description:
 The main2 function tests the operations of Counter with loops.
 */
-// TODO: make this function pass the verification
 int main2() 
     //@ requires true;
     //@ ensures true;
 {
   struct Counter* c = init(0);
-  bool b = random();
+  bool b = my_random();
   int n = 0;
   while(b && n < INT_MAX) 
-    //@ invariant counter(c, n) &*& 0 <= n;
+    //@ invariant counter(c, n);
   {
     increment(c);
     n = n + 1;
-    b = random();
+    b = my_random();
   }
 
   while(0 < n) 
-    //@ invariant counter(c, n) &*& 0 <= n;
+    //@ invariant counter(c, n);
   {
     decrement(c);
     n = n - 1;

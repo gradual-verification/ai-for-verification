@@ -2,6 +2,12 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
 
 struct tokenizer
 {
@@ -10,13 +16,6 @@ struct tokenizer
 	int                   lasttoken; // the last token parsed
 	struct string_buffer* buffer;
 };
-
-
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
 
 
 // TODO: make this function pass the verification
@@ -28,13 +27,12 @@ It ensures nothing.
 */
 /*@
 // Specification for is_digit function
-// Requires true because it doesn't need any heap resources
-// Ensures true because it doesn't modify any heap resources
-// The function just performs a pure computation
-requires true;
-ensures result == (c >= '0' && c <= '9');
+// Requires true because it doesn't need any preconditions
+// Ensures true because it doesn't modify any state
 @*/
 bool is_digit(int c)
+//@ requires true;
+//@ ensures result == (c >= '0' && c <= '9');
 {
 	return c >= '0' && c <= '9';
 }

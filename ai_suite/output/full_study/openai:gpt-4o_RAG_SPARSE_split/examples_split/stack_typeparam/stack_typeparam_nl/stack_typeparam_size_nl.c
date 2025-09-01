@@ -1,6 +1,18 @@
 #include "stdlib.h"
 
 /*
+  Destructors
+*/
+
+/*
+destructor function
+-params: data
+-description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
+*/
+typedef void destructor(void* data);
+
+
+/*
   Stack
 */
 
@@ -27,29 +39,16 @@ struct data
   int bar;
 };
 
-/*
-  Destructors
-*/
-
-/*
-destructor function
--params: data
--description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
-*/
-typedef void destructor(void* data);
-
 /*@
 
-predicate nodes(struct node *node, list<void*> values) =
-    node == 0 ?
-        values == nil
-    :
-        node->data |-> ?data &*& node->next |-> ?next &*& malloc_block_node(node) &*&
-        nodes(next, ?values0) &*& values == cons(data, values0);
+predicate nodes(struct node* node, list<void*> values) =
+  node == 0 ? 
+    values == nil 
+  : 
+    node->data |-> ?data &*& node->next |-> ?next &*& malloc_block_node(node) &*& nodes(next, ?values0) &*& values == cons(data, values0);
 
-predicate stack(struct stack *stack, list<void*> values) =
-    stack->first |-> ?first &*& stack->destructor |-> ?destructor &*& stack->size |-> ?size &*&
-    malloc_block_stack(stack) &*& nodes(first, values) &*& length(values) == size;
+predicate stack(struct stack* stack, list<void*> values) =
+  stack->first |-> ?first &*& stack->destructor |-> ?destructor &*& stack->size |-> ?size &*& malloc_block_stack(stack) &*& nodes(first, values) &*& length(values) == size;
 
 @*/
 
@@ -58,11 +57,9 @@ predicate stack(struct stack *stack, list<void*> values) =
 -params: A stack
 This function makes sure to return the size of the stack and does not modify the stack. */
 int size(struct stack* stack)
-    //@ requires stack(stack, ?values);
-    //@ ensures stack(stack, values) &*& result == length(values);
+  //@ requires stack(stack, ?values);
+  //@ ensures stack(stack, values) &*& result == length(values);
 {
-    //@ open stack(stack, values);
-    int size = stack->size;
-    //@ close stack(stack, values);
-    return size;
+  int size = stack->size;
+  return size;
 }

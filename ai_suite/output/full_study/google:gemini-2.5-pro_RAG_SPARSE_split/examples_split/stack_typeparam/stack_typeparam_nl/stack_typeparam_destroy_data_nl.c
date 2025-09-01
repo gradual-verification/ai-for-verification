@@ -1,8 +1,27 @@
 #include "stdlib.h"
-
-// Forward declaration of the destructor type to make the C code valid.
-typedef void destructor(void* data);
   
+/*
+  Destructors
+*/
+
+/*@
+// A predicate family to specify the precondition of a destructor.
+// The family is indexed by the function pointer of the destructor.
+predicate_family destructor_pre(void* func)(void* data);
+
+// A predicate family to specify the postcondition of a destructor.
+predicate_family destructor_post(void* func)(void* data);
+@*/
+
+/*
+destructor function
+-params: data
+-description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
+*/
+typedef void destructor(void* data);
+    //@ requires destructor_pre(this)(data);
+    //@ ensures destructor_post(this)(data);
+
 
 /*
   Stack
@@ -33,40 +52,23 @@ struct data
 };
 
 /*@
-// A predicate to represent ownership of a 'struct data'.
-// It includes ownership of the fields and the memory block itself.
+// Predicate describing a valid, allocated data struct.
 predicate data_struct(struct data *d; int foo, int bar) =
     d->foo |-> foo &*&
     d->bar |-> bar &*&
     malloc_block_data(d);
 @*/
 
-
-/*
-  Destructors
-*/
-
 /*@
-// A predicate family to abstract over the data that a destructor function can destroy.
-// It is indexed by the function pointer of the destructor.
-predicate_family data_to_destruct(void* destructor)(void* data);
-@*/
+// Instantiation of the destructor_pre predicate family for the destroy_data function.
+// It requires ownership of a data_struct.
+predicate_family_instance destructor_pre(destroy_data)(void* data) =
+    data_struct(data, _, _);
 
-/*
-destructor function
--params: data
--description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
-*/
-typedef void destructor(void* data);
-    //@ requires data_to_destruct(this)(data);
-    //@ ensures emp;
-
-
-/*@
-// An instance of the predicate family for the 'destroy_data' function.
-// It specifies that 'destroy_data' knows how to destroy a 'struct data'.
-predicate_family_instance data_to_destruct(destroy_data)(void* data) =
-    data_struct((struct data*)data, _, _);
+// Instantiation of the destructor_post predicate family for the destroy_data function.
+// It ensures nothing, as the memory is freed.
+predicate_family_instance destructor_post(destroy_data)(void* data) =
+    true;
 @*/
 
 // TODO: make this function pass the verification
@@ -76,10 +78,11 @@ predicate_family_instance data_to_destruct(destroy_data)(void* data) =
   - description: This function frees the memory allocated for the data.
 */
 void destroy_data(struct data* data) //@ : destructor
-    //@ requires data_to_destruct(destroy_data)(data);
-    //@ ensures emp;
+    //@ requires destructor_pre(destroy_data)(data);
+    //@ ensures destructor_post(destroy_data)(data);
 {
-    //@ open data_to_destruct(destroy_data)(data);
+    //@ open destructor_pre(destroy_data)(data);
     //@ open data_struct(data, _, _);
     free(data);
+    //@ close destructor_post(destroy_data)(data);
 }

@@ -3,13 +3,6 @@
 
 typedef struct eloop *eloop;
 
-struct eloop {
-    int lock;
-    int signalCount;
-    eloop_handler *handler;
-    void *handlerData;
-};
-
 /***
  * Description:
 The eloop_handler function pointer that handles the data of an event loop and preserves the property of event loop and data.
@@ -18,16 +11,29 @@ The eloop_handler function pointer that handles the data of an event loop and pr
 */
 typedef void eloop_handler(void *data);
 
-//@ predicate eloop_inv(eloop x, predicate() P) = 
-//@     x->signalCount |-> ?count &*& count >= 0 &*&
-//@     x->handler |-> ?handler &*& x->handlerData |-> ?handlerData &*&
-//@     (count > 0 ? handler != 0 : true) &*&
-//@     lock(&x->lock, eloop_lock_inv(x, P)) &*& P();
+struct eloop {
+    int lock;
+    int signalCount;
+    eloop_handler *handler;
+    void *handlerData;
+};
 
-/*@ predicate eloop_lock_inv(eloop x, predicate() P)() =
-    x->signalCount |-> ?count &*& count >= 0 &*&
-    x->handler |-> ?handler &*& x->handlerData |-> ?handlerData &*&
-    (count > 0 ? handler != 0 : true) &*& P();
+/*@
+predicate eloop_inv(eloop x, predicate() P) =
+    x->signalCount |-> ?count &*&
+    x->handler |-> ?handler &*&
+    x->handlerData |-> ?handlerData &*&
+    (count > 0 ? handler != 0 &*& P() : true);
+
+predicate eloop(eloop x, predicate() P) =
+    malloc_block_eloop(x) &*&
+    lock(&x->lock, eloop_inv(x, P));
+
+predicate_family_instance thread_run_pre(eloop_loop)(eloop x, predicate() P) =
+    eloop(x, P);
+
+predicate_family_instance thread_run_post(eloop_loop)(eloop x, predicate() P) =
+    eloop(x, P);
 @*/
 
 // TODO: make this function pass the verification
@@ -42,8 +48,8 @@ releasing the lock and handling the data (if the handler is found.)
 It makes sure that x preserves the property of event loop before and after the execution.
 */
 void eloop_loop(eloop x)
-    //@ requires eloop_inv(x, ?P);
-    //@ ensures eloop_inv(x, P);
+    //@ requires thread_run_pre(eloop_loop)(x, ?P);
+    //@ ensures thread_run_post(eloop_loop)(x, P);
 {
     for (;;)
     {
@@ -51,17 +57,20 @@ void eloop_loop(eloop x)
         void *handlerData;
         
         acquire(&x->lock);
-        //@ open eloop_lock_inv(x, P)();
+        //@ open eloop_inv(x, P);
         if (x->signalCount > 0) {
             x->signalCount--;
             handler = x->handler;
             if (handler)
                 handlerData = x->handlerData;
         }
-        //@ close eloop_lock_inv(x, P)();
+        //@ close eloop_inv(x, P);
         release(&x->lock);
         
-        if (handler)
+        if (handler) {
+            //@ P();
             handler(handlerData);
+            //@ close eloop_inv(x, P);
+        }
     }
 }

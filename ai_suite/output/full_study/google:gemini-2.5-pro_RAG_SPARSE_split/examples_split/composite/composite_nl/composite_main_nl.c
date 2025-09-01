@@ -1,4 +1,5 @@
 #include "stdlib.h"
+#include "assert.h"
 #include "limits.h"
 
 /***
@@ -14,10 +15,6 @@
  * - Updating node counts recursively.
  */
 
-/***
- * Structure representing a node in the tree.
- * Each node has a left child, a right child, a parent, and an integer count.
- */
 struct Node {
     struct Node* left;
     struct Node* right;
@@ -26,152 +23,53 @@ struct Node {
 };
 
 /*@
-// Predicate for a well-formed tree (or subtree).
-// It is precise, meaning VeriFast can reason more powerfully about it.
-// `n`: root of the subtree.
-// `p`: parent of the root `n`.
-// `c`: number of nodes in the subtree.
-predicate tree(struct Node* n, struct Node* p; int c) =
+// Predicate for a node's fields, used for convenience.
+predicate node_fields(struct Node* n, struct Node* l, struct Node* r, struct Node* p, int c) =
+    n->left |-> l &*&
+    n->right |-> r &*&
+    n->parent |-> p &*&
+    n->count |-> c &*&
+    malloc_block_Node(n);
+
+// Forward declaration for mutual recursion with `unfixed_path`.
+predicate tree(struct Node *n; struct Node *p, int size);
+
+// Predicate for the path of nodes from `n` to the root whose counts are incorrect.
+// `child` is the immediate child of `n` that is on the path towards the modification.
+// `child_new_size` is the new, correct size of the subtree at `child`.
+predicate unfixed_path(struct Node* n, struct Node* child, int child_new_size) =
     n == 0 ?
-        c == 0
+        child == 0
     :
-        n->left |-> ?l &*& n->right |-> ?r &*& n->parent |-> p &*& n->count |-> c &*&
-        malloc_block_Node(n) &*&
-        tree(l, n, ?cl) &*& tree(r, n, ?cr) &*&
-        c == 1 + cl + cr;
-
-// Predicate for the path from a node 'n' up to the root.
-// It owns the `parent` and `count` fields of each node on the path.
-// `n`: the starting node of the path.
-// `counts`: a list of the 'count' values for each node on the path.
-predicate path_up(struct Node* n; list<int> counts) =
-    n == 0 ?
-        counts == nil
-    :
-        n->parent |-> ?p &*& n->count |-> ?c &*&
-        path_up(p, ?p_counts) &*&
-        counts == cons(c, p_counts);
-
-// Fixpoint function to increment every element in a list of integers by 1.
-fixpoint list<int> add1_to_list(list<int> xs) {
-    switch(xs) {
-        case nil: return nil;
-        case cons(h, t): return cons(h + 1, add1_to_list(t));
-    }
-}
-
-// Lemma to convert a `tree` predicate into its constituent parts,
-// including the `path_up` predicate for its ancestors.
-lemma void tree_to_path_up_lemma(struct Node* n)
-    requires tree(n, ?p, ?c);
-    ensures n == 0 ?
-        c == 0
-    :
-        n->left |-> ?l &*& n->right |-> ?r &*& n->parent |-> p &*& n->count |-> c &*&
-        malloc_block_Node(n) &*&
-        tree(l, n, ?cl) &*& tree(r, n, ?cr) &*&
-        c == 1 + cl + cr &*&
-        path_up(p, ?p_counts);
-{
-    open tree(n, p, c);
-    if (n != 0) {
-        tree_to_path_up_lemma(n->parent);
-        close path_up(n, cons(c, _));
-    }
-}
-
-// Lemma to convert the constituent parts of a tree back into
-// a single `tree` predicate.
-lemma void path_up_to_tree_lemma(struct Node* n)
-    requires
-        n == 0 ?
-            true
+        node_fields(n, ?l, ?r, ?p, ?c) &*&
+        c < INT_MAX &*&
+        (l == child ?
+            tree(r, n, ?rsize) &*&
+            c == 1 + (child_new_size - 1) + rsize &*&
+            unfixed_path(p, n, 1 + child_new_size + rsize)
         :
-            n->left |-> ?l &*& n->right |-> ?r &*& n->parent |-> ?p &*& n->count |-> ?c &*&
-            malloc_block_Node(n) &*&
-            tree(l, n, ?cl) &*& tree(r, n, ?cr) &*&
-            c == 1 + cl + cr &*&
-            path_up(p, ?p_counts);
-    ensures tree(n, p, c);
-{
-    if (n != 0) {
-        open path_up(n->parent, _);
-        path_up_to_tree_lemma(n->parent);
-    }
-    close tree(n, _, _);
-}
+            r == child ?
+                tree(l, n, ?lsize) &*&
+                c == 1 + lsize + (child_new_size - 1) &*&
+                unfixed_path(p, n, 1 + lsize + child_new_size)
+            :
+                // This case should not happen in a well-formed path.
+                false
+        );
+
+// Predicate for a valid tree. It is precise, meaning for a given `n`,
+// `p` and `size` are uniquely determined.
+predicate tree(struct Node *n; struct Node *p, int size) =
+    n == 0 ?
+        size == 0
+    :
+        node_fields(n, ?l, ?r, p, size) &*&
+        tree(l, n, ?lsize) &*&
+        tree(r, n, ?rsize) &*&
+        size == 1 + lsize + rsize &*&
+        1 <= size;
+
 @*/
-
-struct Node* internalCreate(struct Node* parent);
-void fix(struct Node* node);
-struct Node* internalAddLeft(struct Node* node);
-int internalGetNbOfNodes(struct Node* n);
-
-
-/***
- * Description:
- * The `create` function creates and returns a new tree node with no children.
- *
- * @returns A pointer to a newly allocated `Node`.
- *
- * This function makes sure to return a tree with one node. 
- */
-struct Node* create()
-    //@ requires true;
-    //@ ensures tree(result, 0, 1);
-{
-    struct Node* n = malloc(sizeof(struct Node));
-    if(n == 0) {
-        abort();
-    }
-    n->parent = 0;
-    n->left = 0;
-    n->right = 0;
-    n->count = 1;
-  
-    //@ close tree(0, n, 0);
-    //@ close tree(0, n, 0);
-    //@ close tree(n, 0, 1);
-    return n;
-}
-
-
-/***
- * Description:
- * The `addLeft` function adds a left child to a given node and returns the newly added child.
- *
- * @param node - A pointer to the node where the left child should be added, and its both children are originally empty.
- *
- * The function makes sure that a new (and distinct) left child node is added and returned.
- */
-struct Node* addLeft(struct Node* node)
-    //@ requires tree(node, ?p, ?c) &*& node->left == 0;
-    //@ ensures tree(node, p, c + 1) &*& tree(result, node, 1) &*& result == node->left;
-{
-    //@ open tree(node, p, c);
-    //@ tree_to_path_up_lemma(node->parent);
-    struct Node* newChild = internalAddLeft(node);
-    //@ path_up_to_tree_lemma(node->parent);
-    //@ close tree(node, p, c + 1);
-    return newChild;
-}
-
-
-/***
- * Description:
- * The `getNbOfNodes` function retrieves the number of nodes in the subtree rooted at `n`.
- *
- * @param n - A pointer to the root of the subtree.
- *
- * The function makes sure not to change the subtree and return the `count` field of the node.
- */
-int getNbOfNodes(struct Node* n)
-    //@ requires tree(n, ?p, ?c);
-    //@ ensures tree(n, p, c) &*& result == c;
-{
-    int c = internalGetNbOfNodes(n);
-    return c;
-}
 
 
 /***
@@ -194,7 +92,6 @@ struct Node* internalCreate(struct Node* parent)
     n->right = 0;
     n->parent = parent;
     n->count = 1;
-
     //@ close tree(0, n, 0);
     //@ close tree(0, n, 0);
     //@ close tree(n, parent, 1);
@@ -204,39 +101,28 @@ struct Node* internalCreate(struct Node* parent)
 
 /***
  * Description:
- * The `internalAddLeft` function creates and adds a left child to a node.
+ * The `create` function creates and returns a new tree node with no children.
  *
- * @param node - A pointer to the node where the left child should be added. The node has empty left child.
+ * @returns A pointer to a newly allocated `Node`.
  *
- * The function makes sure to add a left child to node and updates the `count` field of its ancestors by incrementing by 1.
+ * This function makes sure to return a tree with one node. 
  */
-struct Node* internalAddLeft(struct Node* node)
-    /*@
-    requires
-        node != 0 &*&
-        node->left |-> 0 &*& node->right |-> ?r &*& node->parent |-> ?p &*& node->count |-> ?c &*&
-        malloc_block_Node(node) &*&
-        tree(r, node, ?cr) &*& c == 1 + cr &*&
-        path_up(p, ?p_counts);
-    @*/
-    /*@
-    ensures
-        tree(result, node, 1) &*&
-        node->left |-> result &*& node->right |-> r &*& node->parent |-> p &*& node->count |-> c + 1 &*&
-        malloc_block_Node(node) &*&
-        tree(r, node, cr) &*&
-        path_up(p, add1_to_list(p_counts));
-    @*/
+struct Node* create()
+    //@ requires true;
+    //@ ensures tree(result, 0, 1);
 {
-    struct Node* child = internalCreate(node);
-    node->left = child;
-    
-    //@ open path_up(node->parent, _);
-    //@ close path_up(node, cons(node->count, _));
-    fix(node);
-    //@ open path_up(node, _);
-    
-    return child;
+    struct Node* n = malloc(sizeof(struct Node));
+    if(n == 0) {
+        abort();
+    }
+    n->parent = 0;
+    n->left = 0;
+    n->right = 0;
+    n->count = 1;
+    //@ close tree(0, n, 0);
+    //@ close tree(0, n, 0);
+    //@ close tree(n, 0, 1);
+    return n;
 }
 
 
@@ -249,22 +135,98 @@ struct Node* internalAddLeft(struct Node* node)
  * The function makes sure that the count field of current node with its ancestors is incremented by 1
  */
 void fix(struct Node* node)
-    //@ requires node != 0 &*& path_up(node, ?counts);
-    //@ ensures path_up(node, add1_to_list(counts));
+    //@ requires unfixed_path(node, ?child, ?child_new_size);
+    //@ ensures tree(node, _, _);
 {
-    //@ open path_up(node, counts);
-    //@ assert counts == cons(?c, ?p_counts);
+    //@ open unfixed_path(node, child, child_new_size);
+    if (node == 0) {
+        //@ close tree(0, _, 0);
+        return;
+    }
+    //@ assert node_fields(node, ?l, ?r, ?p, ?c);
     int tmp = node->count;
     if (tmp == INT_MAX) {
         abort();
     }
     node->count = tmp + 1;
+    int new_size = tmp + 1;
 
     struct Node* parent = node->parent;
-    if(parent != 0) {
+    if (parent != 0) {
+        //@ assert unfixed_path(parent, node, new_size);
         fix(parent);
+        //@ assert tree(parent, _, _);
     }
-    //@ close path_up(node, add1_to_list(counts));
+
+    /*@
+    if (l == child) {
+        open unfixed_path(child, _, _); // Should be a leaf of the unfixed path.
+        close tree(child, node, child_new_size);
+    } else {
+        open unfixed_path(child, _, _);
+        close tree(child, node, child_new_size);
+    }
+    @*/
+    
+    //@ if (l == child) { close tree(l, node, child_new_size); }
+    //@ if (r == child) { close tree(r, node, child_new_size); }
+    
+    //@ close tree(node, p, new_size);
+}
+
+
+/***
+ * Description:
+ * The `internalAddLeft` function creates and adds a left child to a node.
+ *
+ * @param node - A pointer to the node where the left child should be added. The node has empty left child.
+ *
+ * The function makes sure to add a left child to node and updates the `count` field of its ancestors by incrementing by 1.
+ */
+struct Node* internalAddLeft(struct Node* node)
+    //@ requires tree(node, ?p, ?size) &*& node->left |-> 0;
+    //@ ensures tree(node, p, size + 1) &*& tree(result, node, 1);
+{
+    //@ open tree(node, p, size);
+    //@ assert node_fields(node, 0, ?r, p, size);
+    //@ open tree(0, node, 0);
+    //@ assert tree(r, node, ?rsize);
+    //@ assert size == 1 + 0 + rsize;
+
+    struct Node* child = internalCreate(node);
+    //@ assert tree(child, node, 1);
+    node->left = child;
+
+    //@ close unfixed_path(node, child, 1);
+    fix(node);
+    //@ assert tree(node, p, size + 1);
+    
+    //@ open tree(node, p, size + 1);
+    //@ assert node->left |-> ?new_l;
+    //@ assert tree(new_l, node, 1);
+    //@ close tree(node, p, size + 1);
+    
+    return child;
+}
+
+
+/***
+ * Description:
+ * The `addLeft` function adds a left child to a given node and returns the newly added child.
+ *
+ * @param node - A pointer to the node where the left child should be added, and its both children are originally empty.
+ *
+ * The function makes sure that a new (and distinct) left child node is added and returned.
+ */
+struct Node* addLeft(struct Node* node)
+    //@ requires tree(node, ?p, 1);
+    //@ ensures tree(node, p, 2) &*& tree(result, node, 1) &*& result != node;
+{
+    //@ open tree(node, p, 1);
+    //@ assert node->left |-> 0;
+    //@ close tree(node, p, 1);
+    struct Node* newChild = internalAddLeft(node);
+    return newChild;
 }
 
 
@@ -277,13 +239,30 @@ void fix(struct Node* node)
  * The function simply returns the `count` field of the node.
  */
 int internalGetNbOfNodes(struct Node* n)
-    //@ requires tree(n, ?p, ?c);
-    //@ ensures tree(n, p, c) &*& result == c;
+    //@ requires tree(n, ?p, ?size);
+    //@ ensures tree(n, p, size) &*& result == size;
 {
-    //@ open tree(n, p, c);
-    int c_val = n->count;
-    //@ close tree(n, p, c);
-    return c_val;
+    //@ open tree(n, p, size);
+    int c = n->count;
+    //@ close tree(n, p, size);
+    return c;
+}
+
+
+/***
+ * Description:
+ * The `getNbOfNodes` function retrieves the number of nodes in the subtree rooted at `n`.
+ *
+ * @param n - A pointer to the root of the subtree.
+ *
+ * The function makes sure not to change the subtree and return the `count` field of the node.
+ */
+int getNbOfNodes(struct Node* n)
+    //@ requires tree(n, ?p, ?size);
+    //@ ensures tree(n, p, size) &*& result == size;
+{
+    int c = internalGetNbOfNodes(n);
+    return c;
 }
 
 
@@ -303,21 +282,20 @@ int main()
     struct Node* mytree = create();
     //@ assert tree(mytree, 0, 1);
     
-    //@ open tree(mytree, 0, 1);
     struct Node* child = addLeft(mytree);
-    //@ close tree(mytree, 0, 2);
-    //@ assert tree(child, mytree, 1);
-
+    //@ assert tree(mytree, 0, 2) &*& tree(child, mytree, 1);
+    
     //@ open tree(mytree, 0, 2);
-    //@ open tree(child, mytree, 1);
+    //@ assert tree(child, mytree, 1);
     struct Node* child2 = addLeft(child);
-    //@ close tree(child, mytree, 2);
+    //@ assert tree(child, mytree, 2) &*& tree(child2, child, 1);
     //@ close tree(mytree, 0, 3);
-    //@ assert tree(child2, child, 1);
   
     int c = getNbOfNodes(child2);
+    //@ assert tree(child2, child, 1) &*& c == 1;
     assert(c == 1);
     
+    // Clean up memory to avoid leaks in verification, although the program aborts.
     //@ open tree(mytree, 0, 3);
     //@ open tree(child, mytree, 2);
     //@ open tree(child2, child, 1);

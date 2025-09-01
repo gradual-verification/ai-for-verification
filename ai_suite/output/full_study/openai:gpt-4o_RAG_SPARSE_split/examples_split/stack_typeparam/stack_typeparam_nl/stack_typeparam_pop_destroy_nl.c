@@ -1,6 +1,17 @@
 #include "stdlib.h"
 
 /*
+  Destructors
+*/
+
+/*
+destructor function
+-params: data
+-description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
+*/
+typedef void destructor(void* data);
+
+/*
   Stack
 */
 
@@ -27,17 +38,6 @@ struct data
   int bar;
 };
 
-/*
-  Destructors
-*/
-
-/*
-destructor function
--params: data
--description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
-*/
-typedef void destructor(void* data);
-
 /*@
 
 predicate nodes(struct node* n, list<void*> vs) =
@@ -46,8 +46,10 @@ predicate nodes(struct node* n, list<void*> vs) =
   : 
     n->data |-> ?d &*& n->next |-> ?next &*& malloc_block_node(n) &*& nodes(next, ?vs0) &*& vs == cons(d, vs0);
 
-predicate stack(struct stack* s, list<void*> vs, destructor* d) =
-  s->first |-> ?first &*& s->destructor |-> d &*& s->size |-> ?size &*& malloc_block_stack(s) &*& nodes(first, vs) &*& length(vs) == size;
+predicate stack(struct stack* s, list<void*> vs) =
+  s->first |-> ?f &*& s->destructor |-> ?d &*& s->size |-> ?size &*& malloc_block_stack(s) &*& nodes(f, vs) &*& length(vs) == size;
+
+predicate is_destructor(destructor* d) = true;
 
 @*/
 
@@ -57,12 +59,11 @@ predicate stack(struct stack* s, list<void*> vs, destructor* d) =
 It requires that the stack is not empty.
 It ensures that the head element is removed and returned (with ownership) */
 void* pop(struct stack* stack)
-  //@ requires stack(stack, ?vs, ?d) &*& vs != nil;
-  //@ ensures stack(stack, tail(vs), d) &*& result == head(vs);
+  //@ requires stack(stack, ?vs) &*& vs != nil;
+  //@ ensures stack(stack, tail(vs)) &*& result == head(vs);
 {
-  //@ open stack(stack, vs, d);
+  //@ open stack(stack, vs);
   struct node* first = stack->first;
-  //@ open nodes(first, vs);
   void* data = first->data;
   stack->first = first->next;
   free(first);
@@ -70,21 +71,20 @@ void* pop(struct stack* stack)
     abort();  // or handle error as necessary
   }
   stack->size--;
-  //@ close stack(stack, tail(vs), d);
+  //@ close stack(stack, tail(vs));
   return data;
 }
 
 /* get_destructor function
 -params: A stack
-
 It makes sure to return the destructor of the stack*/
 destructor* get_destructor(struct stack* stack)
-  //@ requires stack(stack, ?vs, ?d);
-  //@ ensures stack(stack, vs, d) &*& result == d;
+  //@ requires stack(stack, ?vs);
+  //@ ensures stack(stack, vs) &*& result == stack->destructor;
 {
-  //@ open stack(stack, vs, d);
+  //@ open stack(stack, vs);
   destructor* d = stack->destructor;
-  //@ close stack(stack, vs, d);
+  //@ close stack(stack, vs);
   return d;
 }
 
@@ -93,8 +93,8 @@ destructor* get_destructor(struct stack* stack)
 -params: A stack
 It makes sure to pop the top element from the stack and destroys it*/
 void pop_destroy(struct stack* stack)
-  //@ requires stack(stack, ?vs, ?d) &*& is_destructor(d) == true;
-  //@ ensures stack(stack, tail(vs), d);
+  //@ requires stack(stack, ?vs) &*& vs != nil &*& is_destructor(stack->destructor);
+  //@ ensures stack(stack, tail(vs));
 {
   void* data = pop(stack);
   destructor* d = get_destructor(stack);

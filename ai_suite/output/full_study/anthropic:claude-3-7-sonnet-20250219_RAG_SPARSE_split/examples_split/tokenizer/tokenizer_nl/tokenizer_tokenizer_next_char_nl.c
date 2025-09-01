@@ -2,6 +2,11 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
 
 struct tokenizer
 {
@@ -11,13 +16,6 @@ struct tokenizer
 	struct string_buffer* buffer;
 };
 
-
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-
 /*@
 // Define a predicate for the tokenizer structure
 predicate tokenizer(struct tokenizer* t; charreader* reader, int lastread, int lasttoken, struct string_buffer* buffer) =
@@ -25,9 +23,8 @@ predicate tokenizer(struct tokenizer* t; charreader* reader, int lastread, int l
     t->lastread |-> lastread &*&
     t->lasttoken |-> lasttoken &*&
     t->buffer |-> buffer &*&
-    is_charreader(reader) == true &*&
-    (-2 <= lastread && lastread <= 127) &*&
-    string_buffer(buffer, ?cs);
+    string_buffer(buffer, ?cs) &*&
+    -2 <= lastread &*& lastread <= 127; // lastread is either -2 (empty), -1 (EOF), or a valid char (0-127)
 @*/
 
 /***
@@ -39,7 +36,7 @@ It needs to make sure that the given tokenizer preserves its property of tokeniz
 */
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
 //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
-//@ ensures tokenizer(tokenizer, reader, lastread == -2 ? result : lastread, lasttoken, buffer) &*& -1 <= result && result <= 127;
+//@ ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& (lastread != -2 ? new_lastread == lastread : -128 <= new_lastread &*& new_lastread <= 127);
 {
 	if ( tokenizer->lastread == -2 )
 	{
@@ -62,14 +59,14 @@ It needs to make sure that the given tokenizer preserves its property of tokeniz
 */
 int tokenizer_next_char(struct tokenizer* tokenizer)
 //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
-//@ ensures tokenizer(tokenizer, reader, -2, lasttoken, buffer) &*& -1 <= result && result <= 127;
+//@ ensures tokenizer(tokenizer, reader, -2, lasttoken, buffer) &*& result == (lastread == -2 ? ?new_lastread : lastread) &*& -128 <= result &*& result <= 127;
 {
 	int c;
-    
-    //@ open tokenizer(tokenizer, reader, lastread, lasttoken, buffer);
+
 	tokenizer_fill_buffer(tokenizer);
+	//@ open tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer);
 	c = tokenizer->lastread;
 	tokenizer->lastread = -2;
-    //@ close tokenizer(tokenizer, reader, -2, lasttoken, buffer);
+	//@ close tokenizer(tokenizer, reader, -2, lasttoken, buffer);
 	return c;
 }

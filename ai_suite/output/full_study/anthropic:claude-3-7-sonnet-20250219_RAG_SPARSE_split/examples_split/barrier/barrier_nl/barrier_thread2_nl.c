@@ -36,23 +36,21 @@ struct data {
 };
 
 /*@
-// Predicate to represent the barrier's internal state
-predicate_ctor barrier_inv(struct barrier *b)() =
+// Predicate to represent the barrier invariant
+predicate_ctor barrier_inv(struct barrier *b)() = 
     b->n |-> ?n &*& 
     b->k |-> ?k &*& 
     b->outgoing |-> ?outgoing &*& 
+    n > 0 &*& 
     0 <= k &*& k <= n;
 
-// Predicate for a barrier that can be used by threads
-predicate barrier(struct barrier *b; int n) =
-    b->mutex |-> ?m &*&
-    mutex(m, barrier_inv(b)) &*&
+// Predicate for a barrier
+predicate barrier(struct barrier *b, int n) = 
+    b->mutex |-> ?m &*& 
+    mutex(m, barrier_inv(b)) &*& 
+    malloc_block_barrier(b) &*&
     b->n |-> n &*&
-    malloc_block_barrier(b);
-
-// Predicate for a thread that is at the barrier
-predicate thread_at_barrier(struct barrier *b; int n) =
-    [1/n]barrier(b, n);
+    n > 0;
 @*/
 
 /***
@@ -72,20 +70,19 @@ predicate thread_at_barrier(struct barrier *b; int n) =
  * the barrier is exiting at the end.
  */
 void barrier(struct barrier *barrier)
-//@ requires thread_at_barrier(barrier, ?n);
-//@ ensures thread_at_barrier(barrier, n);
+//@ requires barrier->mutex |-> ?m &*& mutex(m, barrier_inv(barrier));
+//@ ensures barrier->mutex |-> m &*& mutex(m, barrier_inv(barrier));
 {
-    //@ open thread_at_barrier(barrier, n);
     struct mutex *mutex = barrier->mutex;
     mutex_acquire(mutex);
     //@ open barrier_inv(barrier)();
 
     {
         while (barrier->outgoing)
-        //@ invariant barrier->n |-> n &*& barrier->k |-> ?k &*& barrier->outgoing |-> true &*& 0 <= k &*& k <= n;
+        //@ invariant barrier->n |-> ?n &*& barrier->k |-> ?k &*& barrier->outgoing |-> ?outgoing &*& n > 0 &*& 0 <= k &*& k <= n &*& mutex_held(mutex, barrier_inv(barrier), currentThread, _);
         {
-            mutex_release(mutex);
             //@ close barrier_inv(barrier)();
+            mutex_release(mutex);
             mutex_acquire(mutex);
             //@ open barrier_inv(barrier)();
         }
@@ -99,10 +96,10 @@ void barrier(struct barrier *barrier)
         mutex_release(barrier->mutex);
     } else {
         while (!barrier->outgoing)
-        //@ invariant barrier->n |-> n &*& barrier->k |-> ?k2 &*& barrier->outgoing |-> ?out &*& 0 <= k2 &*& k2 <= n;
+        //@ invariant barrier->n |-> ?n &*& barrier->k |-> ?k &*& barrier->outgoing |-> ?outgoing &*& n > 0 &*& 0 <= k &*& k <= n &*& mutex_held(mutex, barrier_inv(barrier), currentThread, _);
         {
-            mutex_release(mutex);
             //@ close barrier_inv(barrier)();
+            mutex_release(mutex);
             mutex_acquire(mutex);
             //@ open barrier_inv(barrier)();
         }
@@ -114,30 +111,24 @@ void barrier(struct barrier *barrier)
         //@ close barrier_inv(barrier)();
         mutex_release(mutex);
     }
-    //@ close thread_at_barrier(barrier, n);
 }
 
 /*@
-// Predicate for the shared data structure
-predicate data_shared(struct data *d, struct barrier *b, int n) =
-    d->barrier |-> b &*&
-    d->x1 |-> ?x1 &*& d->x2 |-> ?x2 &*&
-    d->y1 |-> ?y1 &*& d->y2 |-> ?y2 &*&
+// Predicate for thread2's data
+predicate thread2_data(struct data *d) =
+    d->barrier |-> ?b &*&
+    barrier->mutex |-> ?m &*&
+    mutex(m, barrier_inv(b)) &*&
+    d->x1 |-> ?x1 &*&
+    d->x2 |-> ?x2 &*&
+    d->y1 |-> ?y1 &*&
+    d->y2 |-> ?y2 &*&
     d->i |-> ?i &*&
-    malloc_block_data(d) &*&
-    0 <= x1 &*& x1 <= 1000 &*&
-    0 <= x2 &*& x2 <= 1000 &*&
-    0 <= y1 &*& y1 <= 1000 &*&
-    0 <= y2 &*& y2 <= 1000;
+    malloc_block_data(d);
 
-// Thread-specific predicate for thread2
-predicate thread2_data(struct data *d, struct barrier *b, int n) =
-    [1/2]data_shared(d, b, n) &*&
-    thread_at_barrier(b, n);
-
-// Predicate family for thread2's run data
-predicate_family_instance thread_run_data(thread2)(struct data *data) =
-    thread2_data(data, ?b, ?n);
+// Predicate family for thread2 function
+predicate_family_instance thread_run_data(thread2)(struct data *d) =
+    thread2_data(d);
 @*/
 
 // TODO: make this function pass the verification
@@ -151,41 +142,36 @@ predicate_family_instance thread_run_data(thread2)(struct data *data) =
  *
  * @param d - A pointer to the shared `struct data`.
  */
-void thread2(struct data *d) //@ : thread_run
+void thread2(struct data *d)
 //@ requires thread_run_data(thread2)(d);
 //@ ensures true;
 {
     //@ open thread_run_data(thread2)(d);
-    //@ open thread2_data(d, ?b, ?n);
-    struct barrier *barrier = d->barrier;
+    struct barrier *b = d->barrier;
     {
-        //@ barrier(barrier);
+        barrier(b);
     }
     int m = 0;
     while (m < 30)
-    //@ invariant thread_at_barrier(barrier, n) &*& [1/2]data_shared(d, barrier, n) &*& 0 <= m;
+    //@ invariant d->barrier |-> b &*& b->mutex |-> ?mutex &*& mutex(mutex, barrier_inv(b)) &*& d->i |-> ?i &*& d->x1 |-> ?x1 &*& d->x2 |-> ?x2 &*& d->y1 |-> ?y1 &*& d->y2 |-> ?y2 &*& malloc_block_data(d) &*& 0 <= m;
     {
-        //@ open [1/2]data_shared(d, barrier, n);
         int a1 = d->x1;
         int a2 = d->x2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->y2 = a1 + 3 * a2;
-        //@ close [1/2]data_shared(d, barrier, n);
         {
-            //@ barrier(barrier);
+            barrier(b);
         }
-        //@ open [1/2]data_shared(d, barrier, n);
         a1 = d->y1;
         a2 = d->y2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->x2 = a1 + 3 * a2;
-        m = d->i;
-        //@ close [1/2]data_shared(d, barrier, n);
         {
-            //@ barrier(barrier);
+            barrier(b);
         }
+        m = d->i;
     }
     {
-        //@ barrier(barrier);
+        barrier(b);
     }
 }

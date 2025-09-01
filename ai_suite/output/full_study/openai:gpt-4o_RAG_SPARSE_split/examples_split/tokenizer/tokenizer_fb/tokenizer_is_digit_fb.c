@@ -2,6 +2,10 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
+
 struct tokenizer
 {
     charreader*           next_char;
@@ -24,14 +28,10 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
   t->buffer |-> buffer;
 @*/
 
-typedef int charreader();
-    //@ requires true;
-    //@ ensures true;
-
 // TODO: make this function pass the verification
 bool is_digit(int c)
     //@ requires true;
-    //@ ensures true;
+    //@ ensures (result == true) == ('0' <= c && c <= '9');
 {
     return c >= '0' && c <= '9';
 }

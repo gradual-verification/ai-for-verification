@@ -130,5 +130,10 @@ void only_allow_incrementing(struct cell* c)
 {
   int x1 = get(c);
   int x2 = get(c);
-  assert x1 <= x2;
+  assert(x1 <= x2);
+  //@ open observed(c, trace0);
+  //@ assert is_prefix(trace0, ?trace1);
+  //@ assert is_prefix(trace1, ?trace2);
+  //@ assert incr_only(trace2);
+  //@ close observed(c, trace2);
 }

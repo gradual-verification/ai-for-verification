@@ -22,14 +22,9 @@ struct mystruct my_global_nested_struct = {{42, {420, 421, 422, 423, 424, 425, 4
 
 static int ar2 [55];
 
-//@ predicate struct_with_array_arr(struct_with_array *arr, int count;) = count == 0 ? true : struct_with_array(arr) &*& struct_with_array_arr(arr + 1, count - 1);
-
 static struct_with_array bigArray[10] = {{100, {1,2,3,4}, 200}, {300, {5,6,7}, 400}}; // Incomplete initializer lists; remaining elements get default value.
 
 struct point { int x; int y; };
-//@ predicate point(struct point *p;) = p->x |-> _ &*& p->y |-> _;
-
-//@ predicate points_arr(struct point *p, int count;) = count == 0 ? true : point(p) &*& points_arr(p + 1, count - 1);
 
 struct point points[] = { { 10, 20 }, { 30, 40 } };
 
@@ -40,15 +35,28 @@ static void foo()
 {
   struct mystruct my_local_nested_struct;
   memset(&my_local_nested_struct, 0, sizeof(struct mystruct));
+  
+  //@ chars_split((char *)&my_local_nested_struct, sizeof(struct_with_array));
+  //@ chars_to_chars_((char *)&my_local_nested_struct);
   memset(&(&my_local_nested_struct)->s1, 0, sizeof(struct_with_array));
+  //@ chars_join((char *)&my_local_nested_struct);
+  
   assert(&my_global_nested_struct != &my_local_nested_struct);
   struct mystruct *sh = malloc(sizeof(struct mystruct));
   if (sh == 0) abort();
   assert(sh != &my_global_nested_struct);
   assert(sh != &my_local_nested_struct);
+  
+  //@ open mystruct(&my_global_nested_struct);
+  //@ open struct_with_array(&my_global_nested_struct.s1);
   (&(&my_global_nested_struct)->s1)->ar[5] = 100;
+  //@ close struct_with_array(&my_global_nested_struct.s1);
+  //@ close mystruct(&my_global_nested_struct);
+  
   (&(&my_local_nested_struct)->s1)->ar[5] = 200;
+  
   (&sh->s1)->ar[5] = 300;
+  
   free(sh);
 }
 
@@ -68,77 +76,74 @@ void mod_ar2 (void)
 
 // TODO: make this function pass the verification
 int main(int argc, char **argv) //@ : main_full(static_array_main_fbp)
-    //@ requires module(static_array_main_fbp, true);
-    //@ ensures result == 0;
-{
-    //@ open module(static_array_main_fbp, true);
+//@ requires module(static_array_main_fbp, true);
+//@ ensures result == 0;
+ {
+  //@ open_module();
+  
+  struct_with_array *bigArrayPtr = bigArray;
+  
+  foo();
 
-    struct_with_array *bigArrayPtr = bigArray;
-    
-    foo();
+  struct_with_array *s;
+  int    i = 1;
+  int    ar1 [55];
+  int    t;
 
-    struct_with_array *s;
-    int    i = 1;
-    int    ar1 [55];
-    int    t;
+  /* normal array */
+  ar1[ 0] = 1;
+  ar1[ 1] = 5;
+  ar1[ 2] = 0;
+  ar1[26] = 2;
+  ar1[ 1] = ar1[ 1] + ar1[26];
 
-    /* normal array */
-    ar1[ 0] = 1;
-    ar1[ 1] = 5;
-    ar1[ 2] = 0;
-    ar1[26] = 2;
-    ar1[ 1] = ar1[ 1] + ar1[26];
+  if (ar1[i] == 7)
+   { t = ar1[2]; }
+   else
+   { assert(false); }
 
-    if (ar1[i] == 7)
-    { t = ar1[2]; }
-    else
-    { assert false; }
+  assert (ar1[26] == 2);
 
-    assert (ar1[26] == 2);
+  /* array inside a struct */
+  s = malloc (sizeof (struct_with_array));
+  if (s == 0) { abort(); }
 
-    /* array inside a struct */
-    s = malloc (sizeof (struct_with_array));
-    if (s == 0) { abort(); }
+  s->ar[ 0] = 1;
+  s->ar[ 1] = 5;
+  s->ar[ 2] = 0;
+  s->ar[ 6] = 2;
+  s->ar[ 1] = s->ar[ 1] + s->ar[ 6];
 
-    s->ar[ 0] = 1;
-    s->ar[ 1] = 5;
-    s->ar[ 2] = 0;
-    s->ar[ 6] = 2;
-    s->ar[ 1] = s->ar[ 1] + s->ar[ 6];
+  if (s->ar[i] == 7)
+   { t += s->ar[2]; }
+   else
+   { assert(false); }
 
-    if (s->ar[i] == 7)
-    { t += s->ar[2]; }
-    else
-    { assert false; }
-
-    assert (s->ar[0] == 1);
-    free (s);
+  assert (s->ar[0] == 1);
+  free (s);
 
 
-    /* global array */
-    ar2[ 0] = 1;
-    ar2[ 1] = 5;
-    ar2[ 2] = 0;
-    ar2[26] = 2;
-    mod_ar2 ();
+  /* global array */
+  ar2[ 0] = 1;
+  ar2[ 1] = 5;
+  ar2[ 2] = 0;
+  ar2[26] = 2;
+  mod_ar2 ();
 
-    if (ar2[i] == 7)
-    { t += ar2[2]; }
-    else
-    { assert false; }
+  if (ar2[i] == 7)
+   { t += ar2[2]; }
+   else
+   { assert(false); }
 
-    assert (ar2[1] == 7);
+  assert (ar2[1] == 7);
 
-    //@ open points_arr(points, 2);
-    //@ open points_arr(points + 1, 1);
-    //@ open point(points + 1);
-    assert (points[1].y == 40);
-    
-    int xs[] = {1, 2, 3}, ys[] = {4, 5, 6, 7};
-    xs[1] = xs[2];
-    assert (xs[1] == 3);
-    ys[2] = ys[3];
-    assert (ys[2] == 7);
+  assert (points[1].y == 40);
+  
+  int xs[] = {1, 2, 3}, ys[] = {4, 5, 6, 7};
+  xs[1] = xs[2];
+  assert (xs[1] == 3);
+  ys[2] = ys[3];
+  assert (ys[2] == 7);
 
-    return (t);
-}
+  return (t);
+ }

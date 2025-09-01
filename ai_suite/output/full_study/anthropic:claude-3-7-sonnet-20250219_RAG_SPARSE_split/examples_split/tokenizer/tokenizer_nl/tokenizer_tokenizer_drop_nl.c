@@ -2,6 +2,22 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
+/*@
+// Define a predicate for the tokenizer structure
+predicate tokenizer(struct tokenizer *t;) =
+    t->next_char |-> ?reader &*&
+    t->lastread |-> ?lastread &*&
+    t->lasttoken |-> ?lasttoken &*&
+    t->buffer |-> ?buffer &*&
+    string_buffer(buffer, ?cs) &*&
+    is_charreader(reader) == true;
+@*/
 
 struct tokenizer
 {
@@ -12,22 +28,6 @@ struct tokenizer
 };
 
 
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-
-/*@
-// Define a predicate for the tokenizer structure
-predicate tokenizer(struct tokenizer* t; charreader* reader, int lastread, int lasttoken, struct string_buffer* buffer) =
-    t->next_char |-> reader &*&
-    t->lastread |-> lastread &*&
-    t->lasttoken |-> lasttoken &*&
-    t->buffer |-> buffer &*&
-    string_buffer(buffer, _);
-@*/
-
 // TODO: make this function pass the verification
 /***
  * Description:
@@ -36,10 +36,10 @@ The tokenizer_drop function drops the last character of a tokenizer by assigning
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 void tokenizer_drop(struct tokenizer* tokenizer)
-//@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
-//@ ensures tokenizer(tokenizer, reader, -2, lasttoken, buffer);
+//@ requires tokenizer(tokenizer);
+//@ ensures tokenizer(tokenizer);
 {
-    //@ open tokenizer(tokenizer, reader, lastread, lasttoken, buffer);
+    //@ open tokenizer(tokenizer);
     tokenizer->lastread = -2;
-    //@ close tokenizer(tokenizer, reader, -2, lasttoken, buffer);
+    //@ close tokenizer(tokenizer);
 }

@@ -1,6 +1,18 @@
 #include "stdlib.h"
   
 /*
+  Destructors
+*/
+
+/*
+destructor function
+-params: data
+-description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
+*/
+typedef void destructor(void* data);
+
+
+/*
   Stack
 */
 
@@ -29,20 +41,8 @@ struct data
 };
 
 
-/*
-  Destructors
-*/
-
-/*
-destructor function
--params: data
--description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
-*/
-typedef void destructor(void* data);
-
 /*@
-  // Predicate for the data structure
-  predicate data_structure(struct data *d; int foo, int bar) =
+  predicate data(struct data *d; int foo, int bar) =
     d->foo |-> foo &*& d->bar |-> bar &*& malloc_block_data(d);
 @*/
 
@@ -52,8 +52,8 @@ typedef void destructor(void* data);
   - description: This function creates a data structure and initializes its fields by the fiven foo and bar.
 */
 struct data* create_data(int foo, int bar)
-  //@ requires true;
-  //@ ensures data_structure(result, foo, bar);
+//@ requires true;
+//@ ensures data(result, foo, bar);
 {
   struct data* data = malloc( sizeof( struct data ) );
   if ( data == 0 ) abort();

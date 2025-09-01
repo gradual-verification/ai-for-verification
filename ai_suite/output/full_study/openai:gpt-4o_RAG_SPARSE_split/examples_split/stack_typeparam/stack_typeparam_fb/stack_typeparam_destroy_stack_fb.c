@@ -1,6 +1,14 @@
 #include "stdlib.h"
 
 /*
+  Destructors
+*/
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
+/*
   Stack
 */
 
@@ -129,14 +137,6 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
 // TODO: make this function pass the verification
 void destroy_stack/*@ <T> @*/(struct stack* stack)
   //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?S);
@@ -148,13 +148,11 @@ void destroy_stack/*@ <T> @*/(struct stack* stack)
   while (current != 0)
     //@ invariant StackItems(Ownership, current, ?S0);
   {
-    //@ open StackItems(Ownership, current, S0);
     struct node* next = current->next;
     //@ open Node(Ownership, current, ?data, ?info, next);
     destructor(current->data);
     free(current);
     current = next;
   }
-  //@ open StackItems(Ownership, current, _);
   free(stack);
 }

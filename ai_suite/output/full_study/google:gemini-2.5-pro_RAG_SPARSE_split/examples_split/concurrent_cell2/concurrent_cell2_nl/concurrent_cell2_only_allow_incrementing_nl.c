@@ -3,91 +3,106 @@
 
 /*@
 
-// A predicate representing a thread's permission to access the monotonic integer `c`.
-// It also holds the thread's local view of the trace of values.
-predicate monotonic_int(int* c, list<int> trace);
-
-// A fixpoint function to check if a list of integers is sorted non-decreasingly.
-fixpoint bool is_sorted(list<int> xs) {
-    switch (xs) {
-        case nil: return true;
-        case cons(h, t): return
-            switch (t) {
-                case nil: return true;
-                case cons(th, tt): return h <= th && is_sorted(t);
-            };
-    }
-}
-
-// A fixpoint function to get the last element of a list.
-fixpoint int last(list<int> xs) {
-    switch (xs) {
-        case nil: return 0; // Should not be called on nil lists in this context.
+// Fixpoint to get the last element of a list.
+fixpoint t last<t>(list<t> xs) {
+    switch(xs) {
+        case nil: return default_value<t>;
         case cons(h, t): return t == nil ? h : last(t);
     }
 }
 
-// Lemma: In a non-empty sorted list, the head is less than or equal to the head of the tail.
-lemma void is_sorted_cons(list<int> l)
-    requires is_sorted(l) == true &*& l != nil &*& tail(l) != nil;
-    ensures head(l) <= head(tail(l));
-{
-    switch(l) { case nil: case cons(h, t): }
+// Fixpoint to check if one list is a prefix of another.
+fixpoint bool is_prefix_of<t>(list<t> xs, list<t> ys) {
+    return length(xs) <= length(ys) && take(length(xs), ys) == xs;
 }
 
-// Lemma: In a non-empty sorted list, the head is less than or equal to the last element.
-lemma void last_le_last_of_suffix(list<int> l)
-    requires is_sorted(l) == true &*& l != nil;
-    ensures head(l) <= last(l);
-{
-    switch(l) {
-        case nil:
+// Fixpoint to check if a list of integers is non-decreasing.
+fixpoint bool is_non_decreasing(list<int> xs) {
+    switch (xs) {
+        case nil: return true;
         case cons(h, t):
-            if (t == nil) {
-            } else {
-                is_sorted_cons(l);
-                last_le_last_of_suffix(t);
-                le_trans(h, head(t), last(t));
+            switch (t) {
+                case nil: return true;
+                case cons(h2, t2): return h <= h2 && is_non_decreasing(t);
             }
     }
 }
 
-// Lemma: If the concatenation of two non-empty lists is sorted, then both lists are sorted,
-// and the last element of the first is less than or equal to the head of the second.
-lemma void is_sorted_append_inv(list<int> p, list<int> s)
-    requires is_sorted(append(p, s)) == true &*& p != nil &*& s != nil;
-    ensures is_sorted(p) == true &*& is_sorted(s) == true &*& last(p) <= head(s);
+// Lemma: The suffix of a non-decreasing list is also non-decreasing.
+lemma void is_non_decreasing_drop(int n, list<int> xs)
+    requires is_non_decreasing(xs) == true &*& 0 <= n;
+    ensures is_non_decreasing(drop(n, xs)) == true;
 {
-    switch(p) {
+    switch(xs) {
         case nil:
         case cons(h, t):
-            if (t == nil) {
-                is_sorted_cons(append(p, s));
-            } else {
-                is_sorted_cons(append(p, s));
-                is_sorted_append_inv(t, s);
+            if (n > 0) {
+                is_non_decreasing_drop(n - 1, t);
             }
     }
 }
 
-// Lemma: If 'prefix' is a prefix of a sorted list 'l', then the last element of 'prefix'
-// is less than or equal to the last element of 'l'.
-lemma void last_of_prefix_le_last(list<int> prefix, list<int> l)
-    requires is_prefix_of(prefix, l) == true &*& is_sorted(l) == true &*& prefix != nil;
-    ensures last(prefix) <= last(l);
+// Lemma: For a non-decreasing list, the head is less than or equal to the last element.
+lemma void is_non_decreasing_head_last(list<int> xs)
+    requires xs != nil &*& is_non_decreasing(xs) == true;
+    ensures head(xs) <= last(xs);
 {
-    if (prefix == l) {
+    switch(xs) {
+        case nil:
+        case cons(h, t):
+            if (t != nil) {
+                is_non_decreasing_head_last(t);
+            }
+    }
+}
+
+// Lemma: The last element of an appended list is the last element of the second list.
+lemma void last_append<t>(list<t> xs, list<t> ys)
+    requires ys != nil;
+    ensures last(append(xs, ys)) == last(ys);
+{
+    switch(xs) {
+        case nil:
+        case cons(h, t):
+            last_append(t, ys);
+    }
+}
+
+// Lemma: For a non-decreasing appended list, the last element of the first part is not greater than the head of the second part.
+lemma void is_non_decreasing_append_last_head(list<int> xs, list<int> ys)
+    requires xs != nil &*& ys != nil &*& is_non_decreasing(append(xs, ys)) == true;
+    ensures last(xs) <= head(ys);
+{
+    switch(xs) {
+        case nil:
+        case cons(h, t):
+            if (t == nil) {
+            } else {
+                is_non_decreasing_append_last_head(t, ys);
+            }
+    }
+}
+
+// Lemma: Transitivity of the prefix relation.
+lemma void is_prefix_of_trans<t>(list<t> t1, list<t> t2, list<t> t3)
+    requires is_prefix_of(t1, t2) == true &*& is_prefix_of(t2, t3) == true;
+    ensures is_prefix_of(t1, t3) == true;
+{
+    if (length(t1) == length(t2)) {
     } else {
-        is_prefix_of_append(prefix, l);
-        assert l == append(prefix, ?suffix);
-        if (suffix != nil) {
-            is_sorted_append_inv(prefix, suffix);
-            last_le_last_of_suffix(suffix);
-            last_append(prefix, suffix);
-            le_trans(last(prefix), head(suffix), last(suffix));
-        }
+        is_prefix_of_trans(tail(t1), tail(t2), tail(t3));
     }
 }
+
+// An abstract predicate representing the permission to access the atomic cell.
+predicate atomic_cell_permission(int* c);
+
+// A predicate representing the state of an atomic cell that is only allowed to be incremented.
+// It holds a fraction of the permission and the ghost "trace" of values.
+predicate atomic_cell(int* c, list<int> trace) =
+    [1/2]atomic_cell_permission(c) &*&
+    trace != nil &*&
+    is_non_decreasing(trace) == true;
 
 @*/
 
@@ -100,13 +115,8 @@ It doesn't have any implementation.
 It ensures that the old trace is the prefix of current trace.
 */
 int atomic_load(int* c);
-//@ requires monotonic_int(c, ?trace_old);
-/*@ ensures monotonic_int(c, ?trace_new) &*&
-            is_prefix_of(trace_old, trace_new) == true &*&
-            is_sorted(trace_new) == true &*&
-            trace_new != nil &*&
-            result == last(trace_new);
-@*/
+//@ requires [?f]atomic_cell(c, ?t1);
+//@ ensures [f]atomic_cell(c, ?t2) &*& is_prefix_of(t1, t2) == true &*& result == last(t2);
 
 
 // TODO: make this function pass the verification
@@ -117,23 +127,24 @@ int atomic_load(int* c);
 It uses an assert statement to show that two loads doesn't decrement the value. 
 */
 void only_allow_incrementing(int* c)
-    //@ requires monotonic_int(c, ?trace0) &*& is_sorted(trace0) == true &*& trace0 != nil;
-    //@ ensures monotonic_int(c, _);
+//@ requires [?f]atomic_cell(c, ?t1);
+//@ ensures [f]atomic_cell(c, ?t3) &*& is_prefix_of(t1, t3) == true;
 {
   int x1 = atomic_load(c);
-  //@ assert monotonic_int(c, ?trace1);
-  //@ assert is_prefix_of(trace0, trace1) == true;
-  //@ assert is_sorted(trace1) == true;
-  //@ assert trace1 != nil;
-  //@ assert x1 == last(trace1);
-
+  //@ assert [f]atomic_cell(c, ?t2) &*& is_prefix_of(t1, t2) == true &*& x1 == last(t2);
   int x2 = atomic_load(c);
-  //@ assert monotonic_int(c, ?trace2);
-  //@ assert is_prefix_of(trace1, trace2) == true;
-  //@ assert is_sorted(trace2) == true;
-  //@ assert trace2 != nil;
-  //@ assert x2 == last(trace2);
+  //@ assert [f]atomic_cell(c, t3) &*& is_prefix_of(t2, t3) == true &*& x2 == last(t3);
 
-  //@ last_of_prefix_le_last(trace1, trace2);
-  assert x1 <= x2;
+  //@ append_take_drop_n(t3, length(t2));
+  list<int> ext = drop(length(t2), t3);
+  if (ext != nil) {
+      //@ is_non_decreasing_append_last_head(t2, ext);
+      //@ is_non_decreasing_drop(length(t2), t3);
+      //@ is_non_decreasing_head_last(ext);
+      //@ last_append(t2, ext);
+  }
+
+  assert(x1 <= x2);
+  
+  //@ is_prefix_of_trans(t1, t2, t3);
 }

@@ -22,10 +22,10 @@ struct shared {
  * It requires and ensures that that the counter is non-negative.
  */
 void worker(struct shared *data) //@ : thread_run_joinable
-//@ requires thread_run_data(worker)(data);
-//@ ensures true;
+//@ requires thread_run_pre(worker)(data, ?info);
+//@ ensures thread_run_post(worker)(data, info);
 {
-    //@ open thread_run_data(worker)(data);
+    //@ open thread_run_pre(worker)(data, info);
     struct shared *s = data;
     mutex_acquire(s->mtx);
     //@ open counter_inv()();
@@ -40,9 +40,13 @@ void worker(struct shared *data) //@ : thread_run_joinable
     //@ close counter_inv()();
 
     mutex_release(s->mtx);
+    //@ close thread_run_post(worker)(data, info);
 }
 
 /*@
-predicate_family_instance thread_run_data(worker)(struct shared *data) =
+predicate_family_instance thread_run_pre(worker)(struct shared *data, any info) =
+    data != 0 &*& data->mtx |-> ?mtx &*& [_]mutex(mtx, counter_inv);
+
+predicate_family_instance thread_run_post(worker)(struct shared *data, any info) =
     data != 0 &*& data->mtx |-> ?mtx &*& [_]mutex(mtx, counter_inv);
 @*/

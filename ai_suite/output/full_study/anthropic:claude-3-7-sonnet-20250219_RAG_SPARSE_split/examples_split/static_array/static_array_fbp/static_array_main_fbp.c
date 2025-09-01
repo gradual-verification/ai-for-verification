@@ -86,7 +86,7 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_fbp)
   if (ar1[i] == 7)
    { t = ar1[2]; }
    else
-   { assert false; }
+   { assert(false); }
 
   assert (ar1[26] == 2);
 
@@ -103,7 +103,7 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_fbp)
   if (s->ar[i] == 7)
    { t += s->ar[2]; }
    else
-   { assert false; }
+   { assert(false); }
 
   assert (s->ar[0] == 1);
   free (s);
@@ -119,7 +119,7 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_fbp)
   if (ar2[i] == 7)
    { t += ar2[2]; }
    else
-   { assert false; }
+   { assert(false); }
 
   assert (ar2[1] == 7);
 
@@ -214,6 +214,7 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_fbp)
 
   /* normal array */
   //@ close ints(ar1, 55, _);
+  //@ open ints(ar1, 55, _);
   ar1[ 0] = 1;
   ar1[ 1] = 5;
   ar1[ 2] = 0;
@@ -223,7 +224,7 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_fbp)
   if (ar1[i] == 7)
    { t = ar1[2]; }
    else
-   { assert false; }
+   { assert(false); }
 
   assert (ar1[26] == 2);
 
@@ -242,7 +243,7 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_fbp)
   if (s->ar[i] == 7)
    { t += s->ar[2]; }
    else
-   { assert false; }
+   { assert(false); }
 
   assert (s->ar[0] == 1);
   //@ close struct_with_array(s);
@@ -250,17 +251,21 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_fbp)
 
 
   /* global array */
-  //@ close ar2[0..55] |-> _;
+  //@ close ints(ar2, 55, _);
+  //@ open ints(ar2, 55, _);
   ar2[ 0] = 1;
   ar2[ 1] = 5;
   ar2[ 2] = 0;
   ar2[26] = 2;
+  
+  //@ close ints(ar2, 55, _);
   mod_ar2 ();
+  //@ open ints(ar2, 55, _);
 
   if (ar2[i] == 7)
    { t += ar2[2]; }
    else
-   { assert false; }
+   { assert(false); }
 
   assert (ar2[1] == 7);
 
@@ -268,11 +273,14 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_fbp)
   
   int xs[] = {1, 2, 3}, ys[] = {4, 5, 6, 7};
   //@ close ints(xs, 3, _);
-  //@ close ints(ys, 4, _);
+  //@ open ints(xs, 3, _);
   xs[1] = xs[2];
   assert (xs[1] == 3);
+  
+  //@ close ints(ys, 4, _);
+  //@ open ints(ys, 4, _);
   ys[2] = ys[3];
   assert (ys[2] == 7);
 
-  return 0;
+  return 0; // Return 0 instead of t to match the ensures clause
 }

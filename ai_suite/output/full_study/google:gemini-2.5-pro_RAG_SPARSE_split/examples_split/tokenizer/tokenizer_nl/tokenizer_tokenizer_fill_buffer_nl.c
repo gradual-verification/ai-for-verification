@@ -2,6 +2,20 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+/*@
+// Predicate families for the pre- and post-conditions of a charreader function.
+// This allows different charreader implementations to have different states.
+predicate_family charreader_pre(void* f)();
+predicate_family charreader_post(void* f)(int result);
+@*/
+typedef int charreader();
+    //@ requires is_charreader(this) == true &*& charreader_pre(this)();
+    //@ ensures charreader_post(this)(result) &*& (result == -1 || (-128 <= result && result <= 127));
+
 
 struct tokenizer
 {
@@ -11,39 +25,15 @@ struct tokenizer
 	struct string_buffer* buffer;
 };
 
-
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
 /*@
-// An abstract model of a character source. It's a list of integers.
-predicate char_source(void *reader; list<int> cs);
-@*/
-
-typedef int charreader();
-    //@ requires char_source(this, ?cs);
-    /*@ ensures
-            cs == nil ?
-                result == -1 &*& char_source(this, nil)
-            :
-                result == head(cs) &*& char_source(this, tail(cs));
-    @*/
-
-/*@
-// A helper fixpoint to check if an integer is within the signed char range.
-fixpoint bool signed_char_range(int c) { return -128 <= c && c <= 127; }
-
-// The predicate representing a valid tokenizer.
-// It owns the tokenizer struct fields and the associated character source.
-predicate tokenizer(struct tokenizer *t; list<int> source_cs, int lastread, int lasttoken, list<char> buffer_cs) =
-    t->next_char |-> ?reader &*&
-    char_source(reader, source_cs) &*&
+predicate tokenizer(struct tokenizer *t; charreader* reader, int lastread, int lasttoken, struct string_buffer* buffer, list<char> cs) =
+    t->next_char |-> reader &*&
     t->lastread |-> lastread &*&
     t->lasttoken |-> lasttoken &*&
-    t->buffer |-> ?sb &*&
-    string_buffer(sb, buffer_cs) &*&
-    malloc_block_tokenizer(t);
+    t->buffer |-> buffer &*&
+    malloc_block(t, sizeof(struct tokenizer)) &*&
+    string_buffer(buffer, cs) &*&
+    is_charreader(reader) == true;
 @*/
 
 
@@ -56,42 +46,30 @@ if the original lastread char is -2 (which means empty).
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer, ?source_cs, ?lastread, ?lasttoken, ?buffer_cs) &*& forall(source_cs, (signed_char_range));
-    /*@ ensures
-            lastread != -2 ?
-                tokenizer(tokenizer, source_cs, lastread, lasttoken, buffer_cs)
-            :
-                source_cs == nil ?
-                    tokenizer(tokenizer, nil, -1, lasttoken, buffer_cs)
-                :
-                    tokenizer(tokenizer, tail(source_cs), head(source_cs), lasttoken, buffer_cs);
+    /*@
+    requires
+        tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer_ptr, ?cs) &*&
+        (lastread == -2 ? charreader_pre(reader)() : true);
+    @*/
+    /*@
+    ensures
+        lastread == -2 ?
+            tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer_ptr, cs) &*&
+            charreader_post(reader)(new_lastread)
+        :
+            tokenizer(tokenizer, reader, lastread, lasttoken, buffer_ptr, cs);
     @*/
 {
-	//@ open tokenizer(tokenizer, source_cs, lastread, lasttoken, buffer_cs);
+	//@ open tokenizer(tokenizer, reader, lastread, lasttoken, buffer_ptr, cs);
 	if ( tokenizer->lastread == -2 )
 	{
-	        charreader *reader = tokenizer->next_char;
-	        int result = reader();
-			
-			//@ switch(source_cs) { case nil: {} case cons(h,t): { forall_elim(source_cs, (signed_char_range), h); } }
-			
-			if (result < -128 || result > 127)
-				abort();
-				
-		    tokenizer->lastread = result;
-		    
-		    /*@
-		    if (source_cs == nil) {
-		        assert result == -1;
-		        close tokenizer(tokenizer, nil, -1, lasttoken, buffer_cs);
-		    } else {
-		        assert result == head(source_cs);
-		        close tokenizer(tokenizer, tail(source_cs), head(source_cs), lasttoken, buffer_cs);
-		    }
-		    @*/
-	}
-	else
-	{
-	    //@ close tokenizer(tokenizer, source_cs, lastread, lasttoken, buffer_cs);
-	}
+	        charreader *reader_local = tokenizer->next_char;
+	        int result = reader_local();
+		if (result < -128 || result > 127)
+			abort();
+		tokenizer->lastread = result;
+        	//@ close tokenizer(tokenizer, reader, result, lasttoken, buffer_ptr, cs);
+	} else {
+        	//@ close tokenizer(tokenizer, reader, lastread, lasttoken, buffer_ptr, cs);
+    	}
 }

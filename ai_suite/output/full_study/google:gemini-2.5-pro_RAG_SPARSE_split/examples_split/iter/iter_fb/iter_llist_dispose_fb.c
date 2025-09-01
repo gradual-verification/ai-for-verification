@@ -11,16 +11,20 @@ struct llist {
 };
 
 /*@
+// Corrected to include malloc_block for the node.
 predicate node(struct node *node; struct node *next, int value) =
-  node->next |-> next &*& node->value |-> value &*& malloc_block_node(node);
+  malloc_block_node(node) &*&
+  node->next |-> next &*& node->value |-> value;
 @*/
 
 /*@
 predicate lseg(struct node *n1, struct node *n2; list<int> v) =
   n1 == n2 ? true &*& v == nil : node(n1, ?_n, ?h) &*& lseg(_n, n2, ?t) &*& v == cons(h, t);
 
+// Corrected to include malloc_block for the list struct.
 predicate llist(struct llist *list; list<int> v) =
-  list->first |-> ?_f &*& list->last |-> ?_l &*& malloc_block_llist(list) &*& lseg(_f, _l, v) &*& node(_l, _, _);
+  malloc_block_llist(list) &*&
+  list->first |-> ?_f &*& list->last |-> ?_l &*& lseg(_f, _l, v) &*& node(_l, _, _);
 @*/
 
 /*@
@@ -40,8 +44,10 @@ struct iter {
 
 /*@
 
+// Corrected to include malloc_block for the list struct.
 predicate llist_with_node(struct llist *list, list<int> v0, struct node *n, list<int> vn) =
-  list->first |-> ?f &*& list->last |-> ?l &*& malloc_block_llist(list) &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
+  malloc_block_llist(list) &*&
+  list->first |-> ?f &*& list->last |-> ?l &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
 
 predicate iter(struct iter *i, real frac, struct llist *l, list<int> v0, list<int> v) =
   i->current |-> ?n &*& [frac]llist_with_node(l, v0, n, v);
@@ -58,14 +64,14 @@ void llist_dispose(struct llist *list)
   struct node *n = list->first;
   struct node *l = list->last;
   while (n != l)
-    //@ invariant lseg(n, l, ?v_rem) &*& node(l, _, _) &*& list->first |-> _ &*& list->last |-> l &*& malloc_block_llist(list);
+    //@ invariant lseg(n, l, ?v_rem) &*& node(l, _, _) &*& malloc_block_llist(list);
   {
     //@ open lseg(n, l, v_rem);
     struct node *next = n->next;
     free(n);
     n = next;
   }
-  //@ open lseg(l, l, _); // When n == l, the remaining segment is empty.
+  //@ open lseg(l, l, _);
   free(l);
   free(list);
 }

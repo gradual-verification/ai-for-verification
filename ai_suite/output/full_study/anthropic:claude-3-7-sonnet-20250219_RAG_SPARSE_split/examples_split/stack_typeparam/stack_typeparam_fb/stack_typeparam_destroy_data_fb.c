@@ -1,18 +1,24 @@
 #include "stdlib.h"
 
+/*
+  Destructors
+*/
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
 */
 
-struct node
-{
+struct node {
   void* data;
   struct node* next;
 };
 
-struct stack
-{
+struct stack {
   struct node* first;
   destructor* destructor;
   int size;
@@ -27,7 +33,6 @@ inductive Stack<T> =
 predicate Node<T>(predicate(void *, T) Ownership, struct node* node, void *data, T info, struct node* next) =
   node->data |-> data &*&
   node->next |-> next &*&
-  malloc_block_node(node) &*&
   Ownership(data, info);
 
 predicate StackItems<T>(predicate(void *, T) Ownership, struct node* head, Stack<T> S) =
@@ -42,8 +47,7 @@ predicate Stack<T>(struct stack* stack, destructor* destructor, predicate(void *
   stack->first |-> ?first &*&
   stack->size |-> ?size &*&
   size == Size(S) &*&
-  StackItems(Ownership, first, S) &*&
-  malloc_block_stack(stack);
+  StackItems(Ownership, first, S);
 
 fixpoint Stack<T> Push<T>(void* item, T info, Stack<T> Stack)
 {
@@ -91,8 +95,7 @@ fixpoint int Size<T>(Stack<T> S)
   A few use cases
 */
 
-struct data
-{
+struct data {
   int foo;
   int bar;
 };
@@ -101,8 +104,7 @@ struct data
 
 predicate Data(struct data* data, int foo, int bar) =
   data->foo |-> foo &*&
-  data->bar |-> bar &*&
-  malloc_block_data(data);
+  data->bar |-> bar;
 
 @*/
 
@@ -132,14 +134,6 @@ fixpoint int GetBar(DataCarrier dc)
 predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(DC), GetBar(DC));
 
 @*/
-
-/*
-  Destructors
-*/
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
 
 
 // TODO: make this function pass the verification

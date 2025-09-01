@@ -1,8 +1,18 @@
 //@ requires true;
 //@ ensures true;
+bool is_digit(int c)
+ //@ requires true;
+ //@ ensures result == (c >= '0' && c <= '9');
+{
+	return c >= '0' && c <= '9';
+}
 #include "stdio.h"
 #include "stdlib.h"
 #include "stringBuffers.h"
+
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
 
 
 struct tokenizer
@@ -28,19 +38,11 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
   t->lasttoken |-> ?lasttoken &*&
   t->buffer |-> buffer;
 @*/
-
-
-typedef int charreader();
-    //@ requires true;
-    //@ ensures true;
     
 
-// TODO: make this function pass the verification
 bool is_digit(int c)
  //@ requires true;
  //@ ensures result == (c >= '0' && c <= '9');
 {
 	return c >= '0' && c <= '9';
 }
-//@ requires true;
-//@ ensures result == (c >= '0' && c <= '9');

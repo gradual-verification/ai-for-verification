@@ -1,11 +1,26 @@
 #include "stdlib.h"
+  
+/*
+  Destructors
+*/
 
 /*@
-// A predicate family to represent ownership of the data stored in the stack.
-// It is indexed by the destructor function pointer.
-predicate_family data_pred(destructor* p)(void* data);
+// A predicate family to represent the ownership of the generic data.
+// The family is indexed by the destructor function pointer.
+predicate_family data_inv(destructor* p)(void* data);
 @*/
-  
+
+/*
+destructor function
+-params: data
+-description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
+*/
+typedef void destructor(void* data);
+/*@
+    requires data_inv(this)(data);
+    ensures true;
+@*/
+
 
 /*
   Stack
@@ -17,23 +32,6 @@ struct node
   struct node* next;
 };
 
-/*@
-// A predicate for a linked list of nodes.
-// 'n' is the head of the list.
-// 'd' is the destructor for the data in each node.
-// 'vs' is a ghost list of the data pointers.
-predicate nodes(struct node* n, destructor* d, list<void*> vs) =
-    n == 0 ?
-        vs == nil
-    :
-        n->data |-> ?data &*&
-        n->next |-> ?next &*&
-        malloc_block_node(n) &*&
-        data_pred(d)(data) &*&
-        nodes(next, d, ?rest_vs) &*&
-        vs == cons(data, rest_vs);
-@*/
-
 struct stack
 {
   struct node* first;
@@ -42,19 +40,31 @@ struct stack
 };
 
 /*@
-// A predicate for the stack data structure.
-// 's' is the stack pointer.
-// 'd' is the destructor.
-// 'vs' is a ghost list of the data pointers.
-predicate stack(struct stack* s, destructor* d, list<void*> vs) =
+// A predicate for the linked list of nodes.
+// It is parameterized by the destructor 'd' to handle the generic data.
+// It is recursively defined on the 'n' parameter.
+// 'vs' is a ghost list of the data pointers for functional correctness.
+predicate nodes(struct node* n; destructor* d, list<void*> vs) =
+    n == 0 ?
+        vs == nil
+    :
+        n->data |-> ?data &*&
+        n->next |-> ?next &*&
+        malloc_block_node(n) &*&
+        data_inv(d)(data) &*&
+        nodes(next; d, ?tail_vs) &*&
+        vs == cons(data, tail_vs);
+
+// A predicate for the stack structure.
+// It ties together the stack's fields, the nodes, and the destructor contract.
+predicate stack(struct stack* s; destructor* d, list<void*> vs) =
     s->first |-> ?first &*&
     s->destructor |-> d &*&
     s->size |-> length(vs) &*&
     malloc_block_stack(s) &*&
     is_destructor(d) == true &*&
-    nodes(first, d, vs);
+    nodes(first; d, vs);
 @*/
-
 
 /*
   A few use cases
@@ -67,20 +77,6 @@ struct data
 };
 
 
-/*
-  Destructors
-*/
-
-
-/*
-destructor function
--params: data
--description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
-*/
-typedef void destructor(void* data);
-//@ requires data_pred(this)(data);
-//@ ensures emp;
-
 
 
 // TODO: make this function pass the verification
@@ -89,21 +85,21 @@ typedef void destructor(void* data);
 This function makes sure to destroy the stack by destructing the data of each node and freeing each node. */
 void destroy_stack(struct stack* stack)
     //@ requires stack(stack, ?d, ?vs);
-    //@ ensures emp;
+    //@ ensures true;
 {
-    //@ open stack(stack, d, vs);
-    struct node* current = stack->first;
-    destructor* destructor = stack->destructor;
+  //@ open stack(stack, d, vs);
+  struct node* current = stack->first;
+  destructor* destructor = stack->destructor;
   
-    while (current != 0)
-        //@ invariant nodes(current, destructor, ?current_vs) &*& is_destructor(destructor) == true;
-    {
-        //@ open nodes(current, destructor, current_vs);
-        struct node* next = current->next;
-        destructor(current->data);
-        free(current);
-        current = next;
-    }
-    //@ open nodes(current, destructor, _); // current is 0, so this consumes nodes(0, d, nil)
-    free(stack);
+  while ( current != 0 )
+    //@ invariant nodes(current; d, ?rem_vs) &*& is_destructor(d) == true;
+  {
+    //@ open nodes(current; d, rem_vs);
+    struct node* next = current->next;
+    destructor(current->data);
+    free(current);
+    current = next;
+  }
+  //@ open nodes(current; d, _);
+  free(stack);
 }

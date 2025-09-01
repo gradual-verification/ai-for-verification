@@ -41,12 +41,13 @@ struct iter {
 /*@
 
 predicate llist_with_node(struct llist *list, list<int> v0, struct node *n, list<int> vn) =
-  list->first |-> ?f &*& list->last |-> ?l &*& malloc_block_llist(list) &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
+  list->first |-> ?f &*& list->last |-> ?l &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
 
 predicate iter(struct iter *i, real frac, struct llist *l, list<int> v0, list<int> v) =
   i->current |-> ?n &*& [frac]llist_with_node(l, v0, n, v);
 
 @*/
+
 
 // TODO: make this function pass the verification
 void iter_dispose(struct iter *i)
@@ -54,8 +55,6 @@ void iter_dispose(struct iter *i)
     //@ ensures [f1 + f2]llist(l, v0);
 {
     //@ open iter(i, f1, l, v0, v);
-    //@ open llist_with_node(l, v0, ?n, v);
     free(i);
-    //@ close llist_with_node(l, v0, n, v);
     //@ close [f1 + f2]llist(l, v0);
 }

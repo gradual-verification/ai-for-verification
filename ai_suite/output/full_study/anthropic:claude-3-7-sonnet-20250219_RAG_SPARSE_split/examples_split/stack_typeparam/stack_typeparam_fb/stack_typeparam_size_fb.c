@@ -1,5 +1,14 @@
 #include "stdlib.h"
 
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -85,68 +94,12 @@ fixpoint int Size<T>(Stack<T> S)
 }
 @*/
 
-/*
-  A few use cases
-*/
-
-struct data
-{
-  int foo;
-  int bar;
-};
-
-/*@
-
-predicate Data(struct data* data, int foo, int bar) =
-  data->foo |-> foo &*&
-  data->bar |-> bar;
-
-@*/
-
-/*@
-
-inductive DataCarrier =
-  | DataCarrier(int, int);
-
-fixpoint int GetFoo(DataCarrier dc)
-{
-  switch ( dc )
-  {
-    case DataCarrier(x, y):
-      return x;
-  }
-}
-
-fixpoint int GetBar(DataCarrier dc)
-{
-  switch ( dc )
-  {
-    case DataCarrier(x, y):
-      return y;
-  }
-}
-
-predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(DC), GetBar(DC));
-
-@*/
-
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
-
-
 int size/*@ <T> @*/(struct stack* stack)
   //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack);
   //@ ensures Stack(stack, destructor, Ownership, Stack) &*& result == Size(Stack);
 {
-  //@ open Stack<T>(stack, destructor, Ownership, Stack);
+  //@ open Stack(stack, destructor, Ownership, Stack);
   int size = stack->size;
-  //@ close Stack<T>(stack, destructor, Ownership, Stack);
+  //@ close Stack(stack, destructor, Ownership, Stack);
   return size;
 }

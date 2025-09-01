@@ -1,6 +1,17 @@
 #include "stdlib.h"
 
 /*
+  Destructors
+*/
+
+/*
+destructor function
+-params: data
+-description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
+*/
+typedef void destructor(void* data);
+
+/*
   Stack
 */
 
@@ -27,29 +38,13 @@ struct data
   int bar;
 };
 
-/*
-  Destructors
-*/
-
-/*
-destructor function
--params: data
--description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
-*/
-typedef void destructor(void* data);
-
 /*@
 
-predicate nodes(struct node* n, destructor* destructor, list<void*> values) =
-  n == 0 ? 
-    values == nil 
-  : 
-    n->data |-> ?data &*& n->next |-> ?next &*& malloc_block_node(n) &*&
-    nodes(next, destructor, ?nextValues) &*& values == cons(data, nextValues);
+predicate nodes(struct node *node, int count) =
+    node == 0 ? count == 0 : 0 < count &*& node->data |-> ?data &*& node->next |-> ?next &*& malloc_block_node(node) &*& nodes(next, count - 1);
 
-predicate stack(struct stack* stack, list<void*> values) =
-  stack->first |-> ?first &*& stack->destructor |-> ?destructor &*& stack->size |-> ?size &*&
-  malloc_block_stack(stack) &*& nodes(first, destructor, values) &*& length(values) == size;
+predicate stack(struct stack *stack, int count) =
+    stack->first |-> ?first &*& stack->destructor |-> ?destructor &*& stack->size |-> count &*& malloc_block_stack(stack) &*& nodes(first, count);
 
 @*/
 
@@ -58,21 +53,22 @@ predicate stack(struct stack* stack, list<void*> values) =
 -params: A stack
 This function makes sure to destroy the stack by destructing the data of each node and freeing each node. */
 void destroy_stack(struct stack* stack)
-  //@ requires stack(stack, ?values);
-  //@ ensures true;
+    //@ requires stack(stack, _);
+    //@ ensures true;
 {
-  struct node* current = stack->first;
-  destructor* destructor = stack->destructor;
+    //@ open stack(stack, _);
+    struct node* current = stack->first;
+    destructor* destructor = stack->destructor;
   
-  while (current != 0)
-    //@ invariant nodes(current, destructor, ?remainingValues);
-  {
-    struct node* next = current->next;
-    destructor(current->data);
-    //@ open nodes(current, destructor, remainingValues);
-    free(current);
-    current = next;
-  }
-  //@ open nodes(0, destructor, _);
-  free(stack);
+    while (current != 0)
+        //@ invariant nodes(current, _);
+    {
+        //@ open nodes(current, _);
+        struct node* next = current->next;
+        destructor(current->data);
+        free(current);
+        current = next;
+    }
+    //@ open nodes(0, _);
+    free(stack);
 }

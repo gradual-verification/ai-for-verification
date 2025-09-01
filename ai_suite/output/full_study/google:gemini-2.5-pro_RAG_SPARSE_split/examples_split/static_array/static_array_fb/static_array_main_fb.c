@@ -26,6 +26,8 @@ static int ar2 [55];
 static struct_with_array bigArray[10] = {{100, {1,2,3,4}, 200}, {300, {5,6,7}, 400}}; // Incomplete initializer lists; remaining elements get default value.
 
 struct point { int x; int y; };
+//@ predicate point(struct point *p; int x, int y) = p->x |-> x &*& p->y |-> y;
+//@ predicate points(struct point *p, int count; list<pair<int, int> > vals) = count == 0 ? vals == nil : point(p, ?x, ?y) &*& points(p + 1, count - 1, ?t) &*& vals == cons(pair(x, y), t);
 
 struct point points[] = { { 10, 20 }, { 30, 40 } };
 
@@ -66,89 +68,79 @@ void mod_ar2 (void)
 
 // TODO: make this function pass the verification
 int main(int argc, char **argv) //@ : main_full(static_array_main_fb)
-    //@ requires module(static_array_main_fb, true);
-    //@ ensures result == 0;
-{
-    struct_with_array *bigArrayPtr = bigArray;
-    
-    foo();
+//@ requires module(static_array_main_fb, true);
+//@ ensures result == 0;
+ {
+  //@ open module_static_array_main_fb(true);
+  
+  struct_with_array *bigArrayPtr = bigArray;
+  
+  foo();
 
-    struct_with_array *s;
-    int    i = 1;
-    int    ar1 [55];
-    int    t;
+  struct_with_array *s;
+  int    i = 1;
+  int    ar1 [55];
+  int    t;
 
-    /* normal array */
-    ar1[ 0] = 1;
-    ar1[ 1] = 5;
-    ar1[ 2] = 0;
-    ar1[26] = 2;
-    ar1[ 1] = ar1[ 1] + ar1[26];
+  /* normal array */
+  ar1[ 0] = 1;
+  ar1[ 1] = 5;
+  ar1[ 2] = 0;
+  ar1[26] = 2;
+  ar1[ 1] = ar1[ 1] + ar1[26];
 
-    if (ar1[i] == 7)
-    {
-        t = ar1[2];
-    }
-    else
-    {
-        assert false;
-    }
-    //@ assert t == 0;
+  if (ar1[i] == 7)
+   { t = ar1[2]; }
+   else
+   { assert(false); }
 
-    assert (ar1[26] == 2);
+  assert (ar1[26] == 2);
 
-    /* array inside a struct */
-    s = malloc (sizeof (struct_with_array));
-    if (s == 0) { abort(); }
-    
-    //@ open_struct(s);
-    s->ar[ 0] = 1;
-    s->ar[ 1] = 5;
-    s->ar[ 2] = 0;
-    s->ar[ 6] = 2;
-    s->ar[ 1] = s->ar[ 1] + s->ar[ 6];
+  /* array inside a struct */
+  s = malloc (sizeof (struct_with_array));
+  if (s == 0) { abort(); }
+  
+  memset(s, 0, sizeof(struct_with_array));
 
-    if (s->ar[i] == 7)
-    {
-        t += s->ar[2];
-    }
-    else
-    {
-        assert false;
-    }
-    //@ assert t == 0;
+  s->ar[ 0] = 1;
+  s->ar[ 1] = 5;
+  s->ar[ 2] = 0;
+  s->ar[ 6] = 2;
+  s->ar[ 1] = s->ar[ 1] + s->ar[ 6];
 
-    assert (s->ar[0] == 1);
-    //@ close_struct(s);
-    free (s);
+  if (s->ar[i] == 7)
+   { t += s->ar[2]; }
+   else
+   { assert(false); }
+
+  assert (s->ar[0] == 1);
+  
+  //@ chars_to_chars_((void *)s);
+  free (s);
 
 
-    /* global array */
-    ar2[ 0] = 1;
-    ar2[ 1] = 5;
-    ar2[ 2] = 0;
-    ar2[26] = 2;
-    mod_ar2 ();
+  /* global array */
+  ar2[ 0] = 1;
+  ar2[ 1] = 5;
+  ar2[ 2] = 0;
+  ar2[26] = 2;
+  mod_ar2 ();
 
-    if (ar2[i] == 7)
-    {
-        t += ar2[2];
-    }
-    else
-    {
-        assert false;
-    }
-    //@ assert t == 0;
+  if (ar2[i] == 7)
+   { t += ar2[2]; }
+   else
+   { assert(false); }
 
-    assert (ar2[1] == 7);
+  assert (ar2[1] == 7);
 
-    assert (points[1].y == 40);
-    
-    int xs[] = {1, 2, 3}, ys[] = {4, 5, 6, 7};
-    xs[1] = xs[2];
-    assert (xs[1] == 3);
-    ys[2] = ys[3];
-    assert (ys[2] == 7);
+  //@ open points_();
+  assert (points[1].y == 40);
+  
+  int xs[] = {1, 2, 3}, ys[] = {4, 5, 6, 7};
+  xs[1] = xs[2];
+  assert (xs[1] == 3);
+  ys[2] = ys[3];
+  assert (ys[2] == 7);
 
-    return (t);
-}
+  return (t);
+ }

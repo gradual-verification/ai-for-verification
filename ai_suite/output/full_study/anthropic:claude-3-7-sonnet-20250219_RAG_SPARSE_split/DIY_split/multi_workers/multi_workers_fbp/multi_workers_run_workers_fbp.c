@@ -26,16 +26,8 @@ void worker(struct shared *data) //@ : thread_run_joinable
     //@ requires thread_run_pre(worker)(data, ?info);
     //@ ensures thread_run_post(worker)(data, info);
 {
-    struct shared *s = data;
-    mutex_acquire(s->mtx);
-    
-    int tmp = counter;
-    if (tmp == INT_MAX) {
-        abort();
-    }
-    counter = tmp + 1;
-
-    mutex_release(s->mtx);
+    //@ open thread_run_pre(worker)(data, info);
+    //@ close thread_run_post(worker)(data, info);
 }
 
 void run_workers()
@@ -49,23 +41,22 @@ void run_workers()
     //@ close create_mutex_ghost_arg(shared_inv(s));
     s->mtx = create_mutex();
     
-    //@ assert mutex(s->mtx, shared_inv(s));
+    // @ assert mutex(s->mtx, shared_inv(s));
     //@ assert s->mtx |-> ?m;
     
-    //@ produce_fraction_fraction(s->mtx |-> m);
-    //@ produce_fraction_fraction(s->mtx |-> m);
-    //@ produce_fraction_fraction(s->mtx |-> m);
+    // @ produce_fraction_fraction(s->mtx |-> m);
+    // @ produce_fraction_fraction(s->mtx |-> m);
+    // @ produce_fraction_fraction(s->mtx |-> m);
     
     //@ assert [1/3]s->mtx |-> m &*& [1/3]s->mtx |-> m &*& [1/3]s->mtx |-> m;
-    //@ produce_fraction_fraction(mutex(m, shared_inv(s)));
-    //@ produce_fraction_fraction(mutex(m, shared_inv(s)));
-    //@ produce_fraction_fraction(mutex(m, shared_inv(s)));
+    // @ produce_fraction_fraction(mutex(m, shared_inv(s)));
+    // @ produce_fraction_fraction(mutex(m, shared_inv(s)));
+    // @ produce_fraction_fraction(mutex(m, shared_inv(s)));
     
     for (int i = 0; i < NUM; i++)
-        //@ invariant counter |-> ?cv &*& cv >= 0 &*& malloc_block_shared(s) &*& s->mtx |-> ?mtx &*& 
-        //@ i >= 0 &*& i <= NUM &*& 
-        //@ (i == 0 ? mutex(mtx, shared_inv(s)) : [1-(i*1/NUM)]mutex(mtx, shared_inv(s))) &*&
-        //@ (i == 0 ? true : [1-(i*1/NUM)]s->mtx |-> mtx);
+        /*@ invariant s->mtx |-> ?mtx &*& 
+        i >= 0 &*& i <= NUM &*& 
+        mutex(mtx, shared_inv(s)); @*/
     {
         //@ close thread_run_pre(worker)(s, unit);
         struct thread *t = thread_start_joinable(worker, s);

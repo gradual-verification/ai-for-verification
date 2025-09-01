@@ -166,16 +166,23 @@ void thread2(struct data *d) //@ : thread_run_joinable
     //@ requires thread_run_pre(thread2)(d, ?info);
     //@ ensures thread_run_post(thread2)(d, info);
 {
+    struct barrier *b = d->barrier;
+    
     //@ open thread_run_pre(thread2)(d, info);
-    struct barrier *barrier = d->barrier;
+    //@ assert [1/2]d->phase2 |-> writing_x;
+    //@ assert [1/2]d->inside2 |-> false;
+    //@ assert [1/3]d->barrier |-> b;
+    //@ assert [1/2]barrier(b, 2, my_barrier_inv(d));
+    
     {
-        //@ produce_barrier_enter_lemma_function_pointer();
-        //@ produce_barrier_exit_lemma_function_pointer();
-        //@ close barrier_incoming(barrier_enter)(2, my_barrier_inv(d), barrier_exit);
+        //@ produce_barrier_enter_lemma();
+        //@ close barrier_incoming(barrier_enter_lemma)(2, my_barrier_inv(d), barrier_exit_lemma);
         //@ d->inside2 = true;
-        barrier(barrier);
-        //@ open barrier_exiting(barrier_exit)(2, my_barrier_inv(d));
+        //@ close my_barrier_inv(d)(1, false);
+        barrier(b);
+        //@ open barrier_exiting(barrier_exit_lemma)(2, my_barrier_inv(d));
     }
+    
     int m = 0;
     while (m < 30)
     {
@@ -184,34 +191,38 @@ void thread2(struct data *d) //@ : thread_run_joinable
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->y2 = a1 + 3 * a2;
         {
-            //@ produce_barrier_enter_lemma_function_pointer();
-            //@ produce_barrier_exit_lemma_function_pointer();
-            //@ close barrier_incoming(barrier_enter)(2, my_barrier_inv(d), barrier_exit);
             //@ d->phase2 = writing_y;
-            barrier(barrier);
-            //@ open barrier_exiting(barrier_exit)(2, my_barrier_inv(d));
+            //@ produce_barrier_enter_lemma();
+            //@ close barrier_incoming(barrier_enter_lemma)(2, my_barrier_inv(d), barrier_exit_lemma);
+            //@ close my_barrier_inv(d)(1, true);
+            barrier(b);
+            //@ open barrier_exiting(barrier_exit_lemma)(2, my_barrier_inv(d));
         }
+        
         a1 = d->y1;
         a2 = d->y2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->x2 = a1 + 3 * a2;
         {
-            //@ produce_barrier_enter_lemma_function_pointer();
-            //@ produce_barrier_exit_lemma_function_pointer();
-            //@ close barrier_incoming(barrier_enter)(2, my_barrier_inv(d), barrier_exit);
             //@ d->phase2 = writing_x;
-            barrier(barrier);
-            //@ open barrier_exiting(barrier_exit)(2, my_barrier_inv(d));
+            //@ produce_barrier_enter_lemma();
+            //@ close barrier_incoming(barrier_enter_lemma)(2, my_barrier_inv(d), barrier_exit_lemma);
+            //@ close my_barrier_inv(d)(1, true);
+            barrier(b);
+            //@ open barrier_exiting(barrier_exit_lemma)(2, my_barrier_inv(d));
         }
+        
         m = d->i;
     }
+    
     {
-        //@ produce_barrier_enter_lemma_function_pointer();
-        //@ produce_barrier_exit_lemma_function_pointer();
-        //@ close barrier_incoming(barrier_enter)(2, my_barrier_inv(d), barrier_exit);
+        //@ produce_barrier_enter_lemma();
+        //@ close barrier_incoming(barrier_enter_lemma)(2, my_barrier_inv(d), barrier_exit_lemma);
         //@ d->inside2 = false;
-        barrier(barrier);
-        //@ open barrier_exiting(barrier_exit)(2, my_barrier_inv(d));
+        //@ close my_barrier_inv(d)(0, true);
+        barrier(b);
+        //@ open barrier_exiting(barrier_exit_lemma)(2, my_barrier_inv(d));
     }
+    
     //@ close thread_run_post(thread2)(d, info);
 }

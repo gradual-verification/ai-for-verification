@@ -6,6 +6,11 @@
 
 typedef struct eloop *eloop;
 
+typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
+    //@ requires eloop(x) &*& [_]dataPred(data);
+    //@ ensures eloop(x) &*& [_]dataPred(data);
+
+
 struct eloop {
     int lock;
     int signalCount;
@@ -31,19 +36,33 @@ predicate eloop(eloop x) =
     [_]lock(&x->lock, I(x));
 @*/
 
-
-// TODO: make this function pass the verification
-typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
-    //@ requires eloop(x) &*& [_]dataPred(data);
-    //@ ensures eloop(x) &*& [_]dataPred(data);
+// Implementation of eloop_handler function
+void handle_signal(eloop x, void *data)
+    //@ requires eloop(x) &*& [_]x->dataPred(data);
+    //@ ensures eloop(x) &*& [_]x->dataPred(data);
+{
+    //@ open eloop(x);
+    acquire(&x->lock);
+    //@ open I(x)();
     
-/*@
-// Add the predicate to verify that a function is an eloop_handler
-predicate is_eloop_handler(eloop_handler *h, eloop x, predicate(void *) dataPred) =
-    is_eloop_handler_function_pointer(h) == true &*&
-    h != 0 &*&
-    handler_for(h) == pair(x, dataPred);
-
-// Helper function to associate a handler with its eloop and dataPred
-fixpoint pair<eloop, predicate(void *)> handler_for(eloop_handler *h);
-@*/
+    eloop_handler *h = x->handler;
+    //@ predicate(void *) dataPred = x->dataPred;
+    
+    if (h != 0) {
+        void *handlerData = x->handlerData;
+        x->signalCount++;
+        
+        //@ close I(x)();
+        release(&x->lock);
+        
+        h(handlerData);
+        
+        acquire(&x->lock);
+        //@ open I(x)();
+        x->signalCount--;
+    }
+    
+    //@ close I(x)();
+    release(&x->lock);
+    //@ close eloop(x);
+}

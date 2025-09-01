@@ -1,5 +1,14 @@
 #include "stdlib.h"
 
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -130,17 +139,7 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
 
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
-
-// TODO: make this function pass the verification
 struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
   //@ requires [_]is_destructor<T>(destructor, ?Ownership);
   //@ ensures Stack(result, destructor, Ownership, ?Stack) &*& IsEmpty(Stack) == true;

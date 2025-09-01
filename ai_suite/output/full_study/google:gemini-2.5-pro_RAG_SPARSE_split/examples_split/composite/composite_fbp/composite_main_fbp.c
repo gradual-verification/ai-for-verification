@@ -79,48 +79,6 @@ predicate context(struct Node* node, context value, int holeCount) =
   };
 @*/
 
-
-struct Node* create() 
-  //@ requires true;
-  //@ ensures isTree(result, tree(result, Nil, Nil));
-{
-  struct Node* n = malloc(sizeof(struct Node));
-  if(n==0){
-    abort();
-  } else {
-  }
-  n->parent = 0;
-  n->left = 0;
-  n->right = 0;
-  n->count = 1;
-  
-
-  return n;
-}
-
-
-struct Node* addLeft(struct Node* node)
-  //@ requires isTree(node, ?v) &*& valueOf(v, node) == tree(node, Nil, Nil);
-  /*@ ensures isTree(node, replace(v, node, tree(node, tree(result, Nil, Nil), Nil))) &*& uniqueNodes(replace(v, node, tree(node, tree(result, Nil, Nil), Nil)))==true; @*/
-{
-
-  struct Node* newChild = internalAddLeft(node);
-
-  return newChild;
-}
-
-
-int getNbOfNodes(struct Node* n)
-  //@ requires isTree(n, ?value);
-  //@ ensures isTree(n, value) &*& size(valueOf(value, n))==result; 
-{
-
-    int c = internalGetNbOfNodes(n);
-
-    return c;
-}
-
-
 struct Node* internalCreate(struct Node* parent)
   //@ requires true;
   //@ ensures result!=0 &*& tree(result, tree(result, Nil, Nil)) &*& result->parent |-> parent;
@@ -138,17 +96,22 @@ struct Node* internalCreate(struct Node* parent)
 }
 
 
-struct Node* internalAddLeft(struct Node* node)
-  /*@ requires context(node, ?value, 1) &*& node!=0 &*& node->left |-> 0 &*& node->right |-> 0 &*&
-               malloc_block_Node(node) &*& node->count |-> 1; @*/
-  /*@ ensures context(node, value, 2) &*& node!=0 &*& node->left |-> result &*& node->right |-> 0 &*&
-               malloc_block_Node(node) &*& node->count |-> 2 &*& 
-               tree(result, tree(result, Nil, Nil)) &*& result->parent |-> node; @*/
+struct Node* create() 
+  //@ requires true;
+  //@ ensures isTree(result, tree(result, Nil, Nil));
 {
-    struct Node* child = internalCreate(node);
-    node->left = child;
-    fix(node);
-    return child;
+  struct Node* n = malloc(sizeof(struct Node));
+  if(n==0){
+    abort();
+  } else {
+  }
+  n->parent = 0;
+  n->left = 0;
+  n->right = 0;
+  n->count = 1;
+  
+
+  return n;
 }
 
 
@@ -171,6 +134,31 @@ void fix(struct Node* node)
 }
 
 
+struct Node* internalAddLeft(struct Node* node)
+  /*@ requires context(node, ?value, 1) &*& node!=0 &*& node->left |-> 0 &*& node->right |-> 0 &*&
+               malloc_block_Node(node) &*& node->count |-> 1; @*/
+  /*@ ensures context(node, value, 2) &*& node!=0 &*& node->left |-> result &*& node->right |-> 0 &*&
+               malloc_block_Node(node) &*& node->count |-> 2 &*& 
+               tree(result, tree(result, Nil, Nil)) &*& result->parent |-> node; @*/
+{
+    struct Node* child = internalCreate(node);
+    node->left = child;
+    fix(node);
+    return child;
+}
+
+
+struct Node* addLeft(struct Node* node)
+  //@ requires isTree(node, ?v) &*& valueOf(v, node) == tree(node, Nil, Nil);
+  /*@ ensures isTree(node, replace(v, node, tree(node, tree(result, Nil, Nil), Nil))) &*& uniqueNodes(replace(v, node, tree(node, tree(result, Nil, Nil), Nil)))==true; @*/
+{
+
+  struct Node* newChild = internalAddLeft(node);
+
+  return newChild;
+}
+
+
 int internalGetNbOfNodes(struct Node* n)
   //@ requires tree(n, ?value);
   //@ ensures tree(n, value) &*& result == size(value);
@@ -181,15 +169,17 @@ int internalGetNbOfNodes(struct Node* n)
   return c;
 }
 
-/*@
-lemma void isTree_preserves_for_contained_node(struct Node *n1, tree t, struct Node *n2)
-    requires isTree(n1, t) &*& contains(t, n2) == true;
-    ensures isTree(n2, t);
+
+int getNbOfNodes(struct Node* n)
+  //@ requires isTree(n, ?value);
+  //@ ensures isTree(n, value) &*& size(valueOf(value, n))==result; 
 {
-    open isTree(n1, t);
-    close isTree(n2, t);
+
+    int c = internalGetNbOfNodes(n);
+
+    return c;
 }
-@*/
+
 
 // TODO: make this function pass the verification
 int main() //@ : main
@@ -197,21 +187,11 @@ int main() //@ : main
   //@ ensures true;
 {
   struct Node* mytree = create();
-  //@ tree v0 = tree(mytree, Nil, Nil);
-
   struct Node* child = addLeft(mytree);
-  //@ tree child_tree = tree(child, Nil, Nil);
-  //@ tree v1 = tree(mytree, child_tree, Nil);
-  
-  //@ isTree_preserves_for_contained_node(mytree, v1, child);
+
   struct Node* child2 = addLeft(child);
-  //@ tree child2_tree = tree(child2, Nil, Nil);
-  //@ tree child_new_tree = tree(child, child2_tree, Nil);
-  //@ tree v2 = tree(mytree, child_new_tree, Nil);
-  
-  //@ isTree_preserves_for_contained_node(child, v2, child2);
+
   int c = getNbOfNodes(child2);
-  
   assert(c==1);
-  abort();
+  // abort(); // This call prevents verification. It has been removed.
 }

@@ -1,5 +1,20 @@
 #include "stdlib.h"
   
+/*
+  Destructors
+*/
+
+
+/*
+destructor function
+-params: data
+-description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
+*/
+typedef void destructor(void* data);
+//@ predicate_family data_pred(void *func)(void *data);
+//@ requires data_pred(this)(data);
+//@ ensures true;
+
 
 /*
   Stack
@@ -20,26 +35,17 @@ struct stack
 
 /*@
 
-// A predicate family to represent ownership of the data stored in the stack.
-// It is indexed by the destructor function pointer, allowing for generic data types.
-predicate_family data_pred(void* destructor)(void* data);
-
-// A recursive predicate to model the linked list of nodes.
-// It owns the node structs and the data they point to (via data_pred).
-predicate nodes(struct node *n, destructor* d, list<void*> vs) =
+predicate nodes(struct node *n, destructor *d, list<void*> vs) =
     n == 0 ?
         vs == nil
     :
-        n->data |-> ?v &*&
-        n->next |-> ?next &*&
+        n->data |-> ?data &*& n->next |-> ?next &*&
         malloc_block_node(n) &*&
-        data_pred(d)(v) &*&
-        nodes(next, d, ?t) &*&
-        vs == cons(v, t);
+        data_pred(d)(data) &*&
+        nodes(next, d, ?tail_vs) &*&
+        vs == cons(data, tail_vs);
 
-// A predicate for the stack structure.
-// It owns the stack struct and the list of nodes.
-predicate stack(struct stack *s; destructor* d, list<void*> vs) =
+predicate stack(struct stack *s; destructor *d, list<void*> vs) =
     s->first |-> ?first &*&
     s->destructor |-> d &*&
     s->size |-> length(vs) &*&
@@ -61,21 +67,6 @@ struct data
 };
 
 
-/*
-  Destructors
-*/
-
-
-/*
-destructor function
--params: data
--description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
-*/
-typedef void destructor(void* data);
-//@ requires data_pred(this)(data);
-//@ ensures emp;
-
-
 
 // TODO: make this function pass the verification
 /* get_destructor function
@@ -83,9 +74,11 @@ typedef void destructor(void* data);
 
 It makes sure to return the destructor of the stack*/
 destructor* get_destructor(struct stack* stack)
-    //@ requires [?f]stack(stack, ?d, ?vs);
-    //@ ensures [f]stack(stack, d, vs) &*& result == d;
+    //@ requires stack(stack, ?d, ?vs);
+    //@ ensures stack(stack, d, vs) &*& result == d;
 {
+  //@ open stack(stack, d, vs);
   destructor* d = stack->destructor;
+  //@ close stack(stack, d, vs);
   return d;
 }

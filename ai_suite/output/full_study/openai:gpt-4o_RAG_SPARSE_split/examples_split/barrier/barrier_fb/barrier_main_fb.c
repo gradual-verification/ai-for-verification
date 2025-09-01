@@ -129,9 +129,6 @@ struct barrier *create_barrier(int n)
     barrier->outgoing = false;
     struct mutex *mutex = create_mutex();
     barrier->mutex = mutex;
-    //@ close barrier_inv(barrier, n, inv)();
-    //@ close create_mutex_ghost_arg(barrier_inv(barrier, n, inv));
-    //@ close barrier(barrier, n, inv);
     return barrier;
 }
 
@@ -148,46 +145,45 @@ void barrier(struct barrier *barrier)
         barrier_exiting(exit)(n, inv);
     @*/
 {
+
     struct mutex *mutex = barrier->mutex;
     mutex_acquire(mutex);
-    //@ open barrier_inv(barrier, n, inv)();
 
-    while (barrier->outgoing)
-    /*@ invariant
-        barrier->k |-> ?k &*& barrier->outgoing |-> ?outgoing &*& inv(k, outgoing) &*&
-        outgoing ? 1 <= k &*& k < n : 0 <= k &*& k < n;
-    @*/
     {
-        mutex_release(mutex);
-        mutex_acquire(mutex);
-        //@ open barrier_inv(barrier, n, inv)();
+        while (barrier->outgoing)
+
+        {
+
+            mutex_release(mutex);
+            mutex_acquire(mutex);
+
+        }
     }
 
     barrier->k++;
     if (barrier->k == barrier->n) {
         barrier->outgoing = true;
         barrier->k--;
-        //@ close barrier_inv(barrier, n, inv)();
+     
         mutex_release(barrier->mutex);
     } else {
         while (!barrier->outgoing)
-        /*@ invariant
-            barrier->k |-> ?k &*& barrier->outgoing |-> ?outgoing &*& inv(k, outgoing) &*&
-            outgoing ? 1 <= k &*& k < n : 0 <= k &*& k < n;
-        @*/
+       
         {
+          
             mutex_release(mutex);
             mutex_acquire(mutex);
-            //@ open barrier_inv(barrier, n, inv)();
+  
         }
 
         barrier->k--;
         if (barrier->k == 0) {
             barrier->outgoing = false;
         }
-        //@ close barrier_inv(barrier, n, inv)();
+      
         mutex_release(mutex);
     }
+
 }
 
 
@@ -195,10 +191,9 @@ void barrier_dispose(struct barrier *barrier)
     //@ requires barrier(barrier, ?n, ?inv);
     //@ ensures inv(_, _);
 {
-    //@ open barrier(barrier, n, inv);
-    struct mutex *mutex = barrier->mutex;
-    mutex_dispose(mutex);
-    //@ open barrier_inv(barrier, n, inv)();
+  
+    mutex_dispose(barrier->mutex);
+    
     free(barrier);
 }
 
@@ -208,26 +203,25 @@ void thread1(struct data *d) //@ : thread_run_joinable
     //@ requires thread_run_pre(thread1)(d, ?info);
     //@ ensures thread_run_post(thread1)(d, info);
 {
-    //@ open thread_run_pre(thread1)(d, info);
-    struct barrier *barrier = d->barrier;
+   
+    struct barrier *b = d->barrier;
     {
-        //@ close barrier_incoming(?enter)(2, my_barrier_inv(d), ?exit);
-        barrier(barrier);
-        //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
+        
+        barrier(b);
+
     }
     int N = 0;
     while (N < 30)
-    //@ invariant [1/2]d->phase1 |-> writing_x &*& [1/2]d->inside1 |-> false &*& [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> N &*&
-    [1/3]d->barrier |-> barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d));
+      
     {
         int a1 = d->x1;
         int a2 = d->x2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->y1 = a1 + 2 * a2;
         {
-            //@ close barrier_incoming(?enter)(2, my_barrier_inv(d), ?exit);
-            barrier(barrier);
-            //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
+            
+            barrier(b);
+           
         }
         a1 = d->y1;
         a2 = d->y2;
@@ -236,18 +230,18 @@ void thread1(struct data *d) //@ : thread_run_joinable
         N = N + 1;
         d->i = N;
         {
-            //@ close barrier_incoming(?enter)(2, my_barrier_inv(d), ?exit);
-            barrier(barrier);
-            //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
+            
+            barrier(b);
+
         }
     }
     {
-        //@ close barrier_incoming(?enter)(2, my_barrier_inv(d), ?exit);
-        barrier(barrier);
-        //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
+        
+        barrier(b);
+
     }
     d->i = 0;
-    //@ close thread_run_post(thread1)(d, info);
+
 }
 
 
@@ -255,44 +249,43 @@ void thread2(struct data *d) //@ : thread_run_joinable
     //@ requires thread_run_pre(thread2)(d, ?info);
     //@ ensures thread_run_post(thread2)(d, info);
 {
-    //@ open thread_run_pre(thread2)(d, info);
-    struct barrier *barrier = d->barrier;
+   
+    struct barrier *b = d->barrier;
     {
-        //@ close barrier_incoming(?enter)(2, my_barrier_inv(d), ?exit);
-        barrier(barrier);
-        //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
+        
+        barrier(b);
+        
     }
     int m = 0;
     while (m < 30)
-    //@ invariant [1/2]d->phase2 |-> writing_x &*& [1/2]d->inside2 |-> false &*& [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x2 |-> ?_ &*&
-    [1/3]d->barrier |-> barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d));
+        
     {
         int a1 = d->x1;
         int a2 = d->x2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->y2 = a1 + 3 * a2;
         {
-            //@ close barrier_incoming(?enter)(2, my_barrier_inv(d), ?exit);
-            barrier(barrier);
-            //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
+            
+            barrier(b);
+           
         }
         a1 = d->y1;
         a2 = d->y2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->x2 = a1 + 3 * a2;
         {
-            //@ close barrier_incoming(?enter)(2, my_barrier_inv(d), ?exit);
-            barrier(barrier);
-            //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
+           
+            barrier(b);
+          
         }
         m = d->i;
     }
     {
-        //@ close barrier_incoming(?enter)(2, my_barrier_inv(d), ?exit);
-        barrier(barrier);
-        //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
+        
+        barrier(b);
+       
     }
-    //@ close thread_run_post(thread2)(d, info);
+    
 }
 
 
@@ -307,16 +300,12 @@ int main() //@ : main
     struct barrier *barrier = create_barrier(2);
     d->barrier = barrier;
 
-    //@ close thread_run_pre(thread1)(d, unit);
     struct thread *t1 = thread_start_joinable(thread1, d);
 
-    //@ close thread_run_pre(thread2)(d, unit);
     struct thread *t2 = thread_start_joinable(thread2, d);
     thread_join(t1);
-    //@ open thread_run_post(thread1)(d, unit);
     
     thread_join(t2);
-    //@ open thread_run_post(thread2)(d, unit);
    
     barrier_dispose(d->barrier);
   

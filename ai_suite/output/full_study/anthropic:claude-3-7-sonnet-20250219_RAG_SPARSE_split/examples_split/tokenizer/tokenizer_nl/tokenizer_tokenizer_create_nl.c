@@ -2,6 +2,28 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
+/*@
+// Predicate for charreader function
+predicate charreader_function(charreader* reader;) = 
+    is_charreader(reader) == true;
+
+// Predicate for tokenizer structure
+predicate tokenizer(struct tokenizer* tokenizer;) =
+    tokenizer != 0 &*&
+    tokenizer->next_char |-> ?reader &*& 
+    charreader_function(reader) &*&
+    tokenizer->lastread |-> ?lastread &*&
+    tokenizer->lasttoken |-> ?lasttoken &*&
+    tokenizer->buffer |-> ?buffer &*&
+    string_buffer(buffer, ?cs) &*&
+    malloc_block_tokenizer(tokenizer);
+@*/
 
 struct tokenizer
 {
@@ -12,24 +34,6 @@ struct tokenizer
 };
 
 
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-
-/*@
-// Define a predicate for the tokenizer structure
-predicate tokenizer(struct tokenizer* t; charreader* reader) =
-    t != 0 &*&
-    t->next_char |-> reader &*&
-    t->lastread |-> ?lastread &*&
-    t->lasttoken |-> ?lasttoken &*&
-    t->buffer |-> ?buffer &*&
-    string_buffer(buffer, ?cs) &*&
-    malloc_block_tokenizer(t);
-@*/
-
 // TODO: make this function pass the verification
 /***
  * Description:
@@ -38,8 +42,8 @@ The tokenizer_create function creates a tokenizer given a charreader.
 It needs to make sure that the returned tokenizer preserves its property of tokenizer. 
 */
 struct tokenizer* tokenizer_create(charreader* reader)
-//@ requires reader != 0;
-//@ ensures tokenizer(result, reader);
+//@ requires charreader_function(reader);
+//@ ensures tokenizer(result);
 {
 	struct tokenizer* tokenizer;
 	struct string_buffer *buffer;
@@ -51,6 +55,6 @@ struct tokenizer* tokenizer_create(charreader* reader)
 	tokenizer->next_char = reader;
 	buffer = create_string_buffer();
 	tokenizer->buffer = buffer;
-	//@ close tokenizer(tokenizer, reader);
+	//@ close tokenizer(tokenizer);
 	return tokenizer;
 }

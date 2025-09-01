@@ -41,12 +41,13 @@ struct iter {
 /*@
 
 predicate llist_with_node(struct llist *list, list<int> v0, struct node *n, list<int> vn) =
-  list->first |-> ?f &*& list->last |-> ?l &*& malloc_block_llist(list) &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
+  list->first |-> ?f &*& list->last |-> ?l &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
 
 predicate iter(struct iter *i, real frac, struct llist *l, list<int> v0, list<int> v) =
   i->current |-> ?n &*& [frac]llist_with_node(l, v0, n, v);
 
 @*/
+
 
 void llist_add(struct llist *list, int x)
   //@ requires llist(list, ?_v);
@@ -57,27 +58,33 @@ void llist_add(struct llist *list, int x)
   if (n == 0) {
     abort();
   }
+  
   //@ open llist(list, _v);
   l = list->last;
   //@ open node(l, ?old_next, ?old_value);
+  
+  // Set the new node's value and next pointer
+  n->value = x;
+  n->next = 0;
+  
+  // Connect the last node to the new node
   l->next = n;
-  //@ close node(n, 0, x);
-  l->value = x;
+  
+  // Update the list's last pointer
   list->last = n;
-  //@ close node(l, n, x);
   
-  //@ assert lseg(?first, l, ?prefix);
-  //@ close lseg(n, n, nil);
-  //@ close lseg(l, n, cons(x, nil));
+  //@ close node(l, n, old_value);
+  //@ close node(n, 0, x);
   
-  /*@ 
-  if (first == l) {
-    // Case where the list had only one node
-    close llist(list, cons(x, nil));
+  // We need to prove that we've extended the list with the new value
+  /*@
+  if (_v == nil) {
+    // Special case for empty list (though this shouldn't happen with our precondition)
+    close lseg(list->first, n, append(_v, nil));
   } else {
-    // General case
-    assert _v == prefix;
-    close llist(list, append(prefix, cons(x, nil)));
+    // For non-empty list, we need to show that we've extended the list segment
+    open lseg(list->first, l, _v);
+    close lseg(list->first, n, append(_v, cons(x, nil)));
   }
   @*/
   

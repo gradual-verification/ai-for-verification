@@ -74,7 +74,7 @@ int get(struct Counter* c)
   return tmp;
 }
 
-bool random();
+bool my_random();
 //@ requires true;
 //@ ensures true;
 
@@ -84,20 +84,20 @@ int main2()
 //@ ensures true;
 {
   struct Counter* c = init(0);
-  bool b = random();
+  bool b = my_random();
   int n = 0;
   // split of an arbitrary number of children
   while(b && n < INT_MAX) 
-    //@ invariant Counter(c, n);
+    //@ invariant Counter(c, n) &*& 0 <= n &*& n < INT_MAX;
   {
     increment(c);
     n = n + 1;
-    b = random();
+    b = my_random();
   }
 
   // put the permission back together
-  while(0<n) 
-    //@ invariant Counter(c, n);
+  while(0 < n) 
+    //@ invariant Counter(c, n) &*& 0 <= n;
   {
     decrement(c);
     n = n - 1;

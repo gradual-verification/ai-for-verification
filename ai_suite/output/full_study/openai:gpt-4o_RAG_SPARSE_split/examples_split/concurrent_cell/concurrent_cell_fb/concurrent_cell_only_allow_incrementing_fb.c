@@ -116,8 +116,8 @@ int get(struct cell* c)
   int res;
   mutex_acquire(c->mutex);
   res = c->x;
-  {
-  }
+  //@ open lock_invariant(c, allowed)();
+  //@ close lock_invariant(c, allowed)();
   mutex_release(c->mutex);
   return res;
 }
@@ -130,5 +130,16 @@ void only_allow_incrementing(struct cell* c)
 {
   int x1 = get(c);
   int x2 = get(c);
-  assert x1 <= x2;
+  //@ open observed(c, trace0);
+  //@ assert is_prefix_handle(?h, ?id, trace0);
+  //@ open is_prefix_handle(h, id, trace0);
+  //@ assert is_prefix(trace0, ?trace1);
+  //@ assert is_prefix(trace1, ?trace2);
+  //@ assert incr_only(trace1) == true;
+  //@ assert incr_only(trace2) == true;
+  //@ assert execute_trace(trace1) == x1;
+  //@ assert execute_trace(trace2) == x2;
+  //@ assert x1 <= x2;
+  //@ close is_prefix_handle(h, id, trace0);
+  //@ close observed(c, trace0);
 }

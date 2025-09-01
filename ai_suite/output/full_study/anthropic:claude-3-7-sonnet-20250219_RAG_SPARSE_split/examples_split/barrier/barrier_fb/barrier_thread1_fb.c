@@ -118,20 +118,18 @@ void barrier(struct barrier *barrier)
         barrier_exiting(exit)(n, inv);
     @*/
 {
+
     struct mutex *mutex = barrier->mutex;
     mutex_acquire(mutex);
 
     {
         while (barrier->outgoing)
-        /*@
-        invariant
-            mutex_held(mutex, barrier_inv(barrier, n, inv), currentThread, f) &*&
-            barrier_inv(barrier, n, inv)() &*&
-            barrier_incoming(enter)(n, inv, exit) &*& is_barrier_enter(enter) &*& is_barrier_exit(exit);
-        @*/
+
         {
+
             mutex_release(mutex);
             mutex_acquire(mutex);
+
         }
     }
 
@@ -139,39 +137,26 @@ void barrier(struct barrier *barrier)
     if (barrier->k == barrier->n) {
         barrier->outgoing = true;
         barrier->k--;
-        
-        //@ open barrier_inv(barrier, n, inv)();
-        //@ open barrier_incoming(enter)(n, inv, exit);
-        //@ enter(n - 1);
-        //@ close barrier_inv(barrier, n, inv)();
-        
+     
         mutex_release(barrier->mutex);
     } else {
         while (!barrier->outgoing)
-        /*@
-        invariant
-            mutex_held(mutex, barrier_inv(barrier, n, inv), currentThread, f) &*&
-            barrier_inv(barrier, n, inv)() &*&
-            barrier_incoming(enter)(n, inv, exit) &*& is_barrier_enter(enter) &*& is_barrier_exit(exit);
-        @*/
+       
         {
+          
             mutex_release(mutex);
             mutex_acquire(mutex);
+  
         }
 
         barrier->k--;
         if (barrier->k == 0) {
             barrier->outgoing = false;
         }
-        
-        //@ open barrier_inv(barrier, n, inv)();
-        //@ open barrier_incoming(enter)(n, inv, exit);
-        //@ enter(barrier->k);
-        //@ if (barrier->k == n - 1) { } else { exit(barrier->k + 1); }
-        //@ close barrier_inv(barrier, n, inv)();
-        
+      
         mutex_release(mutex);
     }
+
 }
 
 
@@ -180,102 +165,53 @@ void thread1(struct data *d) //@ : thread_run_joinable
     //@ requires thread_run_pre(thread1)(d, ?info);
     //@ ensures thread_run_post(thread1)(d, info);
 {
-    //@ open thread_run_pre(thread1)(d, ?info_);
-    struct barrier *barrier = d->barrier;
-    
-    /*@
-    predicate_family_instance barrier_incoming(enter)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit) =
-        n == 2 &*& inv == my_barrier_inv(d) &*& exit == exit_ &*&
-        [1/2]d->inside1 |-> false &*& [1/2]d->phase1 |-> writing_x &*&
-        [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> ?_;
-    
-    predicate_family_instance barrier_inside(exit_)(int n, predicate(int k, bool outgoing) inv) =
-        n == 2 &*& inv == my_barrier_inv(d) &*&
-        [1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_x &*&
-        [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> ?_;
-    
-    predicate_family_instance barrier_exiting(exit_)(int n, predicate(int k, bool outgoing) inv) =
-        n == 2 &*& inv == my_barrier_inv(d) &*&
-        [1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_x &*&
-        [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> ?_;
-    
-    lemma void enter(int k) : barrier_enter
-        requires barrier_incoming(enter)(?n, ?inv, ?exit) &*& inv(k, false) &*& 0 <= k &*& k < n;
-        ensures
-            k == n - 1 ?
-                barrier_exiting(exit)(n, inv) &*& inv(k, true)
-            :
-                barrier_inside(exit)(n, inv) &*& inv(k + 1, false);
+    //@ open thread_run_pre(thread1)(d, ?info);
+    struct barrier *b = d->barrier;
     {
-        open barrier_incoming(enter)(n, inv, exit);
-        d->inside1 = true;
-        if (k == n - 1) {
-            close barrier_exiting(exit_)(n, inv);
-            close inv(k, true);
-        } else {
-            close barrier_inside(exit_)(n, inv);
-            close inv(k + 1, false);
-        }
+        //@ close barrier_incoming(enter)(2, my_barrier_inv(d), exit);
+        //@ close my_barrier_inv(d)(0, false);
+        barrier(b);
+        //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
     }
-    
-    lemma void exit_(int k) : barrier_exit
-        requires barrier_inside(exit_)(?n, ?inv) &*& inv(k, true) &*& 1 <= k &*& k < n;
-        ensures barrier_exiting(exit_)(n, inv) &*& k == 1 ? inv(0, false) : inv(k - 1, true);
-    {
-        open barrier_inside(exit_)(n, inv);
-        close barrier_exiting(exit_)(n, inv);
-        if (k == 1) {
-            close inv(0, false);
-        } else {
-            close inv(k - 1, true);
-        }
-    }
-    @*/
-    
-    //@ close barrier_incoming(enter)(2, my_barrier_inv(d), exit_);
-    //@ produce_lemma_function_pointer_chunk(enter);
-    //@ produce_lemma_function_pointer_chunk(exit_);
-    barrier(barrier);
-    //@ open barrier_exiting(exit_)(2, my_barrier_inv(d));
-
     int N = 0;
     while (N < 30)
-    /*@
-    invariant
-        0 <= N &*& N <= 30 &*&
-        [1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_x &*&
-        [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> ?_ &*&
-        [1/3]d->barrier |-> barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d));
-    @*/
+    //@ invariant [1/2]d->phase1 |-> writing_x &*& [1/2]d->inside1 |-> false &*& [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> N &*& [1/3]d->barrier |-> b &*& [1/2]barrier(b, 2, my_barrier_inv(d)) &*& 0 <= N &*& N <= 30;
     {
         int a1 = d->x1;
         int a2 = d->x2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->y1 = a1 + 2 * a2;
-        
-        /*@
-        predicate_family_instance barrier_incoming(enter2)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit) =
-            n == 2 &*& inv == my_barrier_inv(d) &*& exit == exit2_ &*&
-            [1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_x &*&
-            [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_;
-        
-        predicate_family_instance barrier_inside(exit2_)(int n, predicate(int k, bool outgoing) inv) =
-            n == 2 &*& inv == my_barrier_inv(d) &*&
-            [1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_y &*&
-            [1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y1 |-> ?_;
-        
-        predicate_family_instance barrier_exiting(exit2_)(int n, predicate(int k, bool outgoing) inv) =
-            n == 2 &*& inv == my_barrier_inv(d) &*&
-            [1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_y &*&
-            [1/2]d->x1 |-> ?_ &*& [1/2]d->x2 |-> ?_ &*& d->y1 |-> ?_;
-        
-        lemma void enter2(int k) : barrier_enter
-            requires barrier_incoming(enter2)(?n, ?inv, ?exit) &*& inv(k, false) &*& 0 <= k &*& k < n;
-            ensures
-                k == n - 1 ?
-                    barrier_exiting(exit)(n, inv) &*& inv(k, true)
-                :
-                    barrier_inside(exit)(n, inv) &*& inv(k + 1, false);
         {
-            open barrier_incoming(enter2)(n, inv, exit);
-            d->phase1 = writing
+            //@ d->inside1 = true;
+            //@ close my_barrier_inv(d)(1, false);
+            //@ close barrier_incoming(enter)(2, my_barrier_inv(d), exit);
+            barrier(b);
+            //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
+            //@ d->inside1 = false;
+            //@ d->phase1 = writing_y;
+        }
+        a1 = d->y1;
+        a2 = d->y2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+        d->x1 = a1 + 2 * a2;
+        N = N + 1;
+        d->i = N;
+        {
+            //@ d->inside1 = true;
+            //@ close my_barrier_inv(d)(1, false);
+            //@ close barrier_incoming(enter)(2, my_barrier_inv(d), exit);
+            barrier(b);
+            //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
+            //@ d->inside1 = false;
+            //@ d->phase1 = writing_x;
+        }
+    }
+    {
+        //@ close my_barrier_inv(d)(0, false);
+        //@ close barrier_incoming(enter)(2, my_barrier_inv(d), exit);
+        barrier(b);
+        //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
+    }
+    d->i = 0;
+    //@ close thread_run_post(thread1)(d, info);
+}

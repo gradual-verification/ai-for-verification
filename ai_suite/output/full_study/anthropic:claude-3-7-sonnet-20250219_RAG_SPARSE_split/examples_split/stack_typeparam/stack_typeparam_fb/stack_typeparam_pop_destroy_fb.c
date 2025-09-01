@@ -1,31 +1,18 @@
 #include "stdlib.h"
 
-
 /*@
 
 inductive Stack<T> =
   | Nil
   | Cons(void* data, T info, Stack<T>);
 
-predicate Node<T>(predicate(void *, T) Ownership, struct node* node, void *data, T info, struct node* next) =
-  node->data |-> data &*&
-  node->next |-> next &*&
-  malloc_block_node(node) &*&
-  Ownership(data, info);
+predicate foreach(list<void *> values, predicate(void *) p) =
+    switch (values) {
+        case nil: return true;
+        case cons(x, xs0): return p(x) &*& foreach(xs0, p);
+    };
 
-predicate StackItems<T>(predicate(void *, T) Ownership, struct node* head, Stack<T> S) =
-  head == 0 ? S == Nil :
-  Node(Ownership, head, ?data, ?info, ?next) &*&
-  StackItems(Ownership, next, ?T) &*&
-  S == Cons(data, info, T);
-
-predicate Stack<T>(struct stack* stack, destructor* destructor, predicate(void *, T) Ownership, Stack<T> S) = 
-  [_]is_destructor(destructor, Ownership) &*&
-  stack->destructor |-> destructor &*&
-  stack->first |-> ?first &*&
-  stack->size |-> ?size &*&
-  size == Size(S) &*&
-  StackItems(Ownership, first, S);
+inductive list<t> = nil | cons(t, list<t>);
 
 fixpoint Stack<T> Push<T>(void* item, T info, Stack<T> Stack)
 {
@@ -69,27 +56,47 @@ fixpoint int Size<T>(Stack<T> S)
 }
 @*/
 
-struct node {
-  void* data;
-  struct node* next;
-};
+/*@
 
-struct stack {
-  struct node* first;
-  destructor* destructor;
-  int size;
-};
+predicate Node<T>(predicate(void *, T) Ownership, struct node* node, void *data, T info, struct node* next) =
+  node->data |-> data &*&
+  node->next |-> next &*&
+  malloc_block_node(node) &*&
+  Ownership(data, info);
 
-/*
-  Destructors
-*/
+predicate StackItems<T>(predicate(void *, T) Ownership, struct node* head, Stack<T> S) =
+  head == 0 ? S == Nil :
+  Node(Ownership, head, ?data, ?info, ?next) &*&
+  StackItems(Ownership, next, ?T) &*&
+  S == Cons(data, info, T);
 
+predicate Stack<T>(struct stack* stack, destructor* destructor, predicate(void *, T) Ownership, Stack<T> S) =
+  [_]is_destructor(destructor, Ownership) &*&
+  stack->destructor |-> destructor &*&
+  stack->first |-> ?first &*&
+  stack->size |-> ?size &*&
+  size == Size(S) &*&
+  StackItems(Ownership, first, S);
+
+@*/
 
 typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
   //@ requires Ownership(data, _);
   //@ ensures true;
 
 
+struct node
+{
+  void* data;
+  struct node* next;
+};
+
+struct stack
+{
+  struct node* first;
+  destructor* destructor;
+  int size;
+};
 
 void* pop/*@ <T> @*/(struct stack* stack)
   /*@
@@ -138,14 +145,22 @@ void pop_destroy/*@ <T> @*/(struct stack* stack)
   //@ assert Node(Ownership, first, ?data, ?info, ?next);
   //@ assert StackItems(Ownership, next, ?Tail);
   //@ assert Stack == Cons(data, info, Tail);
+  //@ close StackItems(Ownership, first, Stack);
+  //@ close Stack(stack, destructor, Ownership, Stack);
   
   void* data = pop(stack);
-  //@ assert Ownership(data, info);
+  
+  //@ open Stack(stack, destructor, Ownership, Tail);
+  //@ assert stack->destructor |-> destructor;
+  //@ assert [_]is_destructor(destructor, Ownership);
+  //@ close Stack(stack, destructor, Ownership, Tail);
   
   destructor* d = get_destructor(stack);
-  //@ assert [_]is_destructor(d, Ownership);
-  //@ assert d == destructor;
   
+  //@ assert Ownership(data, info);
+  //@ assert [_]is_destructor(d, Ownership);
   d(data);
-  //@ close Stack(stack, destructor, Ownership, Tail);
+  
+  //@ assert Stack(stack, destructor, Ownership, Tail);
+  //@ assert Pop(Stack) == Tail;
 }

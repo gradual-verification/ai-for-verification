@@ -2,6 +2,10 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
+
 
 struct tokenizer
 {
@@ -28,15 +32,11 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
 @*/
 
 
-typedef int charreader();
-    //@ requires true;
-    //@ ensures true;
-
-
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
  //@ requires Tokenizer(tokenizer);
  //@ ensures Tokenizer(tokenizer);
 {
+	//@ open Tokenizer(tokenizer);
 	if ( tokenizer->lastread == -2 )
 	{
 	        charreader *reader = tokenizer->next_char;
@@ -45,6 +45,7 @@ void tokenizer_fill_buffer(struct tokenizer* tokenizer)
 				abort();
 		tokenizer->lastread = result;
 	}
+	//@ close Tokenizer(tokenizer);
 }
 
 
@@ -53,7 +54,10 @@ int tokenizer_peek(struct tokenizer* tokenizer)
  //@ ensures Tokenizer(tokenizer);
 {
 	tokenizer_fill_buffer(tokenizer);
-	return tokenizer->lastread;
+	//@ open Tokenizer(tokenizer);
+	int result = tokenizer->lastread;
+	//@ close Tokenizer(tokenizer);
+	return result;
 }
 
 
@@ -61,7 +65,9 @@ void tokenizer_drop(struct tokenizer* tokenizer)
  //@ requires Tokenizer(tokenizer);
  //@ ensures Tokenizer(tokenizer);
 {
+	//@ open Tokenizer(tokenizer);
 	tokenizer->lastread = -2;
+	//@ close Tokenizer(tokenizer);
 }
 
 
@@ -72,8 +78,10 @@ int tokenizer_next_char(struct tokenizer* tokenizer)
 	int c;
 
 	tokenizer_fill_buffer(tokenizer);
+	//@ open Tokenizer(tokenizer);
 	c = tokenizer->lastread;
 	tokenizer->lastread = -2;
+	//@ close Tokenizer(tokenizer);
 	return c;
 }
 
@@ -91,7 +99,7 @@ void tokenizer_skip_whitespace(struct tokenizer* tokenizer)
  //@ ensures Tokenizer(tokenizer);
 {
 	while ( is_whitespace( tokenizer_peek(tokenizer) ) )
-		//@ invariant Tokenizer(tokenizer);
+	//@ invariant Tokenizer(tokenizer);
 	{
 		tokenizer_drop(tokenizer);
 	}
@@ -107,8 +115,8 @@ bool is_digit(int c)
 
 
 void string_buffer_append_char(struct string_buffer *buffer, char c)
- //@ requires string_buffer(buffer, _);
- //@ ensures string_buffer(buffer, _);
+ //@ requires string_buffer(buffer, ?bcs);
+ //@ ensures string_buffer(buffer, append(bcs, cons(c, nil)));
 {
 	char cc = c;
 	string_buffer_append_chars(buffer, &cc, 1);
@@ -120,7 +128,7 @@ int tokenizer_eat_number(struct tokenizer* tokenizer)
  //@ ensures Tokenizer(tokenizer);
 {
 	for (;;)
-		//@ invariant Tokenizer(tokenizer);
+	//@ invariant Tokenizer(tokenizer);
 	{
 		int result;
 		bool isDigit;
@@ -130,7 +138,9 @@ int tokenizer_eat_number(struct tokenizer* tokenizer)
 		if ( !isDigit ) break;
 		
 	    result = tokenizer_next_char(tokenizer);
+		//@ open Tokenizer(tokenizer);
 		string_buffer_append_char(tokenizer->buffer, (char)result);
+		//@ close Tokenizer(tokenizer);
 	}
 
 	return '0';
@@ -150,7 +160,7 @@ int tokenizer_eat_symbol(struct tokenizer* tokenizer)
  //@ ensures Tokenizer(tokenizer);
 {
 	for (;;)
-		//@ invariant Tokenizer(tokenizer);
+	//@ invariant Tokenizer(tokenizer);
 	{
 		int result;
 		bool isSymbolChar;
@@ -161,7 +171,9 @@ int tokenizer_eat_symbol(struct tokenizer* tokenizer)
 		if (!isSymbolChar) break;
 		
 		result = tokenizer_next_char(tokenizer);
+		//@ open Tokenizer(tokenizer);
 		string_buffer_append_char(tokenizer->buffer, (char)result);
+		//@ close Tokenizer(tokenizer);
 	}
 
 	return 'S';
@@ -175,7 +187,10 @@ int tokenizer_next(struct tokenizer* tokenizer)
 	int c;
 	int token;
 
+	//@ open Tokenizer(tokenizer);
 	string_buffer_clear(tokenizer->buffer);
+	//@ close Tokenizer(tokenizer);
+	
 	tokenizer_skip_whitespace(tokenizer);
 
 	c = tokenizer_peek(tokenizer);
@@ -199,7 +214,9 @@ int tokenizer_next(struct tokenizer* tokenizer)
 		tokenizer_drop(tokenizer);
 		token = 'B'; // bad character
 	}
+	//@ open Tokenizer(tokenizer);
 	tokenizer->lasttoken = token;
+	//@ close Tokenizer(tokenizer);
 	return token;
 }
 
@@ -213,11 +230,13 @@ struct tokenizer* tokenizer_create(charreader* reader)
 	
 	tokenizer = (struct tokenizer*) malloc( sizeof( struct tokenizer ) );
 	if ( tokenizer == 0 ) abort();
+	//@ close_struct(tokenizer);
 	tokenizer->lastread = -2;
 	tokenizer->lasttoken = 0;
 	tokenizer->next_char = reader;
 	buffer = create_string_buffer();
 	tokenizer->buffer = buffer;
+	//@ close Tokenizer(tokenizer);
 	return tokenizer;
 }
 
@@ -226,6 +245,7 @@ void tokenizer_dispose(struct tokenizer *tokenizer)
 	//@ requires Tokenizer(tokenizer);
 	//@ ensures true;
 {
+	//@ open Tokenizer(tokenizer);
 	string_buffer_dispose(tokenizer->buffer);
 	free(tokenizer);
 }
@@ -239,7 +259,7 @@ void print_string_buffer(struct string_buffer *buffer)
 	char *pcs = string_buffer_get_chars(buffer);
 	int i;
 	for (i = 0; i < n; i++)
-		//@ invariant [f]string_buffer_minus_chars(buffer, pcs, n) &*& [f]chars(pcs, n, cs) &*& 0 <= i &*& i <= n;
+	//@ invariant [f]string_buffer_minus_chars(buffer, pcs, n) &*& [f]chars(pcs, n, cs) &*& 0 <= i &*& i <= n;
 	{
 		putchar(pcs[i]);
 	}
@@ -251,6 +271,7 @@ void print_token(struct tokenizer* tokenizer)
  //@ requires Tokenizer(tokenizer);
  //@ ensures Tokenizer(tokenizer);
 {
+	//@ open Tokenizer(tokenizer);
 	switch ( tokenizer->lasttoken )
 	{
 	case '(':
@@ -277,6 +298,7 @@ void print_token(struct tokenizer* tokenizer)
 		puts("BADCHAR");
 		break;
 	}
+	//@ close Tokenizer(tokenizer);
 }
 
 
@@ -296,7 +318,7 @@ int main()
 	struct tokenizer* tokenizer = tokenizer_create(my_getchar);
 
 	for (;;)
-		//@ invariant Tokenizer(tokenizer);
+	//@ invariant Tokenizer(tokenizer);
 	{
 		int result = tokenizer_next(tokenizer);
 		if (result == -1) break;

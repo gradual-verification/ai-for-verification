@@ -1,7 +1,38 @@
 #include "stdio.h"
-#include "stdlib.h"
+#include "stdlib.hh"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
+/*@
+// Abstract specification for a charreader.
+// It is a stateful function. The state is represented by the pre/post predicates.
+// The `reader` parameter to the predicate family is the function pointer itself,
+// which acts as a unique identifier for the reader instance.
+predicate_family_instance charreader_pre(void* reader)();
+predicate_family_instance charreader_post(void* reader)(int c);
+
+// Predicate for the tokenizer struct.
+// It is parameterized by the last read character.
+predicate tokenizer(struct tokenizer *t; int lastread) =
+    t->next_char |-> ?reader &*&
+    is_charreader(reader) == true &*&
+    // The contract for the function pointer call.
+    (
+        requires charreader_pre(reader)();
+        // The reader returns a character in the signed char range.
+        // EOF (-1) is also included in this range.
+        ensures charreader_post(reader)(result) &*& -128 <= result &*& result <= 127;
+    ) : is_charreader_contract(reader) &*&
+    t->lastread |-> lastread &*&
+    t->lasttoken |-> _ &*&
+    t->buffer |-> ?sb &*&
+    string_buffer(sb, _);
+@*/
 
 struct tokenizer
 {
@@ -14,69 +45,33 @@ struct tokenizer
 
 /***
  * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-
-/*@
-// A charreader is a function that returns the next character from a stream.
-// It returns -1 on end-of-file.
-// We model the stream of characters as a ghost list of chars.
-
-predicate charreader_state(charreader* f; list<char> stream);
-
-// The contract for a charreader function pointer.
-typedef lemma void is_charreader(charreader* f);
-    requires [?q]charreader_state(f, ?s);
-    ensures
-        s == nil ?
-            ([q]charreader_state(f, nil) &*& result == -1)
-        :
-            ([q]charreader_state(f, tail(s)) &*& result == head(s) &*& -128 <= head(s) &*& head(s) <= 127);
-
-// The state of a tokenizer. It is parameterized by the remaining stream of characters.
-// We use tokenizer_p to avoid a name clash with the struct.
-predicate tokenizer_p(struct tokenizer *t; list<char> stream) =
-    t->next_char |-> ?reader
-    &*& t->lastread |-> ?lastread
-    &*& t->lasttoken |-> _
-    &*& t->buffer |-> ?buffer
-    &*& [1/2]is_charreader(reader)
-    &*& [1/2]charreader_state(reader, ?reader_stream)
-    &*& string_buffer(buffer, _)
-    &*& lastread == -2 ? // buffer is empty, stream is what the reader will produce
-        stream == reader_stream
-    : lastread == -1 ? // EOF reached, stream is empty
-        stream == nil &*& reader_stream == nil
-    : // character in buffer, stream is that char plus what the reader will produce
-        -128 <= lastread &*& lastread <= 127 &*&
-        stream == cons(lastread, reader_stream);
-@*/
-
-
-/***
- * Description:
 The tokenizer_fill_buffer function reads a character from the next_char reader of the tokenizer and updates the lastread char,
 if the original lastread char is -2 (which means empty).
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
-    //@ requires tokenizer_p(tokenizer, ?s);
-    //@ ensures tokenizer_p(tokenizer, s);
+    //@ requires tokenizer(tokenizer, -2) &*& charreader_pre(tokenizer->next_char)();
+    /*@ ensures
+        exists<int>(?c) &*&
+        tokenizer(tokenizer, c) &*&
+        charreader_post(tokenizer->next_char)(c) &*&
+        -128 <= c &*& c <= 127;
+    @*/
+    //@ requires tokenizer(tokenizer, ?lastread) &*& lastread != -2;
+    //@ ensures tokenizer(tokenizer, lastread);
 {
-    //@ open tokenizer_p(tokenizer, s);
 	if ( tokenizer->lastread == -2 )
 	{
-	        charreader *reader = tokenizer->next_char;
-	        //@ is_charreader *is_reader = reader;
-	        //@ is_reader();
-	        int result = reader();
-			if (result < -128 || result > 127)
-				abort();
+        //@ open tokenizer(tokenizer, -2);
+	    charreader *reader = tokenizer->next_char;
+	    int result = reader();
+        //@ assert charreader_post(reader)(result) &*& -128 <= result &*& result <= 127;
+		if (result < -128 || result > 127)
+			abort();
 		tokenizer->lastread = result;
+        //@ close tokenizer(tokenizer, result);
 	}
-    //@ close tokenizer_p(tokenizer, s);
 }
 
 
@@ -89,16 +84,26 @@ and drops that character by assigning the lastread field to -2 (meaning empty).
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_next_char(struct tokenizer* tokenizer)
-    //@ requires tokenizer_p(tokenizer, ?s);
-    //@ ensures s == nil ? (tokenizer_p(tokenizer, nil) &*& result == -1) : (tokenizer_p(tokenizer, tail(s)) &*& result == head(s));
+    //@ requires tokenizer(tokenizer, -2) &*& charreader_pre(tokenizer->next_char)();
+    /*@ ensures
+        exists<int>(?c) &*&
+        tokenizer(tokenizer, -2) &*&
+        charreader_post(tokenizer->next_char)(c) &*&
+        result == c &*&
+        -128 <= c &*& c <= 127;
+    @*/
+    //@ requires tokenizer(tokenizer, ?lastread) &*& lastread != -2;
+    /*@ ensures
+        tokenizer(tokenizer, -2) &*&
+        result == lastread;
+    @*/
 {
 	int c;
 
 	tokenizer_fill_buffer(tokenizer);
-	//@ open tokenizer_p(tokenizer, s);
+    //@ open tokenizer(tokenizer, ?current_lastread);
 	c = tokenizer->lastread;
 	tokenizer->lastread = -2;
-	//@ assert tokenizer->next_char |-> ?reader &*& [1/2]charreader_state(reader, ?reader_stream);
-	//@ close tokenizer_p(tokenizer, reader_stream);
+    //@ close tokenizer(tokenizer, -2);
 	return c;
 }

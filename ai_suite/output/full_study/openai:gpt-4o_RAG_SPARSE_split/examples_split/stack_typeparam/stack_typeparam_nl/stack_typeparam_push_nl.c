@@ -1,6 +1,17 @@
 #include "stdlib.h"
 
 /*
+  Destructors
+*/
+
+/*
+destructor function
+-params: data
+-description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
+*/
+typedef void destructor(void* data);
+
+/*
   Stack
 */
 
@@ -27,26 +38,15 @@ struct data
   int bar;
 };
 
-/*
-  Destructors
-*/
-
-/*
-destructor function
--params: data
--description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
-*/
-typedef void destructor(void* data);
-
 /*@
 predicate nodes(struct node* n, list<void*> values) =
   n == 0 ? 
     values == nil 
   : 
-    n->data |-> ?d &*& n->next |-> ?next &*& malloc_block_node(n) &*& nodes(next, ?values0) &*& values == cons(d, values0);
+    n->data |-> ?d &*& n->next |-> ?next &*& malloc_block_node(n) &*& nodes(next, ?values_tail) &*& values == cons(d, values_tail);
 
 predicate stack(struct stack* s, list<void*> values) =
-  s->first |-> ?first &*& s->destructor |-> ?destructor &*& s->size |-> ?size &*& malloc_block_stack(s) &*& nodes(first, values) &*& size == length(values);
+  s->first |-> ?first &*& s->destructor |-> ?destructor &*& s->size |-> ?size &*& malloc_block_stack(s) &*& nodes(first, values) &*& length(values) == size;
 @*/
 
 // TODO: make this function pass the verification

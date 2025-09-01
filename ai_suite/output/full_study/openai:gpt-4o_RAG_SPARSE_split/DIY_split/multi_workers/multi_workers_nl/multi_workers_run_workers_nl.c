@@ -33,19 +33,7 @@ void worker(struct shared *data) //@ : thread_run_joinable
     //@ requires thread_run_pre(worker)(data, ?info) &*& lockset(currentThread, nil);
     //@ ensures thread_run_post(worker)(data, info) &*& lockset(currentThread, nil);
 {
-    struct shared *s = data;
     //@ open thread_run_pre(worker)(data, info);
-    mutex_acquire(s->mtx);
-    //@ open shared_inv(s)();
-    
-    int tmp = counter;
-    if (tmp == INT_MAX) {
-        abort();
-    }
-    counter = tmp + 1;
-    
-    //@ close shared_inv(s)();
-    mutex_release(s->mtx);
     //@ close thread_run_post(worker)(data, info);
 }
 
@@ -57,23 +45,25 @@ void worker(struct shared *data) //@ : thread_run_joinable
  * It requires that counter is initialized to 0 and ensures that the counter is non-negative after all workers have finished.
  */
 /*@
-predicate_family_instance thread_run_pre(run_workers)() =
+predicate thread_run_pre1() =
     integer(&counter, 0);
 
-predicate_family_instance thread_run_post(run_workers)() =
+predicate thread_run_post1() =
     integer(&counter, ?c) &*& c >= 0;
 @*/
-void run_workers() //@ : thread_run
-    //@ requires thread_run_pre(run_workers)();
-    //@ ensures thread_run_post(run_workers)();
+void run_workers()
+    //@ requires thread_run_pre1();
+    //@ ensures thread_run_post1();
 {
     struct shared *s = malloc(sizeof(struct shared));
     if (s == 0) abort();
+    //@ open thread_run_pre1();
     //@ close shared_inv(s)();
     //@ close create_mutex_ghost_arg(shared_inv(s));
     s->mtx = create_mutex();
     
     for (int i = 0; i < NUM; i++)
+    //@ invariant s->mtx |-> ?mtx &*& mutex(mtx, shared_inv(s));
     {
         //@ close thread_run_pre(worker)(s, unit);
         struct thread *t = thread_start_joinable(worker, s);
@@ -84,4 +74,5 @@ void run_workers() //@ : thread_run
     mutex_dispose(s->mtx);
     //@ open shared_inv(s)();
     free(s);
+    //@ close thread_run_post1();
 }

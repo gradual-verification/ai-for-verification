@@ -1,5 +1,14 @@
 #include "stdlib.h"
 
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -23,8 +32,6 @@ struct stack
 inductive Stack<T> =
   | Nil
   | Cons(void* data, T info, Stack<T>);
-
-predicate malloc_block_node(struct node *n) = malloc_block(n, sizeof(struct node));
 
 predicate Node<T>(predicate(void *, T) Ownership, struct node* node, void *data, T info, struct node* next) =
   node->data |-> data &*&
@@ -133,15 +140,6 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
 
 
 void* pop/*@ <T> @*/(struct stack* stack)
@@ -154,43 +152,43 @@ void* pop/*@ <T> @*/(struct stack* stack)
   @*/
 {
   //@ open Stack(stack, destructor, Ownership, Cons(head, info, tail));
-  //@ open StackItems(Ownership, ?first_ptr, Cons(head, info, tail));
+  //@ open StackItems(Ownership, ?s_first, Cons(head, info, tail));
   struct node* first = stack->first;
-  //@ open Node(Ownership, first, head, info, ?next_ptr);
+  //@ open Node(Ownership, first, head, info, ?next_node);
   void* data = first->data;
   stack->first = first->next;
   free(first);
   if (stack->size == INT_MIN) {
-    abort();  // or handle error as necessary
+    abort();
   }
   stack->size--;
-  //@ Size(Cons(head, info, tail));
+  //@ assert StackItems(Ownership, next_node, tail);
   //@ close Stack(stack, destructor, Ownership, tail);
   return data;
 }
 
 
 destructor* get_destructor/*@ <T> @*/(struct stack* stack)
-  //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack);
+  //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?S);
   /*@
-  ensures Stack(stack, destructor, Ownership, Stack) &*&
+  ensures Stack(stack, destructor, Ownership, S) &*&
           [_]is_destructor(result, Ownership) &*&
           result == destructor;
   @*/
 {
-  //@ open Stack(stack, destructor, Ownership, Stack);
+  //@ open Stack(stack, destructor, Ownership, S);
   destructor* d = stack->destructor;
-  //@ close Stack(stack, destructor, Ownership, Stack);
+  //@ close Stack(stack, destructor, Ownership, S);
   return d;
 }
 
 
 // TODO: make this function pass the verification
 void pop_destroy/*@ <T> @*/(struct stack* stack)
-  //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack) &*& Stack != Nil;
-  //@ ensures Stack(stack, destructor, Ownership, Pop(Stack));
+  //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?S) &*& S != Nil;
+  //@ ensures Stack(stack, destructor, Ownership, Pop(S));
 {
-  //@ switch(Stack) { case Nil: case Cons(head, info, tail): }
+  //@ switch(S) { case Nil: case Cons(head, info, tail): }
   void* data = pop(stack);
   destructor* d = get_destructor(stack);
   d(data);

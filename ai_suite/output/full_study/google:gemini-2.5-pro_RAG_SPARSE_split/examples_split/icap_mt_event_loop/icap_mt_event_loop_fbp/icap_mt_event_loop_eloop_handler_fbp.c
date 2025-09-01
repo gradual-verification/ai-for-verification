@@ -6,8 +6,11 @@
 
 typedef struct eloop *eloop;
 
-// Forward declaration of the function pointer type for use in the struct definition.
-typedef void eloop_handler(void *data);
+// TODO: make this function pass the verification
+typedef void eloop_handler(void *data) /*@(eloop x, predicate(void *) dataPred)@*/;
+    //@ requires eloop(x) &*& [_]dataPred(data);
+    //@ ensures eloop(x) &*& [_]dataPred(data);
+
 
 struct eloop {
     int lock;
@@ -33,8 +36,3 @@ predicate_ctor I(eloop x)() =
 predicate eloop(eloop x) =
     [_]lock(&x->lock, I(x));
 @*/
-
-
-typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
-    //@ requires eloop(x) &*& [_]dataPred(data);
-    //@ ensures eloop(x) &*& [_]dataPred(data);

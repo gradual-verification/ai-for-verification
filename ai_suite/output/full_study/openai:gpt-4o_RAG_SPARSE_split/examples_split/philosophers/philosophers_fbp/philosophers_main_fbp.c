@@ -16,18 +16,6 @@ predicate_family_instance thread_run_data(philosopher_run)(struct philosopher *d
 
 @*/
 
-void create_philosopher(struct lock *fork1, struct lock *fork2)
-    //@ requires [_]lock(fork1, ?fork1Id, _) &*& [_]lock(fork2, ?fork2Id, _) &*& lock_below(fork1Id, fork2Id) == true;
-    //@ ensures true;
-{
-    struct philosopher *philosopher = malloc(sizeof(struct philosopher));
-    if (philosopher == 0) abort();
-    philosopher->fork1 = fork1;
-    philosopher->fork2 = fork2;
-    //@ close thread_run_data(philosopher_run)(philosopher);
-    thread_start(philosopher_run, philosopher);
-}
-
 void philosopher_run(void *data) //@ : thread_run
     //@ requires thread_run_data(philosopher_run)(data) &*& lockset(currentThread, nil);
     //@ ensures false;
@@ -44,7 +32,18 @@ void philosopher_run(void *data) //@ : thread_run
     }
 }
 
-// TODO: make this function pass the verification
+void create_philosopher(struct lock *fork1, struct lock *fork2)
+    //@ requires [_]lock(fork1, ?fork1Id, _) &*& [_]lock(fork2, ?fork2Id, _) &*& lock_below(fork1Id, fork2Id) == true;
+    //@ ensures true;
+{
+    struct philosopher *philosopher = malloc(sizeof(struct philosopher));
+    if (philosopher == 0) abort();
+    philosopher->fork1 = fork1;
+    philosopher->fork2 = fork2;
+    //@ close thread_run_data(philosopher_run)(philosopher);
+    thread_start(philosopher_run, philosopher);
+}
+
 int main() //@ : main
     //@ requires true;
     //@ ensures true;
@@ -52,11 +51,11 @@ int main() //@ : main
     struct lock *forkA = create_lock();
     struct lock *forkB = create_lock();
     struct lock *forkC = create_lock();
-    //@ close create_lock_ghost_args(_, nil, cons(forkB, nil));
+    //@ close create_lock_ghost_args(?p1, nil, nil);
+    //@ close create_lock_ghost_args(?p2, nil, nil);
+    //@ close create_lock_ghost_args(?p3, nil, nil);
     create_philosopher(forkA, forkB);
-    //@ close create_lock_ghost_args(_, nil, cons(forkC, nil));
     create_philosopher(forkB, forkC);
-    //@ close create_lock_ghost_args(_, nil, cons(forkC, nil));
     create_philosopher(forkA, forkC);
     return 0;
 }

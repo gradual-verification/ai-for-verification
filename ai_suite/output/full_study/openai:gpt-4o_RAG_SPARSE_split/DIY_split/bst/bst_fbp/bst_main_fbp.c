@@ -51,7 +51,7 @@ struct bst_node *bst_insert(struct bst_node *node, int value)
 
 bool bst_search(struct bst_node *node, int value)
     //@ requires bst(node, ?min, ?max);
-    //@ ensures bst(node, min, max) &*& result == (exists(struct bst_node *n; bst(n, min, max) &*& n->value |-> value));
+    //@ ensures bst(node, min, max) &*& result == (min < value && value < max && (node != 0 && node->value == value || bst(node->left, min, node->value) && bst_search(node->left, value) || bst(node->right, node->value, max) && bst_search(node->right, value)));
 {
     if (node == 0) {
         return false;
@@ -90,6 +90,7 @@ void bst_dispose(struct bst_node *node)
     }
 }
 
+// TODO: make this function pass the verification
 int main()
     //@ requires true;
     //@ ensures true;

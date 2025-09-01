@@ -20,13 +20,6 @@ struct barrier {
     bool outgoing;
 };
 
-/*@
-// Predicate to represent the barrier's state
-predicate_ctor barrier_state(struct barrier *b)() =
-    b->n |-> ?n &*& b->k |-> ?k &*& b->outgoing |-> ?outgoing &*&
-    n > 0 &*& 0 <= k &*& k <= n;
-@*/
-
 /***
  * Description:
  * This structure holds shared data used by two threads that coordinate 
@@ -43,16 +36,25 @@ struct data {
 };
 
 /*@
-// Predicate to represent the data structure's state
-predicate data_state(struct data *d) =
-    d->barrier |-> ?b &*& 
-    d->x1 |-> ?x1 &*& d->x2 |-> ?x2 &*& 
-    d->y1 |-> ?y1 &*& d->y2 |-> ?y2 &*& 
+// Define a predicate for the barrier's invariant
+predicate_ctor barrier_inv(struct barrier *b)() =
+    b->n |-> ?n &*& b->k |-> ?k &*& b->outgoing |-> ?outgoing &*&
+    0 <= k &*& k <= n;
+
+// Define a predicate for the barrier itself
+predicate barrier(struct barrier *b; int n) =
+    b->mutex |-> ?m &*& 
+    mutex(m, barrier_inv(b)) &*&
+    b->n |-> n &*&
+    malloc_block_barrier(b);
+
+// Define a predicate for the data structure
+predicate data_pred(struct data *d; struct barrier *b) =
+    d->barrier |-> b &*&
+    d->x1 |-> ?x1 &*& d->x2 |-> ?x2 &*&
+    d->y1 |-> ?y1 &*& d->y2 |-> ?y2 &*&
     d->i |-> ?i &*&
-    0 <= x1 &*& x1 <= 1000 &*& 
-    0 <= x2 &*& x2 <= 1000 &*& 
-    0 <= y1 &*& y1 <= 1000 &*& 
-    0 <= y2 &*& y2 <= 1000;
+    malloc_block_data(d);
 @*/
 
 /***
@@ -72,19 +74,20 @@ predicate data_state(struct data *d) =
  * the barrier is exiting at the end.
  */
 void barrier(struct barrier *barrier)
-//@ requires [?f]barrier->mutex |-> ?mutex &*& [f]mutex(mutex, barrier_state(barrier));
-//@ ensures [f]barrier->mutex |-> mutex &*& [f]mutex(mutex, barrier_state(barrier));
+/*@ requires [?f]barrier(barrier, ?n) &*& f > 0; @*/
+/*@ ensures [f]barrier(barrier, n); @*/
 {
     struct mutex *mutex = barrier->mutex;
     mutex_acquire(mutex);
-    //@ open barrier_state(barrier)();
+    //@ open barrier_inv(barrier)();
 
     {
         while (barrier->outgoing)
-        //@ invariant barrier->n |-> ?n &*& barrier->k |-> ?k &*& barrier->outgoing |-> ?outgoing &*& n > 0 &*& 0 <= k &*& k <= n;
+        /*@ invariant barrier->n |-> n &*& barrier->k |-> ?k &*& barrier->outgoing |-> true &*& 0 <= k &*& k <= n; @*/
         {
             mutex_release(mutex);
             mutex_acquire(mutex);
+            //@ open barrier_inv(barrier)();
         }
     }
 
@@ -92,25 +95,37 @@ void barrier(struct barrier *barrier)
     if (barrier->k == barrier->n) {
         barrier->outgoing = true;
         barrier->k--;
-        //@ close barrier_state(barrier)();
+        //@ close barrier_inv(barrier)();
         mutex_release(barrier->mutex);
     } else {
         while (!barrier->outgoing)
-        //@ invariant barrier->n |-> ?n &*& barrier->k |-> ?k &*& barrier->outgoing |-> ?outgoing &*& n > 0 &*& 0 <= k &*& k <= n;
+        /*@ invariant barrier->n |-> n &*& barrier->k |-> ?k2 &*& barrier->outgoing |-> false &*& 0 <= k2 &*& k2 <= n; @*/
         {
             mutex_release(mutex);
             mutex_acquire(mutex);
+            //@ open barrier_inv(barrier)();
         }
 
         barrier->k--;
         if (barrier->k == 0) {
             barrier->outgoing = false;
         }
-        //@ close barrier_state(barrier)();
+        //@ close barrier_inv(barrier)();
         mutex_release(mutex);
     }
 }
 
+/*@
+// Define a predicate for the thread1 function
+predicate_family_instance thread_run_data(thread1)(struct data *d) =
+    d->barrier |-> ?b &*& [1/3]barrier(b, ?n) &*&
+    d->x1 |-> ?x1 &*& d->x2 |-> ?x2 &*&
+    d->y1 |-> ?y1 &*& d->y2 |-> ?y2 &*&
+    d->i |-> ?i &*&
+    malloc_block_data(d);
+@*/
+
+// TODO: make this function pass the verification
 /***
  * Description:
  * The first worker thread function. It repeatedly uses the barrier to
@@ -125,23 +140,28 @@ void barrier(struct barrier *barrier)
  * returning.
  */
 void thread1(struct data *d)
-//@ requires data_state(d) &*& [?f]d->barrier->mutex |-> ?mutex &*& [f]mutex(mutex, barrier_state(d->barrier));
-//@ ensures data_state(d) &*& [f]d->barrier->mutex |-> mutex &*& [f]mutex(mutex, barrier_state(d->barrier));
+//@ requires thread_run_data(thread1)(d);
+//@ ensures true;
 {
-    struct barrier *barrier = d->barrier;
+    //@ open thread_run_data(thread1)(d);
+    struct barrier *b = d->barrier;
     {
-        barrier(barrier);
+        barrier(b);
     }
     int N = 0;
     while (N < 30)
-    //@ invariant data_state(d) &*& [f]d->barrier->mutex |-> mutex &*& [f]mutex(mutex, barrier_state(d->barrier)) &*& 0 <= N &*& N <= 30;
+    /*@ invariant d->barrier |-> b &*& [1/3]barrier(b, ?n) &*&
+                  d->x1 |-> ?x1 &*& d->x2 |-> ?x2 &*&
+                  d->y1 |-> ?y1 &*& d->y2 |-> ?y2 &*&
+                  d->i |-> ?i &*& 0 <= N &*& N <= 30 &*&
+                  malloc_block_data(d); @*/
     {
         int a1 = d->x1;
         int a2 = d->x2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->y1 = a1 + 2 * a2;
         {
-            barrier(barrier);
+            barrier(b);
         }
         a1 = d->y1;
         a2 = d->y2;
@@ -150,11 +170,11 @@ void thread1(struct data *d)
         N = N + 1;
         d->i = N;
         {
-            barrier(barrier);
+            barrier(b);
         }
     }
     {
-        barrier(barrier);
+        barrier(b);
     }
     d->i = 0;
 }

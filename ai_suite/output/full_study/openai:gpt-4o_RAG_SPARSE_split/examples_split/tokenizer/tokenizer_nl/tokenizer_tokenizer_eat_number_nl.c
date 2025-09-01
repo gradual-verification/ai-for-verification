@@ -2,6 +2,23 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
+/*@
+predicate tokenizer(struct tokenizer *tokenizer, charreader *next_char, int lastread, int lasttoken, struct string_buffer *buffer) =
+    tokenizer->next_char |-> next_char &*&
+    tokenizer->lastread |-> lastread &*&
+    tokenizer->lasttoken |-> lasttoken &*&
+    tokenizer->buffer |-> buffer &*&
+    malloc_block_tokenizer(tokenizer) &*&
+    (lastread == -2 ? true : -128 <= lastread && lastread <= 127) &*&
+    string_buffer(buffer, _);
+@*/
+
 struct tokenizer
 {
     charreader*           next_char;
@@ -12,27 +29,14 @@ struct tokenizer
 
 /***
  * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-
-/***
- * Description:
 The tokenizer_fill_buffer function reads a character from the next_char reader of the tokenizer and updates the lastread char,
 if the original lastread char is -2 (which means empty).
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
-//@ predicate tokenizer(struct tokenizer* tokenizer) = 
-//@     tokenizer->next_char |-> ?next_char &*& 
-//@     tokenizer->lastread |-> ?lastread &*& 
-//@     tokenizer->lasttoken |-> ?lasttoken &*& 
-//@     tokenizer->buffer |-> ?buffer &*& 
-//@     string_buffer(buffer, _);
-
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer);
-    //@ ensures tokenizer(tokenizer);
+    //@ requires tokenizer(tokenizer, ?next_char, ?lastread, ?lasttoken, ?buffer);
+    //@ ensures tokenizer(tokenizer, next_char, ?new_lastread, lasttoken, buffer) &*& (lastread == -2 ? -128 <= new_lastread && new_lastread <= 127 : new_lastread == lastread);
 {
     if (tokenizer->lastread == -2)
     {
@@ -51,8 +55,8 @@ The tokenizer_peek function reads the next value character of a tokenizer and re
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_peek(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer);
-    //@ ensures tokenizer(tokenizer) &*& result == tokenizer->lastread;
+    //@ requires tokenizer(tokenizer, ?next_char, ?lastread, ?lasttoken, ?buffer);
+    //@ ensures tokenizer(tokenizer, next_char, result, lasttoken, buffer) &*& -128 <= result && result <= 127;
 {
     tokenizer_fill_buffer(tokenizer);
     return tokenizer->lastread;
@@ -66,8 +70,8 @@ and drops that character by assigning the lastread field to -2 (meaning empty).
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_next_char(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer);
-    //@ ensures tokenizer(tokenizer) &*& result == tokenizer->lastread;
+    //@ requires tokenizer(tokenizer, ?next_char, ?lastread, ?lasttoken, ?buffer);
+    //@ ensures tokenizer(tokenizer, next_char, -2, lasttoken, buffer) &*& -128 <= result && result <= 127;
 {
     int c;
 
@@ -98,7 +102,7 @@ It needs to make sure that the property of the buffer holds (i.e., the buffer po
 */
 void string_buffer_append_char(struct string_buffer *buffer, char c)
     //@ requires string_buffer(buffer, ?cs);
-    //@ ensures string_buffer(buffer, append(cs, {c}));
+    //@ ensures string_buffer(buffer, append(cs, cons(c, nil)));
 {
     char cc = c;
     string_buffer_append_chars(buffer, &cc, 1);
@@ -114,8 +118,8 @@ If it peeks a non-digit character, it exits the loop and returns the token that 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_eat_number(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer);
-    //@ ensures tokenizer(tokenizer) &*& result == '0';
+    //@ requires tokenizer(tokenizer, ?next_char, ?lastread, ?lasttoken, ?buffer);
+    //@ ensures tokenizer(tokenizer, next_char, ?new_lastread, '0', buffer) &*& string_buffer(buffer, ?new_buffer) &*& forall(new_buffer, is_digit);
 {
     for (;;)
     {

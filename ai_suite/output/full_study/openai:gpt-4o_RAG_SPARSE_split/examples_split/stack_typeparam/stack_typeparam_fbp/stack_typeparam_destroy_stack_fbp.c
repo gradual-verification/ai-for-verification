@@ -1,6 +1,14 @@
 #include "stdlib.h"
 
 /*
+  Destructors
+*/
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
+/*
   Stack
 */
 
@@ -24,7 +32,7 @@ inductive Stack<T> =
   | Cons(void* data, T info, Stack<T>);
 
 predicate Node<T>(predicate(void *, T) Ownership, struct node* node, void *data, T info, struct node* next) =
-  malloc_block_node( node ) &*&
+  malloc_block_node(node) &*&
   node->data |-> data &*&
   node->next |-> next &*&
   Ownership(data, info) &*&
@@ -133,16 +141,6 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
-
 // TODO: make this function pass the verification
 void destroy_stack/*@ <T> @*/(struct stack* stack)
   //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?S);
@@ -151,16 +149,17 @@ void destroy_stack/*@ <T> @*/(struct stack* stack)
   struct node* current = stack->first;
   destructor* destructor = stack->destructor;
   
-  while ( current != 0 )
+  while (current != 0)
     //@ invariant StackItems(Ownership, current, ?S0);
   {
     //@ open StackItems(Ownership, current, S0);
     struct node* next = current->next;
-    destructor(current->data);
-    //@ open Node(Ownership, current, _, _, _);
+    void* data = current->data;
+    //@ open Node(Ownership, current, data, ?info, next);
+    destructor(data);
     free(current);
     current = next;
   }
-  //@ open StackItems(Ownership, current, _);
+  //@ open StackItems(Ownership, current, S0);
   free(stack);
 }

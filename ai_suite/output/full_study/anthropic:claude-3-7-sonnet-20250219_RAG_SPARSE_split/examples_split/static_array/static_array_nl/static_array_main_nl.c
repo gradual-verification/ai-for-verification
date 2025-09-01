@@ -95,13 +95,12 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_nl)
   ar1[26] = 2;
   ar1[ 1] = ar1[ 1] + ar1[26];
 
-  //@ assert ar1[1] |-> 7;
   if (ar1[i] == 7)
    { t = ar1[2]; }
    else
-   { assert false; }
+   { assert(false); }
 
-  //@ assert ar1[26] |-> 2;
+  //@ assert (ar1[26] == 2);
 
   /* array inside a struct */
   s = malloc (sizeof (struct_with_array));
@@ -113,13 +112,12 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_nl)
   s->ar[ 6] = 2;
   s->ar[ 1] = s->ar[ 1] + s->ar[ 6];
 
-  //@ assert s->ar[1] |-> 7;
   if (s->ar[i] == 7)
    { t += s->ar[2]; }
    else
-   { assert false; }
+   { assert(false); }
 
-  //@ assert s->ar[0] |-> 1;
+  //@ assert (s->ar[0] == 1);
   free (s);
 
 
@@ -128,23 +126,24 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_nl)
   ar2[ 1] = 5;
   ar2[ 2] = 0;
   ar2[26] = 2;
+  //@ assert ar2[1] |-> 5 &*& ar2[26] |-> 2;
   mod_ar2 ();
-
   //@ assert ar2[1] |-> 7;
+
   if (ar2[i] == 7)
    { t += ar2[2]; }
    else
-   { assert false; }
+   { assert(false); }
 
-  //@ assert ar2[1] |-> 7;
+  //@ assert (ar2[1] == 7);
 
-  //@ assert points[1].y |-> 40;
+  //@ assert (points[1].y == 40);
   
   int xs[] = {1, 2, 3}, ys[] = {4, 5, 6, 7};
   xs[1] = xs[2];
-  //@ assert xs[1] |-> 3;
+  //@ assert (xs[1] == 3);
   ys[2] = ys[3];
-  //@ assert ys[2] |-> 7;
+  //@ assert (ys[2] == 7);
 
   return (t);
  }

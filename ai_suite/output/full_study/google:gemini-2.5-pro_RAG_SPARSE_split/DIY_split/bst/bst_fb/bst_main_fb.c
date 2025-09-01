@@ -12,9 +12,9 @@ predicate bst(struct bst_node *node, int min, int max) =
     node == 0 ?
         true
     :
-        malloc_block_bst_node(node) &*&
         node->value |-> ?v &*& min < v &*& v < max &*&
         node->left |-> ?left &*& node->right |-> ?right &*&
+        malloc_block_bst_node(node) &*&
         bst(left, min, v) &*& bst(right, v, max);
 @*/
 
@@ -35,15 +35,17 @@ struct bst_node *bst_insert(struct bst_node *node, int value)
         new_node->value = value;
         new_node->left = 0;
         new_node->right = 0;
+        //@ close bst(new_node, min, max);
         return new_node;
     } else {
+        //@ open bst(node, min, max);
         if (value < node->value) {
             node->left = bst_insert(node->left, value);
         } else if (value > node->value) {
             node->right = bst_insert(node->right, value);
         } else {   
         }
-
+        //@ close bst(node, min, max);
         return node;
     }
 }
@@ -55,14 +57,20 @@ bool bst_search(struct bst_node *node, int value)
     if (node == 0) {
         return false;
     }
-    else if (node->value == value) {
+    //@ open bst(node, min, max);
+    if (node->value == value) {
+        //@ close bst(node, min, max);
         return true;
     }
     else if (value < node->value) {
-        return bst_search(node->left, value);
+        bool result = bst_search(node->left, value);
+        //@ close bst(node, min, max);
+        return result;
     }
     else {
-        return bst_search(node->right, value);
+        bool result = bst_search(node->right, value);
+        //@ close bst(node, min, max);
+        return result;
     }
 }
 
@@ -72,9 +80,11 @@ void bst_traverse(struct bst_node *node)
 {
     if (node == 0) {
     } else {
+        //@ open bst(node, min, max);
         int val = node->value;
         bst_traverse(node->left);
         bst_traverse(node->right);
+        //@ close bst(node, min, max);
     }
 }
 
@@ -83,13 +93,15 @@ void bst_dispose(struct bst_node *node)
     //@ ensures true;
 {
     if (node != 0) {
+        //@ open bst(node, min, max);
         bst_dispose(node->left);
         bst_dispose(node->right);
         free(node);
+    } else {
+        //@ open bst(node, min, max);
     }
 }
 
-// TODO: make this function pass the verification
 int main()
     //@ requires true;
     //@ ensures true;

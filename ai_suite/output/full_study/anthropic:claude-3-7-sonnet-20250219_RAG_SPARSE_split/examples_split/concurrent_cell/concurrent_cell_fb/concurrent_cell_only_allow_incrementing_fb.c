@@ -130,32 +130,80 @@ void only_allow_incrementing(struct cell* c)
 {
   int x1 = get(c);
   //@ trace trace1 = trace0;
-  //@ open observed(c, trace1);
-  //@ close observed(c, trace1);
-  
-  int x2 = get(c);
-  //@ trace trace2 = trace1;
-  //@ open observed(c, trace2);
-  //@ close observed(c, trace2);
-  
-  //@ assert is_prefix(trace0, trace1) == true;
-  //@ assert is_prefix(trace1, trace2) == true;
   
   /*@
-  lemma void increment_only_proof(struct cell* c, int x1)
-    requires c->x |-> ?x2;
-    ensures c->x |-> x2 &*& x1 <= x2;
+  lemma void incr_only_implies_monotonic(trace t1, trace t2)
+    requires incr_only(t1) == true &*& incr_only(t2) == true &*& is_prefix(t1, t2) == true;
+    ensures execute_trace(t1) <= execute_trace(t2);
   {
-    // This is a proof by contradiction
-    if (x1 > x2) {
-      // If x1 > x2, then the trace must have decreased, which contradicts incr_only
-      assert false;
+    switch(t2) {
+      case zero:
+        assert t1 == zero;
+        break;
+      case inc(t2_0):
+        if(t1 == t2) {
+          // Base case: t1 == t2
+        } else {
+          // Recursive case: is_prefix(t1, t2_0)
+          incr_only_implies_monotonic(t1, t2_0);
+          assert execute_trace(t1) <= execute_trace(t2_0);
+          assert execute_trace(t2) == execute_trace(t2_0) + 1;
+          assert execute_trace(t1) <= execute_trace(t2);
+        }
+        break;
+      case dec(t2_0):
+        // This case is impossible because incr_only(t2) would be false
+        assert false;
+        break;
+      case cas_(old, new, t2_0):
+        if(t1 == t2) {
+          // Base case: t1 == t2
+        } else {
+          // Recursive case: is_prefix(t1, t2_0)
+          incr_only_implies_monotonic(t1, t2_0);
+          assert execute_trace(t1) <= execute_trace(t2_0);
+          assert old <= new; // From incr_only(t2)
+          assert execute_trace(t2) == (execute_trace(t2_0) == old ? new : execute_trace(t2_0));
+          if(execute_trace(t2_0) == old) {
+            assert execute_trace(t2) == new;
+            assert old <= new;
+            assert execute_trace(t1) <= execute_trace(t2_0);
+            assert execute_trace(t1) <= old;
+            assert execute_trace(t1) <= new;
+            assert execute_trace(t1) <= execute_trace(t2);
+          } else {
+            assert execute_trace(t2) == execute_trace(t2_0);
+            assert execute_trace(t1) <= execute_trace(t2_0);
+            assert execute_trace(t1) <= execute_trace(t2);
+          }
+        }
+        break;
     }
   }
   @*/
   
-  //@ produce_lemma_function_pointer_chunk(increment_only_proof) : increment_only(c, x1)() { call(); };
-  //@ call_lemma_function_pointer(increment_only(c, x1));
+  int x2 = get(c);
+  //@ trace trace2 = trace1;
   
+  /*@
+  // Now we need to prove that x1 <= x2
+  open observed(c, trace2);
+  assert is_prefix_handle(?h, ?id, trace2);
+  assert is_prefix(trace0, trace1) == true;
+  assert is_prefix(trace1, trace2) == true;
+  
+  // Use the lemma to prove that execute_trace is monotonic for incr_only traces
+  incr_only_implies_monotonic(trace0, trace2);
+  assert execute_trace(trace0) <= execute_trace(trace2);
+  
+  // Now we know that x1 <= x2
+  assert x1 == execute_trace(trace1);
+  assert x2 == execute_trace(trace2);
   assert x1 <= x2;
+  
+  // Close the observed predicate
+  close observed(c, trace2);
+  @*/
+  
+  assert(x1 <= x2);
 }

@@ -1,5 +1,14 @@
 #include "stdlib.h"
   
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -34,8 +43,8 @@ predicate Node<T>(predicate(void *, T) Ownership, struct node* node, void *data,
 predicate StackItems<T>(predicate(void *, T) Ownership, struct node* head, Stack<T> S) =
   head == 0 ? S == Nil :
   Node(Ownership, head, ?data, ?info, ?next) &*&
-  StackItems(Ownership, next, ?S_tail) &*&
-  S == Cons(data, info, S_tail);
+  StackItems(Ownership, next, ?T) &*&
+  S == Cons(data, info, T);
 
 predicate Stack<T>(struct stack* stack, destructor* destructor, predicate(void *, T) Ownership, Stack<T> S) =
   malloc_block_stack(stack) &*&
@@ -134,30 +143,22 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
 
 // TODO: make this function pass the verification
 void destroy_stack/*@ <T> @*/(struct stack* stack)
-  //@ requires Stack<T>(stack, ?dest, ?own, ?S);
+  //@ requires Stack<T>(stack, ?destructor_func, ?Ownership, ?S);
   //@ ensures true;
 {
-  //@ open Stack<T>(stack, dest, own, S);
+  //@ open Stack<T>(stack, destructor_func, Ownership, S);
   struct node* current = stack->first;
   destructor* destructor = stack->destructor;
   
   while ( current != 0 )
-    //@ invariant StackItems<T>(own, current, ?S_current);
+    //@ invariant StackItems<T>(Ownership, current, ?S_current) &*& [_]is_destructor(destructor, Ownership);
   {
-    //@ open StackItems<T>(own, current, S_current);
-    //@ open Node<T>(own, current, ?data, ?info, ?next_node);
+    //@ open StackItems<T>(Ownership, current, S_current);
+    //@ assert S_current == Cons(?data, ?info, ?S_next);
+    //@ open Node<T>(Ownership, current, data, info, ?next_ptr);
     
     struct node* next = current->next;
     destructor(current->data);
@@ -165,6 +166,7 @@ void destroy_stack/*@ <T> @*/(struct stack* stack)
     current = next;
   }
   
-  //@ open StackItems<T>(own, current, ?S_current); // S_current is Nil here
+  //@ open StackItems<T>(Ownership, 0, Nil);
+  
   free(stack);
 }

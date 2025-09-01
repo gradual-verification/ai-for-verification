@@ -161,22 +161,19 @@ void barrier(struct barrier *barrier)
 }
 
 
+// TODO: make this function pass the verification
 void thread1(struct data *d) //@ : thread_run_joinable
     //@ requires thread_run_pre(thread1)(d, ?info);
     //@ ensures thread_run_post(thread1)(d, info);
 {
     //@ open thread_run_pre(thread1)(d, info);
-    struct barrier *barrier = d->barrier;
+    struct barrier *b = d->barrier;
     {
-        //@ predicate_family_instance barrier_incoming(enter)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit) = n == 2 &*& inv == my_barrier_inv(d) &*& exit == exit &*& [1/2]d->inside1 |-> false &*& [1/2]d->phase1 |-> writing_x;
-        //@ predicate_family_instance barrier_inside(exit)(int n, predicate(int k, bool outgoing) inv) = n == 2 &*& inv == my_barrier_inv(d) &*& [1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_x;
-        //@ predicate_family_instance barrier_exiting(exit)(int n, predicate(int k, bool outgoing) inv) = n == 2 &*& inv == my_barrier_inv(d) &*& [1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_x;
-        
-        //@ produce_lemma_function_pointer_chunk enter() : barrier_enter { d->inside1 = true; };
-        //@ produce_lemma_function_pointer_chunk exit() : barrier_exit { d->inside1 = false; d->phase1 = next_phase(d->phase1); };
-        
         //@ close barrier_incoming(enter)(2, my_barrier_inv(d), exit);
-        barrier(barrier);
+        //@ close my_barrier_inv(d)(0, false);
+        //@ produce_lemma_function_pointer_chunk(enter);
+        //@ produce_lemma_function_pointer_chunk(exit);
+        barrier(b);
         //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
     }
     int N = 0;
@@ -187,16 +184,14 @@ void thread1(struct data *d) //@ : thread_run_joinable
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->y1 = a1 + 2 * a2;
         {
-            //@ predicate_family_instance barrier_incoming(enter)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit) = n == 2 &*& inv == my_barrier_inv(d) &*& exit == exit &*& [1/2]d->inside1 |-> false &*& [1/2]d->phase1 |-> writing_y;
-            //@ predicate_family_instance barrier_inside(exit)(int n, predicate(int k, bool outgoing) inv) = n == 2 &*& inv == my_barrier_inv(d) &*& [1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_y;
-            //@ predicate_family_instance barrier_exiting(exit)(int n, predicate(int k, bool outgoing) inv) = n == 2 &*& inv == my_barrier_inv(d) &*& [1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_y;
-            
-            //@ produce_lemma_function_pointer_chunk enter() : barrier_enter { d->inside1 = true; };
-            //@ produce_lemma_function_pointer_chunk exit() : barrier_exit { d->inside1 = false; d->phase1 = next_phase(d->phase1); };
-            
+            //@ d->inside1 = true;
             //@ close barrier_incoming(enter)(2, my_barrier_inv(d), exit);
-            barrier(barrier);
+            //@ close my_barrier_inv(d)(1, false);
+            //@ produce_lemma_function_pointer_chunk(enter);
+            //@ produce_lemma_function_pointer_chunk(exit);
+            barrier(b);
             //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
+            //@ d->phase1 = writing_y;
         }
         a1 = d->y1;
         a2 = d->y2;
@@ -205,28 +200,22 @@ void thread1(struct data *d) //@ : thread_run_joinable
         N = N + 1;
         d->i = N;
         {
-            //@ predicate_family_instance barrier_incoming(enter)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit) = n == 2 &*& inv == my_barrier_inv(d) &*& exit == exit &*& [1/2]d->inside1 |-> false &*& [1/2]d->phase1 |-> writing_x;
-            //@ predicate_family_instance barrier_inside(exit)(int n, predicate(int k, bool outgoing) inv) = n == 2 &*& inv == my_barrier_inv(d) &*& [1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_x;
-            //@ predicate_family_instance barrier_exiting(exit)(int n, predicate(int k, bool outgoing) inv) = n == 2 &*& inv == my_barrier_inv(d) &*& [1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_x;
-            
-            //@ produce_lemma_function_pointer_chunk enter() : barrier_enter { d->inside1 = true; };
-            //@ produce_lemma_function_pointer_chunk exit() : barrier_exit { d->inside1 = false; d->phase1 = next_phase(d->phase1); };
-            
             //@ close barrier_incoming(enter)(2, my_barrier_inv(d), exit);
-            barrier(barrier);
+            //@ close my_barrier_inv(d)(1, false);
+            //@ produce_lemma_function_pointer_chunk(enter);
+            //@ produce_lemma_function_pointer_chunk(exit);
+            barrier(b);
             //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
+            //@ d->phase1 = writing_x;
         }
     }
     {
-        //@ predicate_family_instance barrier_incoming(enter)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit) = n == 2 &*& inv == my_barrier_inv(d) &*& exit == exit &*& [1/2]d->inside1 |-> false &*& [1/2]d->phase1 |-> writing_y;
-        //@ predicate_family_instance barrier_inside(exit)(int n, predicate(int k, bool outgoing) inv) = n == 2 &*& inv == my_barrier_inv(d) &*& [1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_y;
-        //@ predicate_family_instance barrier_exiting(exit)(int n, predicate(int k, bool outgoing) inv) = n == 2 &*& inv == my_barrier_inv(d) &*& [1/2]d->inside1 |-> true &*& [1/2]d->phase1 |-> writing_y;
-        
-        //@ produce_lemma_function_pointer_chunk enter() : barrier_enter { d->inside1 = true; };
-        //@ produce_lemma_function_pointer_chunk exit() : barrier_exit { d->inside1 = false; d->phase1 = next_phase(d->phase1); };
-        
+        //@ d->inside1 = false;
         //@ close barrier_incoming(enter)(2, my_barrier_inv(d), exit);
-        barrier(barrier);
+        //@ close my_barrier_inv(d)(0, false);
+        //@ produce_lemma_function_pointer_chunk(enter);
+        //@ produce_lemma_function_pointer_chunk(exit);
+        barrier(b);
         //@ open barrier_exiting(exit)(2, my_barrier_inv(d));
     }
     d->i = 0;

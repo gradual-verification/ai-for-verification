@@ -1,4 +1,16 @@
 #include "stdlib.h"
+#include "stdbool.h"
+
+/*
+  Destructors
+*/
+
+/*
+destructor function
+-params: data
+-description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
+*/
+typedef void destructor(void* data);
 
 /*
   Stack
@@ -27,24 +39,13 @@ struct data
   int bar;
 };
 
-/*
-  Destructors
-*/
-
-/*
-destructor function
--params: data
--description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
-*/
-typedef void destructor(void* data);
-
 /*@
 
 predicate nodes(struct node *node, int count) =
-    node == 0 ? count == 0 : node->next |-> ?next &*& node->data |-> _ &*& malloc_block_node(node) &*& nodes(next, count - 1);
+    node == 0 ? count == 0 : 0 < count &*& node->next |-> ?next &*& node->data |-> ?data &*& malloc_block_node(node) &*& nodes(next, count - 1);
 
 predicate stack(struct stack *stack, int count) =
-    stack->first |-> ?first &*& stack->destructor |-> _ &*& stack->size |-> count &*& malloc_block_stack(stack) &*& nodes(first, count);
+    stack->first |-> ?first &*& stack->destructor |-> ?destructor &*& stack->size |-> count &*& malloc_block_stack(stack) &*& nodes(first, count);
 
 @*/
 
@@ -56,8 +57,11 @@ bool is_empty(struct stack* stack)
     //@ requires stack(stack, ?count);
     //@ ensures stack(stack, count) &*& result == (count == 0);
 {
-  //@ open stack(stack, count);
-  struct node* first = stack->first;
-  //@ close stack(stack, count);
-  return first == 0;
+    //@ open stack(stack, count);
+    struct node* first = stack->first;
+    //@ open nodes(first, count);
+    bool result = first == 0;
+    //@ close nodes(first, count);
+    //@ close stack(stack, count);
+    return result;
 }

@@ -6,6 +6,11 @@
 
 typedef struct eloop *eloop;
 
+typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
+    //@ requires eloop(x) &*& [_]dataPred(data);
+    //@ ensures eloop(x) &*& [_]dataPred(data);
+
+
 struct eloop {
     int lock;
     int signalCount;
@@ -16,97 +21,84 @@ struct eloop {
 
 /*@
 
-// A ghost predicate family to track if we are dispatching a handler.
-// This allows us to temporarily move the data predicate out of the lock's invariant.
-predicate_family eloop_dispatching(eloop x)(bool isDispatching);
-
-predicate_ctor I_content(eloop x, bool isDispatching) =
+predicate_ctor I(eloop x)() =
     x->signalCount |-> ?signalCount &*& 0 <= signalCount &*&
     x->handler |-> ?h &*&
     x->dataPred |-> ?dataPred &*&
-    x->handlerData |-> ?data &*&
-    (isDispatching ?
-        // When dispatching, the data predicate is held by the thread, not the lock.
-        h != 0 &*& [_]is_eloop_handler(h, x, dataPred)
+    h == 0 ?
+        x->handlerData |-> _ &*&
+        true
     :
-        // When idle, the data predicate is protected by the lock.
-        h == 0 ?
-            true
-        :
-            [_]is_eloop_handler(h, x, dataPred) &*& [_]dataPred(data)
-    );
-
-predicate_ctor I(eloop x)() =
-    eloop_dispatching(x)(?isDispatching) &*& I_content(x, isDispatching);
+        x->handlerData |-> ?data &*&
+        [_]is_eloop_handler(h, x, dataPred) &*& [_]dataPred(data);
 
 predicate eloop(eloop x) =
-    // The eloop predicate owns the lock and the dispatching state.
-    // If dispatching, it also owns the checked-out data predicate.
-    [_]lock(&x->lock, I(x)) &*&
-    (
-        eloop_dispatching(x)(true) ?
-            x->handler |-> ?h &*& x->dataPred |-> ?dp &*& x->handlerData |-> ?d &*& [_]dp(d)
-        :
-            eloop_dispatching(x)(false)
-    );
+    [_]lock(&x->lock, I(x));
 @*/
-
-
-typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
-    //@ requires eloop(x) &*& [_]dataPred(data);
-    //@ ensures eloop(x) &*& [_]dataPred(data);
-
 
 
 // TODO: make this function pass the verification
 void eloop_loop(eloop x)
     //@ requires eloop(x);
-    //@ ensures false;
+    //@ ensures eloop(x);
 {
     for (;;)
         //@ invariant eloop(x);
     {
         eloop_handler *handler = 0;
         void *handlerData;
+        //@ predicate(void *) dataPred = 0;
         
-        //@ open eloop(x);
-        //@ open eloop_dispatching(x)(false);
         acquire(&x->lock);
         //@ open I(x)();
-        //@ open I_content(x, false);
         
         if (x->signalCount > 0) {
             x->signalCount--;
             handler = x->handler;
             if (handler) {
+                // A handler is available. Prepare to call it.
+                // We need to extract the handler's data predicate from the lock invariant.
+                // To do this, we temporarily set the handler to null in the shared state.
+                //@ dataPred = x->dataPred;
                 handlerData = x->handlerData;
-                //@ close I_content(x, true);
-                //@ eloop_dispatching(x)(true);
+                x->handler = 0;
+                
+                // Now, we can close the invariant. The data predicate chunk is now outside the lock.
+                //@ close I(x)();
             } else {
-                //@ close I_content(x, false);
-                //@ eloop_dispatching(x)(false);
+                // No handler, just close the invariant.
+                //@ close I(x)();
             }
         } else {
-            //@ close I_content(x, false);
-            //@ eloop_dispatching(x)(false);
+            // No signal, just close the invariant.
+            //@ close I(x)();
         }
         
-        //@ close I(x)();
         release(&x->lock);
         
         if (handler) {
-            //@ close eloop(x);
+            // The handler was extracted. Call it.
+            // We have eloop(x) from the loop invariant.
+            // We have [_]dataPred(handlerData) because we extracted it.
+            // We have [_]is_eloop_handler(handler, x, dataPred) because it was in the invariant.
+            // These satisfy the handler's precondition.
+            //@ assert [_]is_eloop_handler(handler, x, dataPred);
+            //@ assert [_]dataPred(handlerData);
             handler(handlerData);
-            //@ open eloop(x);
-            //@ open eloop_dispatching(x)(true);
+            
+            // The handler call returns eloop(x) and [_]dataPred(handlerData).
+            // Now, we must return the data predicate to the lock invariant.
             acquire(&x->lock);
             //@ open I(x)();
-            //@ open I_content(x, true);
-            //@ close I_content(x, false);
-            //@ eloop_dispatching(x)(false);
+            
+            // At this point, x->handler is 0, as we set it before.
+            // Restore the original handler.
+            x->handler = handler;
+            
+            // Now we can close the invariant again, this time consuming the data predicate.
             //@ close I(x)();
             release(&x->lock);
         }
-        //@ close eloop(x);
+        // If no handler was called, the loop invariant eloop(x) already holds.
     }
 }

@@ -77,6 +77,22 @@ predicate context(struct Node* node, context value, int holeCount) =
   };
 @*/
 
+struct Node* internalCreate(struct Node* parent)
+  //@ requires true;
+  //@ ensures tree(result, tree(result, Nil, Nil)) &*& result->parent |-> parent;
+{
+  struct Node* n = malloc(sizeof(struct Node));
+  if(n==0) {
+    abort();
+  } else {}
+  n->left = 0;
+  n->right = 0;
+  n->parent = parent;
+  n->count = 1;
+
+  return n;
+}
+
 
 struct Node* create() 
   //@ requires true;
@@ -97,42 +113,22 @@ struct Node* create()
 }
 
 
-struct Node* addLeft(struct Node* node)
-  //@ requires isTree(node, ?v) &*& valueOf(v, node) == tree(node, Nil, Nil);
-  /*@ ensures isTree(node, replace(v, node, tree(node, tree(result, Nil, Nil), Nil))) &*& uniqueNodes(replace(v, node, tree(node, tree(result, Nil, Nil), Nil)))==true; @*/
+void fix(struct Node* node)
+  /*@ requires node->count |-> ?c &*& context(node, ?value, c) @*/   
+  /*@ ensures context(node, value, c + 1) &*& node->count |-> c + 1; @*/
 {
-
-  struct Node* newChild = internalAddLeft(node);
-
-  return newChild;
-}
-
-
-int getNbOfNodes(struct Node* n)
-  //@ requires isTree(n, ?value);
-  //@ ensures isTree(n, value) &*& size(valueOf(value, n))==result; 
-{
-
-    int c = internalGetNbOfNodes(n);
-
-    return c;
-}
-
-
-struct Node* internalCreate(struct Node* parent)
-  //@ requires true;
-  //@ ensures tree(result, tree(result, Nil, Nil)) &*& result->parent |-> parent;
-{
-  struct Node* n = malloc(sizeof(struct Node));
-  if(n==0) {
+  int tmp = node->count;
+  if (tmp == INT_MAX) {
     abort();
-  } else {}
-  n->left = 0;
-  n->right = 0;
-  n->parent = parent;
-  n->count = 1;
+  }
+  node->count = tmp + 1;
 
-  return n;
+  struct Node* parent = node->parent;
+  if(parent==0){
+  } else {
+    fix(parent);
+  }
+
 }
 
 
@@ -148,22 +144,14 @@ struct Node* internalAddLeft(struct Node* node)
 }
 
 
-void fix(struct Node* node)
-  /*@ requires node->count |-> ?c &*& context(node, ?value, c) @*/   
-  /*@ ensures context(node, value, c + 1) &*& node->count |-> c + 1; @*/
+struct Node* addLeft(struct Node* node)
+  //@ requires isTree(node, ?v) &*& valueOf(v, node) == tree(node, Nil, Nil);
+  /*@ ensures isTree(node, replace(v, node, tree(node, tree(result, Nil, Nil), Nil))) &*& uniqueNodes(replace(v, node, tree(node, tree(result, Nil, Nil), Nil)))==true; @*/
 {
-  int tmp = node->count;
-  if (tmp == 2147483647) { // INT_MAX
-    abort();
-  }
-  node->count = tmp + 1;
 
-  struct Node* parent = node->parent;
-  if(parent==0){
-  } else {
-    fix(parent);
-  }
+  struct Node* newChild = internalAddLeft(node);
 
+  return newChild;
 }
 
 
@@ -178,16 +166,40 @@ int internalGetNbOfNodes(struct Node* n)
 }
 
 
+int getNbOfNodes(struct Node* n)
+  //@ requires isTree(n, ?value);
+  //@ ensures isTree(n, value) &*& size(valueOf(value, n))==result; 
+{
+
+    int c = internalGetNbOfNodes(n);
+
+    return c;
+}
+
+
+// TODO: make this function pass the verification
 int main() //@ : main
   //@ requires true;
   //@ ensures true;
 {
   struct Node* mytree = create();
+  //@ assert isTree(mytree, ?v0) &*& v0 == tree(mytree, Nil, Nil);
+  
   struct Node* child = addLeft(mytree);
+  //@ let v1 = replace(v0, mytree, tree(mytree, tree(child, Nil, Nil), Nil));
+  //@ assert isTree(mytree, v1) &*& uniqueNodes(v1) == true;
+  //@ assert v1 == tree(mytree, tree(child, Nil, Nil), Nil);
 
   struct Node* child2 = addLeft(child);
+  //@ let v2 = replace(v1, child, tree(child, tree(child2, Nil, Nil), Nil));
+  //@ assert isTree(child, v2) &*& uniqueNodes(v2) == true;
+  //@ assert v2 == tree(mytree, tree(child, tree(child2, Nil, Nil), Nil), Nil);
 
   int c = getNbOfNodes(child2);
+  //@ assert isTree(child2, v2) &*& size(valueOf(v2, child2)) == c;
+  
+  //@ assert valueOf(v2, child2) == tree(child2, Nil, Nil);
+  //@ assert size(tree(child2, Nil, Nil)) == 1;
   assert(c==1);
   abort();
 }

@@ -1,5 +1,14 @@
 #include "stdlib.h"
   
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -134,15 +143,6 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
 
 struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
   //@ requires [_]is_destructor<T>(destructor, ?Ownership);
@@ -247,7 +247,6 @@ void destroy_data(struct data* data)
 }
 
 
-// TODO: make this function pass the verification
 void check()
   //@ requires true;
   //@ ensures true;
@@ -256,33 +255,31 @@ void check()
   struct stack* stack = create_empty_stack(destroy_data);
   //@ assert Stack(stack, destroy_data, Ownership, ?S1);
   //@ assert IsEmpty(S1) == true;
+  
   int s = size(stack);
   //@ assert s == 0;
-  assert s == 0;
+  assert(s == 0);
   
   struct data* data = create_data(1, 2);
-  //@ assert Data(data, 1, 2);
   //@ close Data_Ownership(data, DataCarrier(1, 2));
   push(stack, data);
   //@ assert Stack(stack, destroy_data, Ownership, ?S2);
-  //@ assert S2 == Push(data, DataCarrier(1, 2), S1);
+  //@ assert S2 == Cons(data, DataCarrier(1, 2), S1);
   
   s = size(stack);
   //@ assert s == 1;
   
   data = create_data(2, 3);
-  //@ assert Data(data, 2, 3);
   //@ close Data_Ownership(data, DataCarrier(2, 3));
   push(stack, data);
   //@ assert Stack(stack, destroy_data, Ownership, ?S3);
-  //@ assert S3 == Push(data, DataCarrier(2, 3), S2);
+  //@ assert S3 == Cons(data, DataCarrier(2, 3), S2);
 
   s = size(stack);
   //@ assert s == 2;
-  assert s == 2;
+  assert(s == 2);
   
   struct data* popped = pop(stack);
-  //@ assert Stack(stack, destroy_data, Ownership, ?S4);
   //@ assert Data_Ownership(popped, DataCarrier(2, 3));
   destroy_data(popped);
 

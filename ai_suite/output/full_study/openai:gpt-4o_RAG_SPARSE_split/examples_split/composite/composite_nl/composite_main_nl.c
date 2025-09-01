@@ -26,11 +26,39 @@ struct Node {
 
 /*@
 predicate nodes(struct Node* node, struct Node* parent, int count) =
-    node == 0 ? count == 0 : 
-    node->parent |-> parent &*& node->left |-> ?left &*& node->right |-> ?right &*& node->count |-> count &*&
-    malloc_block_Node(node) &*&
-    nodes(left, node, ?leftCount) &*& nodes(right, node, ?rightCount) &*& count == 1 + leftCount + rightCount;
+    node == 0 ?
+        count == 0
+    :
+        node->parent |-> parent &*& node->count |-> count &*&
+        node->left |-> ?left &*& node->right |-> ?right &*&
+        malloc_block_Node(node) &*&
+        nodes(left, node, ?leftCount) &*& nodes(right, node, ?rightCount) &*&
+        count == 1 + leftCount + rightCount;
 @*/
+
+/***
+ * Description:
+ * The `internalCreate` function creates a new node with a given parent.
+ *
+ * @param parent - A pointer to the parent node.
+ *
+ * The function makes sure that the returned node is not null and a subtree with that node is linked to the parent.
+ */
+struct Node* internalCreate(struct Node* parent)
+    //@ requires nodes(parent, ?grandparent, ?parentCount);
+    //@ ensures nodes(result, parent, 1) &*& nodes(parent, grandparent, parentCount);
+{
+    struct Node* n = malloc(sizeof(struct Node));
+    if(n == 0) {
+        abort();
+    }
+    n->left = 0;
+    n->right = 0;
+    n->parent = parent;
+    n->count = 1;
+    //@ close nodes(n, parent, 1);
+    return n;
+}
 
 /***
  * Description:
@@ -58,58 +86,29 @@ struct Node* create()
 
 /***
  * Description:
- * The `addLeft` function adds a left child to a given node and returns the newly added child.
+ * The `fix` function updates the `count` field of a non-null node and propagates the update to its ancestors.
  *
- * @param node - A pointer to the node where the left child should be added, and its both children are originally empty.
+ * @param node - A pointer to the node whose count should be updated.
  *
- * The function makes sure that a new (and distinct) left child node is added and returned.
+ * The function makes sure that the count field of current node with its ancestors is incremented by 1
  */
-struct Node* addLeft(struct Node* node)
-    //@ requires nodes(node, ?parent, ?count) &*& node->left |-> 0;
-    //@ ensures nodes(node, parent, count + 1) &*& result != 0 &*& nodes(result, node, 1);
+void fix(struct Node* node)
+    //@ requires nodes(node, ?parent, ?count) &*& count < INT_MAX;
+    //@ ensures nodes(node, parent, count + 1);
 {
-    struct Node* newChild = internalAddLeft(node);
-    return newChild;
-}
-
-/***
- * Description:
- * The `getNbOfNodes` function retrieves the number of nodes in the subtree rooted at `n`.
- *
- * @param n - A pointer to the root of the subtree.
- *
- * The function makes sure not to change the subtree and return the `count` field of the node.
- */
-int getNbOfNodes(struct Node* n)
-    //@ requires nodes(n, ?parent, ?count);
-    //@ ensures nodes(n, parent, count) &*& result == count;
-{
-    int c = internalGetNbOfNodes(n);
-    return c;
-}
-
-/***
- * Description:
- * The `internalCreate` function creates a new node with a given parent.
- *
- * @param parent - A pointer to the parent node.
- *
- * The function makes sure that the returned node is not null and a subtree with that node is linked to the parent.
- */
-struct Node* internalCreate(struct Node* parent)
-    //@ requires nodes(parent, ?grandparent, ?parentCount);
-    //@ ensures nodes(parent, grandparent, parentCount + 1) &*& nodes(result, parent, 1);
-{
-    struct Node* n = malloc(sizeof(struct Node));
-    if(n == 0) {
+    int tmp = node->count;
+    if (tmp == INT_MAX) {
         abort();
     }
-    n->left = 0;
-    n->right = 0;
-    n->parent = parent;
-    n->count = 1;
-    //@ close nodes(n, parent, 1);
-    return n;
+    node->count = tmp + 1;
+
+    struct Node* parent = node->parent;
+    if(parent != 0) {
+        //@ open nodes(parent, ?grandparent, ?parentCount);
+        fix(parent);
+        //@ close nodes(parent, grandparent, parentCount + 1);
+    }
+    //@ close nodes(node, parent, count + 1);
 }
 
 /***
@@ -122,7 +121,7 @@ struct Node* internalCreate(struct Node* parent)
  */
 struct Node* internalAddLeft(struct Node* node)
     //@ requires nodes(node, ?parent, ?count) &*& node->left |-> 0;
-    //@ ensures nodes(node, parent, count + 1) &*& result != 0 &*& nodes(result, node, 1);
+    //@ ensures nodes(result, node, 1) &*& nodes(node, parent, count + 1);
 {
     struct Node* child = internalCreate(node);
     node->left = child;
@@ -132,26 +131,18 @@ struct Node* internalAddLeft(struct Node* node)
 
 /***
  * Description:
- * The `fix` function updates the `count` field of a non-null node and propagates the update to its ancestors.
+ * The `addLeft` function adds a left child to a given node and returns the newly added child.
  *
- * @param node - A pointer to the node whose count should be updated.
+ * @param node - A pointer to the node where the left child should be added, and its both children are originally empty.
  *
- * The function makes sure that the count field of current node with its ancestors is incremented by 1
+ * The function makes sure that a new (and distinct) left child node is added and returned.
  */
-void fix(struct Node* node)
-    //@ requires nodes(node, ?parent, ?count);
-    //@ ensures nodes(node, parent, count + 1);
+struct Node* addLeft(struct Node* node)
+    //@ requires nodes(node, ?parent, ?count) &*& node->left |-> 0 &*& node->right |-> 0;
+    //@ ensures nodes(result, node, 1) &*& nodes(node, parent, count + 1);
 {
-    int tmp = node->count;
-    if (tmp == INT_MAX) {
-        abort();
-    }
-    node->count = tmp + 1;
-
-    struct Node* parent = node->parent;
-    if(parent != 0) {
-        fix(parent);
-    }
+    struct Node* newChild = internalAddLeft(node);
+    return newChild;
 }
 
 /***
@@ -167,6 +158,22 @@ int internalGetNbOfNodes(struct Node* n)
     //@ ensures nodes(n, parent, count) &*& result == count;
 {
     int c = n->count;
+    return c;
+}
+
+/***
+ * Description:
+ * The `getNbOfNodes` function retrieves the number of nodes in the subtree rooted at `n`.
+ *
+ * @param n - A pointer to the root of the subtree.
+ *
+ * The function makes sure not to change the subtree and return the `count` field of the node.
+ */
+int getNbOfNodes(struct Node* n)
+    //@ requires nodes(n, ?parent, ?count);
+    //@ ensures nodes(n, parent, count) &*& result == count;
+{
+    int c = internalGetNbOfNodes(n);
     return c;
 }
 

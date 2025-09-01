@@ -61,20 +61,22 @@ bool bst_search(struct bst_node *node, int value)
     if (node == 0) {
         return false;
     }
-    //@ open bst(node, min, max);
-    if (node->value == value) {
-        //@ close bst(node, min, max);
-        return true;
-    }
-    else if (value < node->value) {
-        bool result = bst_search(node->left, value);
-        //@ close bst(node, min, max);
-        return result;
-    }
     else {
-        bool result = bst_search(node->right, value);
-        //@ close bst(node, min, max);
-        return result;
+        //@ open bst(node, min, max);
+        if (node->value == value) {
+            //@ close bst(node, min, max);
+            return true;
+        }
+        else if (value < node->value) {
+            bool result = bst_search(node->left, value);
+            //@ close bst(node, min, max);
+            return result;
+        }
+        else {
+            bool result = bst_search(node->right, value);
+            //@ close bst(node, min, max);
+            return result;
+        }
     }
 }
 
@@ -82,10 +84,8 @@ void bst_traverse(struct bst_node *node)
     //@ requires bst(node, ?min, ?max);
     //@ ensures bst(node, min, max);
 {
-    if (node == 0) {
-    } else {
+    if (node != 0) {
         //@ open bst(node, min, max);
-        int val = node->value;
         bst_traverse(node->left);
         bst_traverse(node->right);
         //@ close bst(node, min, max);
@@ -102,11 +102,10 @@ void bst_dispose(struct bst_node *node)
         bst_dispose(node->right);
         free(node);
     } else {
-        //@ open bst(node, min, max);
+        //@ open bst(0, min, max);
     }
 }
 
-// TODO: make this function pass the verification
 int main()
     //@ requires true;
     //@ ensures true;

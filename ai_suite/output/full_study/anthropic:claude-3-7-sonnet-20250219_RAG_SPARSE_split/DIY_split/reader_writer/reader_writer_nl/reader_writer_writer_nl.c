@@ -9,15 +9,13 @@ struct rwlock {
 
 /*@
 // Define a predicate for the rwlock invariant
-predicate rwlock_inv(struct rwlock *l) =
-    l->mutex |-> ?m &*&
+predicate_ctor rwlock_inv(struct rwlock *l)() =
     l->readers |-> ?readers &*&
     readers >= 0;
 
 // Define a predicate for the rwlock
-predicate rwlock(struct rwlock *l) =
-    malloc_block_rwlock(l) &*&
-    rwlock_inv(l);
+predicate_family_instance thread_run_data(writer)(struct rwlock *l) =
+    l->mutex |-> ?m &*& mutex(m, rwlock_inv(l));
 @*/
 
 /***
@@ -29,26 +27,27 @@ predicate rwlock(struct rwlock *l) =
  * 
  */
 void writer(struct rwlock *l) //@ : thread_run
-    //@ requires [?f]rwlock(l) &*& lockset(currentThread, nil);
-    //@ ensures [f]rwlock(l) &*& lockset(currentThread, nil);
+    //@ requires [?f]thread_run_data(writer)(l) &*& lockset(currentThread, nil);
+    //@ ensures lockset(currentThread, nil);
 {
     for (;;)
-    //@ invariant [f]rwlock(l) &*& lockset(currentThread, nil);
+    //@ invariant [f]thread_run_data(writer)(l) &*& lockset(currentThread, nil);
     {
+        //@ open [f]thread_run_data(writer)(l);
         mutex_acquire(l->mutex);
-        //@ open [f]rwlock(l);
-        //@ open rwlock_inv(l);
+        //@ open rwlock_inv(l)();
         if (l->readers == 0) {
             break;
         }
-        //@ close rwlock_inv(l);
-        //@ close [f]rwlock(l);
+        //@ close rwlock_inv(l)();
         mutex_release(l->mutex);
+        //@ close [f]thread_run_data(writer)(l);
     }
 
     // critical section (writing)
 
-    //@ close rwlock_inv(l);
-    //@ close [f]rwlock(l);
+    //@ close rwlock_inv(l)();
     mutex_release(l->mutex);
+    //@ close [f]thread_run_data(writer)(l);
+    //@ leak [f]thread_run_data(writer)(l);
 }

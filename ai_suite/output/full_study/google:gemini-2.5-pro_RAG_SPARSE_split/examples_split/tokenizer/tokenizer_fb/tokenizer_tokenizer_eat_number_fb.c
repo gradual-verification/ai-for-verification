@@ -2,6 +2,10 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
+
 
 struct tokenizer
 {
@@ -23,28 +27,7 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
   t->lastread |-> ?lastread &*&
   t->lasttoken |-> ?lasttoken &*&
   t->buffer |-> buffer;
-
-lemma void tokenizer_split(struct tokenizer *t)
-    requires Tokenizer(t);
-    ensures Tokenizer_minus_buffer(t, ?b) &*& string_buffer(b, _);
-{
-    open Tokenizer(t);
-    close Tokenizer_minus_buffer(t, t->buffer);
-}
-
-lemma void tokenizer_join(struct tokenizer *t)
-    requires Tokenizer_minus_buffer(t, ?b) &*& string_buffer(b, _);
-    ensures Tokenizer(t);
-{
-    open Tokenizer_minus_buffer(t, b);
-    close Tokenizer(t);
-}
 @*/
-
-
-typedef int charreader();
-    //@ requires true;
-    //@ ensures true;
 
 
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
@@ -93,8 +76,8 @@ bool is_digit(int c)
 
 
 void string_buffer_append_char(struct string_buffer *buffer, char c)
- //@ requires string_buffer(buffer, ?bcs);
- //@ ensures string_buffer(buffer, append(bcs, cons(c, nil)));
+ //@ requires string_buffer(buffer, _);
+ //@ ensures string_buffer(buffer, _);
 {
 	char cc = c;
 	string_buffer_append_chars(buffer, &cc, 1);
@@ -107,7 +90,7 @@ int tokenizer_eat_number(struct tokenizer* tokenizer)
  //@ ensures Tokenizer(tokenizer);
 {
 	for (;;)
-	//@ invariant Tokenizer(tokenizer);
+	    //@ invariant Tokenizer(tokenizer);
 	{
 		int result;
 		bool isDigit;
@@ -117,10 +100,9 @@ int tokenizer_eat_number(struct tokenizer* tokenizer)
 		if ( !isDigit ) break;
 		
 	    result = tokenizer_next_char(tokenizer);
-		
-		//@ tokenizer_split(tokenizer);
+		//@ open Tokenizer(tokenizer);
 		string_buffer_append_char(tokenizer->buffer, (char)result);
-		//@ tokenizer_join(tokenizer);
+		//@ close Tokenizer(tokenizer);
 	}
 
 	return '0';

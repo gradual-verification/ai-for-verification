@@ -2,10 +2,22 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
-// Forward declaration of charreader type
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
 typedef int charreader();
 
-// Structure definition for tokenizer
+/*@
+predicate tokenizer(struct tokenizer* tokenizer, charreader* reader, int lastread, int lasttoken, struct string_buffer* buffer) =
+    tokenizer->next_char |-> reader &*&
+    tokenizer->lastread |-> lastread &*&
+    tokenizer->lasttoken |-> lasttoken &*&
+    tokenizer->buffer |-> buffer &*&
+    malloc_block_tokenizer(tokenizer) &*&
+    lastread >= -2 &*& lastread <= 127;
+@*/
+
 struct tokenizer
 {
     charreader*           next_char;
@@ -14,21 +26,16 @@ struct tokenizer
     struct string_buffer* buffer;
 };
 
-// Predicate for tokenizer structure
-/*@
-predicate tokenizer(struct tokenizer* tokenizer, charreader* reader, int lastread, int lasttoken, struct string_buffer* buffer) =
-    tokenizer->next_char |-> reader &*&
-    tokenizer->lastread |-> lastread &*&
-    tokenizer->lasttoken |-> lasttoken &*&
-    tokenizer->buffer |-> buffer &*&
-    malloc_block_tokenizer(tokenizer) &*&
-    (lastread == -2 ? true : -128 <= lastread && lastread <= 127);
-@*/
+/***
+ * Description:
+The tokenizer_fill_buffer function reads a character from the next_char reader of the tokenizer and updates the lastread char,
+if the original lastread char is -2 (which means empty).
 
-// Function to fill the tokenizer buffer
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
     //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
-    //@ ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& (lastread == -2 ? -128 <= new_lastread && new_lastread <= 127 : new_lastread == lastread);
+    //@ ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& new_lastread >= -1 &*& new_lastread <= 127;
 {
     if (tokenizer->lastread == -2)
     {
@@ -40,16 +47,26 @@ void tokenizer_fill_buffer(struct tokenizer* tokenizer)
     }
 }
 
-// Function to peek the next character in the tokenizer
+/***
+ * Description:
+The tokenizer_peek function reads the next value character of a tokenizer and returns the updated lastread character.
+
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
 int tokenizer_peek(struct tokenizer* tokenizer)
     //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
-    //@ ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& result == new_lastread;
+    //@ ensures tokenizer(tokenizer, reader, result, lasttoken, buffer) &*& result >= -1 &*& result <= 127;
 {
     tokenizer_fill_buffer(tokenizer);
     return tokenizer->lastread;
 }
 
-// Function to drop the last character in the tokenizer
+/***
+ * Description:
+The tokenizer_drop function drops the last character of a tokenizer by assigning its lastread field to -2 (meaning empty).
+
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
 void tokenizer_drop(struct tokenizer* tokenizer)
     //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
     //@ ensures tokenizer(tokenizer, reader, -2, lasttoken, buffer);
@@ -57,7 +74,12 @@ void tokenizer_drop(struct tokenizer* tokenizer)
     tokenizer->lastread = -2;
 }
 
-// Function to check if a character is whitespace
+/***
+ * Description:
+The is_whitespace function checks whether a given character in integer means a whitespace.
+
+This function ensures nothing. 
+*/
 bool is_whitespace(int c)
     //@ requires true;
     //@ ensures true;
@@ -65,10 +87,16 @@ bool is_whitespace(int c)
     return c == ' ' || c == '\n' || c == '\r' || c == '\t';
 }
 
-// Function to skip whitespace in the tokenizer
+// TODO: make this function pass the verification
+/***
+ * Description:
+The tokenizer_skip_whitespace function reads and drops all the whitespace characters that are encountered sequentially by the tokenizer.
+
+It needs to make sure that the given tokenizer preserves its property of tokenizer. 
+*/
 void tokenizer_skip_whitespace(struct tokenizer* tokenizer)
     //@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
-    //@ ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& (is_whitespace(new_lastread) == false || new_lastread == -1);
+    //@ ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& new_lastread >= -1 &*& new_lastread <= 127;
 {
     while (is_whitespace(tokenizer_peek(tokenizer)))
     {

@@ -2,6 +2,10 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
+
 
 struct tokenizer
 {
@@ -15,22 +19,17 @@ struct tokenizer
 predicate Tokenizer(struct tokenizer* t;) =
   malloc_block_tokenizer(t) &*&
   t->next_char |-> ?nc &*& is_charreader(nc) == true &*&
-  t->lastread |-> ?lastread &*& (lastread >= -128 && lastread <= 127 || lastread == -1 || lastread == -2) &*&
+  t->lastread |-> ?lastread &*& lastread >= -128 &*& lastread <= 127 &*&
   t->lasttoken |-> ?lasttoken &*&
   t->buffer |-> ?b &*& string_buffer(b, _);
 
 predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buffer) =
   malloc_block_tokenizer(t) &*&
   t->next_char |-> ?nc &*& is_charreader(nc) == true &*&
-  t->lastread |-> ?lastread &*& (lastread >= -128 && lastread <= 127 || lastread == -1 || lastread == -2) &*&
+  t->lastread |-> ?lastread &*& lastread >= -128 &*& lastread <= 127 &*&
   t->lasttoken |-> ?lasttoken &*&
   t->buffer |-> buffer;
 @*/
-
-
-typedef int charreader();
-    //@ requires true;
-    //@ ensures true;
 
 
 // TODO: make this function pass the verification
@@ -43,8 +42,8 @@ void tokenizer_fill_buffer(struct tokenizer* tokenizer)
 	{
 	        charreader *reader = tokenizer->next_char;
 	        int result = reader();
-		if (result < -128 || result > 127)
-			abort();
+			if (result < -128 || result > 127)
+				abort();
 		tokenizer->lastread = result;
 	}
 	//@ close Tokenizer(tokenizer);

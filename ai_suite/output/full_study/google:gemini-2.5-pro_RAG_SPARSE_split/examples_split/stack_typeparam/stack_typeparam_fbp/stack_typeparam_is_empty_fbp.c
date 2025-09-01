@@ -1,5 +1,14 @@
 #include "stdlib.h"
   
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -134,25 +143,21 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
 
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
-
-// TODO: make this function pass the verification
 bool is_empty/*@ <T> @*/(struct stack* stack)
   //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack);
   //@ ensures Stack(stack, destructor, Ownership, Stack) &*& result == IsEmpty(Stack);
 {
-  //@ open Stack(stack, destructor, Ownership, Stack);
+  //@ open Stack<T>(stack, destructor, Ownership, Stack);
   struct node* first = stack->first;
-  //@ open StackItems(Ownership, first, Stack);
-  //@ close StackItems(Ownership, first, Stack);
-  //@ close Stack(stack, destructor, Ownership, Stack);
+  //@ open StackItems<T>(Ownership, first, Stack);
+  
+  // VeriFast performs a case split on 'first' due to the definition of StackItems.
+  // If first == 0, then Stack == Nil, and IsEmpty(Nil) is true. The function returns true.
+  // If first != 0, then Stack == Cons(...), and IsEmpty(Cons(...)) is false. The function returns false.
+  // In both cases, result == IsEmpty(Stack) holds.
+  
+  //@ close StackItems<T>(Ownership, first, Stack);
+  //@ close Stack<T>(stack, destructor, Ownership, Stack);
   return first == 0;
 }

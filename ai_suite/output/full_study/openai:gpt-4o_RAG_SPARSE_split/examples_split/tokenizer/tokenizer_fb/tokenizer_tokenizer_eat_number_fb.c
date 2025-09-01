@@ -2,6 +2,10 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
+
 struct tokenizer
 {
     charreader*           next_char;
@@ -23,10 +27,6 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
   t->lasttoken |-> ?lasttoken &*&
   t->buffer |-> buffer;
 @*/
-
-typedef int charreader();
-    //@ requires true;
-    //@ ensures true;
 
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
  //@ requires Tokenizer(tokenizer);
@@ -80,7 +80,7 @@ void string_buffer_append_char(struct string_buffer *buffer, char c)
 // TODO: make this function pass the verification
 int tokenizer_eat_number(struct tokenizer* tokenizer)
  //@ requires Tokenizer(tokenizer);
- //@ ensures Tokenizer(tokenizer);
+//@ ensures Tokenizer(tokenizer);
 {
     for (;;)
     {

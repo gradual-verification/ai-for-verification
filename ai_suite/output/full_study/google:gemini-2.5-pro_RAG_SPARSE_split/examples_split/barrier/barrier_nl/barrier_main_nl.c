@@ -18,7 +18,6 @@ struct barrier {
     int n;
     int k;
     bool outgoing;
-    //@ box box_id;
 };
 
 /***
@@ -37,58 +36,73 @@ struct data {
 };
 
 /*@
-// Predicate for the shared data invariant.
-// 'phase' tracks the computation stage, 'N' is the loop counter.
-predicate data_inv(struct data *d, int phase, int N) =
-    d->x1 |-> 0 &*& d->x2 |-> 0 &*&
-    d->y1 |-> 0 &*& d->y2 |-> 0 &*&
-    d->i |-> N &*&
-    0 <= N &*& N <= 30 &*&
-    0 <= phase &*& phase <= 2;
+// N: main loop counter (0-30). phase: sub-computation step (0-2).
+// phase 0: y values are computed.
+// phase 1: x values are computed.
+// phase 2: i is updated.
+predicate_ctor barrier_inv(struct barrier *b, struct data *d, int N, int phase)() =
+    b->n |-> 2 &*& b->k |-> ?k &*& b->outgoing |-> ?outgoing &*&
+    d->barrier |-> b &*&
+    0 <= k &*& k <= 2 &*& (k == 2 ? outgoing == false : true) &*&
+    0 <= N &*& N <= 30 &*& 0 <= phase &*& phase <= 2 &*&
+    (
+        k == 0 && !outgoing ?
+            d->x1 |-> 0 &*& d->x2 |-> 0 &*& d->y1 |-> 0 &*& d->y2 |-> 0 &*&
+            d->i |-> (phase == 2 ? N + 1 : N)
+        : k == 1 && !outgoing ?
+            (
+                phase == 0 ?
+                    [1/2]d->x1 |-> 0 &*& [1/2]d->x2 |-> 0 &*&
+                    d->y1 |-> 0 &*& d->y2 |-> _ &*& [1/2]d->i |-> N
+                : phase == 1 ?
+                    [1/2]d->y1 |-> 0 &*& [1/2]d->y2 |-> 0 &*&
+                    d->x1 |-> 0 &*& d->x2 |-> _ &*& [1/2]d->i |-> N
+                : d->x1 |-> 0 &*& d->x2 |-> 0 &*& d->y1 |-> 0 &*& d->y2 |-> 0 &*& d->i |-> N + 1
+            )
+        : k == 1 && outgoing ?
+            (
+                phase == 0 ?
+                    d->x1 |-> _ &*& d->x2 |-> _ &*&
+                    [1/2]d->y1 |-> 0 &*& [1/2]d->y2 |-> 0 &*& [1/2]d->i |-> N
+                : phase == 1 ?
+                    [1/2]d->x1 |-> 0 &*& [1/2]d->x2 |-> 0 &*&
+                    [1/2]d->y1 |-> 0 &*& [1/2]d->y2 |-> 0 &*& d->i |-> _
+                : [1/2]d->x1 |-> 0 &*& [1/2]d->x2 |-> 0 &*&
+                  [1/2]d->y1 |-> 0 &*& [1/2]d->y2 |-> 0 &*& [1/2]d->i |-> N + 1
+            )
+        : false
+    );
 
-// Box class to model the barrier's state machine.
-box_class barrier_box(struct barrier *b, int n, struct data *d) {
-    // Physical state of the barrier
-    invariant b->k |-> ?k &*& b->outgoing |-> ?outgoing &*&
-    // Ghost state
-              b->phase |-> ?phase &*& b->N |-> ?N &*&
-    // Invariant linking physical and ghost state
-              (outgoing ? 0 < k && k <= n : 0 <= k && k < n) &*&
-    // The shared data is held by the box only when the barrier is idle.
-              (k == 0 && !outgoing ? data_inv(d, phase, N) : true);
+predicate barrier_object(struct barrier *b, struct data *d, int N, int phase) =
+    b->mutex |-> ?m &*& malloc_block_barrier(b) &*&
+    mutex(m, barrier_inv(b, d, N, phase));
 
-    // Action for a thread arriving at the barrier.
-    action arrive(int thread_id);
-        requires true;
-        ensures k == old_k + 1 && outgoing == old_outgoing &&
-                (k < n ?
-                    phase == old_phase && N == old_N
-                : // Last thread to arrive advances the phase.
-                    phase == (old_phase + 1) % 3 &&
-                    N == (old_phase == 2 ? old_N + 1 : old_N)
-                );
+// Permissions for thread 1 before a barrier call
+predicate t1_perms(struct data *d, int N, int phase) =
+    d->barrier |-> ?b &*& [1/2]barrier_object(b, d, N, phase) &*&
+    (
+        phase == 0 ?
+            [1/2]d->x1 |-> 0 &*& [1/2]d->x2 |-> 0 &*& d->y1 |-> _ &*& [1/2]d->i |-> N
+        : phase == 1 ?
+            d->x1 |-> _ &*& [1/2]d->y1 |-> 0 &*& [1/2]d->y2 |-> 0 &*& d->i |-> _
+        :
+            [1/2]d->x1 |-> 0 &*& [1/2]d->x2 |-> 0 &*&
+            [1/2]d->y1 |-> 0 &*& [1/2]d->y2 |-> 0 &*& d->i |-> N
+    );
 
-    // Action for a thread leaving the barrier.
-    action leave(int thread_id);
-        requires true;
-        ensures k == old_k - 1 &&
-                (k > 0 ? outgoing == old_outgoing : outgoing == false) &&
-                phase == old_phase && N == old_N;
+// Permissions for thread 2 before a barrier call
+predicate t2_perms(struct data *d, int N, int phase) =
+    d->barrier |-> ?b &*& [1/2]barrier_object(b, d, N, phase) &*&
+    (
+        phase == 0 ?
+            [1/2]d->x1 |-> 0 &*& [1/2]d->x2 |-> 0 &*& d->y2 |-> _ &*& [1/2]d->i |-> N
+        : phase == 1 ?
+            d->x2 |-> _ &*& [1/2]d->y1 |-> 0 &*& [1/2]d->y2 |-> 0 &*& [1/2]d->i |-> N
+        :
+            [1/2]d->x1 |-> 0 &*& [1/2]d->x2 |-> 0 &*&
+            [1/2]d->y1 |-> 0 &*& [1/2]d->y2 |-> 0 &*& [1/2]d->i |-> N + 1
+    );
 
-    // Handle for a thread, proving its participation.
-    handle_predicate barrier_handle(int thread_id) {
-        invariant true;
-        preserved_by arrive(thread_id) {}
-        preserved_by leave(thread_id) {}
-    }
-}
-
-// Predicate for the barrier object itself.
-predicate barrier(struct barrier *b, int n, struct data *d) =
-    b->mutex |-> ?m &*&
-    b->box_id |-> ?box_id &*&
-    malloc_block_barrier(b) &*&
-    mutex(m, barrier_box(box_id, b, n, d));
 @*/
 
 /***
@@ -102,24 +116,20 @@ predicate barrier(struct barrier *b, int n, struct data *d) =
  * values, and creates a mutex to protect updates to the barrier.
  */
 struct barrier *create_barrier(int n)
-    //@ requires n > 0 &*& exists<struct data *>(?d) &*& data_inv(d, 0, 0);
-    //@ ensures barrier(result, n, d) &*& result->box_id |-> ?box_id &*& foreach(range(0, n), (barrier_handle)(box_id));
+    //@ requires n == 2 &*& barrier_inv(?b, ?d, ?N, ?phase)();
+    //@ ensures barrier_object(result, d, N, phase) &*& result->n |-> n;
 {
-    struct barrier *b = malloc(sizeof(struct barrier));
-    if (b == 0) abort();
-    b->n = n;
-    b->k = 0;
-    b->outgoing = false;
-    //@ b->phase = 0;
-    //@ b->N = 0;
-    //@ create_box box_id = barrier_box(b, n, d);
-    //@ b->box_id = box_id;
-    //@ close barrier_box(box_id, b, n, d);
+    struct barrier *barrier = malloc(sizeof(struct barrier));
+    if (barrier == 0) abort();
+    barrier->n = n;
+    barrier->k = 0;
+    barrier->outgoing = false;
+    //@ close barrier_inv(barrier, d, N, phase)();
+    //@ close create_mutex_ghost_arg(barrier_inv(barrier, d, N, phase));
     struct mutex *mutex = create_mutex();
-    b->mutex = mutex;
-    //@ close barrier(b, n, d);
-    //@ foreach_create_handle_from_zero(n, barrier_box_handle(box_id));
-    return b;
+    barrier->mutex = mutex;
+    //@ close barrier_object(barrier, d, N, phase);
+    return barrier;
 }
 
 
@@ -140,87 +150,73 @@ struct barrier *create_barrier(int n)
  * the barrier is exiting at the end.
  */
 void barrier(struct barrier *b)
-    //@ requires [?f]barrier(b, ?n, ?d) &*& barrier_handle(?box_id, ?id) &*& b->box_id |-> box_id &*& (f > 0);
-    //@ ensures [f]barrier(b, n, d) &*& barrier_handle(box_id, id);
+    /*@ requires
+            [?f]barrier_object(b, ?d, ?N, ?phase) &*&
+            (
+                is_thread_run_joinable(thread1, d) ?
+                    t1_perms(d, N, phase)
+                :
+                    t2_perms(d, N, phase)
+            );
+    @*/
+    /*@ ensures
+            [f]barrier_object(b, d, phase == 2 ? N + 1 : N, (phase + 1) % 3) &*&
+            (
+                is_thread_run_joinable(thread1, d) ?
+                    t1_perms(d, phase == 2 ? N + 1 : N, (phase + 1) % 3)
+                :
+                    t2_perms(d, phase == 2 ? N + 1 : N, (phase + 1) % 3)
+            );
+    @*/
 {
-    //@ open barrier(b, n, d);
+    //@ open barrier_object(b, d, N, phase);
     struct mutex *mutex = b->mutex;
     mutex_acquire(mutex);
-    //@ open barrier_box(box_id, b, n, d);
+    //@ open barrier_inv(b, d, N, phase)();
 
-    while (b->outgoing)
-        //@ invariant mutex_held(mutex, barrier_box(box_id, b, n, d), currentThread, f) &*& b->k |-> ?k &*& b->outgoing |-> true &*& k > 0 &*& k <= n &*& b->n |-> n &*& b->phase |-> _ &*& b->N |-> _;
     {
-        //@ close barrier_box(box_id, b, n, d);
-        mutex_release(mutex);
-        mutex_acquire(mutex);
-        //@ open barrier_box(box_id, b, n, d);
-    }
-
-    //@ assert b->k |-> ?k_old &*& k_old < n;
-    //@ assert b->phase |-> ?phase_old &*& b->N |-> ?N_old;
-    //@ if (k_old == 0) open data_inv(d, phase_old, N_old);
-    /*@
-    consuming_box_predicate barrier_box(box_id, b, n, d)
-    consuming_handle_predicate barrier_handle(id)
-    perform_action arrive(id) {
-    @*/
-    b->k++;
-    /*@
-    }
-    producing_box_predicate barrier_box(b, n, d)
-    producing_handle_predicate barrier_handle(id);
-    @*/
-    //@ assert b->k |-> ?k_new &*& k_new == k_old + 1;
-    //@ if (k_new < n) { close data_inv(d, phase_old, N_old); } else { assert b->phase |-> (phase_old + 1) % 3; }
-
-    if (b->k == b->n) {
-        b->outgoing = true;
-        /*@
-        consuming_box_predicate barrier_box(box_id, b, n, d)
-        consuming_handle_predicate barrier_handle(id)
-        perform_action leave(id) {
-        @*/
-        b->k--;
-        /*@
-        }
-        producing_box_predicate barrier_box(b, n, d)
-        producing_handle_predicate barrier_handle(id);
-        @*/
-        //@ close barrier_box(box_id, b, n, d);
-        mutex_release(b->mutex);
-    } else {
-        //@ close barrier_box(box_id, b, n, d);
-        while (!b->outgoing)
-            //@ invariant mutex_held(mutex, barrier_box(box_id, b, n, d), currentThread, f) &*& b->k |-> ?k &*& b->outgoing |-> false &*& k > 0 &*& k < n &*& b->n |-> n &*& b->phase |-> _ &*& b->N |-> _;
+        while (b->outgoing)
+            //@ invariant mutex_held(mutex, barrier_inv(b, d, N, phase), currentThread, f) &*& b->outgoing |-> true &*& b->k |-> ?k &*& 0 <= k &*& k < 2 &*& d->barrier |-> b;
         {
+            //@ close barrier_inv(b, d, N, phase)();
             mutex_release(mutex);
             mutex_acquire(mutex);
-            //@ open barrier_box(box_id, b, n, d);
+            //@ open barrier_inv(b, d, N, phase)();
         }
-        
-        /*@
-        consuming_box_predicate barrier_box(box_id, b, n, d)
-        consuming_handle_predicate barrier_handle(id)
-        perform_action leave(id) {
-        @*/
+    }
+    
+    //@ assert b->k |-> ?k_pre &*& b->outgoing |-> false;
+    //@ if (k_pre == 0) { open t1_perms(d, N, phase); open t2_perms(d, N, phase); }
+    //@ else { assert k_pre == 1; }
+    
+    b->k++;
+    if (b->k == b->n) {
+        b->outgoing = true;
         b->k--;
-        /*@
+        //@ int next_N = phase == 2 ? N + 1 : N;
+        //@ int next_phase = (phase + 1) % 3;
+        //@ close barrier_inv(b, d, next_N, next_phase)();
+        mutex_release(b->mutex);
+    } else {
+        while (!b->outgoing)
+            //@ invariant mutex_held(mutex, barrier_inv(b, d, N, phase), currentThread, f) &*& b->outgoing |-> false &*& b->k |-> 1 &*& d->barrier |-> b;
+        {
+            //@ close barrier_inv(b, d, N, phase)();
+            mutex_release(mutex);
+            mutex_acquire(mutex);
+            //@ open barrier_inv(b, d, N, phase)();
         }
-        producing_box_predicate barrier_box(b, n, d)
-        producing_handle_predicate barrier_handle(id);
-        @*/
 
+        b->k--;
         if (b->k == 0) {
             b->outgoing = false;
-            //@ assert b->phase |-> ?phase;
-            //@ assert b->N |-> ?N;
-            //@ close data_inv(d, phase, N);
         }
-        //@ close barrier_box(box_id, b, n, d);
+        //@ int next_N = phase == 2 ? N + 1 : N;
+        //@ int next_phase = (phase + 1) % 3;
+        //@ close barrier_inv(b, d, next_N, next_phase)();
         mutex_release(mutex);
     }
-    //@ close [f]barrier(b, n, d);
+    //@ close [f]barrier_object(b, d, phase == 2 ? N + 1 : N, (phase + 1) % 3);
 }
 
 
@@ -235,37 +231,25 @@ void barrier(struct barrier *b)
  * pointer must not be used again.
  */
 void barrier_dispose(struct barrier *b)
-    //@ requires barrier(b, ?n, ?d) &*& b->box_id |-> ?box_id &*& foreach(range(0, n), (barrier_handle)(box_id)) &*& data_inv(d, _, _);
-    //@ ensures malloc_block_data(d);
+    //@ requires barrier_object(b, ?d, ?N, ?phase);
+    //@ ensures d->barrier |-> b &*& d->x1 |-> 0 &*& d->x2 |-> 0 &*& d->y1 |-> 0 &*& d->y2 |-> 0 &*& d->i |-> (phase == 2 ? N + 1 : N);
 {
-    //@ open barrier(b, n, d);
+    //@ open barrier_object(b, d, N, phase);
     mutex_dispose(b->mutex);
-    //@ open barrier_box(b->box_id, b, n, d);
-    //@ dispose_box barrier_box(b->box_id, b, n, d);
-    //@ foreach_dispose((barrier_handle)(b->box_id));
+    //@ open barrier_inv(b, d, N, phase)();
     free(b);
 }
 
 /*@
-// Predicate families for thread contracts
-predicate_family_instance thread_run_pre(thread1)(void *data, pair<int, box> info) =
-    [1/2]data_pred(data) &*&
-    switch(info) { case pair(id, box_id): return barrier_handle(box_id, id); };
+predicate_family_instance thread_run_pre(thread1)(void *data, any info) =
+    t1_perms(data, 0, 0);
+predicate_family_instance thread_run_post(thread1)(void *data, any info) =
+    t1_perms(data, 0, 1);
 
-predicate_family_instance thread_run_post(thread1)(void *data, pair<int, box> info) =
-    [1/2]data_pred(data) &*&
-    switch(info) { case pair(id, box_id): return barrier_handle(box_id, id); };
-
-predicate_family_instance thread_run_pre(thread2)(void *data, pair<int, box> info) =
-    [1/2]data_pred(data) &*&
-    switch(info) { case pair(id, box_id): return barrier_handle(box_id, id); };
-
-predicate_family_instance thread_run_post(thread2)(void *data, pair<int, box> info) =
-    [1/2]data_pred(data) &*&
-    switch(info) { case pair(id, box_id): return barrier_handle(box_id, id); };
-
-predicate data_pred(struct data *d) =
-    d->barrier |-> ?b &*& [1/2]barrier(b, 2, d) &*& b->box_id |-> _;
+predicate_family_instance thread_run_pre(thread2)(void *data, any info) =
+    t2_perms(data, 0, 0);
+predicate_family_instance thread_run_post(thread2)(void *data, any info) =
+    t2_perms(data, 0, 1);
 @*/
 
 /***
@@ -281,46 +265,58 @@ predicate data_pred(struct data *d) =
  * synchronizing until it finishes its loop, then sets `d->i` to 0 before
  * returning.
  */
-void thread1(struct data *d)
-    //@ requires thread_run_pre(thread1)(d, ?info);
-    //@ ensures thread_run_post(thread1)(d, info);
+void thread1(struct data *d) //@ : thread_run_joinable
+    //@ requires thread_run_pre(thread1)(d, _);
+    //@ ensures thread_run_post(thread1)(d, _);
 {
-    //@ open thread_run_pre(thread1)(d, info);
-    //@ open data_pred(d);
+    //@ open t1_perms(d, 0, 0);
     struct barrier *b = d->barrier;
-    
-    barrier(b);
-
+    {
+        barrier(b);
+    }
     int N = 0;
     while (N < 30)
-        //@ invariant [1/4]barrier(b, 2, d) &*& barrier_handle(b->box_id, fst(info)) &*& d->barrier |-> b;
+        /*@ invariant 0 <= N &*& N <= 30 &*&
+                (
+                    N == 30 ?
+                        t1_perms(d, 30, 0)
+                    :
+                        t1_perms(d, N, 0)
+                );
+        @*/
     {
-        // Phase 0: compute y1
+        //@ open t1_perms(d, N, 0);
         int a1 = d->x1;
         int a2 = d->x2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->y1 = a1 + 2 * a2;
-        
-        barrier(b);
-        
-        // Phase 1: compute x1
+        //@ close t1_perms(d, N, 0);
+        {
+            barrier(b);
+        }
+        //@ open t1_perms(d, N, 1);
         a1 = d->y1;
         a2 = d->y2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->x1 = a1 + 2 * a2;
+        //@ close t1_perms(d, N, 1);
+        {
+            barrier(b);
+        }
+        //@ open t1_perms(d, N, 2);
         N = N + 1;
         d->i = N;
-        
-        barrier(b);
-        
-        // Phase 2: loop back
+        //@ close t1_perms(d, N - 1, 2);
+        {
+            barrier(b);
+        }
+    }
+    {
         barrier(b);
     }
-    
-    barrier(b);
+    //@ open t1_perms(d, 30, 1);
     d->i = 0;
-    //@ close data_pred(d);
-    //@ close thread_run_post(thread1)(d, info);
+    //@ close t1_perms(d, 0, 1);
 }
 
 
@@ -334,44 +330,54 @@ void thread1(struct data *d)
  *
  * @param d - A pointer to the shared `struct data`.
  */
-void thread2(struct data *d)
-    //@ requires thread_run_pre(thread2)(d, ?info);
-    //@ ensures thread_run_post(thread2)(d, info);
+void thread2(struct data *d) //@ : thread_run_joinable
+    //@ requires thread_run_pre(thread2)(d, _);
+    //@ ensures thread_run_post(thread2)(d, _);
 {
-    //@ open thread_run_pre(thread2)(d, info);
-    //@ open data_pred(d);
+    //@ open t2_perms(d, 0, 0);
     struct barrier *b = d->barrier;
-    
-    barrier(b);
-    
+    {
+        barrier(b);
+    }
     int m = 0;
     while (m < 30)
-        //@ invariant [1/4]barrier(b, 2, d) &*& barrier_handle(b->box_id, fst(info)) &*& d->barrier |-> b;
+        /*@ invariant 0 <= m &*& m <= 30 &*&
+                (
+                    m == 30 ?
+                        t2_perms(d, 30, 0)
+                    :
+                        t2_perms(d, m, 0)
+                );
+        @*/
     {
-        // Phase 0: compute y2
+        //@ open t2_perms(d, m, 0);
         int a1 = d->x1;
         int a2 = d->x2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->y2 = a1 + 3 * a2;
-        
-        barrier(b);
-        
-        // Phase 1: compute x2
+        //@ close t2_perms(d, m, 0);
+        {
+            barrier(b);
+        }
+        //@ open t2_perms(d, m, 1);
         a1 = d->y1;
         a2 = d->y2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->x2 = a1 + 3 * a2;
-        
-        barrier(b);
-        
-        // Phase 2: loop back
+        //@ close t2_perms(d, m, 1);
+        {
+            barrier(b);
+        }
+        //@ open t2_perms(d, m, 2);
         m = d->i;
+        //@ close t2_perms(d, m, 2);
+        {
+            barrier(b);
+        }
+    }
+    {
         barrier(b);
     }
-    
-    barrier(b);
-    //@ close data_pred(d);
-    //@ close thread_run_post(thread2)(d, info);
 }
 
 
@@ -393,33 +399,27 @@ int main()
 {
     struct data *d = calloc(1, sizeof(struct data));
     if (d == 0) abort();
-    //@ close data_inv(d, 0, 0);
     
-    struct barrier *b = create_barrier(2);
-    d->barrier = b;
-    //@ box box_id = b->box_id;
-    //@ open foreach(cons(0, cons(1, nil)), (barrier_handle)(box_id));
-    //@ assert barrier_handle(box_id, 0) &*& foreach(cons(1, nil), (barrier_handle)(box_id));
-    //@ open foreach(cons(1, nil), (barrier_handle)(box_id));
-    //@ assert barrier_handle(box_id, 1) &*& foreach(nil, (barrier_handle)(box_id));
-    //@ open foreach(nil, (barrier_handle)(box_id));
+    //@ close barrier_inv(0, d, 0, 0)();
+    struct barrier *barrier = create_barrier(2);
+    d->barrier = barrier;
 
-    //@ close data_pred(d);
-    //@ close data_pred(d);
-    //@ close thread_run_pre(thread1)(d, pair(0, box_id));
+    //@ open barrier_object(barrier, d, 0, 0);
+    //@ close t1_perms(d, 0, 0);
+    //@ close t2_perms(d, 0, 0);
+    //@ close thread_run_pre(thread1)(d, unit);
     struct thread *t1 = thread_start_joinable(thread1, d);
-    //@ close thread_run_pre(thread2)(d, pair(1, box_id));
+    //@ close thread_run_pre(thread2)(d, unit);
     struct thread *t2 = thread_start_joinable(thread2, d);
     
     thread_join(t1);
-    //@ open thread_run_post(thread1)(d, pair(0, box_id));
     thread_join(t2);
-    //@ open thread_run_post(thread2)(d, pair(1, box_id));
     
-    //@ open data_pred(d);
-    //@ open data_pred(d);
-    //@ close foreach(cons(1, nil), (barrier_handle)(box_id));
-    //@ close foreach(cons(0, cons(1, nil)), (barrier_handle)(box_id));
+    //@ open t1_perms(d, 0, 1);
+    //@ open t2_perms(d, 0, 1);
+    //@ open barrier_object(barrier, d, 0, 1);
+    //@ assert barrier_inv(barrier, d, 0, 1)();
+    
     barrier_dispose(d->barrier);
   
     free(d);

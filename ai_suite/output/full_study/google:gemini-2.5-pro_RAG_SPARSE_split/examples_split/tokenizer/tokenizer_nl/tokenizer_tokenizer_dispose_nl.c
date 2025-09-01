@@ -1,6 +1,14 @@
 #include "stdio.h"
-#include "stdlib.h"
+#include "stdlib.hh"
 #include "stringBuffers.h"
+
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
 
 
 struct tokenizer
@@ -10,20 +18,6 @@ struct tokenizer
 	int                   lasttoken; // the last token parsed
 	struct string_buffer* buffer;
 };
-
-
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-/*@
-// A generic contract for a function that reads a character.
-// The details would depend on the source of characters (e.g., a file, a string).
-// For the tokenizer, we just need to know it's a valid function.
-requires true;
-ensures true;
-@*/
 
 /*@
 predicate tokenizer(struct tokenizer *t) =
@@ -43,9 +37,10 @@ The tokenizer_dispose function frees the tokenizer.
 It needs to make sure that the given tokenizer is freed.
 */
 void tokenizer_dispose(struct tokenizer *tokenizer)
-//@ requires tokenizer(tokenizer);
-//@ ensures true;
+    //@ requires tokenizer(tokenizer);
+    //@ ensures true;
 {
+    //@ open tokenizer(tokenizer);
 	string_buffer_dispose(tokenizer->buffer);
 	free(tokenizer);
 }

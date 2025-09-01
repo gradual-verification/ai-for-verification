@@ -1,6 +1,14 @@
 #include "stdlib.h"
 
 /*
+  Destructors
+*/
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
+/*
   Stack
 */
 
@@ -24,7 +32,7 @@ inductive Stack<T> =
   | Cons(void* data, T info, Stack<T>);
 
 predicate Node<T>(predicate(void *, T) Ownership, struct node* node, void *data, T info, struct node* next) =
-  malloc_block_node( node ) &*&
+  malloc_block_node(node) &*&
   node->data |-> data &*&
   node->next |-> next &*&
   Ownership(data, info) &*&
@@ -132,14 +140,6 @@ fixpoint int GetBar(DataCarrier dc)
 predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(DC), GetBar(DC));
 
 @*/
-
-/*
-  Destructors
-*/
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
 
 // TODO: make this function pass the verification
 void* pop/*@ <T> @*/(struct stack* stack)

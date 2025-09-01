@@ -1,5 +1,14 @@
 #include "stdlib.h"
 
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -24,12 +33,11 @@ inductive Stack<T> =
   | Nil
   | Cons(void* data, T info, Stack<T>);
 
-// VF-EXPERT-NOTE: Added malloc_block_node, which is required to verify free(node).
 predicate Node<T>(predicate(void *, T) Ownership, struct node* node, void *data, T info, struct node* next) =
-  malloc_block_node(node) &*&
   node->data |-> data &*&
   node->next |-> next &*&
-  Ownership(data, info);
+  Ownership(data, info) &*&
+  malloc_block_node(node);
 
 predicate StackItems<T>(predicate(void *, T) Ownership, struct node* head, Stack<T> S) =
   head == 0 ? S == Nil :
@@ -37,15 +45,14 @@ predicate StackItems<T>(predicate(void *, T) Ownership, struct node* head, Stack
   StackItems(Ownership, next, ?T) &*&
   S == Cons(data, info, T);
 
-// VF-EXPERT-NOTE: Added malloc_block_stack, which is required to verify free(stack).
 predicate Stack<T>(struct stack* stack, destructor* destructor, predicate(void *, T) Ownership, Stack<T> S) =
-  malloc_block_stack(stack) &*&
   [_]is_destructor(destructor, Ownership) &*&
   stack->destructor |-> destructor &*&
   stack->first |-> ?first &*&
   stack->size |-> ?size &*&
   size == Size(S) &*&
-  StackItems(Ownership, first, S);
+  StackItems(Ownership, first, S) &*&
+  malloc_block_stack(stack);
 
 fixpoint Stack<T> Push<T>(void* item, T info, Stack<T> Stack)
 {
@@ -103,7 +110,8 @@ struct data
 
 predicate Data(struct data* data, int foo, int bar) =
   data->foo |-> foo &*&
-  data->bar |-> bar;
+  data->bar |-> bar &*&
+  malloc_block_data(data);
 
 @*/
 
@@ -134,45 +142,27 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
 
 
 // TODO: make this function pass the verification
 void destroy_stack/*@ <T> @*/(struct stack* stack)
-  //@ requires Stack<T>(stack, ?destructor_ptr, ?Ownership, ?S);
+  //@ requires Stack<T>(stack, ?dest, ?own, ?S);
   //@ ensures true;
 {
-  //@ open Stack<T>(stack, destructor_ptr, Ownership, S);
+  //@ open Stack<T>(stack, dest, own, S);
   struct node* current = stack->first;
   destructor* destructor = stack->destructor;
   
-  while (current != 0)
-    /*@
-    invariant
-      StackItems(Ownership, current, ?rem_S) &*&
-      [_]is_destructor(destructor, Ownership) &*&
-      malloc_block_stack(stack) &*&
-      stack->destructor |-> destructor &*&
-      stack->first |-> _ &*&
-      stack->size |-> _;
-    @*/
+  while ( current != 0 )
+    //@ invariant StackItems<T>(own, current, ?S_current) &*& [_]is_destructor(dest, own) &*& destructor == dest;
   {
-    //@ open StackItems(Ownership, current, rem_S);
-    //@ open Node(Ownership, current, ?data, ?info, ?next);
-    struct node* next_node = current->next;
+    //@ open StackItems<T>(own, current, S_current);
+    //@ open Node<T>(own, current, ?d, ?i, ?n);
+    struct node* next = current->next;
     destructor(current->data);
     free(current);
-    current = next_node;
+    current = next;
   }
-  
-  //@ open StackItems(Ownership, 0, ?rem_S); // consumes the final StackItems(0, Nil)
+  //@ open StackItems<T>(own, current, S_current); // current is 0, S_current is Nil
   free(stack);
 }

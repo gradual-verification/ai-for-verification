@@ -1,5 +1,14 @@
 #include "stdlib.h"
   
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -37,7 +46,7 @@ predicate StackItems<T>(predicate(void *, T) Ownership, struct node* head, Stack
   StackItems(Ownership, next, ?T) &*&
   S == Cons(data, info, T);
 
-predicate Stack<T>(struct stack* stack, destructor* destructor, predicate(void *, T) Ownership, Stack<T> S) =
+predicate Stack<T>(struct stack* stack, destructor* destructor, predicate(void *, T) Ownership, Stack<T> S) = 
   malloc_block_stack(stack) &*&
   [_]is_destructor(destructor, Ownership) &*&
   stack->destructor |-> destructor &*&
@@ -134,33 +143,25 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
-
 void destroy_stack/*@ <T> @*/(struct stack* stack)
   //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?S);
   //@ ensures true;
 {
+  //@ open Stack<T>(stack, destructor, Ownership, S);
   struct node* current = stack->first;
-  destructor* destructor_fn = stack->destructor;
+  destructor* destructor = stack->destructor;
   
+  //@ close StackItems(Ownership, current, S);
   while (current != 0)
-    //@ invariant [_]is_destructor(destructor_fn, Ownership) &*& StackItems<T>(Ownership, current, ?remaining);
+    //@ invariant StackItems(Ownership, current, ?S_remaining) &*& [_]is_destructor(destructor, Ownership);
   {
-    //@ open StackItems(Ownership, current, remaining);
+    //@ open StackItems(Ownership, current, S_remaining);
     //@ open Node(Ownership, current, ?data, ?info, ?next);
     struct node* next = current->next;
-    destructor_fn(current->data);
+    destructor(current->data);
     free(current);
     current = next;
-    //@ close StackItems(Ownership, current, Pop(remaining));
+    //@ S_remaining = Pop(S_remaining);
   }
   //@ open StackItems(Ownership, 0, _);
   free(stack);

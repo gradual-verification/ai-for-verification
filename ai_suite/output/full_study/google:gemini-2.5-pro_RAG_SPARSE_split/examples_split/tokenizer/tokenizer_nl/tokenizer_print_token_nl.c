@@ -2,6 +2,17 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
+/*@
+typedef int charreader_t();
+    requires true;
+    ensures true;
+@*/
 
 struct tokenizer
 {
@@ -12,23 +23,13 @@ struct tokenizer
 };
 
 /*@
-// A predicate for the tokenizer struct.
-// It holds the tokenizer's state, including the last token and the buffer contents.
-predicate tokenizer(struct tokenizer *t; int lasttoken, list<char> buffer_cs) =
-    t->next_char |-> _ &*&
-    t->lastread |-> _ &*&
+predicate tokenizer(struct tokenizer *t; charreader_t *next_char, int lastread, int lasttoken, struct string_buffer* buffer) =
+    t->next_char |-> next_char &*& is_charreader_t(next_char) == true &*&
+    t->lastread |-> lastread &*&
     t->lasttoken |-> lasttoken &*&
-    t->buffer |-> ?buffer &*&
-    string_buffer(buffer, buffer_cs) &*&
+    t->buffer |-> buffer &*&
     malloc_block_tokenizer(t);
 @*/
-
-
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
 
 
 /***
@@ -43,12 +44,13 @@ void print_string_buffer(struct string_buffer *buffer)
 {
 	int n = string_buffer_get_length(buffer);
 	char *pcs = string_buffer_get_chars(buffer);
-	for (int i = 0; i < n; i++)
-	    //@ invariant [f]string_buffer_minus_chars(buffer, pcs, n) &*& [f]chars(pcs, n, cs) &*& 0 <= i &*& i <= n;
+	int i;
+	for (i = 0; i < n; i++)
+        //@ invariant [f]string_buffer_minus_chars(buffer, pcs, n) &*& [f]chars(pcs, n, cs) &*& 0 <= i &*& i <= n;
 	{
 		putchar(pcs[i]);
 	}
-	string_buffer_merge_chars(buffer);
+    //@ string_buffer_merge_chars(buffer);
 }
 
 
@@ -60,10 +62,10 @@ The print_token function prints the last token of of a tokenizer by reading its 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 void print_token(struct tokenizer* tokenizer)
-    //@ requires [?f]tokenizer(tokenizer, ?lasttoken, ?cs);
-    //@ ensures [f]tokenizer(tokenizer, lasttoken, cs);
+    //@ requires [?f]tokenizer(tokenizer, ?nc, ?lr, ?lt, ?buf) &*& [?g]string_buffer(buf, ?cs);
+    //@ ensures [f]tokenizer(tokenizer, nc, lr, lt, buf) &*& [g]string_buffer(buf, cs);
 {
-	//@ open [f]tokenizer(tokenizer, lasttoken, cs);
+    //@ open [f]tokenizer(tokenizer, nc, lr, lt, buf);
 	switch ( tokenizer->lasttoken )
 	{
 	case '(':
@@ -90,5 +92,5 @@ void print_token(struct tokenizer* tokenizer)
 		puts("BADCHAR");
 		break;
 	}
-	//@ close [f]tokenizer(tokenizer, lasttoken, cs);
+    //@ close [f]tokenizer(tokenizer, nc, lr, lt, buf);
 }

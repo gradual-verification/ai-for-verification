@@ -16,10 +16,10 @@ predicate_ctor shared_inv(struct shared *s)() =
   counter |-> ?v &*& v >= 0;    
 
 predicate_family_instance thread_run_pre(worker)(struct shared *s, any info) = 
-    [1/(real)NUM]s->mtx |-> ?m &*& [1/(real)NUM]mutex(m, shared_inv(s));
+    [1/NUM]s->mtx |-> ?m &*& [1/NUM]mutex(m, shared_inv(s));
 
 predicate_family_instance thread_run_post(worker)(struct shared *s, any info) = 
-    [1/(real)NUM]s->mtx |-> ?m &*& [1/(real)NUM]mutex(m, shared_inv(s));
+    [1/NUM]s->mtx |-> ?m &*& [1/NUM]mutex(m, shared_inv(s));
 @*/
 
 void worker(struct shared *data) //@ : thread_run_joinable

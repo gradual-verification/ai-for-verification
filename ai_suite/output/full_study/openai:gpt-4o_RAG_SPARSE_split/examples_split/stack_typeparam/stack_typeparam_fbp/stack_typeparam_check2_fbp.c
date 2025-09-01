@@ -1,6 +1,14 @@
 #include "stdlib.h"
 
 /*
+  Destructors
+*/
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
+/*
   Stack
 */
 
@@ -24,7 +32,7 @@ inductive Stack<T> =
   | Cons(void* data, T info, Stack<T>);
 
 predicate Node<T>(predicate(void *, T) Ownership, struct node* node, void *data, T info, struct node* next) =
-  malloc_block_node( node ) &*&
+  malloc_block_node(node) &*&
   node->data |-> data &*&
   node->next |-> next &*&
   Ownership(data, info) &*&
@@ -133,16 +141,6 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
-
 struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
   //@ requires [_]is_destructor<T>(destructor, ?Ownership);
   //@ ensures Stack(result, destructor, Ownership, ?Stack) &*& IsEmpty(Stack) == true;
@@ -156,7 +154,6 @@ struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
   
   return stack;
 }
-
 
 void destroy_stack/*@ <T> @*/(struct stack* stack)
   //@ requires Stack<T>(stack, _, _, ?S);
@@ -175,7 +172,6 @@ void destroy_stack/*@ <T> @*/(struct stack* stack)
   free(stack);
 }
 
-
 void push/*@ <T> @*/(struct stack* stack, void* data)
   //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack) &*& Ownership(data, ?info);
   //@ ensures Stack(stack, destructor, Ownership, Push(data, info, Stack));
@@ -191,7 +187,6 @@ void push/*@ <T> @*/(struct stack* stack, void* data)
   }
   stack->size++;
 }
-
 
 void* pop/*@ <T> @*/(struct stack* stack)
   /*@
@@ -213,7 +208,6 @@ void* pop/*@ <T> @*/(struct stack* stack)
   return data;
 }
 
-
 struct data* create_data(int foo, int bar)
   //@ requires true;
   //@ ensures Data(result, foo, bar);
@@ -226,15 +220,12 @@ struct data* create_data(int foo, int bar)
   return data;
 }
 
-
-
 void destroy_data(struct data* data)
   //@ requires Data_Ownership(data, _);
   //@ ensures true;
 {
   free(data);
 }
-
 
 // TODO: make this function pass the verification
 void check2()

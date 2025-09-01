@@ -2,104 +2,94 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
 /*@
+fixpoint bool is_valid_read_char(int c) {
+    return c >= -128 && c <= 127;
+}
 
-// Predicate for the abstract state of a character reader
-predicate charreader_state(charreader* reader; list<int> stream);
+// An abstract charreader that produces a stream of integers.
+predicate is_charreader(charreader* f; list<int> stream);
 
-// Predicate for the tokenizer struct
-predicate tokenizer(struct tokenizer *t; list<char> consumed_by_buffer, list<int> stream) =
-    t->next_char |-> ?reader &*& is_charreader(reader) == true &*&
+// Contract for calling a charreader.
+typedef int charreader_contract();
+    requires is_charreader(this, ?s);
+    ensures
+        s == nil ?
+            is_charreader(this, nil) &*& result == -1
+        :
+            is_charreader(this, tail(s)) &*& result == head(s) &*&
+            (head(s) == -1 || is_valid_read_char(head(s)) == true);
+
+// The state of a tokenizer. It is parameterized by the remaining input stream
+// (until EOF) and the current content of its internal string_buffer.
+predicate tokenizer(struct tokenizer *t; list<int> stream, list<char> buffer_cs) =
+    t->next_char |-> ?reader &*&
+    is_charreader_contract(reader) == true &*&
     t->lastread |-> ?lastread &*&
     t->lasttoken |-> ?lasttoken &*&
     t->buffer |-> ?buffer &*&
     malloc_block_tokenizer(t) &*&
-    string_buffer(buffer, consumed_by_buffer) &*&
-    charreader_state(reader, ?reader_stream) &*&
-    (lastread == -2 ? // buffer empty
-        stream == reader_stream
-    : lastread == -1 ? // EOF
-        stream == nil &*& reader_stream == nil
-    : // char in buffer
-        -128 <= lastread &*& lastread <= 127 &*&
-        stream == cons(lastread, reader_stream)
-    );
+    is_charreader(reader, ?reader_stream) &*&
+    string_buffer(buffer, buffer_cs) &*&
+    (
+        lastread == -2 ? // Buffer is empty
+            append(stream, cons(-1, nil)) == reader_stream
+        : // A character or EOF is buffered
+            append(stream, cons(-1, nil)) == cons(lastread, reader_stream)
+    ) &*&
+    forall(stream, (is_valid_read_char));
 
-// Specification for is_symbol_char
-fixpoint bool is_symbol_char_spec(int c) {
-    return c > 32 && c <= 127 && c != '(' && c != ')';
-}
-
-// Helper fixpoints for the main function's spec
-fixpoint list<int> take_while_int(fixpoint(int, bool) p, list<int> xs) {
+fixpoint list<t> take_while<t>(fixpoint(t, bool) p, list<t> xs) {
     switch (xs) {
         case nil: return nil;
-        case cons(h, t): return p(h) ? cons(h, take_while_int(p, t)) : nil;
+        case cons(h, t): return p(h) ? cons(h, take_while(p, t)) : nil;
     }
 }
 
-fixpoint list<int> drop_while_int(fixpoint(int, bool) p, list<int> xs) {
+fixpoint list<char> chars_of_ints(list<int> xs) {
     switch (xs) {
         case nil: return nil;
-        case cons(h, t): return p(h) ? drop_while_int(p, t) : xs;
+        case cons(h, t): return cons((char)h, chars_of_ints(t));
     }
 }
 
-fixpoint list<char> ints_to_chars(list<int> xs) {
+lemma void chars_of_ints_append(list<int> xs, list<int> ys)
+    requires true;
+    ensures chars_of_ints(append(xs, ys)) == append(chars_of_ints(xs), chars_of_ints(ys));
+{
+    switch (xs) {
+        case nil:
+        case cons(h, t):
+            chars_of_ints_append(t, ys);
+    }
+}
+
+lemma void take_while_append<t>(fixpoint(t, bool) p, list<t> xs, list<t> ys)
+    requires forall(xs, p) == true;
+    ensures take_while(p, append(xs, ys)) == append(xs, take_while(p, ys));
+{
     switch(xs) {
-        case nil: return nil;
-        case cons(h, t): return cons((char)h, ints_to_chars(t));
+        case nil:
+        case cons(h, t):
+            forall_elim(xs, p, h);
+            take_while_append(p, t, ys);
     }
 }
 
-// Helper lemmas for proving the main function
-
-lemma void forall_append<t>(list<t> xs, list<t> ys, fixpoint(t, bool) p)
-    requires forall(xs, p) &*& forall(ys, p);
+lemma void forall_append_preserves<t>(list<t> xs, list<t> ys, fixpoint(t, bool) p)
+    requires forall(xs, p) && forall(ys, p);
     ensures forall(append(xs, ys), p);
 {
     switch(xs) {
         case nil:
         case cons(h, t):
-            forall_append(t, ys, p);
-    }
-}
-
-lemma void ints_to_chars_append(list<int> l1, list<int> l2)
-    requires true;
-    ensures ints_to_chars(append(l1, l2)) == append(ints_to_chars(l1), ints_to_chars(l2));
-{
-    switch(l1) {
-        case nil:
-        case cons(h, t):
-            ints_to_chars_append(t, l2);
-    }
-}
-
-lemma void append_take_while_drop_while_int(fixpoint(int, bool) p, list<int> xs)
-    requires true;
-    ensures append(take_while_int(p, xs), drop_while_int(p, xs)) == xs;
-{
-    switch (xs) {
-        case nil:
-        case cons(h, t):
-            if (p(h)) {
-                append_take_while_drop_while_int(p, t);
-            }
-    }
-}
-
-// This is the key lemma for the loop termination case.
-lemma void take_while_properties_int(fixpoint(int, bool) p, list<int> consumed, list<int> stream)
-    requires forall(consumed, p) == true &*& (stream == nil || !p(head(stream)));
-    ensures take_while_int(p, append(consumed, stream)) == consumed &*&
-            drop_while_int(p, append(consumed, stream)) == stream;
-{
-    switch (consumed) {
-        case nil:
-        case cons(h, t):
-            open forall(consumed, p);
-            take_while_properties_int(p, t, stream);
+            forall_append_preserves(t, ys, p);
     }
 }
 
@@ -116,41 +106,26 @@ struct tokenizer
 
 /***
  * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-    //@ requires charreader_state(this, ?s);
-    /*@ ensures s == nil ?
-                    result == -1 &*& charreader_state(this, nil)
-                :
-                    -128 <= head(s) &*& head(s) <= 127 &*&
-                    result == head(s) &*& charreader_state(this, tail(s));
-    @*/
-
-
-/***
- * Description:
 The tokenizer_fill_buffer function reads a character from the next_char reader of the tokenizer and updates the lastread char,
 if the original lastread char is -2 (which means empty).
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer, ?consumed, ?stream);
-    //@ ensures tokenizer(tokenizer, consumed, stream);
+    //@ requires tokenizer(tokenizer, ?s, ?bcs);
+    //@ ensures tokenizer(tokenizer, s, bcs);
 {
-    //@ open tokenizer(tokenizer, consumed, stream);
+	//@ open tokenizer(tokenizer, s, bcs);
 	if ( tokenizer->lastread == -2 )
 	{
 	        charreader *reader = tokenizer->next_char;
-	        //@ open charreader_state(reader, stream);
+	        //@ assume(is_charreader_contract(reader) == true);
 	        int result = reader();
 			if (result < -128 || result > 127)
 				abort();
 		tokenizer->lastread = result;
-		//@ if (stream == nil) { assert result == -1; } else { assert result == head(stream); }
 	}
-	//@ close tokenizer(tokenizer, consumed, stream);
+	//@ close tokenizer(tokenizer, s, bcs);
 }
 
 
@@ -161,15 +136,15 @@ The tokenizer_peek function reads the next value character of a tokenizer and re
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_peek(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer, ?consumed, ?stream);
-    //@ ensures tokenizer(tokenizer, consumed, stream) &*& result == (stream == nil ? -1 : head(stream));
+    //@ requires tokenizer(tokenizer, ?s, ?bcs);
+    //@ ensures tokenizer(tokenizer, s, bcs) &*& result == (s == nil ? -1 : head(s));
 {
 	tokenizer_fill_buffer(tokenizer);
-	//@ open tokenizer(tokenizer, consumed, stream);
-	//@ if (stream == nil) { assert tokenizer->lastread == -1; } else { assert tokenizer->lastread == head(stream); }
-	int c = tokenizer->lastread;
-	//@ close tokenizer(tokenizer, consumed, stream);
-	return c;
+	//@ open tokenizer(tokenizer, s, bcs);
+	//@ append_is_nil_iff_both_nil(s, cons(-1, nil));
+	int result = tokenizer->lastread;
+	//@ close tokenizer(tokenizer, s, bcs);
+	return result;
 }
 
 
@@ -181,21 +156,16 @@ and drops that character by assigning the lastread field to -2 (meaning empty).
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_next_char(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer, ?consumed, ?stream);
-    /*@ ensures stream == nil ?
-                  tokenizer(tokenizer, consumed, nil) &*& result == -1
-              :
-                  tokenizer(tokenizer, consumed, tail(stream)) &*& result == head(stream);
-    @*/
+    //@ requires tokenizer(tokenizer, ?s, ?bcs);
+    //@ ensures tokenizer(tokenizer, s == nil ? nil : tail(s), bcs) &*& result == (s == nil ? -1 : head(s));
 {
 	int c;
 
 	tokenizer_fill_buffer(tokenizer);
-	//@ open tokenizer(tokenizer, consumed, stream);
+	//@ open tokenizer(tokenizer, s, bcs);
 	c = tokenizer->lastread;
 	tokenizer->lastread = -2;
-	//@ if (stream == nil) { assert c == -1; } else { assert c == head(stream); }
-	//@ close tokenizer(tokenizer, consumed, tail(stream));
+	//@ close tokenizer(tokenizer, s == nil ? nil : tail(s), bcs);
 	return c;
 }
 
@@ -225,7 +195,7 @@ It ensures nothing
 */
 bool is_symbol_char(int c)
     //@ requires true;
-    //@ ensures result == is_symbol_char_spec(c);
+    //@ ensures result == (c > 32 && c <= 127 && c != '(' && c != ')');
 {
 	return c > 32 && c <= 127 && c != '(' && c != ')'; 
 }
@@ -241,54 +211,72 @@ If it peeks a non-symbol character, it exits the loop and return the token that 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_eat_symbol(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer, ?consumed, ?stream);
-    /*@ ensures tokenizer(tokenizer,
-                         append(consumed, ints_to_chars(take_while_int(is_symbol_char_spec, stream))),
-                         drop_while_int(is_symbol_char_spec, stream)) &*&
-                result == 'S';
+    //@ requires tokenizer(tokenizer, ?s_initial, ?bcs_initial);
+    /*@ ensures
+            let eaten_prefix = take_while(is_symbol_char, s_initial) in
+            let s_final = drop(length(eaten_prefix), s_initial) in
+            let bcs_final = append(bcs_initial, chars_of_ints(eaten_prefix)) in
+            tokenizer(tokenizer, s_final, bcs_final) &*&
+            result == 'S';
     @*/
 {
-    //@ list<int> eaten_symbols = nil;
+    //@ list<int> eaten_prefix = nil;
 	for (;;)
         /*@
-        invariant tokenizer(tokenizer, append(consumed, ints_to_chars(eaten_symbols)), ?current_stream) &*&
-                  append(eaten_symbols, current_stream) == stream &*&
-                  forall(eaten_symbols, (is_symbol_char_spec));
+        invariant
+            tokenizer(tokenizer, ?s, ?bcs) &*&
+            s_initial == append(eaten_prefix, s) &*&
+            bcs == append(bcs_initial, chars_of_ints(eaten_prefix)) &*&
+            forall(eaten_prefix, is_symbol_char) == true;
         @*/
 	{
 		int result;
 		bool isSymbolChar;
 		
 		result = tokenizer_peek(tokenizer);
-		//@ assert result == (current_stream == nil ? -1 : head(current_stream));
+        //@ if (s == nil) { assert result == -1; } else { assert result == head(s); }
+		
 		isSymbolChar = is_symbol_char(result);
-		//@ assert isSymbolChar == is_symbol_char_spec(result);
 		
 		if (!isSymbolChar) {
-		    //@ append_take_while_drop_while_int(is_symbol_char_spec, stream);
-		    //@ take_while_properties_int(is_symbol_char_spec, eaten_symbols, current_stream);
-		    break;
-		}
+            /*@
+            if (s == nil) {
+                assert result == -1;
+                assert is_symbol_char(-1) == false;
+                assert take_while(is_symbol_char, s) == nil;
+            } else {
+                assert result == head(s);
+                assert is_symbol_char(head(s)) == false;
+                assert take_while(is_symbol_char, s) == nil;
+            }
+            take_while_append(is_symbol_char, eaten_prefix, s);
+            @*/
+            break;
+        }
 		
-		//@ list<int> old_eaten_symbols = eaten_symbols;
-		//@ list<char> old_consumed = append(consumed, ints_to_chars(eaten_symbols));
+		//@ assert s != nil;
+		//@ assert is_symbol_char(head(s)) == true;
+		
 		result = tokenizer_next_char(tokenizer);
-		//@ assert result == head(current_stream);
-		//@ assert tokenizer(tokenizer, old_consumed, tail(current_stream));
-		
-		//@ open tokenizer(tokenizer, old_consumed, tail(current_stream));
+        //@ open tokenizer(tokenizer, tail(s), bcs);
+        
 		string_buffer_append_char(tokenizer->buffer, (char)result);
-		
-		//@ eaten_symbols = append(eaten_symbols, cons(result, nil));
-		//@ ints_to_chars_append(old_eaten_symbols, cons(result, nil));
-		//@ append_assoc(consumed, ints_to_chars(old_eaten_symbols), cons((char)result, nil));
-		//@ assert string_buffer(tokenizer->buffer, append(consumed, ints_to_chars(eaten_symbols)));
-		
-		//@ append_assoc(old_eaten_symbols, cons(result, nil), tail(current_stream));
-		
-		//@ forall_append(old_eaten_symbols, cons(result, nil), is_symbol_char_spec);
-		
-		//@ close tokenizer(tokenizer, append(consumed, ints_to_chars(eaten_symbols)), tail(current_stream));
+        
+        //@ list<int> next_eaten_prefix = append(eaten_prefix, cons(result, nil));
+        //@ list<char> next_bcs = append(bcs, cons((char)result, nil));
+        
+        /*@
+        append_assoc(eaten_prefix, cons(result, nil), tail(s));
+        
+        chars_of_ints_append(eaten_prefix, cons(result, nil));
+        append_assoc(bcs_initial, chars_of_ints(eaten_prefix), cons((char)result, nil));
+        
+        forall_append_preserves(eaten_prefix, cons(result, nil), is_symbol_char);
+        @*/
+        
+        //@ eaten_prefix = next_eaten_prefix;
+        
+        //@ close tokenizer(tokenizer, tail(s), next_bcs);
 	}
 
 	return 'S';

@@ -13,7 +13,7 @@ predicate_ctor rwlock_inv(struct rwlock *l)() =
 
 struct rwlock *rwlock_init()
     //@ requires true;
-    //@ ensures result->mutex |-> ?m &*& mutex(m, rwlock_inv(result));
+    //@ ensures result->mutex |-> ?m &*& mutex(m, rwlock_inv(result)) &*& malloc_block_rwlock(result);
 {
     struct rwlock *l = malloc(sizeof(struct rwlock));
     if (l == 0) abort();

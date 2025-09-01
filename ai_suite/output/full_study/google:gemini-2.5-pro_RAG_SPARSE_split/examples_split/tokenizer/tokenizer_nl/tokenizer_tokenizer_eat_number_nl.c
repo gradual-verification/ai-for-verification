@@ -3,106 +3,93 @@
 #include "stringBuffers.h"
 
 /*@
-// Predicates and fixpoints for verification
+// --- Predicate for charreader ---
 
-fixpoint bool is_digit_spec(int c) { return c >= '0' && c <= '9'; }
+predicate_family charreader_state(charreader* reader)(list<int> s);
 
-// Model for the abstract character reader
-predicate charreader(charreader* f; list<int> stream);
+// --- Predicate for tokenizer ---
 
-typedef int charreader_code();
-    requires charreader(this, ?s);
-    ensures
-        charreader(this, s == nil ? nil : tail(s)) &*&
-        result == (s == nil ? -1 : head(s)) &*&
-        // The implementation checks this range.
-        result >= -128 &*& result <= 127;
-
-// Predicate for the tokenizer struct
-predicate tokenizer(struct tokenizer *t; charreader* reader, list<int> stream, int lastread, list<char> buffer_content) =
-    t->next_char |-> reader &*&
-    is_charreader_code(reader) == true &*& charreader(reader, stream) &*&
-    t->lastread |-> lastread &*&
+predicate tokenizer(struct tokenizer *t; list<char> buffer_content, list<int> stream) =
+    t->next_char |-> ?reader &*& is_charreader(reader) == true &*&
+    t->lastread |-> ?lastread &*&
     t->lasttoken |-> _ &*&
-    t->buffer |-> ?buffer &*&
-    string_buffer(buffer, buffer_content) &*&
-    lastread >= -2 &*& lastread <= 127 &*&
-    (lastread == -1 ? stream == nil : true);
+    t->buffer |-> ?sb &*&
+    string_buffer(sb, buffer_content) &*&
+    (
+        lastread == -2 ?
+            charreader_state(reader)(stream)
+        :
+            stream == nil ?
+                lastread == -1 &*& charreader_state(reader)(nil)
+            :
+                lastread == head(stream) &*& charreader_state(reader)(tail(stream))
+    );
 
-// The logical stream of characters available from the tokenizer
-fixpoint list<int> available_stream(int lastread, list<int> stream) {
-    if (lastread >= 0)
-        return cons(lastread, stream);
-    else if (lastread == -1)
-        return nil;
-    else // lastread == -2
-        return stream;
-}
+// --- Helper fixpoints and lemmas for tokenizer_eat_number ---
 
-// Splits a stream into a prefix of digits and the remainder
-fixpoint pair<list<int>, list<int> > split_digits(list<int> stream) {
-    if (stream == nil) {
-        return pair(nil, nil);
-    } else {
-        int h = head(stream);
-        if (is_digit_spec(h)) {
-            pair<list<int>, list<int> > p = split_digits(tail(stream));
-            return pair(cons(h, fst(p)), snd(p));
-        } else {
-            return pair(nil, stream);
-        }
-    }
-}
+fixpoint bool is_digit_int(int c) { return c >= '0' && c <= '9'; }
 
-// Converts a list of ints to a list of chars
-fixpoint list<char> int_list_to_char_list(list<int> is) {
-    switch (is) {
+fixpoint list<char> digit_prefix(list<int> s) {
+    switch(s) {
         case nil: return nil;
-        case cons(h, t): return cons((char)h, int_list_to_char_list(t));
+        case cons(h, t):
+            return is_digit_int(h) ? cons((char)h, digit_prefix(t)) : nil;
     }
 }
 
-// Lemma: forall(map(f, xs), p) == forall(xs, (compose)(p, f))
-lemma_auto void forall_map<a,b>(list<a> xs, fixpoint(a,b) f, fixpoint(b,bool) p)
+fixpoint list<int> digit_prefix_int(list<int> s) {
+    switch(s) {
+        case nil: return nil;
+        case cons(h, t):
+            return is_digit_int(h) ? cons(h, digit_prefix_int(t)) : nil;
+    }
+}
+
+fixpoint list<int> drop_digit_prefix(list<int> s) {
+    switch(s) {
+        case nil: return nil;
+        case cons(h, t):
+            return is_digit_int(h) ? drop_digit_prefix(t) : s;
+    }
+}
+
+lemma void length_digit_prefix(list<int> s)
     requires true;
-    ensures forall(map(f, xs), p) == forall(xs, (compose)(p, f));
+    ensures length(digit_prefix(s)) == length(digit_prefix_int(s));
 {
-    switch(xs) {
-        case nil:
-        case cons(h,t):
-            forall_map(t, f, p);
-    }
-}
-
-// Lemma for reasoning about split_digits on a prefixed stream
-lemma void split_digits_prefix(list<int> prefix, list<int> rest)
-    requires forall(prefix, (is_digit_spec)) == true;
-    ensures split_digits(append(prefix, rest)) == pair(append(prefix, fst(split_digits(rest))), snd(split_digits(rest)));
-{
-    switch (prefix) {
+    switch(s) {
         case nil:
         case cons(h, t):
-            open forall(prefix, (is_digit_spec));
-            split_digits_prefix(t, rest);
+            if (is_digit_int(h)) {
+                length_digit_prefix(t);
+            }
     }
 }
 
-// Lemma showing that available_stream is invariant under tokenizer_fill_buffer
-lemma void available_stream_fill_buffer_commutes(int lr, list<int> s)
+lemma void drop_digit_prefix_def(list<int> s)
     requires true;
-    ensures available_stream(
-        lr == -2 ? (s == nil ? -1 : head(s)) : lr,
-        lr == -2 ? (s == nil ? nil : tail(s)) : s
-    ) == available_stream(lr, s);
+    ensures drop_digit_prefix(s) == drop(length(digit_prefix_int(s)), s);
 {
-    if (lr == -2) {
-        if (s == nil) {
-        } else {
-        }
+    switch(s) {
+        case nil:
+        case cons(h, t):
+            if (is_digit_int(h)) {
+                length_digit_prefix(t);
+                drop_digit_prefix_def(t);
+            }
     }
 }
 
 @*/
+
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+    //@ requires charreader_state(this)(?s);
+    //@ ensures s == nil ? charreader_state(this)(nil) &*& result == -1 : charreader_state(this)(tail(s)) &*& result == head(s);
+
 
 struct tokenizer
 {
@@ -115,39 +102,27 @@ struct tokenizer
 
 /***
  * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-
-
-/***
- * Description:
 The tokenizer_fill_buffer function reads a character from the next_char reader of the tokenizer and updates the lastread char,
 if the original lastread char is -2 (which means empty).
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
+//@ requires tokenizer(tokenizer, ?bcs, ?stream);
+//@ ensures tokenizer(tokenizer, bcs, stream);
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer, ?reader, ?s, ?lr, ?bcs);
-    /*@ ensures tokenizer(tokenizer, reader, ?s_new, ?lr_new, bcs) &*&
-                (lr == -2 ?
-                    (s_new == (s == nil ? nil : tail(s)) &*& lr_new == (s == nil ? -1 : head(s)))
-                :
-                    (s_new == s &*& lr_new == lr));
-    @*/
 {
-	//@ open tokenizer(tokenizer, reader, s, lr, bcs);
+    //@ open tokenizer(tokenizer, bcs, stream);
 	if ( tokenizer->lastread == -2 )
 	{
-	        charreader *rd = tokenizer->next_char;
-	        //@ open charreader(rd, s);
-	        int result = rd();
-	        //@ close charreader(rd, s == nil ? nil : tail(s));
-		if (result < -128 || result > 127)
-			abort();
+	        //@ open charreader_state(tokenizer->next_char)(stream);
+	        charreader *reader = tokenizer->next_char;
+	        int result = reader();
+			if (result < -128 || result > 127)
+				abort();
 		tokenizer->lastread = result;
+		//@ if (stream == nil) { assert result == -1; } else { assert result == head(stream); }
 	}
-	//@ close tokenizer(tokenizer, reader, _, _, bcs);
+	//@ close tokenizer(tokenizer, bcs, stream);
 }
 
 
@@ -157,20 +132,14 @@ The tokenizer_peek function reads the next value character of a tokenizer and re
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
+//@ requires tokenizer(tokenizer, ?bcs, ?stream);
+//@ ensures tokenizer(tokenizer, bcs, stream) &*& result == (stream == nil ? -1 : head(stream));
 int tokenizer_peek(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer, ?reader, ?s, ?lr, ?bcs);
-    /*@ ensures tokenizer(tokenizer, reader, ?s_new, ?lr_new, bcs) &*&
-                (lr == -2 ?
-                    (s_new == (s == nil ? nil : tail(s)) &*& lr_new == (s == nil ? -1 : head(s)) &*& result == lr_new)
-                :
-                    (s_new == s &*& lr_new == lr &*& result == lr));
-    @*/
 {
 	tokenizer_fill_buffer(tokenizer);
-	//@ open tokenizer(tokenizer, reader, _, _, bcs);
-	int res = tokenizer->lastread;
-	//@ close tokenizer(tokenizer, reader, _, _, bcs);
-	return res;
+	//@ open tokenizer(tokenizer, bcs, stream);
+	//@ close tokenizer(tokenizer, bcs, stream);
+	return tokenizer->lastread;
 }
 
 
@@ -181,22 +150,18 @@ and drops that character by assigning the lastread field to -2 (meaning empty).
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
+//@ requires tokenizer(tokenizer, ?bcs, ?stream);
+//@ ensures stream == nil ? tokenizer(tokenizer, bcs, nil) &*& result == -1 : tokenizer(tokenizer, bcs, tail(stream)) &*& result == head(stream);
 int tokenizer_next_char(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer, ?reader, ?s, ?lr, ?bcs);
-    /*@ ensures tokenizer(tokenizer, reader, ?s_new, -2, bcs) &*&
-                (lr == -2 ?
-                    (s_new == (s == nil ? nil : tail(s)) &*& result == (s == nil ? -1 : head(s)))
-                :
-                    (s_new == s &*& result == lr));
-    @*/
 {
 	int c;
 
 	tokenizer_fill_buffer(tokenizer);
-	//@ open tokenizer(tokenizer, ?reader_, ?s_filled, ?lr_filled, ?bcs_filled);
+	//@ open tokenizer(tokenizer, bcs, stream);
 	c = tokenizer->lastread;
 	tokenizer->lastread = -2;
-	//@ close tokenizer(tokenizer, reader_, s_filled, -2, bcs_filled);
+	//@ list<int> new_stream = stream == nil ? nil : tail(stream);
+	//@ close tokenizer(tokenizer, bcs, new_stream);
 	return c;
 }
 
@@ -207,9 +172,9 @@ The is_digit function checks whether a given character in integer means a digit 
 
 It ensures nothing.
 */
+//@ requires true;
+//@ ensures result == (c >= '0' && c <= '9');
 bool is_digit(int c)
-    //@ requires true;
-    //@ ensures result == is_digit_spec(c);
 {
 	return c >= '0' && c <= '9';
 }
@@ -221,9 +186,9 @@ The string_buffer_append_char function appends a char to a buffer.
 
 It needs to make sure that the property of the buffer holds (i.e., the buffer points to a list of characters) before and after the function.
 */
+//@ requires string_buffer(buffer, ?bcs);
+//@ ensures string_buffer(buffer, append(bcs, cons(c, nil)));
 void string_buffer_append_char(struct string_buffer *buffer, char c)
-    //@ requires string_buffer(buffer, ?bcs);
-    //@ ensures string_buffer(buffer, append(bcs, cons(c, nil)));
 {
 	char cc = c;
 	string_buffer_append_chars(buffer, &cc, 1);
@@ -239,92 +204,63 @@ If it peeks a non-digit character, it exits the loop and returns the token that 
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
+//@ requires tokenizer(tokenizer, ?bcs0, ?stream0);
+//@ ensures tokenizer(tokenizer, append(bcs0, digit_prefix(stream0)), drop_digit_prefix(stream0)) &*& result == '0';
 int tokenizer_eat_number(struct tokenizer* tokenizer)
-    /*@
-    requires tokenizer(tokenizer, ?reader, ?s, ?lr, ?bcs);
-    ensures
-        let initial_stream = available_stream(lr, s) in
-        let p = split_digits(initial_stream) in
-        let ds = fst(p) in
-        let rem = snd(p) in
-        tokenizer(tokenizer, reader, ?s_final, ?lr_final, append(bcs, int_list_to_char_list(ds))) &*&
-        available_stream(lr_final, s_final) == rem &*&
-        result == '0';
-    @*/
 {
-    //@ open tokenizer(tokenizer, reader, s, lr, bcs);
-    //@ let initial_stream = available_stream(lr, s);
-    //@ let p = split_digits(initial_stream);
-    //@ let ds = fst(p);
-    //@ let rem = snd(p);
-    //@ close tokenizer(tokenizer, reader, s, lr, bcs);
-    //@ list<int> ds_read = nil;
-    //@ forall_nil((is_digit_spec));
-    //@ split_digits_prefix(ds_read, initial_stream);
-
 	for (;;)
-        /*@
-        invariant
-            tokenizer(tokenizer, ?reader_curr, ?s_curr, ?lr_curr, ?bcs_curr) &*&
-            reader == reader_curr &*&
-            bcs_curr == append(bcs, int_list_to_char_list(ds_read)) &*&
-            initial_stream == append(ds_read, available_stream(lr_curr, s_curr)) &*&
-            ds == append(ds_read, fst(split_digits(available_stream(lr_curr, s_curr)))) &*&
-            rem == snd(split_digits(available_stream(lr_curr, s_curr))) &*&
-            forall(ds_read, (is_digit_spec)) == true;
-        @*/
+	    /*@
+	    invariant
+	        tokenizer(tokenizer, ?bcs, ?stream) &*&
+	        append(bcs0, digit_prefix(stream0)) == append(bcs, digit_prefix(stream)) &*&
+	        stream == drop(length(bcs) - length(bcs0), stream0);
+	    @*/
 	{
 		int result;
 		bool isDigit;
 		
-        //@ let current_available = available_stream(lr_curr, s_curr);
-        //@ available_stream_fill_buffer_commutes(lr_curr, s_curr);
 		result = tokenizer_peek(tokenizer);
-        //@ open tokenizer(tokenizer, reader_curr, ?s_peek, ?lr_peek, bcs_curr);
-        //@ close tokenizer(tokenizer, reader_curr, s_peek, lr_peek, bcs_curr);
-        //@ assert available_stream(lr_peek, s_peek) == current_available;
-
+		//@ assert tokenizer(tokenizer, bcs, stream);
+		//@ if (stream == nil) { assert result == -1; } else { assert result == head(stream); }
+		
 		isDigit = is_digit(result);
-        //@ assert isDigit == is_digit_spec(result);
-        //@ assert result == lr_peek;
+		//@ if (stream == nil) { assert isDigit == false; } else { assert isDigit == is_digit_int(head(stream)); }
 		
-		if ( !isDigit ) {
-            //@ assert is_digit_spec(lr_peek) == false;
-            /*@
-            if (current_available == nil) {
-                assert lr_peek == -1;
-            } else {
-                assert head(current_available) == lr_peek;
-            }
-            @*/
-            //@ assert fst(split_digits(current_available)) == nil;
-            //@ assert snd(split_digits(current_available)) == current_available;
-            break;
-        }
+		if ( !isDigit ) break;
 		
-        //@ assert is_digit_spec(lr_peek) == true;
-        /*@
-        if (current_available == nil) {
-            // This case is impossible, because lr_peek would be -1, which is not a digit.
-            assert false;
-        } else {
-            assert head(current_available) == lr_peek;
-        }
-        @*/
-        //@ assert fst(split_digits(current_available)) == cons(lr_peek, fst(split_digits(tail(current_available))));
-        //@ assert snd(split_digits(current_available)) == snd(split_digits(tail(current_available)));
-
+		//@ assert stream != nil && is_digit_int(head(stream));
+		
 	    result = tokenizer_next_char(tokenizer);
-        //@ open tokenizer(tokenizer, reader_curr, ?s_next, ?lr_next, bcs_curr);
-        //@ assert lr_next == -2;
-        //@ assert result == lr_peek;
-        //@ assert available_stream(lr_next, s_next) == tail(current_available);
-        //@ close tokenizer(tokenizer, reader_curr, s_next, lr_next, bcs_curr);
-
+	    //@ assert tokenizer(tokenizer, bcs, tail(stream)) &*& result == head(stream);
+	    
+	    //@ open tokenizer(tokenizer, bcs, tail(stream));
 		string_buffer_append_char(tokenizer->buffer, (char)result);
-        //@ ds_read = append(ds_read, cons(result, nil));
-        //@ forall_append(ds_read, cons(result, nil), (is_digit_spec));
+		//@ list<char> new_bcs = append(bcs, cons((char)result, nil));
+		//@ list<int> new_stream = tail(stream);
+		//@ close tokenizer(tokenizer, new_bcs, new_stream);
+		
+		/*@
+		// Prove invariant part 1: append(bcs0, digit_prefix(stream0)) == append(new_bcs, digit_prefix(new_stream))
+		append_assoc(bcs, cons((char)result, nil), digit_prefix(tail(stream)));
+		
+		// Prove invariant part 2: new_stream == drop(length(new_bcs) - length(bcs0), stream0)
+		length_append(bcs, cons((char)result, nil));
+		drop_n_plus_one(length(bcs) - length(bcs0), stream0);
+		@*/
 	}
+
+	/*@
+	assert tokenizer(tokenizer, ?bcs, ?stream);
+	if (stream == nil) {
+	    assert digit_prefix(stream) == nil;
+	} else {
+	    assert !is_digit_int(head(stream));
+	    assert digit_prefix(stream) == nil;
+	}
+	append_nil(bcs);
+	length_digit_prefix(stream0);
+	drop_digit_prefix_def(stream0);
+	@*/
 
 	return '0';
 }

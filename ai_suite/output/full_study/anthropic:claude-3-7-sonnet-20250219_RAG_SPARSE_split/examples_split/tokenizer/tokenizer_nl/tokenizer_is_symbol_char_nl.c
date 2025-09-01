@@ -2,6 +2,12 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
 
 struct tokenizer
 {
@@ -12,13 +18,6 @@ struct tokenizer
 };
 
 
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-
-
 // TODO: make this function pass the verification
 /***
  * Description:
@@ -26,9 +25,12 @@ The is_symbol_char function checks whether a given character in integer means a 
 
 It ensures nothing
 */
+/*@
+  // Function specification
+  requires true;
+  ensures true;
+@*/
 bool is_symbol_char(int c)
-//@ requires true;
-//@ ensures true;
 {
 	return c > 32 && c <= 127 && c != '(' && c != ')'; 
 }

@@ -1,6 +1,22 @@
+void tokenizer_dispose(struct tokenizer *tokenizer)
+	//@ requires Tokenizer(tokenizer);
+	//@ ensures true;
+{
+	string_buffer_dispose(tokenizer->buffer);
+	free(tokenizer);
+}
+predicate Tokenizer(struct tokenizer* t;) =
+  t->next_char |-> ?nc &*& is_charreader(nc) == true &*&
+  t->lastread |-> ?lastread &*&
+  t->lasttoken |-> ?lasttoken &*&
+  t->buffer |-> ?b &*& string_buffer(b, _);
 #include "stdio.h"
 #include "stdlib.h"
 #include "stringBuffers.h"
+
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
 
 
 struct tokenizer
@@ -26,18 +42,11 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
 @*/
 
 
-typedef int charreader();
-    //@ requires true;
-    //@ ensures true;
-
-
-// TODO: make this function pass the verification
 void tokenizer_dispose(struct tokenizer *tokenizer)
 	//@ requires Tokenizer(tokenizer);
 	//@ ensures true;
 {
 	//@ open Tokenizer(tokenizer);
 	string_buffer_dispose(tokenizer->buffer);
-	//@ close Tokenizer_minus_buffer(tokenizer, 0);
 	free(tokenizer);
 }

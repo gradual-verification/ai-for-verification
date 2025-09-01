@@ -1,6 +1,14 @@
+//@ requires string_buffer(buffer, _);
+//@ ensures string_buffer(buffer, _);
+//@ requires string_buffer(buffer, ?bcs);
+//@ ensures string_buffer(buffer, append(bcs, cons(c, nil)));
 #include "stdio.h"
-#include "stdlib.hh"
+#include "stdlib.h"
 #include "stringBuffers.h"
+
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
 
 
 struct tokenizer
@@ -24,17 +32,11 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
   t->lasttoken |-> ?lasttoken &*&
   t->buffer |-> buffer;
 @*/
-
-
-typedef int charreader();
-    //@ requires true;
-    //@ ensures true;
     
 
-// TODO: make this function pass the verification
 void string_buffer_append_char(struct string_buffer *buffer, char c)
- //@ requires string_buffer(buffer, ?cs);
- //@ ensures string_buffer(buffer, append(cs, cons(c, nil)));
+ //@ requires string_buffer(buffer, ?bcs);
+ //@ ensures string_buffer(buffer, append(bcs, cons(c, nil)));
 {
 	char cc = c;
 	string_buffer_append_chars(buffer, &cc, 1);

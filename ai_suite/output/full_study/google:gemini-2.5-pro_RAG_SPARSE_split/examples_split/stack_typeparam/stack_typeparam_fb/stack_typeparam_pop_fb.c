@@ -1,5 +1,14 @@
 #include "stdlib.h"
 
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -20,11 +29,11 @@ struct stack
 
 /*@
 
+predicate malloc_block_node(struct node *n) = malloc_block(n, sizeof(struct node));
+
 inductive Stack<T> =
   | Nil
   | Cons(void* data, T info, Stack<T>);
-
-predicate malloc_block_node(struct node* n) = malloc_block(n, sizeof(struct node));
 
 predicate Node<T>(predicate(void *, T) Ownership, struct node* node, void *data, T info, struct node* next) =
   node->data |-> data &*&
@@ -86,17 +95,6 @@ fixpoint int Size<T>(Stack<T> S)
       return 1 + Size(T);
   }
 }
-
-lemma_auto void Size_nonnegative<T>(Stack<T> S)
-    requires true;
-    ensures 0 <= Size(S);
-{
-    switch(S) {
-        case Nil:
-        case Cons(h, t, s): Size_nonnegative(s);
-    }
-}
-
 @*/
 
 /*
@@ -144,15 +142,6 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
 
 // TODO: make this function pass the verification
 void* pop/*@ <T> @*/(struct stack* stack)
@@ -165,22 +154,17 @@ void* pop/*@ <T> @*/(struct stack* stack)
   @*/
 {
   //@ open Stack(stack, destructor, Ownership, Cons(head, info, tail));
-  //@ assert stack->first |-> ?first_node;
-  //@ open StackItems(Ownership, first_node, Cons(head, info, tail));
-  //@ assert Node(Ownership, first_node, head, info, ?next_node);
-  //@ open Node(Ownership, first_node, head, info, next_node);
-  
+  //@ open StackItems(Ownership, ?first_ptr, Cons(head, info, tail));
+  //@ assert first_ptr != 0;
+  //@ open Node(Ownership, first_ptr, head, info, ?next);
   struct node* first = stack->first;
   void* data = first->data;
   stack->first = first->next;
   free(first);
-  
-  //@ Size_nonnegative(tail);
   if (stack->size == INT_MIN) {
     abort();
   }
   stack->size--;
-  
   //@ close Stack(stack, destructor, Ownership, tail);
   return data;
 }

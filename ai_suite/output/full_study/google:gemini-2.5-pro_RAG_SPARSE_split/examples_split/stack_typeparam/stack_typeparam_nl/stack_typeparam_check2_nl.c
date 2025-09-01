@@ -1,6 +1,31 @@
 #include "stdlib.h"
-#include "limits.h"
+
+/*@
+// Predicate for the data structure
+predicate data_pred(struct data *d; int foo, int bar) =
+    d->foo |-> foo &*&
+    d->bar |-> bar &*&
+    malloc_block_data(d);
+
+// A predicate family to represent ownership of data that can be destroyed
+// by a specific destructor function.
+predicate_family destructible(void* destructor)(void* data);
+@*/
   
+/*
+  Destructors
+*/
+
+
+/*
+destructor function
+-params: data
+-description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
+*/
+typedef void destructor(void* data);
+    //@ requires destructible(this)(data);
+    //@ ensures true;
+
 
 /*
   Stack
@@ -12,15 +37,36 @@ struct node
   struct node* next;
 };
 
-// Forward declaration for use in struct stack
-typedef void destructor(void* data);
-
 struct stack
 {
   struct node* first;
   destructor* destructor;
   int size;
 };
+
+/*@
+// Predicate for a list of nodes, holding ownership of the data via the 'destructible' predicate.
+predicate nodes(struct node* n, destructor* destructor, list<void*> elems) =
+    n == 0 ?
+        elems == nil
+    :
+        n->data |-> ?d &*&
+        n->next |-> ?next &*&
+        malloc_block_node(n) &*&
+        destructible(destructor)(d) &*&
+        nodes(next, destructor, ?rest) &*&
+        elems == cons(d, rest);
+
+// Predicate for the stack structure.
+predicate stack(struct stack* s; destructor* destructor, list<void*> elems) =
+    s->first |-> ?first &*&
+    s->destructor |-> destructor &*&
+    s->size |-> ?size &*&
+    malloc_block_stack(s) &*&
+    is_destructor(destructor) == true &*&
+    nodes(first, destructor, elems) &*&
+    size == length(elems);
+@*/
 
 
 /*
@@ -33,56 +79,6 @@ struct data
   int bar;
 };
 
-/*@
-
-// Predicate family for the data chunks managed by the generic stack.
-// The family is indexed by the destructor function pointer.
-predicate_family data_chunk(destructor* d)(void* data);
-
-// Predicate for the concrete data struct used in the example.
-predicate data_struct(struct data* d; int foo, int bar) =
-    d->foo |-> foo &*&
-    d->bar |-> bar &*&
-    malloc_block_data(d);
-
-// Predicate for a list of nodes in the stack.
-predicate nodes(struct node* n, destructor* d, list<void*> vs) =
-    n == 0 ?
-        vs == nil
-    :
-        n->data |-> ?data &*&
-        n->next |-> ?next &*&
-        malloc_block_node(n) &*&
-        data_chunk(d)(data) &*&
-        nodes(next, d, ?rest) &*&
-        vs == cons(data, rest);
-
-// Predicate for the stack itself.
-predicate stack(struct stack* s; destructor* d, list<void*> vs) =
-    s->first |-> ?first &*&
-    s->destructor |-> d &*&
-    s->size |-> ?size &*&
-    malloc_block_stack(s) &*&
-    is_destructor(d) == true &*&
-    nodes(first, d, vs) &*&
-    size == length(vs);
-
-@*/
-
-
-/*
-  Destructors
-*/
-
-
-/*
-destructor function
--params: data
--description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
-*/
-typedef void destructor(void* data);
-    //@ requires data_chunk(this)(data);
-    //@ ensures emp;
 
 
 
@@ -110,23 +106,23 @@ struct stack* create_empty_stack(destructor* destructor)
 -params: A stack
 This function makes sure to destroy the stack by destructing the data of each node and freeing each node. */
 void destroy_stack(struct stack* stack)
-    //@ requires stack(stack, ?d, ?vs);
-    //@ ensures emp;
+    //@ requires stack(stack, ?destructor, ?elems);
+    //@ ensures true;
 {
-  //@ open stack(stack, d, vs);
+  //@ open stack(stack, destructor, elems);
   struct node* current = stack->first;
-  destructor* destructor = stack->destructor;
+  destructor* dtor = stack->destructor;
   
   while ( current != 0 )
-    //@ invariant nodes(current, d, ?current_vs) &*& is_destructor(d) == true;
+    //@ invariant nodes(current, dtor, ?current_elems) &*& is_destructor(dtor) == true;
   {
-    //@ open nodes(current, d, current_vs);
+    //@ open nodes(current, dtor, current_elems);
     struct node* next = current->next;
-    destructor(current->data);
+    dtor(current->data);
     free(current);
     current = next;
   }
-  //@ open nodes(0, d, _);
+  //@ open nodes(0, dtor, _);
   free(stack);
 }
 
@@ -135,22 +131,25 @@ void destroy_stack(struct stack* stack)
 -params: A stack and a data element, where the data has ownership
 This function makes sure to push the data element onto the head of stack (with ownership) */
 void push(struct stack* stack, void* data)
-    //@ requires stack(stack, ?d, ?vs) &*& data_chunk(d)(data) &*& length(vs) < INT_MAX;
-    //@ ensures stack(stack, d, cons(data, vs));
+    //@ requires stack(stack, ?destructor, ?elems) &*& destructible(destructor)(data) &*& length(elems) < INT_MAX;
+    //@ ensures stack(stack, destructor, cons(data, elems));
 {
-  //@ open stack(stack, d, vs);
+  //@ open stack(stack, destructor, elems);
   struct node* node = malloc( sizeof( struct node ) );
   if ( node == 0 ) abort();
 
   node->data = data;
   node->next = stack->first;
+  
+  //@ close nodes(node, stack->destructor, cons(data, elems));
+  
   stack->first = node;
   if (stack->size == INT_MAX) {
-    abort();  // or handle error as necessary
+    abort();
   }
   stack->size++;
-  //@ close nodes(node, d, cons(data, vs));
-  //@ close stack(stack, d, cons(data, vs));
+  
+  //@ close stack(stack, stack->destructor, cons(data, elems));
 }
 
 
@@ -160,20 +159,22 @@ void push(struct stack* stack, void* data)
 It requires that the stack is not empty.
 It ensures that the head element is removed and returned (with ownership) */
 void* pop(struct stack* stack)
-    //@ requires stack(stack, ?d, ?vs) &*& vs != nil;
-    //@ ensures stack(stack, d, tail(vs)) &*& data_chunk(d)(result);
+    //@ requires stack(stack, ?destructor, ?elems) &*& elems != nil;
+    //@ ensures stack(stack, destructor, tail(elems)) &*& destructible(destructor)(result) &*& result == head(elems);
 {
-  //@ open stack(stack, d, vs);
+  //@ open stack(stack, destructor, elems);
   struct node* first = stack->first;
-  //@ open nodes(first, d, vs);
+  //@ open nodes(first, destructor, elems);
+  
   void* data = first->data;
   stack->first = first->next;
   free(first);
   if (stack->size == INT_MIN) {
-    abort();  // or handle error as necessary
+    abort();
   }
   stack->size--;
-  //@ close stack(stack, d, tail(vs));
+  
+  //@ close stack(stack, stack->destructor, tail(elems));
   return data;
 }
 
@@ -185,30 +186,33 @@ void* pop(struct stack* stack)
 */
 struct data* create_data(int foo, int bar)
     //@ requires true;
-    //@ ensures data_struct(result, foo, bar);
+    //@ ensures data_pred(result, foo, bar);
 {
   struct data* data = malloc( sizeof( struct data ) );
   if ( data == 0 ) abort();
   
   data->foo = foo;
   data->bar = bar;
-  //@ close data_struct(data, foo, bar);
   return data;
 }
 
+/*@
+// An instance of the destructible family for the destroy_data function.
+// It states that being destructible by 'destroy_data' means holding a 'data_pred' chunk.
+predicate_family_instance destructible(destroy_data)(void* data) =
+    data_pred((struct data*)data, _, _);
+@*/
 
 /*
   destroy_data function
   - params: data stucture
   - description: This function frees the memory allocated for the data.
 */
-//@ predicate_family_instance data_chunk(destroy_data)(void* data) = data_struct((struct data*)data, _, _);
-void destroy_data(void* data) //@ : destructor
-    //@ requires data_chunk(destroy_data)(data);
-    //@ ensures emp;
+void destroy_data(struct data* data) //@ : destructor
+    //@ requires destructible(destroy_data)(data);
+    //@ ensures true;
 {
-  //@ open data_chunk(destroy_data)(data);
-  //@ open data_struct((struct data*)data, _, _);
+  //@ open destructible(destroy_data)(data);
   free(data);
 }
 
@@ -228,9 +232,9 @@ void check2()
   struct data* d1 = create_data(1, 1);
   struct data* d2 = create_data(2, 2);
   
-  //@ close data_chunk(destroy_data)(d1);
+  //@ close destructible(destroy_data)((void *)d1);
   push(stack, d1);
-  //@ close data_chunk(destroy_data)(d2);
+  //@ close destructible(destroy_data)((void *)d2);
   push(stack, d2);
 
   struct data* d = pop(stack);

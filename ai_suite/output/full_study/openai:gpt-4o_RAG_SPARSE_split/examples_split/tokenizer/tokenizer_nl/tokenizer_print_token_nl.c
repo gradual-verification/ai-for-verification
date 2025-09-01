@@ -2,8 +2,11 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
-//@ #include "list.gh"
-//@ #include "stringBuffers.gh"
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
 
 struct tokenizer
 {
@@ -15,29 +18,13 @@ struct tokenizer
 
 /***
  * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-
-/*@
-predicate tokenizer(struct tokenizer* tokenizer, charreader* next_char, int lastread, int lasttoken, struct string_buffer* buffer) =
-    tokenizer != 0 &*&
-    tokenizer->next_char |-> next_char &*&
-    tokenizer->lastread |-> lastread &*&
-    tokenizer->lasttoken |-> lasttoken &*&
-    tokenizer->buffer |-> buffer &*&
-    string_buffer(buffer, _);
-@*/
-
-/***
- * Description:
 The print_string_buffer function prints the content in a string buffer.
 
 It needs to make sure that the property of the buffer holds (i.e., the buffer points to a list of characters) before and after the function.
 */
 void print_string_buffer(struct string_buffer *buffer)
-    //@ requires string_buffer(buffer, ?cs);
-    //@ ensures string_buffer(buffer, cs);
+    //@ requires [?f]string_buffer(buffer, ?cs);
+    //@ ensures [f]string_buffer(buffer, cs);
 {
     int n = string_buffer_get_length(buffer);
     char *pcs = string_buffer_get_chars(buffer);
@@ -57,10 +44,9 @@ The print_token function prints the last token of a tokenizer by reading its las
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 void print_token(struct tokenizer* tokenizer)
-    //@ requires tokenizer(tokenizer, ?next_char, ?lastread, ?lasttoken, ?buffer);
-    //@ ensures tokenizer(tokenizer, next_char, lastread, lasttoken, buffer);
+    //@ requires [?f]tokenizer->buffer |-> ?buffer &*& [f]string_buffer(buffer, ?bcs) &*& integer(&tokenizer->lasttoken, ?lasttoken);
+    //@ ensures [f]tokenizer->buffer |-> buffer &*& [f]string_buffer(buffer, bcs) &*& integer(&tokenizer->lasttoken, lasttoken);
 {
-    //@ open tokenizer(tokenizer, next_char, lastread, lasttoken, buffer);
     switch (tokenizer->lasttoken)
     {
     case '(':
@@ -87,5 +73,4 @@ void print_token(struct tokenizer* tokenizer)
         puts("BADCHAR");
         break;
     }
-    //@ close tokenizer(tokenizer, next_char, lastread, lasttoken, buffer);
 }

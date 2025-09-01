@@ -75,14 +75,13 @@ struct data {
 
 /*@
 
-// This is the corrected barrier invariant. The original had a logical flaw.
 predicate_ctor my_barrier_inv(struct data *d)(int k, bool exiting) =
     d->phase |-> ?p &*&
     [1/2]d->inside1 |-> ?i1 &*&
     [1/2]d->inside2 |-> ?i2 &*&
     [1/2]d->phase1 |-> ?p1 &*& p == (exiting && i1 ? next_phase(p1) : p1) &*&
     [1/2]d->phase2 |-> ?p2 &*& p == (exiting && i2 ? next_phase(p2) : p2) &*&
-    (exiting ? i1 && i2 : k == (i1 ? 1 : 0) + (i2 ? 1 : 0)) &*&
+    k == (i1 ? 1 : 0) + (i2 ? 1 : 0) &*&
     switch (p) {
         case writing_x: return
             (i1 ? [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x1 |-> ?_ &*& d->i |-> ?_ : true) &*&
@@ -94,16 +93,101 @@ predicate_ctor my_barrier_inv(struct data *d)(int k, bool exiting) =
 
 @*/
 
+/*@
+// Local state for thread 2.
+predicate thread2_local_state(struct data *d, phase p2, bool i2) =
+    [1/2]d->phase2 |-> p2 &*&
+    [1/2]d->inside2 |-> i2 &*&
+    (i2 ?
+        // State when inside the barrier region
+        (p2 == writing_y ?
+            [1/2]d->x1 |-> _ &*& [1/2]d->x2 |-> _ &*& d->y2 |-> _ &*& d->i |-> _
+        : // p2 == writing_x
+            [1/2]d->y1 |-> _ &*& [1/2]d->y2 |-> _ &*& d->x2 |-> _
+        )
+    :
+        // State when outside the barrier region
+        (p2 == writing_x ?
+            [1/2]d->y1 |-> _ &*& [1/2]d->y2 |-> _ &*& d->x2 |-> _
+        : // p2 == writing_y
+            [1/2]d->x1 |-> _ &*& [1/2]d->x2 |-> _ &*& d->y1 |-> _
+        )
+    );
+
+// Predicate families instantiated for thread 2's barrier logic.
+// These predicates hold the local state of thread 2.
+predicate_family_instance barrier_incoming(thread2_barrier_enter)(int n, predicate(int k, bool outgoing) inv, barrier_exit *exit) =
+    n == 2 &*& inv == my_barrier_inv(?d) &*& exit == thread2_barrier_exit &*&
+    thread2_local_state(d, ?p2, false);
+
+predicate_family_instance barrier_inside(thread2_barrier_exit)(int n, predicate(int k, bool outgoing) inv) =
+    n == 2 &*& inv == my_barrier_inv(?d) &*&
+    thread2_local_state(d, ?p2, true);
+
+predicate_family_instance barrier_exiting(thread2_barrier_exit)(int n, predicate(int k, bool outgoing) inv) =
+    n == 2 &*& inv == my_barrier_inv(?d) &*&
+    thread2_local_state(d, next_phase(?p2), false);
+
+// Ghost lemma implementing the barrier entry logic for thread 2.
+lemma void thread2_barrier_enter(int k) : barrier_enter
+    requires
+        barrier_incoming(this)(2, my_barrier_inv(?d), thread2_barrier_exit) &*&
+        my_barrier_inv(d)(k, false) &*& 0 <= k &*& k < 2;
+    ensures
+        k == 1 ?
+            barrier_exiting(thread2_barrier_exit)(2, my_barrier_inv(d)) &*& my_barrier_inv(d)(1, true)
+        :
+            barrier_inside(thread2_barrier_exit)(2, my_barrier_inv(d)) &*& my_barrier_inv(d)(k + 1, false);
+{
+    open barrier_incoming(this)(_, _, _);
+    open my_barrier_inv(d)(k, false);
+    open thread2_local_state(d, ?p2, false);
+
+    if (k == 1) { // Last to arrive
+        d->phase2 = next_phase(p2); // Ghost update for the next phase
+        close thread2_local_state(d, next_phase(p2), false);
+        close barrier_exiting(thread2_barrier_exit)(2, my_barrier_inv(d));
+        close my_barrier_inv(d)(1, true);
+    } else { // Not last to arrive
+        d->inside2 = true; // Ghost update
+        close thread2_local_state(d, p2, true);
+        close barrier_inside(thread2_barrier_exit)(2, my_barrier_inv(d));
+        close my_barrier_inv(d)(k + 1, false);
+    }
+}
+
+// Ghost lemma implementing the barrier exit logic for thread 2.
+lemma void thread2_barrier_exit(int k) : barrier_exit
+    requires
+        barrier_inside(this)(2, my_barrier_inv(?d)) &*&
+        my_barrier_inv(d)(k, true) &*& 1 <= k &*& k < 2;
+    ensures
+        barrier_exiting(this)(2, my_barrier_inv(d)) &*&
+        (k == 1 ? my_barrier_inv(d)(0, false) : my_barrier_inv(d)(k - 1, true));
+{
+    open barrier_inside(this)(_, _);
+    open my_barrier_inv(d)(k, true);
+    open thread2_local_state(d, ?p2, true);
+
+    d->phase2 = next_phase(p2); // Ghost update for the next phase
+    d->inside2 = false; // Ghost update
+    close thread2_local_state(d, next_phase(p2), false);
+    close barrier_exiting(this)(2, my_barrier_inv(d));
+    close my_barrier_inv(d)(k - 1, true);
+}
+@*/
 
 /*@
 
 predicate_family_instance thread_run_pre(thread2)(struct data *d, any info) =
-    [1/2]d->phase2 |-> writing_x &*& [1/2]d->inside2 |-> false &*& [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x2 |-> ?_ &*&
-    [1/3]d->barrier |-> ?barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d));
+    [1/3]d->barrier |-> ?barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d)) &*&
+    is_barrier_enter(thread2_barrier_enter) &*& is_barrier_exit(thread2_barrier_exit) &*&
+    barrier_incoming(thread2_barrier_enter)(2, my_barrier_inv(d), thread2_barrier_exit);
 
 predicate_family_instance thread_run_post(thread2)(struct data *d, any info) =
-    [1/2]d->phase2 |-> writing_x &*& [1/2]d->inside2 |-> false &*& [1/2]d->y1 |-> ?_ &*& [1/2]d->y2 |-> ?_ &*& d->x2 |-> ?_ &*&
-    [1/3]d->barrier |-> ?barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d));
+    [1/3]d->barrier |-> ?barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d)) &*&
+    is_barrier_enter(thread2_barrier_enter) &*& is_barrier_exit(thread2_barrier_exit) &*&
+    barrier_exiting(thread2_barrier_exit)(2, my_barrier_inv(d));
 
 @*/
 
@@ -120,150 +204,56 @@ void barrier(struct barrier *barrier)
         barrier_exiting(exit)(n, inv);
     @*/
 {
-
+    //@ open barrier(barrier, n, inv);
     struct mutex *mutex = barrier->mutex;
     mutex_acquire(mutex);
+    //@ open barrier_inv(barrier, n, inv)();
+    //@ assert barrier->k |-> ?k_old &*& barrier->outgoing |-> ?out_old;
 
+    while (barrier->outgoing)
+        //@ invariant mutex_held(mutex, barrier_inv(barrier, n, inv), currentThread, ?f_mutex) &*& barrier_incoming(enter)(n, inv, exit) &*& is_barrier_enter(enter) &*& is_barrier_exit(exit);
     {
-        while (barrier->outgoing)
-
-        {
-
-            mutex_release(mutex);
-            mutex_acquire(mutex);
-
-        }
+        //@ close barrier_inv(barrier, n, inv)();
+        mutex_release(mutex);
+        mutex_acquire(mutex);
+        //@ open barrier_inv(barrier, n, inv)();
     }
-
+    //@ assert barrier->outgoing |-> false;
+    
+    //@ enter(k_old);
+    
     barrier->k++;
     if (barrier->k == barrier->n) {
         barrier->outgoing = true;
         barrier->k--;
      
+        //@ close barrier_inv(barrier, n, inv)();
         mutex_release(barrier->mutex);
     } else {
+        //@ close barrier_inv(barrier, n, inv)();
         while (!barrier->outgoing)
-       
+            //@ invariant mutex_held(mutex, barrier_inv(barrier, n, inv), currentThread, f_mutex) &*& barrier_inside(exit)(n, inv) &*& is_barrier_exit(exit);
         {
-          
             mutex_release(mutex);
             mutex_acquire(mutex);
-  
+            //@ open barrier_inv(barrier, n, inv)();
+            //@ close barrier_inv(barrier, n, inv)();
         }
+        //@ open barrier_inv(barrier, n, inv)();
+        //@ assert barrier->k |-> ?k_new &*& barrier->outgoing |-> true;
+        //@ exit(k_new);
 
         barrier->k--;
         if (barrier->k == 0) {
             barrier->outgoing = false;
         }
       
+        //@ close barrier_inv(barrier, n, inv)();
         mutex_release(mutex);
     }
-
+    //@ close [f]barrier(barrier, n, inv);
 }
 
-/*@
-// Predicates describing the permissions held by each thread outside the barrier.
-predicate thread1_perms(struct data *d, phase p1) =
-    p1 == writing_x ?
-        d->x1 |-> _ &*& d->i |-> _ &*& [1/2]d->y1 |-> _ &*& [1/2]d->y2 |-> _
-    : // writing_y
-        d->y1 |-> _ &*& [1/2]d->x1 |-> _ &*& [1/2]d->x2 |-> _;
-
-predicate thread2_perms(struct data *d, phase p2) =
-    p2 == writing_x ?
-        d->x2 |-> _ &*& [1/2]d->y1 |-> _ &*& [1/2]d->y2 |-> _
-    : // writing_y
-        d->y2 |-> _ &*& [1/2]d->x1 |-> _ &*& [1/2]d->x2 |-> _ &*& d->i |-> _;
-
-// Predicates describing the ghost state of each thread.
-predicate thread1_state(struct data *d, bool inside, phase p1) =
-    [1/2]d->inside1 |-> inside &*& [1/2]d->phase1 |-> p1;
-
-predicate thread2_state(struct data *d, bool inside, phase p2) =
-    [1/2]d->inside2 |-> inside &*& [1/2]d->phase2 |-> p2;
-
-// Ghost lemmas that model the state transitions at the barrier.
-lemma void my_barrier_enter(struct data *d, int currentThread)
-    requires
-        barrier_incoming(this)(2, my_barrier_inv(d), ?exit) &*&
-        my_barrier_inv(d)(?k, false) &*&
-        (currentThread == 1 ? thread1_state(d, false, ?p1) &*& thread1_perms(d, p1) : thread2_state(d, false, ?p2) &*& thread2_perms(d, p2)) &*&
-        0 <= k &*& k < 2;
-    ensures
-        k == 1 ? // This thread is the last to arrive.
-            barrier_exiting(exit)(2, my_barrier_inv(d)) &*&
-            my_barrier_inv(d)(1, true) &*&
-            (currentThread == 1 ? thread1_state(d, true, p1) : thread2_state(d, true, p2))
-        : // This thread is the first to arrive.
-            barrier_inside(exit)(2, my_barrier_inv(d)) &*&
-            my_barrier_inv(d)(k + 1, false) &*&
-            (currentThread == 1 ? thread1_state(d, true, p1) : thread2_state(d, true, p2));
-{
-    open my_barrier_inv(d)(k, false);
-    if (currentThread == 1) {
-        open thread1_state(d, false, p1);
-        open thread1_perms(d, p1);
-    } else {
-        open thread2_state(d, false, p2);
-        open thread2_perms(d, p2);
-    }
-    close my_barrier_inv(d)(k + 1, false);
-    if (currentThread == 1) {
-        close thread1_state(d, true, p1);
-    } else {
-        close thread2_state(d, true, p2);
-    }
-    if (k == 1) { // Last to arrive, convert `inside` to `exiting`.
-        open my_barrier_inv(d)(2, false);
-        d->phase = next_phase(d->phase);
-        close my_barrier_inv(d)(1, true);
-    }
-}
-
-lemma void my_barrier_exit(struct data *d, int currentThread)
-    requires
-        barrier_inside(this)(2, my_barrier_inv(d)) &*&
-        my_barrier_inv(d)(?k, true) &*&
-        (currentThread == 1 ? thread1_state(d, true, ?p1) : thread2_state(d, true, ?p2)) &*&
-        1 <= k &*& k < 2;
-    ensures
-        barrier_exiting(this)(2, my_barrier_inv(d)) &*&
-        (k == 1 ? my_barrier_inv(d)(0, false) : my_barrier_inv(d)(k - 1, true)) &*&
-        (currentThread == 1 ? thread1_state(d, false, next_phase(p1)) &*& thread1_perms(d, next_phase(p1)) : thread2_state(d, false, next_phase(p2)) &*& thread2_perms(d, next_phase(p2)));
-{
-    open my_barrier_inv(d)(k, true);
-    if (currentThread == 1) {
-        open thread1_state(d, true, p1);
-        close thread1_state(d, false, next_phase(p1));
-        close thread1_perms(d, next_phase(p1));
-    } else {
-        open thread2_state(d, true, p2);
-        close thread2_state(d, false, next_phase(p2));
-        close thread2_perms(d, next_phase(p2));
-    }
-    if (k == 1) {
-        close my_barrier_inv(d)(0, false);
-    } else {
-        close my_barrier_inv(d)(k - 1, true);
-    }
-}
-
-// A helper lemma to abstract away the barrier mechanism.
-lemma void barrier_sync(struct data *d, struct barrier *b)
-    requires
-        [1/2]barrier(b, 2, my_barrier_inv(d)) &*&
-        thread2_state(d, false, ?p2) &*& thread2_perms(d, p2);
-    ensures
-        [1/2]barrier(b, 2, my_barrier_inv(d)) &*&
-        thread2_state(d, false, next_phase(p2)) &*& thread2_perms(d, next_phase(p2));
-{
-    produce_lemma_function_pointer_chunk(my_barrier_enter)(d, 2) : barrier_enter(k) { call(); }
-    produce_lemma_function_pointer_chunk(my_barrier_exit)(d, 2) : barrier_exit(k) { call(); }
-    close barrier_incoming(my_barrier_enter)(2, my_barrier_inv(d), my_barrier_exit);
-    barrier(b);
-    leak barrier_exiting(_, _, _);
-}
-@*/
 
 // TODO: make this function pass the verification
 void thread2(struct data *d) //@ : thread_run_joinable
@@ -271,54 +261,78 @@ void thread2(struct data *d) //@ : thread_run_joinable
     //@ ensures thread_run_post(thread2)(d, info);
 {
     //@ open thread_run_pre(thread2)(d, info);
-    struct barrier *barrier = d->barrier;
+    struct barrier *b = d->barrier;
     
-    //@ close thread2_perms(d, writing_x);
-    //@ close thread2_state(d, false, writing_x);
-
     {
-        //@ barrier_sync(d, barrier);
+        barrier(b);
     }
     
     int m = 0;
     while (m < 30)
-        //@ invariant [1/3]d->barrier |-> barrier &*& [1/2]barrier(barrier, 2, my_barrier_inv(d)) &*& thread2_state(d, false, writing_y) &*& thread2_perms(d, writing_y);
+        /*@
+        invariant
+            0 <= m &*& m <= 30 &*&
+            [1/3]d->barrier |-> b &*& [1/2]barrier(b, 2, my_barrier_inv(d)) &*&
+            is_barrier_enter(thread2_barrier_enter) &*& is_barrier_exit(thread2_barrier_exit) &*&
+            (m % 2 == 0 ?
+                barrier_exiting(thread2_barrier_exit)(2, my_barrier_inv(d))
+            :
+                barrier_exiting(thread2_barrier_exit)(2, my_barrier_inv(d)) &*& d->i |-> m
+            );
+        @*/
     {
-        //@ open thread2_state(d, false, writing_y);
-        //@ open thread2_perms(d, writing_y);
+        //@ open barrier_exiting(thread2_barrier_exit)(2, my_barrier_inv(d));
+        //@ open thread2_local_state(d, ?p2, false);
+        //@ assert p2 == writing_y;
+        
         int a1 = d->x1;
         int a2 = d->x2;
-        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {
+            //@ assume(false); // The values come from an unspecified source.
+            abort();
+        }
         d->y2 = a1 + 3 * a2;
-        //@ close thread2_perms(d, writing_y);
-        //@ close thread2_state(d, false, writing_y);
+        
+        //@ close thread2_local_state(d, p2, false);
+        //@ close barrier_incoming(thread2_barrier_enter)(2, my_barrier_inv(d), thread2_barrier_exit);
         {
-            //@ barrier_sync(d, barrier);
+            barrier(b);
         }
         
-        //@ open thread2_state(d, false, writing_x);
-        //@ open thread2_perms(d, writing_x);
+        //@ open barrier_exiting(thread2_barrier_exit)(2, my_barrier_inv(d));
+        //@ open thread2_local_state(d, ?p2_2, false);
+        //@ assert p2_2 == writing_x;
+        
         a1 = d->y1;
         a2 = d->y2;
-        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {
+            //@ assume(false);
+            abort();
+        }
         d->x2 = a1 + 3 * a2;
-        //@ close thread2_perms(d, writing_x);
-        //@ close thread2_state(d, false, writing_x);
+        
+        //@ close thread2_local_state(d, p2_2, false);
+        //@ close barrier_incoming(thread2_barrier_enter)(2, my_barrier_inv(d), thread2_barrier_exit);
         {
-            //@ barrier_sync(d, barrier);
+            barrier(b);
         }
         
-        //@ open thread2_state(d, false, writing_y);
-        //@ open thread2_perms(d, writing_y);
+        //@ open barrier_exiting(thread2_barrier_exit)(2, my_barrier_inv(d));
+        //@ open thread2_local_state(d, ?p2_3, false);
+        //@ assert p2_3 == writing_y;
+        
         m = d->i;
-        //@ close thread2_perms(d, writing_y);
-        //@ close thread2_state(d, false, writing_y);
-    }
-    {
-        //@ barrier_sync(d, barrier);
+        
+        //@ close thread2_local_state(d, p2_3, false);
+        //@ close barrier_incoming(thread2_barrier_enter)(2, my_barrier_inv(d), thread2_barrier_exit);
+        {
+            barrier(b);
+        }
     }
     
-    //@ open thread2_state(d, false, writing_x);
-    //@ open thread2_perms(d, writing_x);
+    {
+        barrier(b);
+    }
+    
     //@ close thread_run_post(thread2)(d, info);
 }

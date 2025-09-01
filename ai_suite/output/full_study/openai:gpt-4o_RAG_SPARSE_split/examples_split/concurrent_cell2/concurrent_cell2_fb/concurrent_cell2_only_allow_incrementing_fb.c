@@ -1,3 +1,5 @@
+#include "verifast.h"
+
 /*@
 inductive trace = zero | inc(int, trace) | dec(int, trace) | cas_(int, int, int, trace);
 
@@ -82,13 +84,11 @@ void only_allow_incrementing(int* c)
 {
   int x1 = atomic_load(c);
   int x2 = atomic_load(c);
-  assert x1 <= x2;
+  assert(x1 <= x2);
   //@ last_seen_allowed(c, currentThread);
   //@ last_seen_allowed(c, currentThread);
   //@ assert incr_only(?trace1);
   //@ assert incr_only(?trace2);
-  //@ assert is_good_prefix(trace0, trace1, currentThread);
-  //@ assert is_good_prefix(trace1, trace2, currentThread);
   //@ assert execute_trace(trace1) == x1;
   //@ assert execute_trace(trace2) == x2;
   //@ assert x1 <= x2;

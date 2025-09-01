@@ -6,6 +6,11 @@
 
 typedef struct eloop *eloop;
 
+typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
+    //@ requires eloop(x) &*& [_]dataPred(data);
+    //@ ensures eloop(x) &*& [_]dataPred(data);
+
+
 struct eloop {
     int lock;
     int signalCount;
@@ -30,19 +35,14 @@ predicate_ctor I(eloop x)() =
 predicate eloop(eloop x) =
     [_]lock(&x->lock, I(x));
 @*/
-
-
-typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
-    //@ requires eloop(x) &*& [_]dataPred(data);
-    //@ ensures eloop(x) &*& [_]dataPred(data);
     
-
 
 void eloop_loop(eloop x)
     //@ requires eloop(x);
     //@ ensures eloop(x);
 {
     for (;;)
+    //@ invariant eloop(x);
     {
         eloop_handler *handler = 0;
         void *handlerData;

@@ -3,11 +3,22 @@
 #include "stringBuffers.h"
 
 /*@
-// A charreader is a function that reads a character.
-// We model this abstractly using predicate families.
-// The user of the tokenizer must provide instances for these families.
-predicate_family charreader_pre(void* reader)();
-predicate_family charreader_post(void* reader)(int char_read);
+// A predicate family to hold the resources required by a charreader instance.
+// This allows different charreader implementations to have different state.
+predicate_family charreader_permission(void* reader)();
+
+// A predicate representing a valid, initialized tokenizer.
+// It owns the memory for the struct and all associated resources,
+// including the string buffer and the permission to call the charreader.
+predicate tokenizer(struct tokenizer *t) =
+    t->next_char |-> ?reader &*&
+    t->lastread |-> -2 &*&
+    t->lasttoken |-> 0 &*&
+    t->buffer |-> ?buffer &*&
+    malloc_block_tokenizer(t) &*&
+    string_buffer(buffer, nil) &*&
+    is_charreader(reader) == true &*&
+    charreader_permission(reader)();
 @*/
 
 /***
@@ -15,8 +26,9 @@ predicate_family charreader_post(void* reader)(int char_read);
 The charreader is a function that reads a character and returns it in an integer.
 */
 typedef int charreader();
-    //@ requires charreader_pre(this)();
-    //@ ensures charreader_post(this)(result);
+    //@ requires charreader_permission(this)();
+    //@ ensures charreader_permission(this)() &*& result >= -1;
+
 
 struct tokenizer
 {
@@ -25,17 +37,6 @@ struct tokenizer
 	int                   lasttoken; // the last token parsed
 	struct string_buffer* buffer;
 };
-
-/*@
-predicate tokenizer(struct tokenizer* t; charreader* reader, int lastread, int lasttoken, list<char> buffer_content) =
-    t->next_char |-> reader &*&
-    is_charreader(reader) == true &*&
-    t->lastread |-> lastread &*&
-    t->lasttoken |-> lasttoken &*&
-    t->buffer |-> ?buffer &*&
-    string_buffer(buffer, buffer_content) &*&
-    malloc_block_tokenizer(t);
-@*/
 
 
 // TODO: make this function pass the verification
@@ -46,8 +47,8 @@ The tokenizer_create function creates a tokenizer given a charreader.
 It needs to make sure that the returned tokenizer preserves its property of tokenizer. 
 */
 struct tokenizer* tokenizer_create(charreader* reader)
-    //@ requires is_charreader(reader) == true;
-    //@ ensures tokenizer(result, reader, -2, 0, nil);
+    //@ requires is_charreader(reader) == true &*& charreader_permission(reader)();
+    //@ ensures tokenizer(result);
 {
 	struct tokenizer* tokenizer;
 	struct string_buffer *buffer;

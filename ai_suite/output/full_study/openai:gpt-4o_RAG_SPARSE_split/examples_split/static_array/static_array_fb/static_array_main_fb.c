@@ -20,7 +20,7 @@ struct mystruct my_global_nested_struct = {{42, {420, 421, 422, 423, 424, 425, 4
 
 static int ar2[55];
 
-static struct_with_array bigArray[10] = {{100, {1, 2, 3, 4}, 200}, {300, {5, 6, 7}, 400}};
+static struct_with_array bigArray[10] = {{100, {1,2,3,4}, 200}, {300, {5,6,7}, 400}}; // Incomplete initializer lists; remaining elements get default value.
 
 struct point { int x; int y; };
 
@@ -80,7 +80,7 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_fb)
   if (ar1[i] == 7)
   { t = ar1[2]; }
   else
-  { assert false; }
+  { assert(false); }
 
   assert(ar1[26] == 2);
 
@@ -97,7 +97,7 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_fb)
   if (s->ar[i] == 7)
   { t += s->ar[2]; }
   else
-  { assert false; }
+  { assert(false); }
 
   assert(s->ar[0] == 1);
   free(s);
@@ -112,7 +112,7 @@ int main(int argc, char **argv) //@ : main_full(static_array_main_fb)
   if (ar2[i] == 7)
   { t += ar2[2]; }
   else
-  { assert false; }
+  { assert(false); }
 
   assert(ar2[1] == 7);
 

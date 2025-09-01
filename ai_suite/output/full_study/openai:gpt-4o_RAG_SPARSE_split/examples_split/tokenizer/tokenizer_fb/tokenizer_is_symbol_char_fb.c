@@ -2,6 +2,10 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
+
 struct tokenizer
 {
     charreader*           next_char;
@@ -24,14 +28,10 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
   t->buffer |-> buffer;
 @*/
 
-typedef int charreader();
-    //@ requires true;
-    //@ ensures true;
-
 // TODO: make this function pass the verification
 bool is_symbol_char(int c)
- //@ requires true;
- //@ ensures result == (c > 32 && c <= 127 && c != '(' && c != ')');
+    //@ requires true;
+    //@ ensures (c > 32 && c <= 127 && c != '(' && c != ')') ? result == true : result == false;
 {
     return c > 32 && c <= 127 && c != '(' && c != ')'; 
 }

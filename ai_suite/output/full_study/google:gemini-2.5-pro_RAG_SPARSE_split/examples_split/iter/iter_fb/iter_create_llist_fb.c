@@ -11,22 +11,24 @@ struct llist {
 };
 
 /*@
-// Corrected predicate definitions to include memory ownership (malloc_block).
-// This is essential for sound verification and preventing logical memory leaks.
-
+// Note: Added malloc_block_node to make the predicate sound for memory management.
 predicate node(struct node *node; struct node *next, int value) =
   node->next |-> next &*& node->value |-> value &*& malloc_block_node(node);
+@*/
 
+/*@
+// Note: The lseg predicate describes a segment from n1 up to (but not including) n2.
 predicate lseg(struct node *n1, struct node *n2; list<int> v) =
   n1 == n2 ?
     v == nil
   :
     node(n1, ?_n, ?h) &*& lseg(_n, n2, ?t) &*& v == cons(h, t);
 
+// Note: Added malloc_block_llist. The list has a sentinel node 'last'.
+// The values 'v' are in the segment from 'first' to 'last'.
 predicate llist(struct llist *list; list<int> v) =
   list->first |-> ?_f &*& list->last |-> ?_l &*& malloc_block_llist(list) &*&
-  lseg(_f, _l, v) &*&
-  node(_l, _, _);
+  lseg(_f, _l, v) &*& node(_l, _, _);
 @*/
 
 /*@
@@ -47,7 +49,7 @@ struct iter {
 /*@
 
 predicate llist_with_node(struct llist *list, list<int> v0, struct node *n, list<int> vn) =
-  list->first |-> ?f &*& list->last |-> ?l &*& malloc_block_llist(list) &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
+  list->first |-> ?f &*& list->last |-> ?l &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
 
 predicate iter(struct iter *i, real frac, struct llist *l, list<int> v0, list<int> v) =
   i->current |-> ?n &*& [frac]llist_with_node(l, v0, n, v);
@@ -64,11 +66,19 @@ struct llist *create_llist()
   if (l == 0) abort();
   struct node *n = calloc(1, sizeof(struct node));
   if (n == 0) abort();
-  //@ open chars(n, sizeof(struct node), _);
+  
+  // The calloc contract ensures the fields of 'n' are zero-initialized.
+  // We close the 'node' predicate for this new sentinel node.
+  //@ close node(n, 0, 0);
+  
   l->first = n;
   l->last = n;
-  //@ close node(n, 0, 0);
+  
+  // For an empty list, 'first' and 'last' point to the same sentinel node.
+  // The list segment from 'n' to 'n' is empty, corresponding to 'nil' values.
   //@ close lseg(n, n, nil);
+  
+  // Now all parts of the 'llist' predicate are satisfied.
   //@ close llist(l, nil);
   return l;
 }

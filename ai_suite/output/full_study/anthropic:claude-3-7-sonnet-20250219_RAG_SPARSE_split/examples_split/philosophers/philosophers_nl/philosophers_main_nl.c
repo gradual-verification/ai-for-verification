@@ -14,43 +14,20 @@ struct philosopher {
 };
 
 /*@
-// Define a predicate for the philosopher structure
-predicate philosopher(struct philosopher *philosopher; struct lock *fork1, struct lock *fork2) =
-    philosopher->fork1 |-> fork1 &*&
-    philosopher->fork2 |-> fork2 &*&
-    malloc_block_philosopher(philosopher);
+// Define a predicate for philosopher data
+predicate_family thread_run_data(philosopher_run)(void *data) =
+    philosopher_data(data);
 
-// Define a predicate family for the thread_run_data
-predicate_family_instance thread_run_data(philosopher_run)(void *data) =
-    philosopher(data, ?fork1, ?fork2) &*&
+// Predicate for philosopher data
+predicate philosopher_data(void *data) =
+    data != 0 &*&
+    ((struct philosopher *)data)->fork1 |-> ?fork1 &*&
+    ((struct philosopher *)data)->fork2 |-> ?fork2 &*&
     [_]lock(fork1, ?lockId1, ?p1) &*&
     [_]lock(fork2, ?lockId2, ?p2) &*&
-    lock_below(lockId1, lockId2) == true;
+    malloc_block_philosopher(data) &*&
+    lock_below(lockId1, lockId2) == true; // Enforce a lock ordering to prevent deadlock
 @*/
-
-/***
- * Function: create_philosopher
- *
- * Description:
- * Allocates and initializes a philosopher with two given forks (locks).
- * Starts a new thread in which the philosopher will run.
- *
-@param fork1 - pointer to the first fork (lock) used by the philosopher.
-@param fork2 - pointer to the second fork (lock) used by the philosopher.
- */
-void create_philosopher(struct lock *fork1, struct lock *fork2)
-//@ requires [?f1]lock(fork1, ?lockId1, ?p1) &*& [?f2]lock(fork2, ?lockId2, ?p2) &*& lock_below(lockId1, lockId2) == true;
-//@ ensures true;
-{
-    struct philosopher *philosopher = malloc(sizeof(struct philosopher));
-    if (philosopher == 0) abort();
-    philosopher->fork1 = fork1;
-    philosopher->fork2 = fork2;
-    //@ close philosopher(philosopher, fork1, fork2);
-    //@ close thread_run_data(philosopher_run)(philosopher);
-    thread_start(philosopher_run, philosopher);
-}
-
 
 /***
  * Function: philosopher_run
@@ -67,21 +44,24 @@ void create_philosopher(struct lock *fork1, struct lock *fork2)
  */
 void philosopher_run(void *data)
 //@ requires thread_run_data(philosopher_run)(data) &*& lockset(currentThread, nil);
-//@ ensures lockset(currentThread, nil);
+//@ ensures false; // Function never returns
 {
     struct philosopher *philosopher = data;
     //@ open thread_run_data(philosopher_run)(data);
     struct lock *fork1 = philosopher->fork1;
     struct lock *fork2 = philosopher->fork2;
-    //@ leak philosopher(philosopher, fork1, fork2);
     
     while (true)
-    //@ invariant [_]lock(fork1, ?lockId1, ?p1) &*& [_]lock(fork2, ?lockId2, ?p2) &*& lock_below(lockId1, lockId2) == true &*& lockset(currentThread, nil);
+    //@ invariant philosopher->fork1 |-> fork1 &*& philosopher->fork2 |-> fork2 &*& [_]lock(fork1, ?lockId1, ?p1) &*& [_]lock(fork2, ?lockId2, ?p2) &*& malloc_block_philosopher(philosopher) &*& lockset(currentThread, nil) &*& lock_below(lockId1, lockId2) == true;
     {
+        // Always acquire locks in order of their IDs to prevent deadlock
         lock_acquire(fork1);
         //@ assert lockset(currentThread, cons(lockId1, nil));
         lock_acquire(fork2);
         //@ assert lockset(currentThread, cons(lockId2, cons(lockId1, nil)));
+        
+        // Simulate eating
+        
         lock_release(fork2);
         //@ assert lockset(currentThread, cons(lockId1, nil));
         lock_release(fork1);
@@ -89,6 +69,38 @@ void philosopher_run(void *data)
     }
 }
 
+/***
+ * Function: create_philosopher
+ *
+ * Description:
+ * Allocates and initializes a philosopher with two given forks (locks).
+ * Starts a new thread in which the philosopher will run.
+ *
+@param fork1 - pointer to the first fork (lock) used by the philosopher.
+@param fork2 - pointer to the second fork (lock) used by the philosopher.
+ */
+void create_philosopher(struct lock *fork1, struct lock *fork2)
+//@ requires [_]lock(fork1, ?lockId1, ?p1) &*& [_]lock(fork2, ?lockId2, ?p2) &*& lock_below(lockId1, lockId2) == true;
+//@ ensures true;
+{
+    struct philosopher *philosopher = malloc(sizeof(struct philosopher));
+    if (philosopher == 0) abort();
+    
+    philosopher->fork1 = fork1;
+    philosopher->fork2 = fork2;
+    
+    //@ close philosopher_data(philosopher);
+    //@ close thread_run_data(philosopher_run)(philosopher);
+    thread_start(philosopher_run, philosopher);
+}
+
+/*@
+// Define a predicate for the empty invariant
+predicate empty_inv() = true;
+
+// Define a predicate constructor for the empty invariant
+predicate_ctor empty_inv_ctor()() = empty_inv();
+@*/
 
 // TODO: make this function pass the verification
 /***
@@ -106,35 +118,28 @@ int main()
 //@ requires true;
 //@ ensures true;
 {
-    //@ predicate empty() = true;
-    
-    //@ close create_lock_ghost_args(empty, nil, nil);
+    // Create the locks with a defined ordering to prevent deadlock
+    //@ close create_lock_ghost_args(empty_inv_ctor(), nil, nil);
     struct lock *forkA = create_lock();
-    //@ assert lock(forkA, ?lockIdA, empty);
+    //@ assert lock(forkA, ?lockIdA, _);
     
-    //@ close create_lock_ghost_args(empty, cons(lockIdA, nil), nil);
+    //@ close create_lock_ghost_args(empty_inv_ctor(), cons(lockIdA, nil), nil);
     struct lock *forkB = create_lock();
-    //@ assert lock(forkB, ?lockIdB, empty);
+    //@ assert lock(forkB, ?lockIdB, _);
     //@ assert lock_above_all(lockIdB, cons(lockIdA, nil)) == true;
     
-    //@ close create_lock_ghost_args(empty, cons(lockIdA, nil), nil);
+    //@ close create_lock_ghost_args(empty_inv_ctor(), cons(lockIdB, cons(lockIdA, nil)), nil);
     struct lock *forkC = create_lock();
-    //@ assert lock(forkC, ?lockIdC, empty);
-    //@ assert lock_above_all(lockIdC, cons(lockIdA, nil)) == true;
+    //@ assert lock(forkC, ?lockIdC, _);
+    //@ assert lock_above_all(lockIdC, cons(lockIdB, cons(lockIdA, nil))) == true;
     
-    // Create philosophers with locks in the correct order to prevent deadlock
-    // For each philosopher, ensure the locks are acquired in a consistent order
-    
-    // First philosopher: forkA and forkB
-    //@ assert lock_below(lockIdA, lockIdB) == true;
+    // Create philosophers with locks in the correct order
+    // Each philosopher must acquire locks in order of increasing lock IDs
     create_philosopher(forkA, forkB);
-    
-    // Second philosopher: forkB and forkC
-    //@ assert lock_below(lockIdB, lockIdC) == true;
     create_philosopher(forkB, forkC);
     
-    // Third philosopher: forkA and forkC
-    //@ assert lock_below(lockIdA, lockIdC) == true;
+    // For the third philosopher, we need to ensure the locks are in the correct order
+    // Since lockIdA < lockIdB < lockIdC, we need to pass forkA and forkC in the correct order
     create_philosopher(forkA, forkC);
     
     return 0;

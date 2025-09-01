@@ -3,13 +3,6 @@
 
 typedef struct eloop *eloop;
 
-struct eloop {
-    int lock;
-    int signalCount;
-    eloop_handler *handler;
-    void *handlerData;
-};
-
 /***
  * Description:
 The eloop_handler function pointer that handles the data of an event loop and preserves the property of event loop and data.
@@ -18,8 +11,23 @@ The eloop_handler function pointer that handles the data of an event loop and pr
 */
 typedef void eloop_handler(void *data);
 
-//@ predicate eloop_predicate(eloop e) = e->handler |-> _ &*& e->signalCount |-> 0 &*& e->handlerData |-> _;
+struct eloop {
+    int lock;
+    int signalCount;
+    eloop_handler *handler;
+    void *handlerData;
+};
 
+/*@
+predicate eloop(struct eloop *e, predicate() I) =
+    e->handler |-> _ &*&
+    e->handlerData |-> _ &*&
+    e->signalCount |-> 0 &*&
+    lock(&e->lock, I) &*&
+    malloc_block_eloop(e);
+@*/
+
+// TODO: make this function pass the verification
 /***
  * Description:
 The eloop_create function creates an instance of event loop, whose lock should be initialized and released (i.e., unlocked).
@@ -27,18 +35,19 @@ Moreover, its number of signals should be greater than or equal to 0.
 
 @return: the created instance of event loop.
 */
-//@ requires true;
-//@ ensures result == 0 ? true : eloop_predicate(result) &*& lock(&result->lock, eloop_predicate(result));
-
+/*@
+requires exists<predicate()>(?I);
+ensures result == 0 ? true : eloop(result, I);
+@*/
 eloop eloop_create()
 {
-    eloop x = malloc(sizeof(struct eloop));
+    struct eloop *x = malloc(sizeof(struct eloop));
     if (x == 0) abort();
     x->handler = 0;
     x->signalCount = 0;
-    //@ close exists(eloop_predicate(x));
+    //@ close exists(I);
     init(&x->lock);
-    //@ close eloop_predicate(x);
+    //@ close eloop(x, I);
     release(&x->lock);
     return x;
 }

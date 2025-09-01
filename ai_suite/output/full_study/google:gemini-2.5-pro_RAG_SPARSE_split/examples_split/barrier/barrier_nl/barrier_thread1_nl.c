@@ -1,4 +1,4 @@
-#include "stdlib.hh"
+#include "stdlib.h"
 #include "threading.h"
 
 /***
@@ -36,46 +36,29 @@ struct data {
 };
 
 /*@
-// A predicate representing the permissions of thread 1 at a given protocol round.
-predicate t1_protocol(struct data *d, int round) =
-    let N = round / 2;
-    let phase = round % 2;
-    phase == 0 ?
-        // Phase 0: Before the first barrier in the loop.
-        // Thread 1 has read access to x1, x2 and write access to y1, i.
-        [1/2]d->x1 |-> ?x1 &*& [1/2]d->x2 |-> ?x2 &*&
-        d->y1 |-> _ &*&
-        d->i |-> _
+// Predicate to assert that a value is within the required bounds.
+predicate bounds(int v) = 0 <= v && v <= 1000;
+
+// Predicate for the state where x1 and x2 are readable and y1, y2 are writable.
+predicate data_phase_x(struct data *d) =
+    d->x1 |-> ?x1 &*& d->x2 |-> ?x2 &*& d->y1 |-> _ &*& d->y2 |-> _ &*&
+    bounds(x1) &*& bounds(x2);
+
+// Predicate for the state where y1 and y2 are readable and x1, x2 are writable.
+predicate data_phase_y(struct data *d) =
+    d->x1 |-> _ &*& d->x2 |-> _ &*& d->y1 |-> ?y1 &*& d->y2 |-> ?y2 &*&
+    bounds(y1) &*& bounds(y2);
+
+// The invariant for the barrier's mutex. It uses a ghost 'phase' variable
+// to track which state the shared data is in.
+predicate_ctor barrier_inv(struct barrier *b, struct data *d, int *phase)() =
+    b->n |-> 2 &*& b->k |-> ?k &*& b->outgoing |-> ?is_outgoing &*& 0 <= k &*& k <= 2 &*&
+    *phase |-> ?p &*&
+    (is_outgoing ?
+        (p == 0 ? data_phase_y(d) : data_phase_x(d))
     :
-        // Phase 1: Before the second barrier in the loop.
-        // Thread 1 has write access to x1 and read access to y1, y2.
-        d->x1 |-> _ &*&
-        [1/2]d->y1 |-> ?y1 &*& [1/2]d->y2 |-> ?y2 &*&
-        d->i |-> N;
-
-// A predicate representing the permissions of a hypothetical thread 2.
-predicate t2_protocol(struct data *d, int round) =
-    let N = round / 2;
-    let phase = round % 2;
-    phase == 0 ?
-        // Phase 0: Thread 2 has read access to x1, x2 and write access to y2.
-        [1/2]d->x1 |-> ?x1 &*& [1/2]d->x2 |-> ?x2 &*&
-        d->y2 |-> _
-    :
-        // Phase 1: Thread 2 has write access to x2 and read access to y1, y2.
-        d->x2 |-> _ &*&
-        [1/2]d->y1 |-> ?y1 &*& [1/2]d->y2 |-> ?y2;
-
-// A ghost lemma describing the state transition at the barrier.
-// It combines the contributions from both threads and produces the next state.
-lemma void barrier_protocol(int round);
-    requires t1_protocol(?d, round) &*& t2_protocol(d, round);
-    ensures t1_protocol(d, round + 1) &*& t2_protocol(d, round + 1);
-
-// A predicate representing a thread's permission to use the barrier.
-// It is parameterized by the protocol lemma and the thread's contribution predicate.
-predicate barrier_token(struct barrier *b, int thread_id, predicate(struct data*, int) P);
-
+        (p == 0 ? data_phase_x(d) : data_phase_y(d))
+    );
 @*/
 
 /***
@@ -95,91 +78,93 @@ predicate barrier_token(struct barrier *b, int thread_id, predicate(struct data*
  * the barrier is exiting at the end.
  */
 void barrier(struct barrier *b)
-    /*@ requires
-            barrier_token(b, ?tid, ?P) &*&
-            P(?d, ?round) &*&
-            is_barrier_protocol(barrier_protocol);
-    @*/
-    /*@ ensures
-            barrier_token(b, tid, P) &*&
-            P(d, round + 1) &*&
-            is_barrier_protocol(barrier_protocol);
-    @*/
+    //@ requires [?f]b->mutex |-> ?m &*& [f]mutex(m, barrier_inv(b, ?d, ?phase));
+    //@ ensures [f]b->mutex |-> m &*& [f]mutex(m, barrier_inv(b, d, phase));
 {
-    //@ open barrier_token(b, tid, P);
-    //@ open P(d, round);
-
-    // The barrier implementation is assumed correct. We model its effect
-    // by calling the ghost protocol lemma.
-    if (tid == 1) {
-        //@ produce_lemma_function_pointer_chunk(barrier_protocol)
-        //@ {
-        //@     open t1_protocol(d, round);
-        //@     leak t2_protocol(d, round);
-        //@     call();
-        //@     open t2_protocol(d, round + 1);
-        //@ }
-        //@ consume_lemma_function_pointer_chunk(barrier_protocol);
-    } else {
-        //@ produce_lemma_function_pointer_chunk(barrier_protocol)
-        //@ {
-        //@     open t2_protocol(d, round);
-        //@     leak t1_protocol(d, round);
-        //@     call();
-        //@     open t1_protocol(d, round + 1);
-        //@ }
-        //@ consume_lemma_function_pointer_chunk(barrier_protocol);
-    }
-
     struct mutex *mutex = b->mutex;
     mutex_acquire(mutex);
+    //@ open barrier_inv(b, d, phase)();
+    //@ int p_old = *phase;
 
+    while (b->outgoing)
+        /*@ invariant mutex_held(mutex, barrier_inv(b, d, phase), currentThread, f) &*&
+            b->n |-> 2 &*& b->k |-> ?k_loop &*& b->outgoing |-> true &*& 0 <= k_loop &*& k_loop <= 2 &*&
+            *phase |-> p_old &*&
+            (p_old == 0 ? data_phase_y(d) : data_phase_x(d));
+        @*/
     {
-        while (b->outgoing)
-        {
-            mutex_release(mutex);
-            mutex_acquire(mutex);
-        }
+        //@ close barrier_inv(b, d, phase)();
+        mutex_release(mutex);
+        mutex_acquire(mutex);
+        //@ open barrier_inv(b, d, phase)();
+        //@ assert *phase == p_old;
     }
+    //@ assert b->outgoing |-> false;
+    //@ assert *phase == p_old;
 
     b->k++;
     if (b->k == b->n) {
         b->outgoing = true;
         b->k--;
-     
+        //@ *phase = 1 - p_old;
+        //@ if (p_old == 0) { open data_phase_x(d); close data_phase_y(d); } else { open data_phase_y(d); close data_phase_x(d); }
+        //@ close barrier_inv(b, d, phase)();
         mutex_release(b->mutex);
     } else {
+        //@ if (p_old == 0) { open data_phase_x(d); } else { open data_phase_y(d); }
         while (!b->outgoing)
+            /*@ invariant mutex_held(mutex, barrier_inv(b, d, phase), currentThread, f) &*&
+                b->n |-> 2 &*& b->k |-> 1 &*& b->outgoing |-> false &*&
+                *phase |-> p_old &*&
+                (p_old == 0 ? data_phase_x(d) : data_phase_y(d));
+            @*/
         {
+            //@ close barrier_inv(b, d, phase)();
             mutex_release(mutex);
             mutex_acquire(mutex);
+            //@ open barrier_inv(b, d, phase)();
+            //@ assert b->outgoing |-> true;
+            //@ assert *phase |-> 1 - p_old;
         }
+        //@ assert b->outgoing |-> true;
+        //@ assert *phase |-> 1 - p_old;
+        //@ if (*phase == 0) { open data_phase_y(d); } else { open data_phase_x(d); }
 
         b->k--;
         if (b->k == 0) {
             b->outgoing = false;
         }
-      
+        //@ if (*phase == 0) { close data_phase_y(d); } else { close data_phase_x(d); }
+        //@ close barrier_inv(b, d, phase)();
         mutex_release(mutex);
     }
-    //@ close P(d, round + 1);
-    //@ close barrier_token(b, tid, P);
 }
 
 /*@
-// Predicate family for thread_run, specifying thread1's initial state.
-predicate_family_instance thread_run_pre(thread1)(struct data *d, any info) =
-    d->barrier |-> ?b &*&
-    barrier_token(b, 1, t1_protocol) &*&
-    t1_protocol(d, 0) &*&
-    is_barrier_protocol(barrier_protocol);
+// Predicate for the resources held by thread1.
+// It holds a fraction of the mutex and full ownership of the 'i' field.
+predicate thread_share(struct data *d, int *phase) =
+    d->barrier |-> ?b &*& b->mutex |-> ?m &*&
+    [1/2]mutex(m, barrier_inv(b, d, phase)) &*&
+    d->i |-> _;
 
-// Predicate family for thread_run, specifying thread1's final state.
-predicate_family_instance thread_run_post(thread1)(struct data *d, any info) =
-    d->barrier |-> ?b &*&
-    barrier_token(b, 1, t1_protocol) &*&
-    t1_protocol(d, 61) &*& // 2*30 (loop) + 1 (final barrier)
-    is_barrier_protocol(barrier_protocol);
+// Predicate families to define the contract for thread1.
+predicate_family thread_run_pre(thread1)(void *data, pair<int *, int> info);
+predicate_family thread_run_post(thread1)(void *data, pair<int *, int> info);
+
+predicate_family_instance thread_run_pre(thread1)(void *data, pair<int *, int> info) =
+    let d = (struct data *)data;
+    let phase = fst(info);
+    let initial_phase = snd(info);
+    thread_share(d, phase) &*&
+    *phase |-> initial_phase;
+
+predicate_family_instance thread_run_post(thread1)(void *data, pair<int *, int> info) =
+    let d = (struct data *)data;
+    let phase = fst(info);
+    thread_share(d, phase) &*&
+    d->i |-> 0 &*&
+    *phase |-> _;
 @*/
 
 // TODO: make this function pass the verification
@@ -197,60 +182,75 @@ predicate_family_instance thread_run_post(thread1)(struct data *d, any info) =
  * returning.
  */
 void thread1(struct data *d)
-    //@ requires thread_run_pre(thread1)(d, _);
-    //@ ensures thread_run_post(thread1)(d, _);
+    //@ requires thread_run_pre(thread1)(d, ?info);
+    //@ ensures thread_run_post(thread1)(d, info);
 {
-    //@ open thread_run_pre(thread1)(d, _);
+    //@ open thread_run_pre(thread1)(d, info);
+    //@ pair<int *, int> info_ = info;
+    //@ int *phase = fst(info_);
+    //@ int initial_phase = snd(info_);
+   
     struct barrier *b = d->barrier;
     {
+        //@ open thread_share(d, phase);
         barrier(b);
+        //@ close thread_share(d, phase);
     }
     int N = 0;
     while (N < 30)
-        /*@ invariant
-                barrier_token(b, 1, t1_protocol) &*&
-                t1_protocol(d, 2 * N + 1) &*&
-                is_barrier_protocol(barrier_protocol) &*&
-                0 <= N &*& N <= 30;
+        /*@ invariant N >= 0 &*& N <= 30 &*&
+            thread_share(d, phase) &*&
+            *phase |-> (initial_phase + N + 1) % 2;
         @*/
     {
-        //@ open t1_protocol(d, 2 * N + 1);
+        // Current phase is (initial_phase + N + 1) % 2, which is the X-phase.
+        //@ open thread_share(d, phase);
+        //@ open_mutex_fraction(b->mutex);
+        //@ open barrier_inv(b, d, phase)();
+        //@ assert *phase |-> ?p &*& p == (initial_phase + N + 1) % 2;
+        //@ if (p == 0) open data_phase_x(d); else open data_phase_y(d);
+        
         int a1 = d->x1;
         int a2 = d->x2;
-        
-        // We assume the values stay within bounds, as proving this would
-        // require knowledge of thread2's logic.
-        assume(0 <= a1 && a1 <= 1000 && 0 <= a2 && a2 <= 1000);
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
-        
         d->y1 = a1 + 2 * a2;
         
+        //@ if (p == 0) close data_phase_x(d); else close data_phase_y(d);
+        //@ close barrier_inv(b, d, phase)();
+        //@ close_mutex_fraction(b->mutex);
+        
         {
-            //@ close t1_protocol(d, 2 * N + 1);
             barrier(b);
         }
         
-        //@ open t1_protocol(d, 2 * N + 2);
+        // Current phase is (initial_phase + N) % 2, which is the Y-phase.
+        //@ open_mutex_fraction(b->mutex);
+        //@ open barrier_inv(b, d, phase)();
+        //@ assert *phase |-> ?p2 &*& p2 == (initial_phase + N) % 2;
+        //@ if (p2 == 0) open data_phase_y(d); else open data_phase_x(d);
+           
         a1 = d->y1;
         a2 = d->y2;
-        
-        assume(0 <= a1 && a1 <= 1000 && 0 <= a2 && a2 <= 1000);
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
-        
         d->x1 = a1 + 2 * a2;
         N = N + 1;
         d->i = N;
         
+        //@ if (p2 == 0) close data_phase_y(d); else close data_phase_x(d);
+        //@ close barrier_inv(b, d, phase)();
+        //@ close_mutex_fraction(b->mutex);
+        
         {
-            //@ close t1_protocol(d, 2 * N);
             barrier(b);
         }
+        //@ close thread_share(d, phase);
     }
     {
+        //@ open thread_share(d, phase);
         barrier(b);
+        //@ close thread_share(d, phase);
     }
-    //@ open t1_protocol(d, 61);
     d->i = 0;
-    //@ close t1_protocol(d, 61);
-    //@ close thread_run_post(thread1)(d, _);
+    //@ open thread_share(d, phase);
+    //@ close thread_run_post(thread1)(d, info);
 }

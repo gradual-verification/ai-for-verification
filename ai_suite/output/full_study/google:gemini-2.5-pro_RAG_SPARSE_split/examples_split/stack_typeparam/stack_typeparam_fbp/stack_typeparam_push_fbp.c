@@ -1,5 +1,15 @@
 #include "stdlib.h"
+#include "limits.h"
   
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -39,8 +49,8 @@ predicate StackItems<T>(predicate(void *, T) Ownership, struct node* head, Stack
 
 predicate Stack<T>(struct stack* stack, destructor* destructor, predicate(void *, T) Ownership, Stack<T> S) =
   malloc_block_stack(stack) &*&
-  [_]is_destructor(destructor, Ownership) &*&
   stack->destructor |-> destructor &*&
+  is_destructor(destructor, Ownership) &*&
   stack->first |-> ?first &*&
   stack->size |-> ?size &*&
   size == Size(S) &*&
@@ -134,22 +144,13 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
 
 // TODO: make this function pass the verification
 void push/*@ <T> @*/(struct stack* stack, void* data)
   //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack) &*& Ownership(data, ?info);
   //@ ensures Stack(stack, destructor, Ownership, Push(data, info, Stack));
 {
-  //@ open Stack<T>(stack, destructor, Ownership, Stack);
+  //@ open Stack(stack, destructor, Ownership, Stack);
   struct node* node = malloc( sizeof( struct node ) );
   if ( node == 0 ) abort();
 
@@ -157,8 +158,8 @@ void push/*@ <T> @*/(struct stack* stack, void* data)
   node->next = stack->first;
   stack->first = node;
   if (stack->size == INT_MAX) {
-    abort();  // or handle error as necessary
+    abort();
   }
   stack->size++;
-  //@ close Stack<T>(stack, destructor, Ownership, Push(data, info, Stack));
+  //@ close Stack(stack, destructor, Ownership, Push(data, info, Stack));
 }

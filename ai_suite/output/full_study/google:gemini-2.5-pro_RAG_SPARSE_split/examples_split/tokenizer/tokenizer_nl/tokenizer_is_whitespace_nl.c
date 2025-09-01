@@ -2,6 +2,12 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
 
 struct tokenizer
 {
@@ -12,20 +18,18 @@ struct tokenizer
 };
 
 
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-
-
+// TODO: make this function pass the verification
 /***
  * Description:
 The is_whitespace function checks whether a given character in integer means a whitespace.
+
+This function ensures nothing. 
 */
+/*@
+requires true;
+ensures result == (c == ' ' || c == '\n' || c == '\r' || c == '\t');
+@*/
 bool is_whitespace(int c)
-    //@ requires true;
-    //@ ensures result == (c == ' ' || c == '\n' || c == '\r' || c == '\t');
 {
 	return c == ' ' || c == '\n' || c == '\r' || c == '\t';
 }

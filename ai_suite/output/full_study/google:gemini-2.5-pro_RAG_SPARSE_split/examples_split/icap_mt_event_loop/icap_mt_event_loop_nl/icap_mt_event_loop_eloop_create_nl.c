@@ -6,13 +6,10 @@
 
 typedef struct eloop *eloop;
 
-struct eloop {
-    int lock;
-    int signalCount;
-    eloop_handler *handler;
-    void *handlerData;
-};
-
+/*@
+predicate_family eloop_handler_pre(eloop_handler* h)(void* data);
+predicate_family eloop_handler_post(eloop_handler* h)(void* data);
+@*/
 
 /***
  * Description:
@@ -21,12 +18,16 @@ The eloop_handler function pointer that handles the data of an event loop and pr
 @param data: the data to be handled, which needs to preserve some property before and after the execution of handler.
 */
 typedef void eloop_handler(void *data);
-/*@
-    predicate_family eloop_handler_inv(eloop_handler *h)(void *data);
+    //@ requires eloop_handler_pre(this)(data);
+    //@ ensures eloop_handler_post(this)(data);
 
-    requires eloop_handler_inv(this)(data);
-    ensures eloop_handler_inv(this)(data);
-@*/
+
+struct eloop {
+    int lock;
+    int signalCount;
+    eloop_handler *handler;
+    void *handlerData;
+};
 
 /*@
 predicate_ctor eloop_inv(eloop e)() =
@@ -37,7 +38,7 @@ predicate_ctor eloop_inv(eloop e)() =
     (h == 0 ?
         true
     :
-        is_eloop_handler(h) == true &*& eloop_handler_inv(h)(hd)
+        is_eloop_handler(h) == true &*& eloop_handler_pre(h)(hd)
     );
 
 predicate eloop_pred(eloop e) =
@@ -60,16 +61,12 @@ eloop eloop_create()
 {
     eloop x = malloc(sizeof(struct eloop));
     if (x == 0) abort();
-    //@ chars_to_struct(x);
     x->handler = 0;
     x->signalCount = 0;
-    
     //@ close exists(eloop_inv(x));
     init(&x->lock);
-    
     //@ close eloop_inv(x)();
     release(&x->lock);
-    
     //@ close eloop_pred(x);
     return x;
 }

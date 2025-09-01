@@ -1,5 +1,13 @@
 #include "stdlib.h"
   
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
 
 /*
   Stack
@@ -134,15 +142,6 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
 
 void* pop/*@ <T> @*/(struct stack* stack)
   /*@
@@ -153,6 +152,9 @@ void* pop/*@ <T> @*/(struct stack* stack)
           Ownership(head, info) &*& result == head;
   @*/
 {
+  //@ open Stack<T>(stack, destructor, Ownership, Cons(head, info, tail));
+  //@ open StackItems(Ownership, ?s_first, Cons(head, info, tail));
+  //@ open Node(Ownership, s_first, head, info, ?s_next);
   struct node* first = stack->first;
   void* data = first->data;
   stack->first = first->next;
@@ -161,6 +163,8 @@ void* pop/*@ <T> @*/(struct stack* stack)
     abort();  // or handle error as necessary
   }
   stack->size--;
+  //@ close StackItems(Ownership, s_next, tail);
+  //@ close Stack(stack, destructor, Ownership, tail);
   return data;
 }
 
@@ -173,15 +177,19 @@ destructor* get_destructor/*@ <T> @*/(struct stack* stack)
           result == destructor;
   @*/
 {
+  //@ open Stack<T>(stack, destructor, Ownership, Stack);
   destructor* d = stack->destructor;
+  //@ close Stack<T>(stack, destructor, Ownership, Stack);
   return d;
 }
 
 
+// TODO: make this function pass the verification
 void pop_destroy/*@ <T> @*/(struct stack* stack)
   //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?Stack) &*& Stack != Nil;
   //@ ensures Stack(stack, destructor, Ownership, Pop(Stack));
 {
+  //@ switch(Stack) { case Nil: case Cons(head, info, tail): }
   void* data = pop(stack);
   destructor* d = get_destructor(stack);
   d(data);

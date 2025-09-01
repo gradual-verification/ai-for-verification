@@ -2,6 +2,10 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
+
 
 struct tokenizer
 {
@@ -26,11 +30,6 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
   t->lasttoken |-> ?lasttoken &*&
   t->buffer |-> buffer;
 @*/
-
-
-typedef int charreader();
-    //@ requires true;
-    //@ ensures true;
 
 
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
@@ -93,29 +92,32 @@ int tokenizer_eat_number(struct tokenizer* tokenizer)
  //@ requires Tokenizer(tokenizer);
  //@ ensures Tokenizer(tokenizer);
 {
+    //@ open Tokenizer(tokenizer);
+    //@ assert tokenizer->buffer |-> ?buffer;
+    //@ close Tokenizer_minus_buffer(tokenizer, buffer);
 	for (;;)
+        //@ invariant Tokenizer_minus_buffer(tokenizer, buffer) &*& string_buffer(buffer, _);
 	{
 		int result;
 		bool isDigit;
 		
-		//@ open Tokenizer(tokenizer);
-		//@ struct string_buffer *buffer = tokenizer->buffer;
-		//@ close Tokenizer(tokenizer);
-		
+        //@ open Tokenizer_minus_buffer(tokenizer, buffer);
+        //@ close Tokenizer(tokenizer);
 		result = tokenizer_peek(tokenizer);
+        //@ open Tokenizer(tokenizer);
+        //@ close Tokenizer_minus_buffer(tokenizer, buffer);
 		isDigit = is_digit(result);
 		if ( !isDigit ) break;
 		
-		//@ open Tokenizer(tokenizer);
-		//@ buffer = tokenizer->buffer;
-		//@ close Tokenizer_minus_buffer(tokenizer, buffer);
-		
+        //@ open Tokenizer_minus_buffer(tokenizer, buffer);
+        //@ close Tokenizer(tokenizer);
 	    result = tokenizer_next_char(tokenizer);
-		
-		//@ open Tokenizer_minus_buffer(tokenizer, buffer);
-		string_buffer_append_char(tokenizer->buffer, (char)result);
-		//@ close Tokenizer(tokenizer);
+        //@ open Tokenizer(tokenizer);
+        //@ close Tokenizer_minus_buffer(tokenizer, buffer);
+		string_buffer_append_char(buffer, (char)result);
 	}
 
+    //@ open Tokenizer_minus_buffer(tokenizer, buffer);
+    //@ close Tokenizer(tokenizer);
 	return '0';
 }

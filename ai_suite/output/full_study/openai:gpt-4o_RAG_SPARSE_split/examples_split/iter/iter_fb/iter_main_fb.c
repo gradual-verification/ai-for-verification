@@ -18,7 +18,7 @@ predicate lseg(struct node *n1, struct node *n2; list<int> v) =
   n1 == n2 ? v == nil : node(n1, ?_n, ?h) &*& lseg(_n, n2, ?t) &*& v == cons(h, t);
 
 predicate llist(struct llist *list; list<int> v) =
-  list->first |-> ?_f &*& list->last |-> ?_l &*& malloc_block_llist(list) &*& lseg(_f, _l, v) &*& node(_l, _, _);
+  list->first |-> ?_f &*& list->last |-> ?_l &*& lseg(_f, _l, v) &*& node(_l, _, _);
 @*/
 
 /*@
@@ -39,7 +39,7 @@ struct iter {
 /*@
 
 predicate llist_with_node(struct llist *list, list<int> v0, struct node *n, list<int> vn) =
-  list->first |-> ?f &*& list->last |-> ?l &*& malloc_block_llist(list) &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
+  list->first |-> ?f &*& list->last |-> ?l &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
 
 predicate iter(struct iter *i, real frac, struct llist *l, list<int> v0, list<int> v) =
   i->current |-> ?n &*& [frac]llist_with_node(l, v0, n, v);
@@ -78,8 +78,10 @@ void llist_add(struct llist *list, int x)
   l->value = x;
   list->last = n;
   //@ open llist(list, _v);
+  //@ open lseg(_, _, _);
   //@ close node(n, 0, 0);
   //@ close lseg(n, n, nil);
+  //@ close lseg(l, n, cons(x, nil));
   //@ close llist(list, append(_v, cons(x, nil)));
 }
 
@@ -91,14 +93,13 @@ void llist_dispose(struct llist *list)
   struct node *n = list->first;
   struct node *l = list->last;
   while (n != l)
-  //@ invariant lseg(n, l, _);
   {
     struct node *next = n->next;
-    //@ open lseg(n, l, _);
+    //@ open node(n, _, _);
     free(n);
     n = next;
   }
-  //@ open lseg(l, l, _);
+  //@ open node(l, _, _);
   free(l);
   free(list);
 }
@@ -131,6 +132,9 @@ int iter_next(struct iter *i)
     struct node *n = c->next;
     i->current = n;
     //@ open iter(i, f, l, v0, v);
+    //@ open llist_with_node(l, v0, c, v);
+    //@ open lseg(c, _, _);
+    //@ close llist_with_node(l, v0, n, tail(v));
     //@ close iter(i, f, l, v0, tail(v));
     return value;
 }
@@ -140,6 +144,7 @@ void iter_dispose(struct iter *i)
     //@ requires iter(i, ?f1, ?l, ?v0, ?v) &*& [?f2]llist(l, v0);
     //@ ensures [f1 + f2]llist(l, v0);
 {
+    //@ open iter(i, f1, l, v0, v);
     free(i);
 }
 

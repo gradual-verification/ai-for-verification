@@ -2,6 +2,12 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
 
 struct tokenizer
 {
@@ -14,21 +20,12 @@ struct tokenizer
 
 /***
  * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-
-
-/***
- * Description:
 The tokenizer_fill_buffer function reads a character from the next_char reader of the tokenizer and updates the lastread char,
 if the original lastread char is -2 (which means empty).
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
-//@ predicate charreader(charreader *reader;) = is_charreader(reader) == true;
-
-//@ predicate tokenizer(struct tokenizer *tokenizer;) = tokenizer->next_char |-> ?reader &*& charreader(reader) &*& tokenizer->lastread |-> ?lastread &*& tokenizer->lasttoken |-> ?lasttoken &*& tokenizer->buffer |-> ?buffer &*& string_buffer(buffer, ?cs) &*& malloc_block_tokenizer(tokenizer);
+//@ predicate tokenizer(struct tokenizer* tokenizer;) = tokenizer->next_char |-> ?reader &*& tokenizer->lastread |-> ?lastread &*& tokenizer->lasttoken |-> ?lasttoken &*& tokenizer->buffer |-> ?buffer &*& string_buffer(buffer, ?cs) &*& malloc_block_tokenizer(tokenizer) &*& is_charreader(reader) == true &*& (lastread == -2 || lastread == -1 || (-128 <= lastread && lastread <= 127));
 
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
 //@ requires tokenizer(tokenizer);
@@ -69,7 +66,7 @@ It needs to make sure that the given tokenizer preserves its property of tokeniz
 */
 int tokenizer_next_char(struct tokenizer* tokenizer)
 //@ requires tokenizer(tokenizer);
-//@ ensures tokenizer(tokenizer) &*& tokenizer->lastread == -2;
+//@ ensures tokenizer(tokenizer) &*& tokenizer->lastread == -2 &*& result == old_tokenizer->lastread;
 {
 	int c;
 
@@ -129,16 +126,15 @@ int tokenizer_eat_number(struct tokenizer* tokenizer)
 		
 		//@ open tokenizer(tokenizer);
 		result = tokenizer_peek(tokenizer);
+		//@ close tokenizer(tokenizer);
 		isDigit = is_digit(result);
-		if ( !isDigit ) {
-		    //@ close tokenizer(tokenizer);
-		    break;
-		}
+		if ( !isDigit ) break;
 		
+		//@ open tokenizer(tokenizer);
 	    result = tokenizer_next_char(tokenizer);
-	    //@ open tokenizer(tokenizer);
-	    //@ assert tokenizer->buffer |-> ?buffer;
-	    //@ assert string_buffer(buffer, ?cs);
+		//@ close tokenizer(tokenizer);
+		
+		//@ open tokenizer(tokenizer);
 		string_buffer_append_char(tokenizer->buffer, (char)result);
 		//@ close tokenizer(tokenizer);
 	}

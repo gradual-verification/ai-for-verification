@@ -1,5 +1,14 @@
 #include "stdlib.h"
   
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -86,18 +95,6 @@ fixpoint int Size<T>(Stack<T> S)
       return 1 + Size(T);
   }
 }
-
-lemma void Size_nonnegative<T>(Stack<T> s)
-  requires true;
-  ensures 0 <= Size(s);
-{
-  switch(s) {
-    case Nil:
-    case Cons(h, i, t):
-      Size_nonnegative(t);
-  }
-}
-
 @*/
 
 /*
@@ -146,15 +143,6 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
 
 // TODO: make this function pass the verification
 void* pop/*@ <T> @*/(struct stack* stack)
@@ -166,20 +154,19 @@ void* pop/*@ <T> @*/(struct stack* stack)
           Ownership(head, info) &*& result == head;
   @*/
 {
-  //@ open Stack(stack, destructor, Ownership, Cons(head, info, tail));
-  //@ open StackItems(Ownership, ?first_node, Cons(head, info, tail));
+  //@ open Stack<T>(stack, destructor, Ownership, Cons(head, info, tail));
+  //@ open StackItems<T>(Ownership, ?first_node, Cons(head, info, tail));
+  //@ open Node<T>(Ownership, first_node, head, info, ?next_node);
+  
   struct node* first = stack->first;
-  //@ open Node(Ownership, first, head, info, ?next_node);
   void* data = first->data;
   stack->first = first->next;
   free(first);
-  
-  //@ Size_nonnegative(tail);
   if (stack->size == INT_MIN) {
     abort();  // or handle error as necessary
   }
   stack->size--;
   
-  //@ close Stack(stack, destructor, Ownership, tail);
+  //@ close Stack<T>(stack, destructor, Ownership, tail);
   return data;
 }

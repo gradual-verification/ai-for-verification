@@ -166,32 +166,41 @@ void thread2(struct data *d) //@ : thread_run_joinable
     //@ requires thread_run_pre(thread2)(d, ?info);
     //@ ensures thread_run_post(thread2)(d, info);
 {
-    //@ open thread_run_pre(thread2)(d, info);
-    struct barrier *barrier = d->barrier;
+   
+    struct barrier *b = d->barrier;
     {
-        barrier(barrier);
+        //@ open thread_run_pre(thread2)(d, info);
+        barrier(b);
+        //@ close thread_run_post(thread2)(d, info);
     }
     int m = 0;
     while (m < 30)
+        
     {
         int a1 = d->x1;
         int a2 = d->x2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->y2 = a1 + 3 * a2;
         {
-            barrier(barrier);
+            //@ open thread_run_post(thread2)(d, info);
+            barrier(b);
+            //@ close thread_run_post(thread2)(d, info);
         }
         a1 = d->y1;
         a2 = d->y2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->x2 = a1 + 3 * a2;
         {
-            barrier(barrier);
+            //@ open thread_run_post(thread2)(d, info);
+            barrier(b);
+            //@ close thread_run_post(thread2)(d, info);
         }
         m = d->i;
     }
     {
-        barrier(barrier);
+        //@ open thread_run_post(thread2)(d, info);
+        barrier(b);
+        //@ close thread_run_post(thread2)(d, info);
     }
-    //@ close thread_run_post(thread2)(d, info);
+    
 }

@@ -36,41 +36,55 @@ struct data {
 };
 
 /*@
-// Predicate for the physical fields of the barrier struct.
-predicate barrier_fields(struct barrier *b; int n, int k, bool outgoing) =
-    b->n |-> n &*&
-    b->k |-> k &*&
-    b->outgoing |-> outgoing;
 
-// Predicate for the shared data fields.
-predicate data_fields(struct data *d; int x1, int x2, int y1, int y2, int i) =
+// Predicate to hold the logical phase of the computation.
+// It's precise, so fractions can be merged, and the phase is consistent.
+predicate barrier_phase(struct barrier *b; int phase);
+
+// Predicate for the barrier's mutex invariant.
+// It holds the physical state of the barrier and the logical phase.
+predicate_ctor barrier_inv(struct barrier *b)() =
+    b->n |-> ?n &*&
+    b->k |-> ?k &*&
+    b->outgoing |-> ?out &*&
+    barrier_phase(b, ?phase) &*&
+    0 <= k &*& k <= n;
+
+// Predicate representing the full barrier object, including its mutex.
+predicate is_barrier(struct barrier *b) =
+    b->mutex |-> ?m &*& mutex(m, barrier_inv(b));
+
+// Predicate for the shared data fields and their bounds.
+predicate data_fields(struct data *d, int x1, int x2, int y1, int y2, int i) =
     d->x1 |-> x1 &*&
     d->x2 |-> x2 &*&
     d->y1 |-> y1 &*&
     d->y2 |-> y2 &*&
-    d->i |-> i;
-
-// The comprehensive invariant for the barrier's mutex.
-// It includes the state of the barrier, the shared data, and a ghost 'stage' variable.
-predicate barrier_inv(struct barrier *b, struct data *d; int stage, int x1, int x2, int y1, int y2, int i) =
-    b->mutex |-> ?m &*&
-    d->barrier |-> b &*&
-    barrier_fields(b, 2, ?k, ?og) &*&
-    data_fields(d, x1, x2, y1, y2, i) &*&
-    // Invariants on values based on the stage.
+    d->i |-> i &*&
     0 <= x1 &*& x1 <= 1000 &*&
     0 <= x2 &*& x2 <= 1000 &*&
-    (stage == 1 || stage == 2 ? 0 <= y1 &*& y1 <= 4000 &*& 0 <= y2 &*& y2 <= 4000 : true) &*&
-    0 <= i &*& i <= 30;
+    0 <= y1 &*& y1 <= 4000 &*& // Bounds adjusted for computation results
+    0 <= y2 &*& y2 <= 4000;
 
-// A predicate_ctor to be used as the mutex's invariant type.
-predicate_ctor barrier_mutex_inv(struct barrier *b, struct data *d)() =
-    barrier_inv(b, d, ?stage, ?x1, ?x2, ?y1, ?y2, ?i);
-
-// A helper lemma for the ghost critical sections.
-typedef lemma void work_t(int stage, int x1, int x2, int y1, int y2, int i);
-    requires barrier_inv(?b, ?d, stage, x1, x2, y1, y2, i);
-    ensures barrier_inv(b, d, stage, ?nx1, ?nx2, ?ny1, ?ny2, ?ni);
+// Predicate for the permissions required by a thread in a given phase.
+// phase 1: compute y's from x's.
+// phase 2: compute x's from y's.
+predicate thread_perm(int thread_id, int phase, struct data *d) =
+    d->barrier |-> ?b &*& [1/2]is_barrier(b) &*&
+    (
+        phase == 1 ?
+            // Phase 1: Read x's, write y's
+            thread_id == 1 ?
+                [1/2]data_fields(d, ?x1, ?x2, _, _, ?i) &*& d->y1 |-> _
+            : // thread_id == 2
+                [1/2]data_fields(d, ?x1, ?x2, _, _, ?i) &*& d->y2 |-> _
+        : // phase == 2
+            // Phase 2: Read y's, write x's
+            thread_id == 1 ?
+                [1/2]data_fields(d, _, _, ?y1, ?y2, _) &*& d->x1 |-> _ &*& d->i |-> _
+            : // thread_id == 2
+                [1/2]data_fields(d, _, _, ?y1, ?y2, _) &*& d->x2 |-> _
+    );
 
 @*/
 
@@ -91,78 +105,67 @@ typedef lemma void work_t(int stage, int x1, int x2, int y1, int y2, int i);
  * the barrier is exiting at the end.
  */
 void barrier(struct barrier *b)
-    /*@ requires [?f]mutex(b->mutex, ?p) &*&
-                 p == barrier_mutex_inv(?b_ghost, ?d_ghost) &*&
-                 b == b_ghost;
-    @*/
-    /*@ ensures [f]mutex(b->mutex, p) &*&
-                p == barrier_mutex_inv(b, d_ghost);
-    @*/
+    /*@ requires thread_perm(?tid, ?p, ?d) &*& d->barrier |-> b; @*/
+    /*@ ensures  thread_perm(tid, p == 1 ? 2 : 1, d) &*& d->barrier |-> b; @*/
 {
+    //@ open thread_perm(tid, p, d);
     struct mutex *mutex = b->mutex;
     mutex_acquire(mutex);
-    //@ open barrier_mutex_inv(b, ?d)();
-    //@ open barrier_inv(b, d, ?stage, ?x1, ?x2, ?y1, ?y2, ?i);
+    //@ open barrier_inv(b)();
 
-    while (b->outgoing)
-        /*@ invariant b->mutex |-> mutex &*& d->barrier |-> b &*&
-                     barrier_fields(b, 2, ?k, true) &*&
-                     data_fields(d, x1, x2, y1, y2, i) &*&
-                     0 <= x1 &*& x1 <= 1000 &*& 0 <= x2 &*& x2 <= 1000 &*&
-                     (stage == 1 || stage == 2 ? 0 <= y1 &*& y1 <= 4000 &*& 0 <= y2 &*& y2 <= 4000 : true) &*&
-                     0 <= i &*& i <= 30;
-        @*/
     {
-        //@ int new_stage = (stage + 1) % 3;
-        //@ close barrier_inv(b, d, new_stage, x1, x2, y1, y2, i);
-        //@ close barrier_mutex_inv(b, d)();
-        mutex_release(mutex);
-        mutex_acquire(mutex);
-        //@ open barrier_mutex_inv(b, d)();
-        //@ open barrier_inv(b, d, new_stage, x1, x2, y1, y2, i);
-        //@ stage = new_stage;
+        while (b->outgoing)
+        /*@ invariant b->mutex |-> mutex &*& b->n |-> ?n &*& b->k |-> ?k &*& b->outgoing |-> true &*&
+                      barrier_phase(b, ?phase) &*&
+                      mutex_held(mutex, barrier_inv(b), currentThread, 1/2);
+        @*/
+        {
+            //@ close barrier_inv(b)();
+            mutex_release(mutex);
+            mutex_acquire(mutex);
+            //@ open barrier_inv(b)();
+        }
     }
 
     b->k++;
     if (b->k == b->n) {
+        //@ open barrier_phase(b, p);
+        //@ close barrier_phase(b, p == 1 ? 2 : 1);
         b->outgoing = true;
         b->k--;
-        //@ int new_stage = (stage + 1) % 3;
-        //@ close barrier_inv(b, d, new_stage, x1, x2, y1, y2, i);
-        //@ close barrier_mutex_inv(b, d)();
+     
+        //@ close barrier_inv(b)();
         mutex_release(b->mutex);
     } else {
-        //@ close barrier_inv(b, d, stage, x1, x2, y1, y2, i);
-        //@ close barrier_mutex_inv(b, d)();
         while (!b->outgoing)
-            /*@ invariant [1]mutex(mutex, barrier_mutex_inv(b, d));
-            @*/
+        /*@ invariant b->mutex |-> mutex &*& b->n |-> ?n &*& b->k |-> ?k &*& b->outgoing |-> false &*&
+                      k > 0 &*& k < n &*&
+                      barrier_phase(b, ?phase) &*&
+                      mutex_held(mutex, barrier_inv(b), currentThread, 1/2);
+        @*/
         {
+            //@ close barrier_inv(b)();
             mutex_release(mutex);
             mutex_acquire(mutex);
+            //@ open barrier_inv(b)();
         }
-        //@ open barrier_mutex_inv(b, d)();
-        //@ open barrier_inv(b, d, ?new_stage, ?nx1, ?nx2, ?ny1, ?ny2, ?ni);
+
         b->k--;
         if (b->k == 0) {
             b->outgoing = false;
         }
-        //@ close barrier_inv(b, d, new_stage, nx1, nx2, ny1, ny2, ni);
-        //@ close barrier_mutex_inv(b, d)();
-        mutex_release(mutex);
+      
+        //@ close barrier_inv(b)();
+        mutex_release(b->mutex);
     }
+    //@ close thread_perm(tid, p == 1 ? 2 : 1, d);
 }
 
-
 /*@
-// Predicate family for thread2's precondition.
-// It holds a fraction of the mutex.
-predicate_family_instance thread_run_pre(thread2)(struct data *d, any info) =
-    [1/2]mutex(d->barrier->mutex, barrier_mutex_inv(d->barrier, d));
-
-// Predicate family for thread2's postcondition.
-predicate_family_instance thread_run_post(thread2)(struct data *d, any info) =
-    [1/2]mutex(d->barrier->mutex, barrier_mutex_inv(d->barrier, d));
+// Predicate for the data passed to the thread.
+// It sets up the initial permissions for thread 2 in phase 1.
+predicate_family_instance thread_run_data(thread2)(struct data *d) =
+    thread_perm(2, 1, d);
 @*/
 
 // TODO: make this function pass the verification
@@ -176,77 +179,50 @@ predicate_family_instance thread_run_post(thread2)(struct data *d, any info) =
  *
  * @param d - A pointer to the shared `struct data`.
  */
-void thread2(struct data *d) //@ : thread_run_joinable
-    //@ requires thread_run_pre(thread2)(d, ?info) &*& lockset(currentThread, nil);
-    //@ ensures thread_run_post(thread2)(d, info) &*& lockset(currentThread, nil);
+void thread2(struct data *d) //@ : thread_run
+    //@ requires thread_run_data(thread2)(d) &*& lockset(currentThread, nil);
+    //@ ensures lockset(currentThread, nil);
 {
-    //@ open thread_run_pre(thread2)(d, info);
-    struct barrier *barrier = d->barrier;
-    
-    barrier(barrier);
-    
+    //@ open thread_run_data(thread2)(d);
+    struct barrier *b = d->barrier;
+    {
+        barrier(b);
+    }
     int m = 0;
     while (m < 30)
-        /*@ invariant [1/2]mutex(barrier->mutex, barrier_mutex_inv(barrier, d)) &*&
-                      m == (m < 30 ? (barrier_mutex_inv(barrier, d)(), barrier_inv(barrier, d, ?s, ?x1,?x2,?y1,?y2,?i), i) : 30);
-        @*/
+        //@ invariant thread_perm(2, 2, d) &*& d->i |-> m;
     {
-        // Stage 0: Update y2
+        //@ open thread_perm(2, 2, d);
+        //@ open data_fields(d, _, _, ?y1, ?y2, _);
+        int a1 = d->y1;
+        int a2 = d->y2;
+        if (a1 < 0 || a1 > 4000 || a2 < 0 || a2 > 4000) {abort();}
+        d->x2 = a1 + 3 * a2;
+        //@ close data_fields(d, _, _, y1, y2, _);
+        //@ close thread_perm(2, 1, d);
         {
-            /*@
-            lemma void work()
-                requires barrier_inv(barrier, d, 0, ?x1, ?x2, ?y1, ?y2, ?i);
-                ensures barrier_inv(barrier, d, 0, x1, x2, y1, x1 + 3 * x2, i);
-            {
-                open barrier_inv(barrier, d, 0, x1, x2, y1, y2, i);
-                d->y2 = x1 + 3 * x2;
-                close data_fields(d, x1, x2, y1, x1 + 3 * x2, i);
-                close barrier_inv(barrier, d, 0, x1, x2, y1, x1 + 3 * x2, i);
-            }
-            @*/
-            //@ produce_lemma_function_pointer_chunk(work) : work_t(0, _, _, _, _, _)() { call(); };
-            //@ mutex_ghost_use(barrier->mutex, work);
+            barrier(b);
         }
-        
-        barrier(barrier);
-        
-        // Stage 1: Update x2
+        //@ open thread_perm(2, 1, d);
+        //@ open data_fields(d, ?x1, ?x2, _, _, _);
+        a1 = d->x1;
+        a2 = d->x2;
+        if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
+        d->y2 = a1 + 3 * a2;
+        //@ close data_fields(d, x1, x2, _, _, _);
+        //@ close thread_perm(2, 2, d);
         {
-            /*@
-            lemma void work()
-                requires barrier_inv(barrier, d, 1, ?x1, ?x2, ?y1, ?y2, ?i);
-                ensures barrier_inv(barrier, d, 1, x1, y1 + 3 * y2, y1, y2, i);
-            {
-                open barrier_inv(barrier, d, 1, x1, x2, y1, y2, i);
-                d->x2 = y1 + 3 * y2;
-                close data_fields(d, x1, y1 + 3 * y2, y1, y2, i);
-                close barrier_inv(barrier, d, 1, x1, y1 + 3 * y2, y1, y2, i);
-            }
-            @*/
-            //@ produce_lemma_function_pointer_chunk(work) : work_t(1, _, _, _, _, _)() { call(); };
-            //@ mutex_ghost_use(barrier->mutex, work);
+            barrier(b);
         }
-        
-        barrier(barrier);
-        
-        // Stage 2: Read i
-        {
-            /*@
-            lemma void work()
-                requires barrier_inv(barrier, d, 2, ?x1, ?x2, ?y1, ?y2, ?i);
-                ensures barrier_inv(barrier, d, 2, x1, x2, y1, y2, i);
-            {
-                open barrier_inv(barrier, d, 2, x1, x2, y1, y2, i);
-                m = i;
-                close barrier_inv(barrier, d, 2, x1, x2, y1, y2, i);
-            }
-            @*/
-            //@ produce_lemma_function_pointer_chunk(work) : work_t(2, _, _, _, _, _)() { call(); };
-            //@ mutex_ghost_use(barrier->mutex, work);
-        }
+        //@ open thread_perm(2, 2, d);
+        //@ open data_fields(d, _, _, _, _, ?i);
+        m = d->i;
+        //@ close data_fields(d, _, _, _, _, i);
+        //@ close thread_perm(2, 2, d);
     }
-    
-    barrier(barrier);
-    
-    //@ close thread_run_post(thread2)(d, info);
+    {
+        barrier(b);
+    }
+    //@ open thread_perm(2, 1, d);
+    //@ leak thread_perm(2, 1, d);
 }

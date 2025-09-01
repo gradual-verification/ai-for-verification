@@ -77,6 +77,22 @@ predicate context(struct Node* node, context value, int holeCount) =
   };
 @*/
 
+struct Node* internalCreate(struct Node* parent)
+  //@ requires true;
+  //@ ensures tree(result, tree(result, Nil, Nil)) &*& result->parent |-> parent;
+{
+  struct Node* n = malloc(sizeof(struct Node));
+  if(n==0) {
+    abort();
+  } else {}
+  n->left = 0;
+  n->right = 0;
+  n->parent = parent;
+  n->count = 1;
+
+  return n;
+}
+
 
 struct Node* create() 
   //@ requires true;
@@ -92,61 +108,8 @@ struct Node* create()
   n->right = 0;
   n->count = 1;
   
-  //@ close tree(n, tree(n, Nil, Nil));
-  //@ close isTree(n, tree(n, Nil, Nil));
+
   return n;
-}
-
-
-struct Node* addLeft(struct Node* node)
-  //@ requires isTree(node, ?v) &*& valueOf(v, node) == tree(node, Nil, Nil);
-  /*@ ensures isTree(node, replace(v, node, tree(node, tree(result, Nil, Nil), Nil))) &*& uniqueNodes(replace(v, node, tree(node, tree(result, Nil, Nil), Nil)))==true; @*/
-{
-
-  struct Node* newChild = internalAddLeft(node);
-
-  return newChild;
-}
-
-
-int getNbOfNodes(struct Node* n)
-  //@ requires isTree(n, ?value);
-  //@ ensures isTree(n, value) &*& size(valueOf(value, n))==result; 
-{
-
-    int c = internalGetNbOfNodes(n);
-
-    return c;
-}
-
-
-struct Node* internalCreate(struct Node* parent)
-  //@ requires true;
-  //@ ensures tree(result, tree(result, Nil, Nil)) &*& result->parent |-> parent;
-{
-  struct Node* n = malloc(sizeof(struct Node));
-  if(n==0) {
-    abort();
-  } else {}
-  n->left = 0;
-  n->right = 0;
-  n->parent = parent;
-  n->count = 1;
-
-  //@ close tree(n, tree(n, Nil, Nil));
-  return n;
-}
-
-
-struct Node* internalAddLeft(struct Node* node)
-  /*@ requires context(node, ?value, 1) &*& node->left |-> 0 &*& node->right |-> 0 &*& node->count |-> 1; @*/
-  /*@ ensures context(node, value, 2) &*& node->left |-> result &*& node->right |-> 0 &*& node->count |-> 2 &*& 
-               tree(result, tree(result, Nil, Nil)) &*& result->parent |-> node; @*/
-{
-    struct Node* child = internalCreate(node);
-    node->left = child;
-    fix(node);
-    return child;
 }
 
 
@@ -169,6 +132,29 @@ void fix(struct Node* node)
 }
 
 
+struct Node* internalAddLeft(struct Node* node)
+  /*@ requires context(node, ?value, 1) &*& node->left |-> 0 &*& node->right |-> 0 &*& node->count |-> 1; @*/
+  /*@ ensures context(node, value, 2) &*& node->left |-> result &*& node->right |-> 0 &*& node->count |-> 2 &*& 
+               tree(result, tree(result, Nil, Nil)) &*& result->parent |-> node; @*/
+{
+    struct Node* child = internalCreate(node);
+    node->left = child;
+    fix(node);
+    return child;
+}
+
+
+struct Node* addLeft(struct Node* node)
+  //@ requires isTree(node, ?v) &*& valueOf(v, node) == tree(node, Nil, Nil);
+  /*@ ensures isTree(node, replace(v, node, tree(node, tree(result, Nil, Nil), Nil))) &*& uniqueNodes(replace(v, node, tree(node, tree(result, Nil, Nil), Nil)))==true; @*/
+{
+
+  struct Node* newChild = internalAddLeft(node);
+
+  return newChild;
+}
+
+
 int internalGetNbOfNodes(struct Node* n)
   //@ requires tree(n, ?value);
   //@ ensures tree(n, value) &*& result == size(value);
@@ -177,6 +163,17 @@ int internalGetNbOfNodes(struct Node* n)
   int c = n->count;
 
   return c;
+}
+
+
+int getNbOfNodes(struct Node* n)
+  //@ requires isTree(n, ?value);
+  //@ ensures isTree(n, value) &*& size(valueOf(value, n))==result; 
+{
+
+    int c = internalGetNbOfNodes(n);
+
+    return c;
 }
 
 
@@ -191,12 +188,17 @@ int main() //@ : main
   //@ assert isTree(mytree, replace(tree(mytree, Nil, Nil), mytree, tree(mytree, tree(child, Nil, Nil), Nil)));
   
   struct Node* child2 = addLeft(child);
-  //@ assert isTree(child, ?v2);
-  //@ assert valueOf(v2, child) == tree(child, tree(child2, Nil, Nil), Nil);
-
+  //@ assert isTree(mytree, ?final_tree);
+  //@ assert isTree(child, ?child_tree);
+  //@ assert valueOf(child_tree, child2) == tree(child2, Nil, Nil);
+  
   int c = getNbOfNodes(child2);
+  //@ assert c == size(valueOf(child_tree, child2));
+  //@ assert c == size(tree(child2, Nil, Nil));
   //@ assert c == 1;
+  
   assert(c==1);
+  abort();
   
   return 0;
 }

@@ -2,6 +2,12 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
 
 struct tokenizer
 {
@@ -10,13 +16,6 @@ struct tokenizer
 	int                   lasttoken; // the last token parsed
 	struct string_buffer* buffer;
 };
-
-
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
 
 
 /***
@@ -44,22 +43,11 @@ The print_token function prints the last token of of a tokenizer by reading its 
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
-/*@
-predicate tokenizer(struct tokenizer* t; charreader* reader, int lastread, int lasttoken, struct string_buffer* buffer) =
-    t != 0 &*&
-    t->next_char |-> reader &*&
-    t->lastread |-> lastread &*&
-    t->lasttoken |-> lasttoken &*&
-    t->buffer |-> buffer &*&
-    malloc_block_tokenizer(t) &*&
-    string_buffer(buffer, ?cs);
-@*/
-
 void print_token(struct tokenizer* tokenizer)
-//@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
-//@ ensures tokenizer(tokenizer, reader, lastread, lasttoken, buffer);
+//@ requires tokenizer(tokenizer, ?t);
+//@ ensures tokenizer(tokenizer, t);
 {
-	//@ open tokenizer(tokenizer, reader, lastread, lasttoken, buffer);
+	//@ open tokenizer(tokenizer, t);
 	switch (tokenizer->lasttoken)
 	{
 	case '(':
@@ -72,12 +60,14 @@ void print_token(struct tokenizer* tokenizer)
 
 	case '0':
 		putchar('N');
+		//@ assert tokenizer->buffer |-> ?buffer;
 		print_string_buffer(tokenizer->buffer);
 		puts("");
 		break;
 
 	case 'S':
 		putchar('S');
+		//@ assert tokenizer->buffer |-> ?buffer;
 		print_string_buffer(tokenizer->buffer);
 		puts("");
 		break;
@@ -86,5 +76,5 @@ void print_token(struct tokenizer* tokenizer)
 		puts("BADCHAR");
 		break;
 	}
-	//@ close tokenizer(tokenizer, reader, lastread, lasttoken, buffer);
+	//@ close tokenizer(tokenizer, t);
 }

@@ -1,17 +1,15 @@
 #include <stdlib.h>
 #include "gotsmanlock.h"
 
-// Define a predicate for the data handled by eloop_handler
+// Define a predicate to represent the property that must be preserved by the handler
 /*@
-predicate eloop_handler_data(void *data) = true;
+predicate handler_data(void *data);
 @*/
 
-// Define the eloop_handler function pointer type with a specification
+// Specify the eloop_handler function pointer type
 typedef void eloop_handler(void *data);
-    //@ requires eloop_handler_data(data);
-    //@ ensures eloop_handler_data(data);
-
-typedef struct eloop *eloop;
+    //@ requires handler_data(data);
+    //@ ensures handler_data(data);
 
 struct eloop {
     int lock;
@@ -22,21 +20,26 @@ struct eloop {
 
 // Example usage of eloop_handler
 void example_handler(void *data)
-    //@ requires eloop_handler_data(data);
-    //@ ensures eloop_handler_data(data);
+    //@ requires handler_data(data);
+    //@ ensures handler_data(data);
 {
-    // Example implementation
+    // Handler implementation
 }
 
 int main()
     //@ requires true;
     //@ ensures true;
 {
-    struct eloop loop;
-    loop.handler = example_handler;
-    loop.handlerData = NULL;
-    //@ close eloop_handler_data(loop.handlerData);
-    loop.handler(loop.handlerData);
-    //@ open eloop_handler_data(loop.handlerData);
+    struct eloop *loop = malloc(sizeof(struct eloop));
+    if (loop == 0) abort();
+    loop->handler = example_handler;
+    loop->handlerData = 0; // Initialize with appropriate data
+    //@ close handler_data(loop->handlerData);
+
+    // Use the handler
+    loop->handler(loop->handlerData);
+
+    //@ open handler_data(loop->handlerData);
+    free(loop);
     return 0;
 }

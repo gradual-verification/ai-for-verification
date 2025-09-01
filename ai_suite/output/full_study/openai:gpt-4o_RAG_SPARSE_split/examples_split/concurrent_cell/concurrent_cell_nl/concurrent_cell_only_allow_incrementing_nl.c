@@ -7,14 +7,8 @@ struct cell {
 };
 
 /*@
-predicate cell(struct cell* c; int x) =
-  c->x |-> x &*& c->mutex |-> ?m &*& malloc_block_cell(c) &*&
-  mutex(m, cell_mutex_inv(c)) &*&
-  cell_mutex_inv(c)() &*&
-  x >= 0;
-
-predicate cell_mutex_inv(struct cell* c)() =
-  c->x |-> ?x &*& x >= 0;
+predicate cell(struct cell *c; int x) =
+  c->x |-> x &*& c->mutex |-> ?m &*& mutex(m, cell(c, x));
 @*/
 
 /*get function
@@ -32,9 +26,9 @@ int get(struct cell* c)
 {
   int res;
   mutex_acquire(c->mutex);
-  //@ open cell_mutex_inv(c)();
+  //@ open cell(c, x);
   res = c->x;
-  //@ close cell_mutex_inv(c)();
+  //@ close cell(c, x);
   mutex_release(c->mutex);
   return res;
 }

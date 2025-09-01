@@ -1,16 +1,7 @@
-// Example from Kasper Svendsen and Lars Birkedal, Impredicative Concurrent Abstract Predicates, ESOP 2014.
-
 #include <stdlib.h>
 #include "gotsmanlock.h"
 
 typedef struct eloop *eloop;
-
-struct eloop {
-    int lock;
-    int signalCount;
-    eloop_handler *handler;
-    void *handlerData;
-};
 
 /***
  * Description:
@@ -20,14 +11,22 @@ The eloop_handler function pointer that handles the data of an event loop and pr
 */
 typedef void eloop_handler(void *data);
 
-//@ predicate eloop_inv(eloop x, eloop_handler *h, void *data) = 
-//@     x->handler |-> h &*& x->handlerData |-> data;
+struct eloop {
+    int lock;
+    int signalCount;
+    eloop_handler *handler;
+    void *handlerData;
+};
 
 /*@
+
+predicate eloop_inv(eloop x, eloop_handler *h, void *data) =
+    x->handler |-> h &*& x->handlerData |-> data;
+
 predicate eloop(eloop x, eloop_handler *h, void *data) =
     x->lock |-> ?lock &*&
-    lock(&x->lock, eloop_inv(x, h, data)) &*&
-    eloop_inv(x, h, data);
+    lock(&x->lock, eloop_inv(x, h, data));
+
 @*/
 
 // TODO: make this function pass the verification
@@ -40,9 +39,13 @@ It makes sure that the event loop property holds before and after the execution.
 @param h: the event loop handler.
 @param data: the data of an event loop handler
 */
-//@ requires eloop(x, ?old_h, ?old_data);
-//@ ensures eloop(x, h, data);
+/*@
+requires
+    eloop(x, ?old_h, ?old_data) &*&
+    lock(&x->lock, eloop_inv(x, old_h, old_data));
+@*/
 void eloop_when(eloop x, eloop_handler *h, void *data)
+    //@ ensures eloop(x, h, data);
 {
     acquire(&x->lock);
     //@ open eloop_inv(x, old_h, old_data);

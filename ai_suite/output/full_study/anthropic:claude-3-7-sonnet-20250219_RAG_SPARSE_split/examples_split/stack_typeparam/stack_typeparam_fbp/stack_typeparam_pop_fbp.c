@@ -1,5 +1,14 @@
 #include "stdlib.h"
   
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -134,15 +143,6 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
 
 void* pop/*@ <T> @*/(struct stack* stack)
   /*@
@@ -153,17 +153,38 @@ void* pop/*@ <T> @*/(struct stack* stack)
           Ownership(head, info) &*& result == head;
   @*/
 {
+  // Open the Stack predicate to access its components
   //@ open Stack(stack, destructor, Ownership, Cons(head, info, tail));
+  
+  // Get the first node
   struct node* first = stack->first;
+  
+  // Open the StackItems predicate to access the first node
   //@ open StackItems(Ownership, first, Cons(head, info, tail));
+  
+  // Open the Node predicate to access its fields
   //@ open Node(Ownership, first, head, info, ?next);
+  
+  // Get the data from the first node
   void* data = first->data;
+  
+  // Update the stack's first pointer to the next node
   stack->first = first->next;
+  
+  // Free the first node
   free(first);
+  
+  // Check for integer overflow when decrementing size
   if (stack->size == INT_MIN) {
     abort();  // or handle error as necessary
   }
+  
+  // Decrement the size
   stack->size--;
+  
+  // Close the Stack predicate with the updated state
   //@ close Stack(stack, destructor, Ownership, tail);
+  
+  // Return the data
   return data;
 }

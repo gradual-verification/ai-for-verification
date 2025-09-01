@@ -36,30 +36,29 @@ struct data {
 };
 
 /*@
-
-predicate barrier(struct barrier *b, int n) =
+predicate barrier(struct barrier *b;) =
     b->mutex |-> ?mutex &*&
-    b->n |-> n &*&
+    b->n |-> ?n &*&
     b->k |-> ?k &*&
     b->outgoing |-> ?outgoing &*&
-    malloc_block_barrier(b) &*&
-    mutex(mutex, barrier_inv(b, n));
+    mutex(mutex, barrier_inv(b)) &*&
+    0 <= k &*& k <= n &*&
+    (outgoing ? k >= 0 : k < n);
 
-predicate barrier_inv(struct barrier *b, int n)() =
+predicate barrier_inv(struct barrier *b)() =
+    b->n |-> ?n &*&
     b->k |-> ?k &*&
     b->outgoing |-> ?outgoing &*&
     0 <= k &*& k <= n &*&
     (outgoing ? k >= 0 : k < n);
 
-predicate data(struct data *d, struct barrier *b, int x1, int x2, int y1, int y2, int i) =
+predicate data(struct data *d, struct barrier *b) =
     d->barrier |-> b &*&
-    d->x1 |-> x1 &*&
-    d->x2 |-> x2 &*&
-    d->y1 |-> y1 &*&
-    d->y2 |-> y2 &*&
-    d->i |-> i &*&
-    malloc_block_data(d);
-
+    d->x1 |-> ?x1 &*&
+    d->x2 |-> ?x2 &*&
+    d->y1 |-> ?y1 &*&
+    d->y2 |-> ?y2 &*&
+    d->i |-> ?i;
 @*/
 
 /***
@@ -79,14 +78,15 @@ predicate data(struct data *d, struct barrier *b, int x1, int x2, int y1, int y2
  * the barrier is exiting at the end.
  */
 void barrier(struct barrier *barrier)
-    //@ requires barrier(barrier, ?n);
-    //@ ensures barrier(barrier, n);
+    //@ requires barrier(barrier);
+    //@ ensures barrier(barrier);
 {
     struct mutex *mutex = barrier->mutex;
     mutex_acquire(mutex);
 
     {
         while (barrier->outgoing)
+        //@ invariant barrier_inv(barrier);
         {
             mutex_release(mutex);
             mutex_acquire(mutex);
@@ -101,6 +101,7 @@ void barrier(struct barrier *barrier)
         mutex_release(barrier->mutex);
     } else {
         while (!barrier->outgoing)
+        //@ invariant barrier_inv(barrier);
         {
             mutex_release(mutex);
             mutex_acquire(mutex);
@@ -127,34 +128,34 @@ void barrier(struct barrier *barrier)
  * @param d - A pointer to the shared `struct data`.
  */
 void thread2(struct data *d)
-    //@ requires data(d, ?b, ?x1, ?x2, ?y1, ?y2, ?i) &*& barrier(b, ?n);
-    //@ ensures data(d, b, ?nx1, ?nx2, ?ny1, ?ny2, ?ni) &*& barrier(b, n);
+    //@ requires data(d, ?b) &*& barrier(b);
+    //@ ensures data(d, b) &*& barrier(b);
 {
-    struct barrier *barrier = d->barrier;
+    struct barrier *b = d->barrier;
     {
-        barrier(barrier);
+        barrier(b);
     }
     int m = 0;
     while (m < 30)
-    //@ invariant data(d, barrier, ?x1_, ?x2_, ?y1_, ?y2_, ?i_) &*& barrier(barrier, n);
+        //@ invariant data(d, b) &*& barrier(b);
     {
         int a1 = d->x1;
         int a2 = d->x2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->y2 = a1 + 3 * a2;
         {
-            barrier(barrier);
+            barrier(b);
         }
         a1 = d->y1;
         a2 = d->y2;
         if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {abort();}
         d->x2 = a1 + 3 * a2;
         {
-            barrier(barrier);
+            barrier(b);
         }
         m = d->i;
     }
     {
-        barrier(barrier);
+        barrier(b);
     }
 }

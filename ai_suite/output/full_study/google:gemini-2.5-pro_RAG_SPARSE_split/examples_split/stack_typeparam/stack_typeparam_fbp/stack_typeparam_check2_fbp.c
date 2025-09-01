@@ -1,5 +1,15 @@
 #include "stdlib.h"
+#include "limits.h"
   
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -134,19 +144,10 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
 
 struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
   //@ requires [_]is_destructor<T>(destructor, ?Ownership);
-  //@ ensures Stack(result, destructor, Ownership, ?Stack) &*& IsEmpty(Stack) == true;
+  //@ ensures Stack(result, destructor, Ownership, ?S) &*& IsEmpty(S) == true;
 {
   struct stack* stack = malloc( sizeof( struct stack ) );
   if ( stack == 0 ) abort();
@@ -155,8 +156,8 @@ struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
   stack->first = 0;
   stack->size = 0;
   
-  //@ close StackItems(Ownership, 0, Nil);
-  //@ close Stack(result, destructor, Ownership, Nil);
+  //@ close StackItems<T>(Ownership, 0, Nil);
+  //@ close Stack<T>(stack, destructor, Ownership, Nil);
   return stack;
 }
 
@@ -165,22 +166,21 @@ void destroy_stack/*@ <T> @*/(struct stack* stack)
   //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?S);
   //@ ensures true;
 {
-  //@ open Stack(stack, destructor, Ownership, S);
-  //@ open StackItems(Ownership, ?first, S);
+  //@ open Stack<T>(stack, destructor, Ownership, S);
   struct node* current = stack->first;
+  destructor* destructor_func = stack->destructor;
   
   while ( current != 0 )
-    //@ invariant StackItems(Ownership, current, ?S_current);
+    //@ invariant StackItems<T>(Ownership, current, ?S_current) &*& [_]is_destructor<T>(destructor_func, Ownership);
   {
-    //@ open StackItems(Ownership, current, S_current);
-    //@ open Node(Ownership, current, ?data, ?info, ?next_node);
+    //@ open StackItems<T>(Ownership, current, S_current);
+    //@ open Node<T>(Ownership, current, ?d, ?info, ?next_node);
     struct node* next = current->next;
-    destructor(current->data);
+    destructor_func(current->data);
     free(current);
     current = next;
-    //@ S_current is Cons(data, info, _);
   }
-  //@ open StackItems(0, _, _);
+  //@ open StackItems<T>(Ownership, 0, _);
   free(stack);
 }
 
@@ -189,18 +189,23 @@ void push/*@ <T> @*/(struct stack* stack, void* data)
   //@ requires Stack<T>(stack, ?destructor, ?Ownership, ?S) &*& Ownership(data, ?info);
   //@ ensures Stack(stack, destructor, Ownership, Push(data, info, S));
 {
-  //@ open Stack(stack, destructor, Ownership, S);
+  //@ open Stack<T>(stack, destructor, Ownership, S);
   struct node* node = malloc( sizeof( struct node ) );
   if ( node == 0 ) abort();
 
   node->data = data;
   node->next = stack->first;
+  
+  //@ close Node<T>(Ownership, node, data, info, stack->first);
+  //@ close StackItems<T>(Ownership, node, Cons(data, info, S));
+  
   stack->first = node;
   if (stack->size == INT_MAX) {
     abort();
   }
   stack->size++;
-  //@ close Stack(stack, destructor, Ownership, Push(data, info, S));
+  
+  //@ close Stack<T>(stack, destructor, Ownership, Cons(data, info, S));
 }
 
 
@@ -213,18 +218,18 @@ void* pop/*@ <T> @*/(struct stack* stack)
           Ownership(head, info) &*& result == head;
   @*/
 {
-  //@ open Stack(stack, destructor, Ownership, Cons(head, info, tail));
-  //@ open StackItems(Ownership, ?first, Cons(head, info, tail));
-  //@ open Node(Ownership, first, head, info, ?next);
-  struct node* first_node = stack->first;
-  void* data = first_node->data;
-  stack->first = first_node->next;
-  free(first_node);
+  //@ open Stack<T>(stack, destructor, Ownership, Cons(head, info, tail));
+  //@ open StackItems<T>(Ownership, stack->first, Cons(head, info, tail));
+  struct node* first = stack->first;
+  //@ open Node<T>(Ownership, first, head, info, ?next);
+  void* data = first->data;
+  stack->first = first->next;
+  free(first);
   if (stack->size == INT_MIN) {
     abort();
   }
   stack->size--;
-  //@ close Stack(stack, destructor, Ownership, tail);
+  //@ close Stack<T>(stack, destructor, Ownership, tail);
   return data;
 }
 
@@ -243,14 +248,16 @@ struct data* create_data(int foo, int bar)
 }
 
 
+/*@
+// Declaring that destroy_data is a valid destructor for Data_Ownership
+predicate_family_instance is_destructor<DataCarrier>(destroy_data, Data_Ownership) = true;
+@*/
 
-void destroy_data(struct data* data)
-  //@ : destructor<DataCarrier>(Data_Ownership)
+void destroy_data(void* data)
   //@ requires Data_Ownership(data, _);
   //@ ensures true;
 {
   //@ open Data_Ownership(data, _);
-  //@ open Data(data, _, _);
   free(data);
 }
 
@@ -262,19 +269,17 @@ void check2()
 {
   struct stack* stack = create_empty_stack<DataCarrier>(destroy_data);
   struct data* d1 = create_data(1, 1);
-  //@ close Data_Ownership(d1, DataCarrier(1, 1));
   struct data* d2 = create_data(2, 2);
-  //@ close Data_Ownership(d2, DataCarrier(2, 2));
   
-  push(stack, d1);
-  push(stack, d2);
+  push<DataCarrier>(stack, d1);
+  push<DataCarrier>(stack, d2);
 
-  struct data* d = pop(stack);
+  struct data* d = pop<DataCarrier>(stack);
   destroy_data(d);
 
-  d = pop(stack);
+  d = pop<DataCarrier>(stack);
   
   destroy_data(d);
   
-  destroy_stack(stack);
+  destroy_stack<DataCarrier>(stack);
 }

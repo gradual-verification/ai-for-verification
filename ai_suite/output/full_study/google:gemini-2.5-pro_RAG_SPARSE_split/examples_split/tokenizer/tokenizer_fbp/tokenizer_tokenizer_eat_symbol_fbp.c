@@ -2,6 +2,10 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
+
 
 struct tokenizer
 {
@@ -12,12 +16,12 @@ struct tokenizer
 };
 
 /*@
-predicate Tokenizer(struct tokenizer* t;) =
+predicate Tokenizer(struct tokenizer* t, list<char> cs) =
   malloc_block_tokenizer(t) &*&
   t->next_char |-> ?nc &*& is_charreader(nc) == true &*&
   t->lastread |-> ?lastread &*& lastread >= -128 &*& lastread <= 127 &*&
   t->lasttoken |-> ?lasttoken &*&
-  t->buffer |-> ?b &*& string_buffer(b, _);
+  t->buffer |-> ?b &*& string_buffer(b, cs);
 
 predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buffer) =
   malloc_block_tokenizer(t) &*&
@@ -28,14 +32,9 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
 @*/
 
 
-typedef int charreader();
-    //@ requires true;
-    //@ ensures true;
-
-
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
- //@ requires Tokenizer(tokenizer);
- //@ ensures Tokenizer(tokenizer);
+ //@ requires Tokenizer(tokenizer, ?cs);
+ //@ ensures Tokenizer(tokenizer, cs);
 {
 	if ( tokenizer->lastread == -2 )
 	{
@@ -49,8 +48,8 @@ void tokenizer_fill_buffer(struct tokenizer* tokenizer)
 
 
 int tokenizer_peek(struct tokenizer* tokenizer)
- //@ requires Tokenizer(tokenizer);
- //@ ensures Tokenizer(tokenizer);
+ //@ requires Tokenizer(tokenizer, ?cs);
+ //@ ensures Tokenizer(tokenizer, cs);
 {
 	tokenizer_fill_buffer(tokenizer);
 	return tokenizer->lastread;
@@ -58,8 +57,8 @@ int tokenizer_peek(struct tokenizer* tokenizer)
 
 
 int tokenizer_next_char(struct tokenizer* tokenizer)
- //@ requires Tokenizer(tokenizer);
- //@ ensures Tokenizer(tokenizer) &*& result >= -128 && result <= 127;
+ //@ requires Tokenizer(tokenizer, ?cs);
+ //@ ensures Tokenizer(tokenizer, cs) &*& result >= -128 && result <= 127;
 {
 	int c;
 
@@ -71,8 +70,8 @@ int tokenizer_next_char(struct tokenizer* tokenizer)
 
 
 void string_buffer_append_char(struct string_buffer *buffer, char c)
- //@ requires string_buffer(buffer, _);
- //@ ensures string_buffer(buffer, _);
+ //@ requires string_buffer(buffer, ?bcs);
+ //@ ensures string_buffer(buffer, append(bcs, cons(c, nil)));
 {
 	char cc = c;
 	string_buffer_append_chars(buffer, &cc, 1);
@@ -89,11 +88,11 @@ bool is_symbol_char(int c)
 
 // TODO: make this function pass the verification
 int tokenizer_eat_symbol(struct tokenizer* tokenizer)
- //@ requires Tokenizer(tokenizer);
- //@ ensures Tokenizer(tokenizer);
+ //@ requires Tokenizer(tokenizer, _);
+ //@ ensures Tokenizer(tokenizer, _);
 {
 	for (;;)
-		//@ invariant Tokenizer(tokenizer);
+		//@ invariant Tokenizer(tokenizer, _);
 	{
 		int result;
 		bool isSymbolChar;
@@ -105,14 +104,10 @@ int tokenizer_eat_symbol(struct tokenizer* tokenizer)
 		
 		result = tokenizer_next_char(tokenizer);
 		
-		open Tokenizer(tokenizer);
-		struct string_buffer *b = tokenizer->buffer;
-		close Tokenizer_minus_buffer(tokenizer, b);
-		
+		//@ open Tokenizer(tokenizer, ?cs);
+		//@ assert tokenizer->buffer |-> ?b;
 		string_buffer_append_char(b, (char)result);
-		
-		open Tokenizer_minus_buffer(tokenizer, b);
-		close Tokenizer(tokenizer);
+		//@ close Tokenizer(tokenizer, _);
 	}
 
 	return 'S';

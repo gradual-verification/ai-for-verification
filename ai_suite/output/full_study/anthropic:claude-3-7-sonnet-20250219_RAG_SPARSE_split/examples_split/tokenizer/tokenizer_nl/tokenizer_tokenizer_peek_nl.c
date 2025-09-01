@@ -2,6 +2,13 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
+//@ predicate charreader_function(charreader *reader) = is_charreader(reader) == true;
 
 struct tokenizer
 {
@@ -11,15 +18,7 @@ struct tokenizer
 	struct string_buffer* buffer;
 };
 
-
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-//@ requires true;
-//@ ensures -128 <= result && result <= 127;
-
+//@ predicate tokenizer(struct tokenizer* t; charreader* reader, int lastread, int lasttoken, struct string_buffer* buffer) = t->next_char |-> reader &*& t->lastread |-> lastread &*& t->lasttoken |-> lasttoken &*& t->buffer |-> buffer &*& charreader_function(reader) &*& string_buffer(buffer, ?cs) &*& (lastread == -2 || lastread == -1 || (-128 <= lastread && lastread <= 127));
 
 /***
  * Description:
@@ -28,22 +27,9 @@ if the original lastread char is -2 (which means empty).
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
-/*@
-predicate tokenizer(struct tokenizer* tokenizer) =
-    tokenizer != 0 &*&
-    tokenizer->next_char |-> ?reader &*&
-    tokenizer->lastread |-> ?lastread &*&
-    tokenizer->lasttoken |-> ?lasttoken &*&
-    tokenizer->buffer |-> ?buffer &*&
-    is_charreader(reader) == true &*&
-    (-2 <= lastread && lastread <= 127) &*&
-    string_buffer(buffer, ?cs) &*&
-    malloc_block_tokenizer(tokenizer);
-@*/
-
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
-//@ requires tokenizer(tokenizer);
-//@ ensures tokenizer(tokenizer);
+//@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
+//@ ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& (lastread != -2 ? new_lastread == lastread : true);
 {
 	if ( tokenizer->lastread == -2 )
 	{
@@ -64,13 +50,9 @@ The tokenizer_peek function reads the next value character of a tokenizer and re
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_peek(struct tokenizer* tokenizer)
-//@ requires tokenizer(tokenizer);
-//@ ensures tokenizer(tokenizer) &*& -1 <= result && result <= 127;
+//@ requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
+//@ ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& result == new_lastread &*& (new_lastread == -1 || (-128 <= new_lastread && new_lastread <= 127));
 {
-	//@ open tokenizer(tokenizer);
 	tokenizer_fill_buffer(tokenizer);
-	//@ open tokenizer(tokenizer);
-	int result = tokenizer->lastread;
-	//@ close tokenizer(tokenizer);
-	return result;
+	return tokenizer->lastread;
 }

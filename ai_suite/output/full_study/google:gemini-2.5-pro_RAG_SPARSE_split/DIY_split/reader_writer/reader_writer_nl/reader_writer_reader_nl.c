@@ -1,4 +1,4 @@
-        invariant l->readers |-> length(reader_handles);
+
 #include "stdlib.h"
 #include "threading.h"
 //@ #include "listex.gh"

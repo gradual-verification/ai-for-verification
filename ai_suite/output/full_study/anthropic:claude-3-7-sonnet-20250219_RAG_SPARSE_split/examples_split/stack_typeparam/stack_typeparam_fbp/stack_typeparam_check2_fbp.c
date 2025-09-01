@@ -1,5 +1,14 @@
 #include "stdlib.h"
   
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -134,15 +143,6 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
 
 struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
   //@ requires [_]is_destructor<T>(destructor, ?Ownership);
@@ -241,41 +241,24 @@ void check2()
   //@ requires true;
   //@ ensures true;
 {
-  //@ predicate(void*, DataCarrier) Ownership = Data_Ownership;
-  //@ [_]is_destructor<DataCarrier>(destroy_data, Ownership);
+  //@ [_]is_destructor<DataCarrier>(destroy_data, Data_Ownership);
   struct stack* stack = create_empty_stack(destroy_data);
-  //@ assert Stack<DataCarrier>(stack, destroy_data, Ownership, ?S1) &*& IsEmpty(S1) == true;
   
   struct data* d1 = create_data(1, 1);
-  //@ assert Data(d1, 1, 1);
   //@ close Data_Ownership(d1, DataCarrier(1, 1));
   
   struct data* d2 = create_data(2, 2);
-  //@ assert Data(d2, 2, 2);
   //@ close Data_Ownership(d2, DataCarrier(2, 2));
   
   push(stack, d1);
-  //@ assert Stack<DataCarrier>(stack, destroy_data, Ownership, ?S2);
-  //@ assert S2 == Push(d1, DataCarrier(1, 1), S1);
-  
   push(stack, d2);
-  //@ assert Stack<DataCarrier>(stack, destroy_data, Ownership, ?S3);
-  //@ assert S3 == Push(d2, DataCarrier(2, 2), S2);
 
   struct data* d = pop(stack);
-  //@ assert Stack<DataCarrier>(stack, destroy_data, Ownership, ?S4);
-  //@ assert S4 == Pop(S3);
-  //@ assert d == d2;
-  //@ assert Data_Ownership(d, DataCarrier(2, 2));
-  
+  //@ open Data_Ownership(d, _);
   destroy_data(d);
 
   d = pop(stack);
-  //@ assert Stack<DataCarrier>(stack, destroy_data, Ownership, ?S5);
-  //@ assert S5 == Pop(S4);
-  //@ assert d == d1;
-  //@ assert Data_Ownership(d, DataCarrier(1, 1));
-  
+  //@ open Data_Ownership(d, _);
   destroy_data(d);
   
   destroy_stack(stack);

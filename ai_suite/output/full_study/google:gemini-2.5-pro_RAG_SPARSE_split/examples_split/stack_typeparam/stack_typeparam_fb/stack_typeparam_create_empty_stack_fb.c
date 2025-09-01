@@ -1,5 +1,14 @@
 #include "stdlib.h"
 
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -24,12 +33,11 @@ inductive Stack<T> =
   | Nil
   | Cons(void* data, T info, Stack<T>);
 
-// An expert would add malloc_block_node to enable freeing the node in a dispose function.
 predicate Node<T>(predicate(void *, T) Ownership, struct node* node, void *data, T info, struct node* next) =
   node->data |-> data &*&
   node->next |-> next &*&
-  malloc_block_node(node) &*&
-  Ownership(data, info);
+  Ownership(data, info) &*&
+  malloc_block_node(node);
 
 predicate StackItems<T>(predicate(void *, T) Ownership, struct node* head, Stack<T> S) =
   head == 0 ? S == Nil :
@@ -37,15 +45,14 @@ predicate StackItems<T>(predicate(void *, T) Ownership, struct node* head, Stack
   StackItems(Ownership, next, ?T) &*&
   S == Cons(data, info, T);
 
-// An expert would add malloc_block_stack to enable freeing the stack in a dispose function.
 predicate Stack<T>(struct stack* stack, destructor* destructor, predicate(void *, T) Ownership, Stack<T> S) =
   [_]is_destructor(destructor, Ownership) &*&
   stack->destructor |-> destructor &*&
   stack->first |-> ?first &*&
   stack->size |-> ?size &*&
-  malloc_block_stack(stack) &*&
   size == Size(S) &*&
-  StackItems(Ownership, first, S);
+  StackItems(Ownership, first, S) &*&
+  malloc_block_stack(stack);
 
 fixpoint Stack<T> Push<T>(void* item, T info, Stack<T> Stack)
 {
@@ -103,7 +110,8 @@ struct data
 
 predicate Data(struct data* data, int foo, int bar) =
   data->foo |-> foo &*&
-  data->bar |-> bar;
+  data->bar |-> bar &*&
+  malloc_block_data(data);
 
 @*/
 
@@ -134,15 +142,6 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
 
 // TODO: make this function pass the verification
 struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
@@ -156,8 +155,8 @@ struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
   stack->first = 0;
   stack->size = 0;
   
-  //@ close StackItems(Ownership, 0, Nil);
-  //@ close Stack(stack, destructor, Ownership, Nil);
+  //@ close StackItems<T>(Ownership, 0, Nil);
+  //@ close Stack<T>(stack, destructor, Ownership, Nil);
   
   return stack;
 }

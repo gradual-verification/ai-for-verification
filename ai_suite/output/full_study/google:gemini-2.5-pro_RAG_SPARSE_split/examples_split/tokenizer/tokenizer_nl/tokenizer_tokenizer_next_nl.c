@@ -3,87 +3,49 @@
 #include "stringBuffers.h"
 
 /*@
-fixpoint bool is_whitespace(int c) {
-    return c == ' ' || c == '\n' || c == '\r' || c == '\t';
-}
+// VeriFast specification starts here
 
-fixpoint bool is_digit(int c) {
-    return c >= '0' && c <= '9';
-}
+// --- Fixpoint helper functions for classifying characters ---
 
-fixpoint bool is_symbol_char(int c) {
-    return c > 32 && c <= 127 && c != '(' && c != ')';
-}
+fixpoint bool is_whitespace_int(int c) { return c == ' ' || c == '\n' || c == '\r' || c == '\t'; }
+fixpoint bool is_digit_int(int c) { return c >= '0' && c <= '9'; }
+fixpoint bool is_symbol_char_int(int c) { return c > 32 && c <= 127 && c != '(' && c != ')'; }
 
-fixpoint bool is_whitespace_char(char c) { return is_whitespace((int)c); }
-fixpoint bool is_digit_char(char c) { return is_digit((int)c); }
-fixpoint bool is_symbol_char_char(char c) { return is_symbol_char((int)c); }
+// --- Fixpoint helper functions for list manipulation ---
 
-fixpoint list<char> take_while(fixpoint(char, bool) p, list<char> xs) {
-    switch (xs) {
+fixpoint list<t> drop_while<t>(list<t> s, fixpoint(t, bool) p) {
+    switch(s) {
         case nil: return nil;
-        case cons(h, t): return p(h) ? cons(h, take_while(p, t)) : nil;
+        case cons(h, t): return p(h) ? drop_while(t, p) : s;
     }
 }
 
-fixpoint list<char> drop_while(fixpoint(char, bool) p, list<char> xs) {
-    switch (xs) {
+fixpoint list<t> take_while<t>(list<t> s, fixpoint(t, bool) p) {
+    switch(s) {
         case nil: return nil;
-        case cons(h, t): return p(h) ? drop_while(p, t) : xs;
+        case cons(h, t): return p(h) ? cons(h, take_while(t, p)) : nil;
     }
 }
 
-lemma void append_take_drop_while(fixpoint(char, bool) p, list<char> xs)
+lemma void take_while_append_drop_while<t>(list<t> s, fixpoint(t, bool) p)
     requires true;
-    ensures append(take_while(p, xs), drop_while(p, xs)) == xs;
+    ensures append(take_while(s, p), drop_while(s, p)) == s;
 {
-    switch (xs) {
+    switch(s) {
         case nil:
         case cons(h, t):
-            if (p(h)) {
-                append_take_drop_while(p, t);
+            if (!p(h)) {
+            } else {
+                take_while_append_drop_while(t, p);
             }
     }
 }
 
-lemma void forall_take_while(fixpoint(char, bool) p, list<char> xs)
-    requires true;
-    ensures forall(take_while(p, xs), p) == true;
-{
-    switch (xs) {
-        case nil:
-        case cons(h, t):
-            if (p(h)) {
-                forall_take_while(p, t);
-            }
-    }
-}
+fixpoint char char_of_int(int c) { return (char)c; }
 
-lemma void property_drop_while(fixpoint(char, bool) p, list<char> xs)
-    requires true;
-    ensures drop_while(p, xs) == nil || !p(head(drop_while(p, xs)));
-{
-    switch (xs) {
-        case nil:
-        case cons(h, t):
-            if (p(h)) {
-                property_drop_while(p, t);
-            }
-    }
-}
+// --- Predicates and typedefs for the tokenizer ---
 
-lemma void forall_append_one(list<char> xs, char c, fixpoint(char, bool) p)
-    requires forall(xs, p) == true &*& p(c) == true;
-    ensures forall(append(xs, cons(c, nil)), p) == true;
-{
-    switch(xs) {
-        case nil:
-        case cons(h, t):
-            forall_append_one(t, c, p);
-    }
-}
-
-predicate charreader_state(list<char> cs);
+predicate charreader_pred(charreader* f; list<int> stream);
 
 @*/
 
@@ -92,13 +54,31 @@ predicate charreader_state(list<char> cs);
 The charreader is a function that reads a character and returns it in an integer.
 */
 typedef int charreader();
-    //@ requires charreader_state(?cs);
-    /*@ ensures
-            cs == nil ?
-                charreader_state(nil) &*& result == -1
-            :
-                charreader_state(tail(cs)) &*& result == (int)head(cs) &*& -128 <= result &*& result <= 127;
-    @*/
+    //@ requires charreader_pred(this, ?s);
+    //@ ensures s == nil ? charreader_pred(this, nil) &*& result == -1 : charreader_pred(this, tail(s)) &*& result == head(s) &*& -128 <= result &*& result <= 127;
+
+/*@
+predicate is_charreader(charreader* f) = true;
+
+predicate tokenizer(struct tokenizer *t; list<int> stream, list<char> buffer_cs) =
+    t->next_char |-> ?reader &*& is_charreader(reader) == true &*&
+    t->lastread |-> ?lastread &*&
+    t->lasttoken |-> _ &*&
+    t->buffer |-> ?buffer &*&
+    string_buffer(buffer, buffer_cs) &*&
+    malloc_block_tokenizer(t) &*&
+    (lastread == -2 ?
+        // Buffer is empty, the full stream is in the reader
+        charreader_pred(reader, stream)
+    : lastread == -1 ?
+        // EOF has been read
+        stream == nil &*& charreader_pred(reader, nil)
+    :
+        // A character is buffered in lastread
+        stream == cons(lastread, ?rest) &*& charreader_pred(reader, rest)
+    );
+
+@*/
 
 struct tokenizer
 {
@@ -108,24 +88,6 @@ struct tokenizer
 	struct string_buffer* buffer;
 };
 
-/*@
-predicate tokenizer(struct tokenizer* t; list<char> stream, list<char> buffer_content) =
-    t->next_char |-> ?reader &*& is_charreader(reader) == true &*&
-    t->lastread |-> ?lastread &*&
-    t->lasttoken |-> _ &*&
-    t->buffer |-> ?buffer &*& string_buffer(buffer, buffer_content) &*&
-    malloc_block_tokenizer(t) &*&
-    (
-        lastread == -2 ? // buffer empty
-            charreader_state(?s) &*& stream == s
-        : lastread == -1 ? // EOF
-            charreader_state(nil) &*& stream == nil
-        : // char in buffer
-            -128 <= lastread &*& lastread <= 127 &*&
-            charreader_state(?s) &*& stream == cons((char)lastread, s)
-    );
-@*/
-
 
 /***
  * Description:
@@ -134,22 +96,22 @@ if the original lastread char is -2 (which means empty).
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
-//@ requires tokenizer(tokenizer, ?s, ?bcs);
-//@ ensures tokenizer(tokenizer, s, bcs);
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
+    //@ requires tokenizer(tokenizer, ?s, ?bcs);
+    //@ ensures tokenizer(tokenizer, s, bcs);
 {
     //@ open tokenizer(tokenizer, s, bcs);
 	if ( tokenizer->lastread == -2 )
 	{
 	        charreader *reader = tokenizer->next_char;
-	        //@ open charreader_state(s);
+	        //@ open charreader_pred(reader, s);
 	        int result = reader();
-            //@ switch(s) { case nil: case cons(h, t): }
+	        //@ if (s == nil) { close charreader_pred(reader, nil); } else { close charreader_pred(reader, tail(s)); }
 			if (result < -128 || result > 127)
 				abort();
 		tokenizer->lastread = result;
 	}
-    //@ close tokenizer(tokenizer, s, bcs);
+	//@ close tokenizer(tokenizer, s, bcs);
 }
 
 
@@ -159,16 +121,16 @@ The tokenizer_peek function reads the next value character of a tokenizer and re
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
-//@ requires tokenizer(tokenizer, ?s, ?bcs);
-//@ ensures tokenizer(tokenizer, s, bcs) &*& result == (s == nil ? -1 : (int)head(s));
 int tokenizer_peek(struct tokenizer* tokenizer)
+    //@ requires tokenizer(tokenizer, ?s, ?bcs);
+    //@ ensures tokenizer(tokenizer, s, bcs) &*& result == (s == nil ? -1 : head(s));
 {
 	tokenizer_fill_buffer(tokenizer);
-    //@ open tokenizer(tokenizer, s, bcs);
-	int res = tokenizer->lastread;
-    //@ if (s == nil) { assert res == -1; } else { assert res == (int)head(s); }
-    //@ close tokenizer(tokenizer, s, bcs);
-	return res;
+	//@ open tokenizer(tokenizer, s, bcs);
+	//@ if (s == nil) { assert tokenizer->lastread |-> -1; } else { assert tokenizer->lastread |-> head(s); }
+	int c = tokenizer->lastread;
+	//@ close tokenizer(tokenizer, s, bcs);
+	return c;
 }
 
 
@@ -178,15 +140,14 @@ The tokenizer_drop function drops the last character of a tokenizer by assigning
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
-//@ requires tokenizer(tokenizer, ?s, ?bcs);
-//@ ensures s == nil ? tokenizer(tokenizer, nil, bcs) : tokenizer(tokenizer, tail(s), bcs);
 void tokenizer_drop(struct tokenizer* tokenizer)
+    //@ requires tokenizer(tokenizer, ?s, ?bcs);
+    //@ ensures tokenizer(tokenizer, s == nil ? s : tail(s), bcs);
 {
+    tokenizer_fill_buffer(tokenizer);
     //@ open tokenizer(tokenizer, s, bcs);
-    //@ open charreader_state(?s_underlying);
 	tokenizer->lastread = -2;
-    //@ if (s == nil) { } else { assert s_underlying == tail(s); }
-    //@ close tokenizer(tokenizer, s == nil ? nil : tail(s), bcs);
+	//@ close tokenizer(tokenizer, tail(s), bcs);
 }
 
 
@@ -197,24 +158,17 @@ and drops that character by assigning the lastread field to -2 (meaning empty).
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
-//@ requires tokenizer(tokenizer, ?s, ?bcs);
-/*@ ensures
-    s == nil ?
-        tokenizer(tokenizer, nil, bcs) &*& result == -1
-    :
-        tokenizer(tokenizer, tail(s), bcs) &*& result == (int)head(s);
-@*/
 int tokenizer_next_char(struct tokenizer* tokenizer)
+    //@ requires tokenizer(tokenizer, ?s, ?bcs);
+    //@ ensures tokenizer(tokenizer, tail(s), bcs) &*& result == (s == nil ? -1 : head(s));
 {
 	int c;
 
 	tokenizer_fill_buffer(tokenizer);
-    //@ open tokenizer(tokenizer, s, bcs);
+	//@ open tokenizer(tokenizer, s, bcs);
 	c = tokenizer->lastread;
 	tokenizer->lastread = -2;
-    //@ open charreader_state(?s_underlying);
-    //@ if (s == nil) { } else { assert s_underlying == tail(s); }
-    //@ close tokenizer(tokenizer, s == nil ? nil : tail(s), bcs);
+	//@ close tokenizer(tokenizer, tail(s), bcs);
 	return c;
 }
 
@@ -225,9 +179,9 @@ The is_whitespace function checks whether a given character in integer means a w
 
 This function ensures nothing. 
 */
-//@ requires true;
-//@ ensures result == is_whitespace(c);
 bool is_whitespace(int c)
+    //@ requires true;
+    //@ ensures result == is_whitespace_int(c);
 {
 	return c == ' ' || c == '\n' || c == '\r' || c == '\t';
 }
@@ -239,23 +193,21 @@ The tokenizer_skip_whitespace function reads and drops all the whitespace charac
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
-//@ requires tokenizer(t, ?s, ?bcs);
-//@ ensures tokenizer(t, drop_while(is_whitespace_char, s), bcs);
 void tokenizer_skip_whitespace(struct tokenizer* tokenizer)
+    //@ requires tokenizer(tokenizer, ?s, ?bcs);
+    //@ ensures tokenizer(tokenizer, drop_while(s, is_whitespace_int), bcs);
 {
-    //@ list<char> s_initial = s;
+    //@ take_while_append_drop_while(s, is_whitespace_int);
 	while ( is_whitespace( tokenizer_peek(tokenizer) ) )
-        /*@
-        invariant tokenizer(tokenizer, ?s_loop, bcs) &*&
-                  s_initial == append(take_while(is_whitespace_char, s_initial), s_loop);
-        @*/
+	    /*@
+	    invariant
+	        tokenizer(tokenizer, ?current_s, bcs) &*&
+	        drop_while(s, is_whitespace_int) == drop_while(current_s, is_whitespace_int) &*&
+	        is_whitespace_int(head(current_s)) ? true : drop_while(current_s, is_whitespace_int) == current_s;
+	    @*/
 	{
-        //@ append_take_drop_while(is_whitespace_char, s_loop);
-        //@ if (s_loop != nil) { if (is_whitespace_char(head(s_loop))) { take_while_cons(is_whitespace_char, s_loop); } }
 		tokenizer_drop(tokenizer);
 	}
-    //@ property_drop_while(is_whitespace_char, s_loop);
-    //@ append_take_drop_while(is_whitespace_char, s_initial);
 }
 
 
@@ -265,9 +217,9 @@ The is_digit function checks whether a given character in integer means a digit 
 
 It ensures nothing.
 */
-//@ requires true;
-//@ ensures result == is_digit(c);
 bool is_digit(int c)
+    //@ requires true;
+    //@ ensures result == is_digit_int(c);
 {
 	return c >= '0' && c <= '9';
 }
@@ -279,12 +231,17 @@ The string_buffer_append_char function appends a char to a buffer.
 
 It needs to make sure that the property of the buffer holds (i.e., the buffer points to a list of characters) before and after the function.
 */
-//@ requires string_buffer(buffer, ?bcs);
-//@ ensures string_buffer(buffer, append(bcs, cons(c, nil)));
 void string_buffer_append_char(struct string_buffer *buffer, char c)
+    //@ requires string_buffer(buffer, ?cs);
+    //@ ensures string_buffer(buffer, append(cs, cons(c, nil)));
 {
 	char cc = c;
+	//@ character_limits(&cc);
+	//@ open character(&cc, c);
+	//@ close chars(&cc + 1, 0, nil);
 	string_buffer_append_chars(buffer, &cc, 1);
+	//@ open chars(&cc, 1, _);
+	//@ leak character(&cc, c) &*& chars(&cc + 1, 0, _);
 }
 
 
@@ -296,22 +253,21 @@ If it peeks a non-digit character, it exits the loop and returns the token that 
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
-//@ requires tokenizer(t, ?s, ?bcs_in);
-/*@ ensures tokenizer(t, ?s_new, ?bcs_out) &*&
-        let num_cs = take_while(is_digit_char, s) in
-        s_new == drop_while(is_digit_char, s) &*&
-        bcs_out == append(bcs_in, num_cs) &*&
-        result == '0';
-@*/
 int tokenizer_eat_number(struct tokenizer* tokenizer)
+    //@ requires tokenizer(tokenizer, ?s, ?bcs);
+    //@ ensures tokenizer(tokenizer, drop_while(s, is_digit_int), append(bcs, map(char_of_int, take_while(s, is_digit_int)))) &*& result == '0';
 {
-    //@ list<char> s_initial = s;
+    //@ take_while_append_drop_while(s, is_digit_int);
 	for (;;)
-        /*@
-        invariant tokenizer(tokenizer, ?s_cur, ?bcs_cur) &*&
-                  s_initial == append(drop(length(bcs_in), bcs_cur), s_cur) &*&
-                  forall(drop(length(bcs_in), bcs_cur), is_digit_char) == true;
-        @*/
+	    /*@
+	    invariant
+	        tokenizer(tokenizer, ?current_s, ?current_bcs) &*&
+	        s == append(eaten, current_s) &*&
+	        current_bcs == append(bcs, map(char_of_int, eaten)) &*&
+	        forall(eaten, is_digit_int) == true &*&
+	        take_while(s, is_digit_int) == eaten &*&
+	        drop_while(s, is_digit_int) == current_s;
+	    @*/
 	{
 		int result;
 		bool isDigit;
@@ -321,14 +277,10 @@ int tokenizer_eat_number(struct tokenizer* tokenizer)
 		if ( !isDigit ) break;
 		
 	    result = tokenizer_next_char(tokenizer);
-        //@ assert s_cur != nil && is_digit_char(head(s_cur));
-        //@ forall_append_one(drop(length(bcs_in), bcs_cur), head(s_cur), is_digit_char);
 		string_buffer_append_char(tokenizer->buffer, (char)result);
+		//@ take_while_append_drop_while(tail(current_s), is_digit_int);
 	}
-    //@ list<char> num_cs = take_while(is_digit_char, s_initial);
-    //@ forall_take_while(is_digit_char, s_initial);
-    //@ append_take_drop_while(is_digit_char, s_initial);
-    //@ property_drop_while(is_digit_char, s_cur);
+
 	return '0';
 }
 
@@ -339,9 +291,9 @@ The is_symbol_char function checks whether a given character in integer means a 
 
 It ensures nothing
 */
-//@ requires true;
-//@ ensures result == is_symbol_char(c);
 bool is_symbol_char(int c)
+    //@ requires true;
+    //@ ensures result == is_symbol_char_int(c);
 {
 	return c > 32 && c <= 127 && c != '(' && c != ')'; 
 }
@@ -355,22 +307,21 @@ If it peeks a non-symbol character, it exits the loop and return the token that 
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
-//@ requires tokenizer(t, ?s, ?bcs_in);
-/*@ ensures tokenizer(t, ?s_new, ?bcs_out) &*&
-        let sym_cs = take_while(is_symbol_char_char, s) in
-        s_new == drop_while(is_symbol_char_char, s) &*&
-        bcs_out == append(bcs_in, sym_cs) &*&
-        result == 'S';
-@*/
 int tokenizer_eat_symbol(struct tokenizer* tokenizer)
+    //@ requires tokenizer(tokenizer, ?s, ?bcs);
+    //@ ensures tokenizer(tokenizer, drop_while(s, is_symbol_char_int), append(bcs, map(char_of_int, take_while(s, is_symbol_char_int)))) &*& result == 'S';
 {
-    //@ list<char> s_initial = s;
+    //@ take_while_append_drop_while(s, is_symbol_char_int);
 	for (;;)
-        /*@
-        invariant tokenizer(tokenizer, ?s_cur, ?bcs_cur) &*&
-                  s_initial == append(drop(length(bcs_in), bcs_cur), s_cur) &*&
-                  forall(drop(length(bcs_in), bcs_cur), is_symbol_char_char) == true;
-        @*/
+	    /*@
+	    invariant
+	        tokenizer(tokenizer, ?current_s, ?current_bcs) &*&
+	        s == append(eaten, current_s) &*&
+	        current_bcs == append(bcs, map(char_of_int, eaten)) &*&
+	        forall(eaten, is_symbol_char_int) == true &*&
+	        take_while(s, is_symbol_char_int) == eaten &*&
+	        drop_while(s, is_symbol_char_int) == current_s;
+	    @*/
 	{
 		int result;
 		bool isSymbolChar;
@@ -381,95 +332,93 @@ int tokenizer_eat_symbol(struct tokenizer* tokenizer)
 		if (!isSymbolChar) break;
 		
 		result = tokenizer_next_char(tokenizer);
-        //@ assert s_cur != nil && is_symbol_char_char(head(s_cur));
-        //@ forall_append_one(drop(length(bcs_in), bcs_cur), head(s_cur), is_symbol_char_char);
 		string_buffer_append_char(tokenizer->buffer, (char)result);
+		//@ take_while_append_drop_while(tail(current_s), is_symbol_char_int);
 	}
-    //@ list<char> sym_cs = take_while(is_symbol_char_char, s_initial);
-    //@ forall_take_while(is_symbol_char_char, s_initial);
-    //@ append_take_drop_while(is_symbol_char_char, s_initial);
-    //@ property_drop_while(is_symbol_char_char, s_cur);
+
 	return 'S';
 }
 
+/*@
+fixpoint pair<int, pair<list<int>, list<char>>> parse_next_token(list<int> s) {
+    let s_ws = drop_while(s, is_whitespace_int);
+    if (s_ws == nil) return pair(-1, pair(nil, nil));
+    let c = head(s_ws);
+    let s_tail = tail(s_ws);
+    if (c == '(' || c == ')') return pair(c, pair(s_tail, nil));
+    if (is_digit_int(c)) {
+        let num_is = take_while(s_ws, is_digit_int);
+        return pair('0', pair(drop(length(num_is), s_ws), map(char_of_int, num_is)));
+    }
+    if (is_symbol_char_int(c)) {
+        let sym_is = take_while(s_ws, is_symbol_char_int);
+        return pair('S', pair(drop(length(sym_is), s_ws), map(char_of_int, sym_is)));
+    }
+    return pair('B', pair(s_tail, nil));
+}
+@*/
 
+// TODO: make this function pass the verification
 /***
  * Description:
 The tokenizer_next function gets the next token of the tokenizer by reading the stream sequentially, assigning the token to lasttoken field, and returning it.
 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
-/*@
-requires tokenizer(t, ?s, _);
-ensures
-    let s_after_ws = drop_while(is_whitespace_char, s) in
-    s_after_ws == nil ?
-        tokenizer(t, nil, nil) &*& result == -1
-    :
-    let c = head(s_after_ws) in
-    (int)c == '(' || (int)c == ')' ?
-        tokenizer(t, tail(s_after_ws), nil) &*& result == (int)c
-    : is_digit((int)c) ?
-        let num_cs = take_while(is_digit_char, s_after_ws) in
-        tokenizer(t, drop_while(is_digit_char, s_after_ws), num_cs) &*&
-        result == '0'
-    : is_symbol_char((int)c) ?
-        let sym_cs = take_while(is_symbol_char_char, s_after_ws) in
-        tokenizer(t, drop_while(is_symbol_char_char, s_after_ws), sym_cs) &*&
-        result == 'S'
-    : // bad char
-        tokenizer(t, tail(s_after_ws), nil) &*& result == 'B';
-@*/
 int tokenizer_next(struct tokenizer* tokenizer)
+    //@ requires tokenizer(tokenizer, ?s, _);
+    /*@ ensures
+            let p = parse_next_token(s);
+            let token_val = fst(p);
+            let s_new = fst(snd(p));
+            let bcs_new = snd(snd(p));
+            tokenizer(tokenizer, s_new, bcs_new) &*&
+            result == token_val &*&
+            tokenizer->lasttoken |-> token_val;
+    @*/
 {
 	int c;
 	int token;
 
     //@ open tokenizer(tokenizer, s, _);
-    //@ struct string_buffer *buffer = tokenizer->buffer;
-    //@ open string_buffer(buffer, _);
 	string_buffer_clear(tokenizer->buffer);
-    //@ close string_buffer(buffer, nil);
-    //@ close tokenizer(tokenizer, s, nil);
+	//@ close tokenizer(tokenizer, s, nil);
 
 	tokenizer_skip_whitespace(tokenizer);
-    //@ assert tokenizer(tokenizer, ?s_after_ws, nil) &*& s_after_ws == drop_while(is_whitespace_char, s);
+    //@ let s_ws = drop_while(s, is_whitespace_int);
+    //@ assert tokenizer(tokenizer, s_ws, nil);
 
 	c = tokenizer_peek(tokenizer);
-    //@ assert c == (s_after_ws == nil ? -1 : (int)head(s_after_ws));
+    //@ assert c == (s_ws == nil ? -1 : head(s_ws));
 
 	if ( c == '(' || c == ')' || c == -1 )
 	{
-        //@ if (s_after_ws == nil) { assert c == -1; } else { assert c == (int)head(s_after_ws); }
 		tokenizer_drop(tokenizer);
-        //@ if (s_after_ws == nil) { assert tokenizer(tokenizer, nil, nil); } else { assert tokenizer(tokenizer, tail(s_after_ws), nil); }
+        //@ assert tokenizer(tokenizer, tail(s_ws), nil);
 		token = c;
 	}
 	else if ( is_digit(c) )
 	{
-        //@ assert s_after_ws != nil && is_digit((int)head(s_after_ws));
-        //@ assert is_digit_char(head(s_after_ws)) == true;
 		token = tokenizer_eat_number(tokenizer);
-        //@ let num_cs = take_while(is_digit_char, s_after_ws);
-        //@ assert tokenizer(tokenizer, drop_while(is_digit_char, s_after_ws), num_cs);
+        //@ let num_is = take_while(s_ws, is_digit_int);
+        //@ let s_new = drop_while(s_ws, is_digit_int);
+        //@ assert tokenizer(tokenizer, s_new, map(char_of_int, num_is));
 	}
 	else if ( is_symbol_char(c) )
 	{
-        //@ assert s_after_ws != nil && is_symbol_char((int)head(s_after_ws));
-        //@ assert is_symbol_char_char(head(s_after_ws)) == true;
 		token = tokenizer_eat_symbol(tokenizer);
-        //@ let sym_cs = take_while(is_symbol_char_char, s_after_ws);
-        //@ assert tokenizer(tokenizer, drop_while(is_symbol_char_char, s_after_ws), sym_cs);
+        //@ let sym_is = take_while(s_ws, is_symbol_char_int);
+        //@ let s_new = drop_while(s_ws, is_symbol_char_int);
+        //@ assert tokenizer(tokenizer, s_new, map(char_of_int, sym_is));
 	}
 	else
 	{
-        //@ assert s_after_ws != nil && !(c == '(' || c == ')' || c == -1 || is_digit(c) || is_symbol_char(c));
 		tokenizer_drop(tokenizer);
-        //@ assert tokenizer(tokenizer, tail(s_after_ws), nil);
+        //@ assert tokenizer(tokenizer, tail(s_ws), nil);
 		token = 'B'; // bad character
 	}
-    //@ open tokenizer(tokenizer, ?s_new, ?bcs);
+    //@ open tokenizer(tokenizer, ?s_final, ?bcs_final);
 	tokenizer->lasttoken = token;
-    //@ close tokenizer(tokenizer, s_new, bcs);
+    //@ close tokenizer(tokenizer, s_final, bcs_final);
 	return token;
 }

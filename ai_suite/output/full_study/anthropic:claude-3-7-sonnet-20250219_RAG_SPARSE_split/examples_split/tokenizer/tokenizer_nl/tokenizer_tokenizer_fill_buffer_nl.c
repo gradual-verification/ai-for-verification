@@ -2,6 +2,28 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
+/*@
+// Predicate for charreader function
+predicate charreader_function(charreader *reader) =
+    is_charreader(reader) == true;
+
+// Predicate for tokenizer structure
+predicate tokenizer(struct tokenizer *tokenizer) =
+    tokenizer != 0 &*&
+    tokenizer->next_char |-> ?reader &*&
+    tokenizer->lastread |-> ?lastread &*&
+    tokenizer->lasttoken |-> ?lasttoken &*&
+    tokenizer->buffer |-> ?buffer &*&
+    charreader_function(reader) &*&
+    string_buffer(buffer, ?cs) &*&
+    malloc_block_tokenizer(tokenizer);
+@*/
 
 struct tokenizer
 {
@@ -11,27 +33,6 @@ struct tokenizer
 	struct string_buffer* buffer;
 };
 
-
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-
-
-/*@
-// Define a predicate for the tokenizer structure
-predicate tokenizer(struct tokenizer* tokenizer;) =
-    tokenizer != 0 &*&
-    tokenizer->next_char |-> ?reader &*&
-    tokenizer->lastread |-> ?lastread &*&
-    tokenizer->lasttoken |-> ?lasttoken &*&
-    tokenizer->buffer |-> ?buffer &*&
-    is_charreader(reader) == true &*&
-    (-2 <= lastread && lastread <= 127) &*&
-    string_buffer(buffer, ?cs) &*&
-    malloc_block_tokenizer(tokenizer);
-@*/
 
 // TODO: make this function pass the verification
 /***
@@ -49,10 +50,16 @@ ensures tokenizer(tokenizer);
 {
 	if ( tokenizer->lastread == -2 )
 	{
+	        /*@
+	        open tokenizer(tokenizer);
+	        @*/
 	        charreader *reader = tokenizer->next_char;
 	        int result = reader();
 			if (result < -128 || result > 127)
 				abort();
 		tokenizer->lastread = result;
+		/*@
+		close tokenizer(tokenizer);
+		@*/
 	}
 }

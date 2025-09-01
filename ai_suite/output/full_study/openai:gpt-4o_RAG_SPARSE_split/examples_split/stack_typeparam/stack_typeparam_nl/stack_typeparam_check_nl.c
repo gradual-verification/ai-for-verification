@@ -1,6 +1,17 @@
 #include "stdlib.h"
 
 /*
+  Destructors
+*/
+
+/*
+destructor function
+-params: data
+-description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
+*/
+typedef void destructor(void* data);
+
+/*
   Stack
 */
 
@@ -27,31 +38,17 @@ struct data
   int bar;
 };
 
-/*
-  Destructors
-*/
-
-/*
-destructor function
--params: data
--description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
-*/
-typedef void destructor(void* data);
-
 /*@
-predicate nodes(struct node* n, int count, predicate(void*; list<void*>) p) =
-  n == 0 ?
-    count == 0
-  :
-    n->data |-> ?d &*& n->next |-> ?next &*& malloc_block_node(n) &*&
-    p(d, ?dlist) &*& nodes(next, count - 1, p);
 
-predicate stack(struct stack* s, predicate(void*; list<void*>) p) =
-  s->first |-> ?first &*& s->destructor |-> ?destructor &*& s->size |-> ?size &*&
-  malloc_block_stack(s) &*& nodes(first, size, p);
+predicate nodes(struct node* n, int count) =
+  n == 0 ? count == 0 : n->data |-> ?data &*& n->next |-> ?next &*& malloc_block_node(n) &*& nodes(next, count - 1);
 
-predicate data_predicate(void* data, list<void*> dlist) =
-  data == 0 ? dlist == nil : dlist == cons(data, nil);
+predicate stack(struct stack* stack, int count, destructor* destructor) =
+  stack->first |-> ?first &*& stack->destructor |-> destructor &*& stack->size |-> count &*& malloc_block_stack(stack) &*& nodes(first, count);
+
+predicate data(struct data* data, int foo, int bar) =
+  data->foo |-> foo &*& data->bar |-> bar &*& malloc_block_data(data);
+
 @*/
 
 /* create_empty_stack function
@@ -59,7 +56,7 @@ predicate data_predicate(void* data, list<void*> dlist) =
 This function makes sure to create and return an empty stack */
 struct stack* create_empty_stack(destructor* destructor)
   //@ requires true;
-  //@ ensures stack(result, data_predicate);
+  //@ ensures stack(result, 0, destructor);
 {
   struct stack* stack = malloc(sizeof(struct stack));
   if (stack == 0) abort();
@@ -68,8 +65,8 @@ struct stack* create_empty_stack(destructor* destructor)
   stack->first = 0;
   stack->size = 0;
 
-  //@ close nodes(0, 0, data_predicate);
-  //@ close stack(stack, data_predicate);
+  //@ close nodes(0, 0);
+  //@ close stack(stack, 0, destructor);
   return stack;
 }
 
@@ -77,23 +74,22 @@ struct stack* create_empty_stack(destructor* destructor)
 -params: A stack
 This function makes sure to destroy the stack by destructing the data of each node and freeing each node. */
 void destroy_stack(struct stack* stack)
-  //@ requires stack(stack, data_predicate);
+  //@ requires stack(stack, _, ?destructor);
   //@ ensures true;
 {
-  //@ open stack(stack, data_predicate);
   struct node* current = stack->first;
   destructor* destructor = stack->destructor;
 
   while (current != 0)
-    //@ invariant nodes(current, _, data_predicate);
+    //@ invariant nodes(current, ?count);
   {
-    //@ open nodes(current, _, data_predicate);
+    //@ open nodes(current, count);
     struct node* next = current->next;
     destructor(current->data);
     free(current);
     current = next;
   }
-  //@ open nodes(0, _, data_predicate);
+  //@ open nodes(0, _);
   free(stack);
 }
 
@@ -101,8 +97,8 @@ void destroy_stack(struct stack* stack)
 -params: A stack and a data element, where the data has ownership
 This function makes sure to push the data element onto the head of stack (with ownership) */
 void push(struct stack* stack, void* data)
-  //@ requires stack(stack, data_predicate) &*& data_predicate(data, ?dlist);
-  //@ ensures stack(stack, data_predicate);
+  //@ requires stack(stack, ?count, ?destructor) &*& data != 0;
+  //@ ensures stack(stack, count + 1, destructor);
 {
   struct node* node = malloc(sizeof(struct node));
   if (node == 0) abort();
@@ -114,8 +110,8 @@ void push(struct stack* stack, void* data)
     abort();  // or handle error as necessary
   }
   stack->size++;
-  //@ close nodes(node, stack->size, data_predicate);
-  //@ close stack(stack, data_predicate);
+  //@ close nodes(node, count + 1);
+  //@ close stack(stack, count + 1, destructor);
 }
 
 /* pop function
@@ -124,12 +120,11 @@ void push(struct stack* stack, void* data)
 It requires that the stack is not empty.
 It ensures that the head element is removed and returned (with ownership) */
 void* pop(struct stack* stack)
-  //@ requires stack(stack, data_predicate) &*& stack->size > 0;
-  //@ ensures stack(stack, data_predicate) &*& data_predicate(result, ?dlist);
+  //@ requires stack(stack, ?count, ?destructor) &*& count > 0;
+  //@ ensures stack(stack, count - 1, destructor) &*& result != 0;
 {
-  //@ open stack(stack, data_predicate);
   struct node* first = stack->first;
-  //@ open nodes(first, stack->size, data_predicate);
+  //@ open nodes(first, count);
   void* data = first->data;
   stack->first = first->next;
   free(first);
@@ -137,7 +132,7 @@ void* pop(struct stack* stack)
     abort();  // or handle error as necessary
   }
   stack->size--;
-  //@ close stack(stack, data_predicate);
+  //@ close stack(stack, count - 1, destructor);
   return data;
 }
 
@@ -145,8 +140,8 @@ void* pop(struct stack* stack)
 -params: A stack
 This function makes sure to return the size of the stack and does not modify the stack. */
 int size(struct stack* stack)
-  //@ requires stack(stack, data_predicate);
-  //@ ensures stack(stack, data_predicate) &*& result == stack->size;
+  //@ requires stack(stack, ?count, ?destructor);
+  //@ ensures stack(stack, count, destructor) &*& result == count;
 {
   int size = stack->size;
   return size;
@@ -159,14 +154,14 @@ int size(struct stack* stack)
 */
 struct data* create_data(int foo, int bar)
   //@ requires true;
-  //@ ensures data_predicate(result, ?dlist);
+  //@ ensures data(result, foo, bar);
 {
   struct data* data = malloc(sizeof(struct data));
   if (data == 0) abort();
 
   data->foo = foo;
   data->bar = bar;
-  //@ close data_predicate(data, cons(data, nil));
+  //@ close data(data, foo, bar);
   return data;
 }
 
@@ -176,10 +171,10 @@ struct data* create_data(int foo, int bar)
   - description: This function frees the memory allocated for the data.
 */
 void destroy_data(struct data* data)
-  //@ requires data_predicate(data, ?dlist);
+  //@ requires data(data, _, _);
   //@ ensures true;
 {
-  //@ open data_predicate(data, dlist);
+  //@ open data(data, _, _);
   free(data);
 }
 

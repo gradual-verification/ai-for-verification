@@ -1,8 +1,10 @@
-//@ requires Tokenizer(tokenizer);
-//@ ensures Tokenizer(tokenizer);
 #include "stdio.h"
 #include "stdlib.h"
 #include "stringBuffers.h"
+
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
 
 
 struct tokenizer
@@ -27,10 +29,6 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
   t->buffer |-> buffer;
 @*/
 
-
-typedef int charreader();
-    //@ requires true;
-    //@ ensures true;
 
 
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
@@ -79,7 +77,7 @@ void tokenizer_skip_whitespace(struct tokenizer* tokenizer)
  //@ ensures Tokenizer(tokenizer);
 {
 	while ( is_whitespace( tokenizer_peek(tokenizer) ) )
-		//@ invariant Tokenizer(tokenizer);
+	    //@ invariant Tokenizer(tokenizer);
 	{
 		tokenizer_drop(tokenizer);
 	}

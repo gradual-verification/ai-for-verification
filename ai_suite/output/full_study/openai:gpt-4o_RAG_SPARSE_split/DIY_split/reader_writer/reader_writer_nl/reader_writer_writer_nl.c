@@ -7,11 +7,9 @@ struct rwlock {
     int readers;
 };
 
-//@ predicate rwlock(struct rwlock *l; int readers) =
-//@     l->mutex |-> ?mutex &*& mutex(mutex, rwlock_inv(l)) &*& l->readers |-> readers &*& readers >= 0;
+//@ predicate_family_instance thread_run_data(writer)(struct rwlock *l) = l->mutex |-> ?mutex &*& mutex(mutex, rwlock_inv(l));
 
-//@ predicate rwlock_inv(struct rwlock *l) =
-//@     l->readers |-> ?readers &*& readers >= 0;
+//@ predicate_ctor rwlock_inv(struct rwlock *l)() = l->readers |-> ?readers &*& readers >= 0;
 
 // TODO: make this function pass the verification
 /***
@@ -22,26 +20,30 @@ struct rwlock {
  * @param l: the reader-writer lock to be used, which has the mutex and has number of readers >= 0
  * 
  */
-//@ requires rwlock(l, 0);
-//@ ensures rwlock(l, 0);
+
 void writer(struct rwlock *l) //@ : thread_run
+//@requires thread_run_data(writer)(l);
+//@ ensures true;
 {
     for (;;)
-    //@ invariant rwlock(l, 0);
+    //@ invariant thread_run_data(writer)(l);
     {
+        //@ open thread_run_data(writer)(l);
         mutex_acquire(l->mutex);
-        //@ open rwlock_inv(l);
+        //@ open rwlock_inv(l)();
         if (l->readers == 0) {
-            //@ close rwlock_inv(l);
+            //@ close rwlock_inv(l)();
             break;
         }
-        //@ close rwlock_inv(l);
+        //@ close rwlock_inv(l)();
         mutex_release(l->mutex);
+        //@ close thread_run_data(writer)(l);
     }
 
     // critical section (writing)
 
-    //@ open rwlock_inv(l);
+    // @ open rwlock_inv(l)();
     mutex_release(l->mutex);
-    //@ close rwlock(l, 0);
+    //@ close thread_run_data(writer)(l);
+    //@ leak thread_run_data(writer)(l);
 }

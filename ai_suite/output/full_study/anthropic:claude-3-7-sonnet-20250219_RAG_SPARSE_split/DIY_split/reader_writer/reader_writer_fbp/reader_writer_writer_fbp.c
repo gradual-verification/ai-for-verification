@@ -22,6 +22,7 @@ void writer(struct rwlock *l) //@ : thread_run
     //@ open thread_run_data(writer)(l);
     
     for (;;)
+    //@ invariant [1/2]l->mutex |-> ?m &*& [1/2]mutex(m, rwlock_inv(l));
     {
         mutex_acquire(l->mutex);
         //@ open rwlock_inv(l)();
@@ -36,4 +37,5 @@ void writer(struct rwlock *l) //@ : thread_run
     
     //@ close rwlock_inv(l)();
     mutex_release(l->mutex);
+    //@ leak [1/2]l->mutex |-> ?m &*& [1/2]mutex(m, rwlock_inv(l));
 }

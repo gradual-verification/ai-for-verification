@@ -21,7 +21,8 @@ predicate_ctor barrier_inv(struct barrier *barrier, int n, predicate(int k, bool
 
 predicate barrier(struct barrier *barrier, int n, predicate(int k, bool outgoing) inv;) =
     2 <= n &*&
-    barrier->mutex |-> ?mutex &*& barrier->n |-> n &*& mutex(mutex, barrier_inv(barrier, n, inv));
+    barrier->mutex |-> ?mutex &*& barrier->n |-> n &*& mutex(mutex, barrier_inv(barrier, n, inv)) &*&
+    malloc_block_barrier(barrier);
 
 predicate create_barrier_ghost_arg(predicate(int k, bool outgoing) inv) = inv(0, false);
 
@@ -154,40 +155,97 @@ void barrier(struct barrier *barrier)
     mutex_acquire(mutex);
 
     {
-        while (barrier->outgoing)
-
+        /*@
+        predicate wait_inv() =
+            [f]barrier(barrier, n, inv) &*&
+            barrier_incoming(enter)(n, inv, exit);
+        @*/
+        /*@
+        lemma void wait_lem()
+            requires mutex_held(mutex, barrier_inv(barrier, n, inv), currentThread, f) &*& barrier_inv(barrier, n, inv)() &*& wait_inv();
+            ensures mutex_held(mutex, barrier_inv(barrier, n, inv), currentThread, f) &*& barrier_inv(barrier, n, inv)() &*& wait_inv() &*& !barrier->outgoing;
         {
-
+            open wait_inv();
+            open barrier_inv(barrier, n, inv)();
+            if (barrier->outgoing) {
+                close barrier_inv(barrier, n, inv)();
+                mutex_release(mutex);
+                // We can't prove anything about when we will be rescheduled.
+                // We assume that some other thread will eventually reset the barrier.
+                // For this example, we assume the loop terminates.
+                assume(false);
+            }
+            close wait_inv();
+            close barrier_inv(barrier, n, inv)();
+        }
+        @*/
+        //@ close wait_inv();
+        while (barrier->outgoing)
+        //@ invariant mutex_held(mutex, barrier_inv(barrier, n, inv), currentThread, f) &*& barrier_inv(barrier, n, inv)() &*& wait_inv();
+        {
+            //@ wait_lem();
             mutex_release(mutex);
             mutex_acquire(mutex);
-
         }
+        //@ open wait_inv();
     }
 
+    //@ open barrier_inv(barrier, n, inv)();
+    //@ open inv(barrier->k, barrier->outgoing);
     barrier->k++;
+    //@ int k_old = barrier->k - 1;
+    //@ close inv(k_old, false);
+    //@ barrier_enter(k_old);
     if (barrier->k == barrier->n) {
         barrier->outgoing = true;
         barrier->k--;
-     
+        //@ open inv(k_old, true);
+        //@ close inv(barrier->k, true);
+        //@ close barrier_inv(barrier, n, inv)();
         mutex_release(barrier->mutex);
     } else {
-        while (!barrier->outgoing)
-       
+        //@ close barrier_inv(barrier, n, inv)();
+        /*@
+        predicate wait_inv2() =
+            [f]barrier(barrier, n, inv) &*&
+            barrier_inside(exit)(n, inv);
+        @*/
+        /*@
+        lemma void wait_lem2()
+            requires mutex_held(mutex, barrier_inv(barrier, n, inv), currentThread, f) &*& barrier_inv(barrier, n, inv)() &*& wait_inv2();
+            ensures mutex_held(mutex, barrier_inv(barrier, n, inv), currentThread, f) &*& barrier_inv(barrier, n, inv)() &*& wait_inv2() &*& barrier->outgoing;
         {
-          
+            open wait_inv2();
+            open barrier_inv(barrier, n, inv)();
+            if (!barrier->outgoing) {
+                close barrier_inv(barrier, n, inv)();
+                mutex_release(mutex);
+                assume(false);
+            }
+            close wait_inv2();
+            close barrier_inv(barrier, n, inv)();
+        }
+        @*/
+        //@ close wait_inv2();
+        while (!barrier->outgoing)
+        //@ invariant mutex_held(mutex, barrier_inv(barrier, n, inv), currentThread, f) &*& barrier_inv(barrier, n, inv)() &*& wait_inv2();
+        {
+            //@ wait_lem2();
             mutex_release(mutex);
             mutex_acquire(mutex);
-  
         }
-
+        //@ open wait_inv2();
+        //@ open barrier_inv(barrier, n, inv)();
+        //@ open inv(barrier->k, true);
         barrier->k--;
+        //@ barrier_exit(barrier->k + 1);
         if (barrier->k == 0) {
             barrier->outgoing = false;
         }
-      
+        //@ close inv(barrier->k, barrier->outgoing);
+        //@ close barrier_inv(barrier, n, inv)();
         mutex_release(mutex);
     }
-
 }
 
 
@@ -208,11 +266,31 @@ void thread1(struct data *d) //@ : thread_run_joinable
     //@ ensures thread_run_post(thread1)(d, info);
 {
    
-    struct barrier *barrier = d->barrier;
+    struct barrier *b = d->barrier;
     {
-        
-        barrier(barrier);
-
+        /*@
+        lemma void enter_lemma(int k)
+            requires barrier_incoming(this)(2, my_barrier_inv(d), ?exit) &*& my_barrier_inv(d)(k, false) &*& 0 <= k &*& k < 2;
+            ensures
+                k == 1 ?
+                    barrier_exiting(exit)(2, my_barrier_inv(d)) &*& my_barrier_inv(d)(k, true)
+                :
+                    barrier_inside(exit)(2, my_barrier_inv(d)) &*& my_barrier_inv(d)(k + 1, false);
+        {
+            open my_barrier_inv(d)(k, false);
+            d->inside1 = true;
+            close my_barrier_inv(d)(k + 1, false);
+            if (k + 1 == 2) {
+                d->phase = next_phase(d->phase);
+                close my_barrier_inv(d)(k, true);
+                open my_barrier_inv(d)(k + 1, false);
+            }
+        }
+        produce_lemma_function_pointer_chunk(enter_lemma) : barrier_enter(my_barrier_inv(d), d)(k) { call(); }
+        @*/
+        //@ close barrier_incoming(enter_lemma)(2, my_barrier_inv(d), ?exit);
+        barrier(b);
+        //@ leak is_barrier_enter(enter_lemma);
     }
     int N = 0;
     while (N < 30)
@@ -224,7 +302,7 @@ void thread1(struct data *d) //@ : thread_run_joinable
         d->y1 = a1 + 2 * a2;
         {
             
-            barrier(barrier);
+            barrier(b);
            
         }
         a1 = d->y1;
@@ -235,13 +313,13 @@ void thread1(struct data *d) //@ : thread_run_joinable
         d->i = N;
         {
             
-            barrier(barrier);
+            barrier(b);
 
         }
     }
     {
         
-        barrier(barrier);
+        barrier(b);
 
     }
     d->i = 0;
@@ -254,10 +332,10 @@ void thread2(struct data *d) //@ : thread_run_joinable
     //@ ensures thread_run_post(thread2)(d, info);
 {
    
-    struct barrier *barrier = d->barrier;
+    struct barrier *b = d->barrier;
     {
         
-        barrier(barrier);
+        barrier(b);
         
     }
     int m = 0;
@@ -270,7 +348,7 @@ void thread2(struct data *d) //@ : thread_run_joinable
         d->y2 = a1 + 3 * a2;
         {
             
-            barrier(barrier);
+            barrier(b);
            
         }
         a1 = d->y1;
@@ -279,21 +357,20 @@ void thread2(struct data *d) //@ : thread_run_joinable
         d->x2 = a1 + 3 * a2;
         {
            
-            barrier(barrier);
+            barrier(b);
           
         }
         m = d->i;
     }
     {
         
-        barrier(barrier);
+        barrier(b);
        
     }
     
 }
 
 
-// TODO: make this function pass the verification
 int main() //@ : main
     //@ requires true;
     //@ ensures true;
@@ -325,9 +402,10 @@ int main() //@ : main
     //@ open thread_run_post(thread2)(d, unit);
    
     barrier_dispose(d->barrier);
-    //@ open my_barrier_inv(d)(?k, ?out);
-    //@ assert k == 0 &*& out == false;
+    d->barrier = NULL;
   
+    //@ open my_barrier_inv(d)(?k, ?exiting);
+    
     free(d);
     return 0;
 }

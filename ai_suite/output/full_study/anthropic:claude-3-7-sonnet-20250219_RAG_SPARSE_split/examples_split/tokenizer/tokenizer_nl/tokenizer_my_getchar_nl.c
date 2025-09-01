@@ -2,6 +2,12 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
 
 struct tokenizer
 {
@@ -10,13 +16,6 @@ struct tokenizer
 	int                   lasttoken; // the last token parsed
 	struct string_buffer* buffer;
 };
-
-
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
 
 
 // TODO: make this function pass the verification
@@ -34,6 +33,14 @@ int my_getchar() //@ : charreader
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+//@ requires token(?t1) &*& read_char_io(t1, stdin, ?c, ?success, ?t2);
+//@ ensures token(t2) &*& result == c;
+
 
 struct tokenizer
 {
@@ -44,15 +51,6 @@ struct tokenizer
 };
 
 
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-//@ requires true;
-//@ ensures true;
-
-
 // TODO: make this function pass the verification
 /***
  * Description:
@@ -61,8 +59,8 @@ The my_getchar function acts as a char reader and returns an integer read.
 It ensures nothing.
 */
 int my_getchar() //@ : charreader
-//@ requires true;
-//@ ensures true;
+//@ requires token(?t1) &*& read_char_io(t1, stdin, ?c, ?success, ?t2);
+//@ ensures token(t2) &*& result == c;
 {
 	return getchar();
 }

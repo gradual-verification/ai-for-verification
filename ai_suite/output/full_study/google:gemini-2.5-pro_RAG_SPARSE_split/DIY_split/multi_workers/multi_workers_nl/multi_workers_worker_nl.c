@@ -14,7 +14,7 @@ struct shared {
 /*@
 // Predicate for the shared counter. It serves as the invariant for the mutex.
 // It asserts that 'counter' holds a valid integer value 'v' and that 'v' is non-negative.
-predicate counter_inv() = integer(&counter, ?v) &*& 0 <= v;
+predicate counter_inv() = counter |-> ?v &*& 0 <= v;
 
 // Predicate describing the memory layout of the 'shared' struct.
 // It holds a pointer to the mutex and the memory block for the struct itself.
@@ -33,7 +33,7 @@ predicate_family_instance thread_run_pre(worker)(void *data, any info) =
 // It ensures that the resources taken by the thread are returned upon completion.
 predicate_family_instance thread_run_post(worker)(void *data, any info) =
     shared_struct((struct shared *)data, ?mtx) &*&
-    [f]mutex(mtx, counter_inv);
+    [?f]mutex(mtx, counter_inv);
 @*/
 
 // TODO: make this function pass the verification

@@ -89,6 +89,7 @@ void bst_dispose(struct bst_node *node)
     }
 }
 
+// TODO: make this function pass the verification
 int main()
     //@ requires true;
     //@ ensures true;

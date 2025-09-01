@@ -1,6 +1,17 @@
 #include "stdlib.h"
 
 /*
+  Destructors
+*/
+
+/*
+destructor function
+-params: data
+-description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
+*/
+typedef void destructor(void* data);
+
+/*
   Stack
 */
 
@@ -27,28 +38,15 @@ struct data
   int bar;
 };
 
-/*
-  Destructors
-*/
-
-/*
-destructor function
--params: data
--description: It destructs the ownership on the location pointed by the data. It doesn't have a concrete implementation.
-*/
-typedef void destructor(void* data);
-
 /*@
+predicate nodes(struct node* n, list<void*> vs) =
+  n == 0 ? 
+    vs == nil 
+  : 
+    n->data |-> ?d &*& n->next |-> ?next &*& malloc_block_node(n) &*& nodes(next, ?vs0) &*& vs == cons(d, vs0);
 
-predicate nodes(struct node* node, list<void*> values) =
-    node == 0 ? 
-        values == nil 
-    : 
-        node->data |-> ?data &*& node->next |-> ?next &*& malloc_block_node(node) &*& nodes(next, ?values0) &*& values == cons(data, values0);
-
-predicate stack(struct stack* stack, list<void*> values) =
-    stack->first |-> ?first &*& stack->destructor |-> ?destructor &*& stack->size |-> ?size &*& malloc_block_stack(stack) &*& nodes(first, values) &*& length(values) == size;
-
+predicate stack(struct stack* s, list<void*> vs) =
+  s->first |-> ?f &*& s->destructor |-> ?d &*& s->size |-> ?size &*& malloc_block_stack(s) &*& nodes(f, vs) &*& length(vs) == size;
 @*/
 
 // TODO: make this function pass the verification
@@ -58,19 +56,19 @@ predicate stack(struct stack* stack, list<void*> values) =
 It requires that the stack is not empty.
 It ensures that the head element is removed and returned (with ownership) */
 void* pop(struct stack* stack)
-    //@ requires stack(stack, ?values) &*& values != nil;
-    //@ ensures stack(stack, tail(values)) &*& result == head(values);
+  //@ requires stack(stack, ?vs) &*& vs != nil;
+  //@ ensures stack(stack, tail(vs)) &*& result == head(vs);
 {
-    //@ open stack(stack, values);
-    struct node* first = stack->first;
-    //@ open nodes(first, values);
-    void* data = first->data;
-    stack->first = first->next;
-    free(first);
-    if (stack->size == INT_MIN) {
-        abort();  // or handle error as necessary
-    }
-    stack->size--;
-    //@ close stack(stack, tail(values));
-    return data;
+  //@ open stack(stack, vs);
+  struct node* first = stack->first;
+  //@ open nodes(first, vs);
+  void* data = first->data;
+  stack->first = first->next;
+  free(first);
+  if (stack->size == INT_MIN) {
+    abort();  // or handle error as necessary
+  }
+  stack->size--;
+  //@ close stack(stack, tail(vs));
+  return data;
 }

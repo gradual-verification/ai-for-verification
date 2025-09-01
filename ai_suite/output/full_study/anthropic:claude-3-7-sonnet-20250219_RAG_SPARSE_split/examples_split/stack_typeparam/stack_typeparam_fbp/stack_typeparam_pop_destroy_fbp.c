@@ -1,5 +1,13 @@
 #include "stdlib.h"
   
+/*
+  Destructors
+*/
+
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
 
 /*
   Stack
@@ -134,15 +142,6 @@ predicate Data_Ownership(struct data *data, DataCarrier DC) = Data(data, GetFoo(
 
 @*/
 
-/*
-  Destructors
-*/
-
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
-
 
 void* pop/*@ <T> @*/(struct stack* stack)
   /*@
@@ -185,5 +184,7 @@ void pop_destroy/*@ <T> @*/(struct stack* stack)
 {
   void* data = pop(stack);
   destructor* d = get_destructor(stack);
+  //@ open [_]is_destructor(d, Ownership);
   d(data);
+  //@ close [_]is_destructor(d, Ownership);
 }

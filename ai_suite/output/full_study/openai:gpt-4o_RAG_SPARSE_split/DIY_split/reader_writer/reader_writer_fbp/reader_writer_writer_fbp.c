@@ -20,13 +20,15 @@ void writer(struct rwlock *l) //@ : thread_run
     //@ ensures true;
 {
     //@ open thread_run_data(writer)(l);
+    //@ assert [1/2]l->mutex |-> ?m;
     for (;;)
+    //@ invariant [1/2]l->mutex |-> m &*& [1/2]mutex(m, rwlock_inv(l));
     {
         mutex_acquire(l->mutex);
         //@ open rwlock_inv(l)();
         if (l->readers == 0) {
             //@ close rwlock_inv(l)();
-            mutex_release(l->mutex);
+            //mutex_release(l->mutex);
             break;
         }
         //@ close rwlock_inv(l)();
@@ -38,4 +40,5 @@ void writer(struct rwlock *l) //@ : thread_run
     //@ close rwlock_inv(l)();
 
     mutex_release(l->mutex);
+    //@ leak [1/2]l->mutex |-> m &*& [1/2]mutex(m, rwlock_inv(l));
 }

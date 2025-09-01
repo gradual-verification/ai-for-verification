@@ -27,6 +27,7 @@ void worker(struct shared *data) //@ : thread_run_joinable
     //@ ensures thread_run_post(worker)(data, info);
 {
     struct shared *s = data;
+    //@ open thread_run_pre(worker)(data, info);
     mutex_acquire(s->mtx);
     //@ open shared_inv(s)();
     
@@ -38,4 +39,5 @@ void worker(struct shared *data) //@ : thread_run_joinable
     
     //@ close shared_inv(s)();
     mutex_release(s->mtx);
+    //@ close thread_run_post(worker)(data, info);
 }

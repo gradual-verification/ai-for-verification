@@ -71,11 +71,9 @@ void bst_traverse(struct bst_node *node)
 {
     if (node == 0) {
     } else {
-        //@ open bst(node, min, max);
         int val = node->value;
         bst_traverse(node->left);
         bst_traverse(node->right);
-        //@ close bst(node, min, max);
     }
 }
 
@@ -84,7 +82,6 @@ void bst_dispose(struct bst_node *node)
     //@ ensures true;
 {
     if (node != 0) {
-        //@ open bst(node, min, max);
         bst_dispose(node->left);
         bst_dispose(node->right);
         free(node);
@@ -98,18 +95,28 @@ int main()
     struct bst_node *tree = bst_create();
     //@ assert bst(tree, INT_MIN, INT_MAX);
     
+    // Insert 10
+    //@ assert INT_MIN < 10 && 10 < INT_MAX;
     tree = bst_insert(tree, 10);
     //@ assert bst(tree, INT_MIN, INT_MAX);
     
+    // Insert 5
+    //@ assert INT_MIN < 5 && 5 < INT_MAX;
     tree = bst_insert(tree, 5);
     //@ assert bst(tree, INT_MIN, INT_MAX);
     
+    // Insert 15
+    //@ assert INT_MIN < 15 && 15 < INT_MAX;
     tree = bst_insert(tree, 15);
     //@ assert bst(tree, INT_MIN, INT_MAX);
     
+    // Insert 8
+    //@ assert INT_MIN < 8 && 8 < INT_MAX;
     tree = bst_insert(tree, 8);
     //@ assert bst(tree, INT_MIN, INT_MAX);
     
+    // Insert 12
+    //@ assert INT_MIN < 12 && 12 < INT_MAX;
     tree = bst_insert(tree, 12);
     //@ assert bst(tree, INT_MIN, INT_MAX);
 

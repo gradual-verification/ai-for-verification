@@ -51,26 +51,31 @@ fixpoint bool incr_only(trace trace) {
     case cas_(tid, old, new, trace0): return old <= new && incr_only(trace0);
   }
 }
+@*/
 
-lemma void incr_only_monotonic(trace t1, trace t2, int ctid)
-  requires is_good_prefix(t1, t2, ctid) == true &*& incr_only(t2) == true;
-  ensures execute_trace(t1) <= execute_trace(t2);
+/*@
+lemma void incr_only_monotonic(trace trace1, trace trace2);
+    requires incr_only(trace2) == true &*& is_good_prefix(trace1, trace2, ?ctid) == true;
+    ensures execute_trace(trace1) <= execute_trace(trace2);
 {
-  switch(t2) {
-    case zero:
-    case inc(tid, t2_0):
-      if (t1 != t2) {
-        incr_only_monotonic(t1, t2_0, ctid);
-      }
-    case dec(tid, t2_0):
-      // This case is impossible due to 'incr_only(t2) == true'.
-    case cas_(tid, old, new, t2_0):
-      if (t1 != t2) {
-        incr_only_monotonic(t1, t2_0, ctid);
-        // VeriFast can deduce execute_trace(t2_0) <= execute_trace(t2)
-        // from 'old <= new', which is implied by 'incr_only(t2)'.
-      }
-  }
+    switch(trace2) {
+        case zero:
+        case inc(tid, trace2_0):
+            if (trace1 == trace2) {
+            } else {
+                incr_only_monotonic(trace1, trace2_0);
+            }
+        case dec(tid, trace2_0):
+        case cas_(tid, old, new, trace2_0):
+            if (trace1 == trace2) {
+            } else {
+                incr_only_monotonic(trace1, trace2_0);
+                int v0 = execute_trace(trace2_0);
+                if (v0 == old) {
+                } else {
+                }
+            }
+    }
 }
 @*/
 
@@ -103,18 +108,14 @@ int atomic_load(int* c);
   
   
 
+// TODO: make this function pass the verification
 void only_allow_incrementing(int* c)
   //@ requires [?f]cell(c, incr_only) &*& last_seen(c, currentThread, ?trace0);
   //@ ensures [f]cell(c, incr_only) &*& last_seen(c, currentThread, _);
 {
   int x1 = atomic_load(c);
   int x2 = atomic_load(c);
-  
-  //@ last_seen(c, currentThread, ?trace2);
-  //@ assert is_good_prefix(?trace1, trace2, currentThread) == true;
-  
-  last_seen_allowed(c, currentThread);
-  incr_only_monotonic(trace1, trace2, currentThread);
-  
-  assert x1 <= x2;
+  //@ last_seen_allowed(c, currentThread);
+  //@ incr_only_monotonic(?trace1, ?trace2);
+  assert(x1 <= x2);
 }

@@ -3,8 +3,12 @@
 #include <stdlib.h>
 #include "gotsmanlock.h"
 
-
 typedef struct eloop *eloop;
+
+typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
+    //@ requires eloop(x) &*& [_]dataPred(data);
+    //@ ensures eloop(x) &*& [_]dataPred(data);
+
 
 struct eloop {
     int lock;
@@ -28,18 +32,11 @@ predicate_ctor I(eloop x)() =
         [_]is_eloop_handler(h, x, dataPred) &*& [_]dataPred(data);
 
 predicate eloop(eloop x) =
-    malloc_block_eloop(x) &*&
     [_]lock(&x->lock, I(x));
 
-predicate dummy_pred(void *data) = true;
+predicate empty_pred(void *data) = true;
 
 @*/
-
-
-typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
-    //@ requires eloop(x) &*& [_]dataPred(data);
-    //@ ensures eloop(x) &*& [_]dataPred(data);
-
 
 
 // TODO: make this function pass the verification
@@ -51,7 +48,7 @@ eloop eloop_create()
     if (x == 0) abort();
     x->handler = 0;
     x->signalCount = 0;
-    //@ x->dataPred = dummy_pred;
+    //@ x->dataPred = empty_pred;
     
     //@ close exists(I(x));
     init(&x->lock);

@@ -41,29 +41,31 @@ struct iter {
 /*@
 
 predicate llist_with_node(struct llist *list, list<int> v0, struct node *n, list<int> vn) =
-  list->first |-> ?f &*& list->last |-> ?l &*& malloc_block_llist(list) &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
+  list->first |-> ?f &*& list->last |-> ?l &*& lseg2(f, n, l, ?v1) &*& lseg(n, l, vn) &*& node(l, _, _) &*& v0 == append(v1, vn);
 
 predicate iter(struct iter *i, real frac, struct llist *l, list<int> v0, list<int> v) =
   i->current |-> ?n &*& [frac]llist_with_node(l, v0, n, v);
 
 @*/
 
-
-// TODO: make this function pass the verification
 int iter_next(struct iter *i)
     //@ requires iter(i, ?f, ?l, ?v0, ?v) &*& switch (v) { case nil: return false; case cons(h, t): return true; };
     //@ ensures switch (v) { case nil: return false; case cons(h, t): return result == h &*& iter(i, f, l, v0, t); };
 {
-    struct node *c = i->current;
     //@ open iter(i, f, l, v0, v);
+    struct node *c = i->current;
     //@ open [f]llist_with_node(l, v0, c, v);
-    //@ switch (v) { case nil: case cons(h, t): }
-    //@ open node(c, ?next, ?value);
+    //@ assert [f]lseg(c, ?l, v);
+    //@ open [f]lseg(c, l, v);
+    //@ assert v == cons(?h, ?t);
+    //@ assert [f]node(c, ?next, h);
+    //@ open [f]node(c, next, h);
     int value = c->value;
     struct node *n = c->next;
+    //@ close [f]node(c, n, h);
     i->current = n;
-    //@ close node(c, n, value);
-    //@ close [f]llist_with_node(l, v0, n, tail(v));
-    //@ close iter(i, f, l, v0, tail(v));
+    //@ close [f]lseg(n, l, t);
+    //@ close [f]llist_with_node(l, v0, n, t);
+    //@ close iter(i, f, l, v0, t);
     return value;
 }

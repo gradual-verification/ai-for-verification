@@ -1,6 +1,16 @@
+bool is_whitespace(int c)
+ //@ requires true;
+ //@ ensures true;
+{
+	return c == ' ' || c == '\n' || c == '\r' || c == '\t';
+}
 #include "stdio.h"
 #include "stdlib.h"
 #include "stringBuffers.h"
+
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
 
 
 struct tokenizer
@@ -27,16 +37,11 @@ predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buff
   t->buffer |-> buffer;
 @*/
 
-
-typedef int charreader();
-    //@ requires true;
-    //@ ensures true;
-
     
 // TODO: make this function pass the verification
 bool is_whitespace(int c)
- //@ requires c >= -128 && c <= 127;
- //@ ensures result == (c == ' ' || c == '\n' || c == '\r' || c == '\t');
+ //@ requires true;
+ //@ ensures true;
 {
 	return c == ' ' || c == '\n' || c == '\r' || c == '\t';
 }

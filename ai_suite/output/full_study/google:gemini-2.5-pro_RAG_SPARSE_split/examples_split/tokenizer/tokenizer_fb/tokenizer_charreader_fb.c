@@ -2,6 +2,20 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/*@
+// A predicate family to hold the state of a character reader.
+// An instance of this predicate family must be defined for each
+// function that implements the charreader function type.
+// This allows for different kinds of character readers (e.g., from a file,
+// from a string in memory, etc.) to be used with the tokenizer.
+predicate_family charreader_state(void *f)();
+@*/
+
+// TODO: make this function pass the verification
+typedef int charreader();
+    //@ requires charreader_state(this)();
+    //@ ensures charreader_state(this)() &*& (result == EOF || (0 <= result && result <= 255));
+
 
 struct tokenizer
 {
@@ -12,24 +26,17 @@ struct tokenizer
 };
 
 /*@
-// The Tokenizer predicate was originally declared as precise (with a ';'), but its body was not,
-// because `string_buffer(b, _)` has an undetermined output parameter.
-// The semicolon has been removed to declare it as a non-precise predicate.
-predicate Tokenizer(struct tokenizer* t) =
+predicate Tokenizer(struct tokenizer* t;) =
   t->next_char |-> ?nc &*& is_charreader(nc) == true &*&
+  charreader_state(nc)() &*&
   t->lastread |-> ?lastread &*&
   t->lasttoken |-> ?lasttoken &*&
   t->buffer |-> ?b &*& string_buffer(b, _);
 
 predicate Tokenizer_minus_buffer(struct tokenizer* t; struct string_buffer *buffer) =
   t->next_char |-> ?nc &*& is_charreader(nc) == true &*&
+  charreader_state(nc)() &*&
   t->lastread |-> ?lastread &*&
   t->lasttoken |-> ?lasttoken &*&
   t->buffer |-> buffer;
 @*/
-
-
-// TODO: make this function pass the verification
-typedef int charreader();
-    //@ requires true;
-    //@ ensures result == EOF || (0 <= result && result <= 255);

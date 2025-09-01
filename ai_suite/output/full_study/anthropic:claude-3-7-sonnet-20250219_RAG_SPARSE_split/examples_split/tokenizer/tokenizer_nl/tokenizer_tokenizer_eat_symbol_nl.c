@@ -2,6 +2,16 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+/***
+ * Description:
+The charreader is a function that reads a character and returns it in an integer.
+*/
+typedef int charreader();
+
+/*@
+// Predicate for charreader function
+predicate charreader_pred(charreader *reader) = is_charreader(reader) == true;
+@*/
 
 struct tokenizer
 {
@@ -11,25 +21,18 @@ struct tokenizer
 	struct string_buffer* buffer;
 };
 
-
-/***
- * Description:
-The charreader is a function that reads a character and returns it in an integer.
-*/
-typedef int charreader();
-
-
 /*@
-// Predicate for tokenizer
-predicate tokenizer(struct tokenizer* tokenizer;) =
-    tokenizer->next_char |-> ?reader &*&
-    tokenizer->lastread |-> ?lastread &*&
-    tokenizer->lasttoken |-> ?lasttoken &*&
-    tokenizer->buffer |-> ?buffer &*&
-    is_charreader(reader) == true &*&
-    string_buffer(buffer, ?cs) &*&
+// Predicate for tokenizer struct
+predicate tokenizer(struct tokenizer *tokenizer; charreader *reader, int lastread, int lasttoken, struct string_buffer *buffer) =
+    tokenizer != 0 &*&
+    tokenizer->next_char |-> reader &*& 
+    tokenizer->lastread |-> lastread &*& 
+    tokenizer->lasttoken |-> lasttoken &*& 
+    tokenizer->buffer |-> buffer &*&
     malloc_block_tokenizer(tokenizer) &*&
-    (-128 <= lastread && lastread <= 127) || lastread == -1 || lastread == -2;
+    charreader_pred(reader) &*&
+    string_buffer(buffer, ?cs) &*&
+    -2 <= lastread &*& lastread <= 127;
 @*/
 
 /***
@@ -40,8 +43,11 @@ if the original lastread char is -2 (which means empty).
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
-/*@ requires tokenizer(tokenizer); @*/
-/*@ ensures tokenizer(tokenizer); @*/
+/*@
+requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
+ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& 
+        (lastread == -2 ? -128 <= new_lastread &*& new_lastread <= 127 : new_lastread == lastread);
+@*/
 {
 	if ( tokenizer->lastread == -2 )
 	{
@@ -61,9 +67,11 @@ The tokenizer_peek function reads the next value character of a tokenizer and re
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_peek(struct tokenizer* tokenizer)
-/*@ requires tokenizer(tokenizer); @*/
-/*@ ensures tokenizer(tokenizer) &*& result == ?lastread &*& 
-           ((-128 <= lastread && lastread <= 127) || lastread == -1); @*/
+/*@
+requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
+ensures tokenizer(tokenizer, reader, ?new_lastread, lasttoken, buffer) &*& 
+        result == new_lastread &*& -128 <= new_lastread &*& new_lastread <= 127;
+@*/
 {
 	tokenizer_fill_buffer(tokenizer);
 	return tokenizer->lastread;
@@ -78,9 +86,13 @@ and drops that character by assigning the lastread field to -2 (meaning empty).
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_next_char(struct tokenizer* tokenizer)
-/*@ requires tokenizer(tokenizer); @*/
-/*@ ensures tokenizer(tokenizer) &*& result == ?lastread &*& 
-           ((-128 <= lastread && lastread <= 127) || lastread == -1); @*/
+/*@
+requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
+ensures tokenizer(tokenizer, reader, -2, lasttoken, buffer) &*& 
+        result == old_lastread &*& -128 <= old_lastread &*& old_lastread <= 127 &*&
+        old_lastread == (lastread == -2 ? ?new_value : lastread) &*&
+        (lastread == -2 ? -128 <= new_value &*& new_value <= 127 : true);
+@*/
 {
 	int c;
 
@@ -98,8 +110,10 @@ The string_buffer_append_char function appends a char to a buffer.
 It needs to make sure that the property of the buffer holds (i.e., the buffer points to a list of characters) before and after the function.
 */
 void string_buffer_append_char(struct string_buffer *buffer, char c)
-/*@ requires string_buffer(buffer, ?cs); @*/
-/*@ ensures string_buffer(buffer, append(cs, cons(c, nil))); @*/
+/*@
+requires string_buffer(buffer, ?cs);
+ensures string_buffer(buffer, append(cs, cons(c, nil)));
+@*/
 {
 	char cc = c;
 	string_buffer_append_chars(buffer, &cc, 1);
@@ -113,8 +127,10 @@ The is_symbol_char function checks whether a given character in integer means a 
 It ensures nothing
 */
 bool is_symbol_char(int c)
-/*@ requires true; @*/
-/*@ ensures true; @*/
+/*@
+requires true;
+ensures true;
+@*/
 {
 	return c > 32 && c <= 127 && c != '(' && c != ')'; 
 }
@@ -130,11 +146,17 @@ If it peeks a non-symbol character, it exits the loop and return the token that 
 It needs to make sure that the given tokenizer preserves its property of tokenizer. 
 */
 int tokenizer_eat_symbol(struct tokenizer* tokenizer)
-/*@ requires tokenizer(tokenizer); @*/
-/*@ ensures tokenizer(tokenizer) &*& result == 'S'; @*/
+/*@
+requires tokenizer(tokenizer, ?reader, ?lastread, ?lasttoken, ?buffer);
+ensures tokenizer(tokenizer, reader, ?new_lastread, 'S', buffer) &*& 
+        result == 'S' &*& -128 <= new_lastread &*& new_lastread <= 127;
+@*/
 {
 	for (;;)
-	/*@ invariant tokenizer(tokenizer); @*/
+	/*@
+	invariant tokenizer(tokenizer, reader, ?current_lastread, lasttoken, buffer) &*&
+	          -128 <= current_lastread &*& current_lastread <= 127;
+	@*/
 	{
 		int result;
 		bool isSymbolChar;
@@ -145,10 +167,11 @@ int tokenizer_eat_symbol(struct tokenizer* tokenizer)
 		if (!isSymbolChar) break;
 		
 		result = tokenizer_next_char(tokenizer);
-		/*@ assert (-128 <= result && result <= 127) || result == -1; @*/
-		/*@ if (result < 0 || result > 127) { abort(); } @*/
 		string_buffer_append_char(tokenizer->buffer, (char)result);
 	}
 
+	//@ open tokenizer(tokenizer, reader, _, lasttoken, buffer);
+	tokenizer->lasttoken = 'S';
+	//@ close tokenizer(tokenizer, reader, _, 'S', buffer);
 	return 'S';
 }

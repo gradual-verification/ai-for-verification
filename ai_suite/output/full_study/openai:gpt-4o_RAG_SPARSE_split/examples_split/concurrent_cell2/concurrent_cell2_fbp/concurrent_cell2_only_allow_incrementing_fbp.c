@@ -1,4 +1,4 @@
-#include "prelude.h"
+#include "verifast.h"
 
 /*@
 inductive trace = zero | inc(int, trace) | dec(int, trace) | cas_(int, int, int, trace);
@@ -76,7 +76,6 @@ fixpoint bool is_lock(trace trace) {
 int atomic_load(int* c);
   //@ requires [?f]cell(c, ?allowed) &*& last_seen(c, currentThread, ?oldtrace);
   //@ ensures [f]cell(c, allowed) &*& last_seen(c, currentThread, ?currtrace) &*& is_good_prefix(oldtrace, currtrace, currentThread) == true &*& execute_trace(currtrace) == result;
-  
 
 // TODO: make this function pass the verification
 void only_allow_incrementing(int* c)
@@ -85,12 +84,5 @@ void only_allow_incrementing(int* c)
 {
   int x1 = atomic_load(c);
   int x2 = atomic_load(c);
-  assert x1 <= x2;
-  //@ last_seen_allowed(c, currentThread);
-  //@ last_seen_allowed(c, currentThread);
-  //@ assert incr_only(?trace1);
-  //@ assert incr_only(?trace2);
-  //@ assert execute_trace(trace1) == x1;
-  //@ assert execute_trace(trace2) == x2;
-  //@ assert x1 <= x2;
+  assert(x1 <= x2);
 }
