@@ -14,5 +14,7 @@ node->count = tmp + 1;
 struct Node* parent = node->parent;
 if(parent==0){
 } else {
+fix(parent);
+fix(parent);
 }
 }

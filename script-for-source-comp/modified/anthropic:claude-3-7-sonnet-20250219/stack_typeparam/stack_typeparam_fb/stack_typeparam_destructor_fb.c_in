@@ -14,4 +14,4 @@ struct data
 int foo;
 int bar;
 };
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+typedef void destructor(void* data);

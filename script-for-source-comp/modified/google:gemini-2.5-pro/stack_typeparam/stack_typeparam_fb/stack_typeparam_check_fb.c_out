@@ -14,8 +14,8 @@ struct data
 int foo;
 int bar;
 };
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
+typedef void destructor(void* data);
+struct stack* create_empty_stack(destructor* destructor)
 {
 struct stack* stack = malloc( sizeof( struct stack ) );
 if ( stack == 0 ) abort();
@@ -24,7 +24,7 @@ stack->first = 0;
 stack->size = 0;
 return stack;
 }
-void destroy_stack/*@ <T> @*/(struct stack* stack)
+void destroy_stack(struct stack* stack)
 {
 destructor* destructor = stack->destructor;
 struct node* current = stack->first;
@@ -37,7 +37,7 @@ current = next;
 }
 free(stack);
 }
-void push/*@ <T> @*/(struct stack* stack, void* data)
+void push(struct stack* stack, void* data)
 {
 struct node* node = malloc( sizeof( struct node ) );
 if ( node == 0 ) abort();
@@ -49,7 +49,7 @@ abort();
 }
 stack->size++;
 }
-void* pop/*@ <T> @*/(struct stack* stack)
+void* pop(struct stack* stack)
 {
 struct node* first = stack->first;
 void* data = first->data;
@@ -61,7 +61,7 @@ abort();
 stack->size--;
 return data;
 }
-int size/*@ <T> @*/(struct stack* stack)
+int size(struct stack* stack)
 {
 int size = stack->size;
 return size;

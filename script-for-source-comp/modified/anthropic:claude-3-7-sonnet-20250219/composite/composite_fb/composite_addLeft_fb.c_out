@@ -37,9 +37,43 @@ fix(parent);
 }
 }
 struct Node* addLeft(struct Node* node)
+{
+struct Node* newChild = internalAddLeft(node);
+return newChild;
+}
 struct Node {
 struct Node* left;
 struct Node* right;
 struct Node* parent;
 int count;
 };
+/*@
+predicate tree(struct Node* node, tree value) =
+switch(value) {
+case Nil: return false;
+case tree(node2, lhs, rhs): return node==node2 &*& node->count |-> ?c &*& c == size(value) &*&
+node->left |-> ?l &*& node->right |-> ?r &*& (l==0 ? lhs==Nil : tree(l, lhs) &*& l->parent |-> node) &*&
+(r==0 ? rhs==Nil : tree(r, rhs) &*& r->parent |-> node);
+};
+predicate isTree(struct Node* n, tree value) =
+tree(?root, value) &*& root->parent |-> 0 &*& contains(value, n) == true;
+inductive context = | lcontext(struct Node*, context, tree) | rcontext(struct Node*, tree, context) | Root;
+predicate context(struct Node* node, context value, int holeCount) =
+switch(value) {
+case Root: return node->parent |-> 0;
+case lcontext(n, cont, t): return n->left |-> node &*& n->right |-> ?r &*& n->count |-> ?c &*&
+(r==0 ? t==Nil : tree(r, t) &*& r->parent |-> n) &*& context(n, cont, c) &*& c== holeCount + 1 + size(t) &*& node->parent |-> n;
+case rcontext(n, t, cont): return n->right |-> node &*& n->left |-> ?l &*& n->count |-> ?c &*&
+(l==0 ? t==Nil : tree(l, t) &*& l->parent |-> n) &*& context(n, cont, c) &*& c== holeCount + 1 + size(t) &*& node->parent |-> n;
+};
+lemma void extract_context_from_isTree(struct Node* n, tree v)
+requires isTree(n, v) &*& valueOf(v, n) == tree(n, Nil, Nil);
+ensures context(n, ?ctx, 1) &*& n->left |-> 0 &*& n->right |-> 0 &*& n->count |-> 1;
+{
+open isTree(n, v);
+}
+lemma void reconstruct_isTree(struct Node* n, tree v, context ctx, struct Node* newChild)
+requires context(n, ctx, 2) &*& n->left |-> newChild &*& n->right |-> 0 &*& n->count |-> 2 &*&
+tree(newChild, tree(newChild, Nil, Nil)) &*& newChild->parent |-> n;
+ensures isTree(n, replace(v, n, tree(n, tree(newChild, Nil, Nil), Nil))) &*&
+uniqueNodes(replace(v, n, tree(n, tree(newChild, Nil, Nil), Nil))) == true;

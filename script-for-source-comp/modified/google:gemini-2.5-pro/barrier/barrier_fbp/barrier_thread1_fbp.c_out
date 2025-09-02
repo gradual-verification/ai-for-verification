@@ -50,12 +50,12 @@ while (N < 30)
 {
 int a1 = d->x1;
 int a2 = d->x2;
-if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) { /*@ assume(false); @*/ abort();}
+if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {  abort();}
 d->y1 = a1 + 2 * a2;
 barrier(barrier);
 a1 = d->y1;
 a2 = d->y2;
-if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) { /*@ assume(false); @*/ abort();}
+if (a1 < 0 || a1 > 1000 || a2 < 0 || a2 > 1000) {  abort();}
 d->x1 = a1 + 2 * a2;
 N = N + 1;
 d->i = N;

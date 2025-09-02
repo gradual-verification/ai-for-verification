@@ -6,4 +6,4 @@ void *value;
 struct foo {
 int value;
 };
-typedef bool equalsFuncType/*@ (list<void *> keys, void *key00, list<void *> eqKeys, predicate() p) @*/(void *key, void *key0);
+typedef bool equalsFuncType(void *key, void *key0);

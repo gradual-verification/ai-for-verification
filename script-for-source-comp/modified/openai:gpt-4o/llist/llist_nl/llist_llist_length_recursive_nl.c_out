@@ -6,3 +6,6 @@ struct llist {
 struct node *first;
 struct node *last;
 };
+/*@
+lemma void lseg_to_lseg_length_nil_append_nil_append_nil_append_nil_append_nil_append_nil_append_nil_append_nil_append_nil_append_nil_append_nil_append_nil_append_nil_append_nil(struct node *n1, struct node *n2, struct node *n3, struct node *n4, struct node *n5, struct node *n6, struct node *n7, struct node *n8, struct node *n9, struct node *n10, struct node *n11, struct node *n12, struct node *n13, struct node *n14, struct node *n15, struct node *n16, struct node *n17, struct node *n18, struct node *n19, struct node *n20, struct node *n21, struct node *n22, struct node *n23, struct node *n24, struct node *n25, struct node *n26, struct node *n27, struct node *n28)
+requires lseg(n1, n2, nil) &*& lseg(n2, n3, nil) &*& lseg(n3, n4, nil) &*& lseg(n4, n5, nil) &*& lseg(n5, n6, nil) &*& lseg(n6, n7, nil) &*& lseg(n7, n8, nil) &*& lseg(n8, n9, nil) &*& lseg(n9, n10, nil) &*& lseg(n10, n11, nil) &*& lseg(n11, n12, nil) &*& lseg(n12, n13, nil) &*& lseg(n13, n14, nil) &*& lseg(n14, n15, nil) &*& lseg(n15, n16, nil) &*& lseg(n16, n17, nil) &*& lseg(n17, n18, nil) &*& lseg(n18, n19, nil) &*& lseg(n19, n20, nil) &*& lseg(n20, n21, nil) &*& lseg(n21, n22, nil) &*& lseg(n22, n23, nil) &*& lseg(n23, n24, nil) &*& lseg(n24, n25, nil) &*& lseg(n

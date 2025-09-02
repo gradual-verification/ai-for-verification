@@ -26,7 +26,7 @@ map_dispose(map->next);
 free(map);
 }
 }
-typedef bool equalsFuncType/*@ (list<void *> keys, void *key00, list<void *> eqKeys, predicate() p) @*/(void *key, void *key0);
+typedef bool equalsFuncType(void *key, void *key0);
 bool map_contains_key(struct node *map, void *key, equalsFuncType *equalsFunc)
 {
 if (map == 0)

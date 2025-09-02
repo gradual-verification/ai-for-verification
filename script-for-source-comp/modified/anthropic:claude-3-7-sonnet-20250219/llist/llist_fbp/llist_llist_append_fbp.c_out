@@ -92,3 +92,5 @@ l1->value = f2_value;
 list1->last = l2;
 free(f2);
 free(list2);
+/*@
+lemma void lseg_append(struct node *n1, struct node *n2

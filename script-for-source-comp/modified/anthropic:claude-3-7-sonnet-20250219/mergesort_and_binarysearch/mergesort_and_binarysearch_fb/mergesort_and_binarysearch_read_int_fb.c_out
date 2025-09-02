@@ -19,3 +19,8 @@ if (scanf_result < 1) abort();
 return x;
 }
 int read_int()
+{
+int x;
+scanf("%i", &x);
+return x;
+}
