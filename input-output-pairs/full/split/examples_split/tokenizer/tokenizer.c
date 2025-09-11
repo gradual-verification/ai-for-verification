@@ -2,6 +2,9 @@
 #include "stdlib.h"
 #include "stringBuffers.h"
 
+typedef int charreader();
+    //@ requires true;
+    //@ ensures true;
 
 struct tokenizer
 {
@@ -33,10 +36,6 @@ lemma void tokenizer_merge_buffer(struct tokenizer *tokenizer)
     close Tokenizer(tokenizer);
 }
 @*/
-
-typedef int charreader();
-    //@ requires true;
-    //@ ensures true;
 
 void tokenizer_fill_buffer(struct tokenizer* tokenizer)
  //@ requires Tokenizer(tokenizer);

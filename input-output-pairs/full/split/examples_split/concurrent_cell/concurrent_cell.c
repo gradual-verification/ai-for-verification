@@ -301,6 +301,6 @@ void only_allow_incrementing(struct cell* c)
   int x2 = get(c);
   //@ assert observed(c, ?trace2);
   //@ prefix_smaller(trace1, trace2);
-  assert x1 <= x2;
+  assert(x1 <= x2);
   //@ leak observed(c, _);
 }

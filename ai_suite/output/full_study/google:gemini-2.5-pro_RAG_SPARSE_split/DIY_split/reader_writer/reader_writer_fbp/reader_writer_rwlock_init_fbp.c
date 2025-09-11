@@ -1,7 +1,4 @@
-    /*@
-    predicate_ctor rwlock_inv(struct rwlock *l)() =
-        l->readers |-> ?r &*& r >= 0 &*& malloc_block_rwlock(l);
-    @*/
+
 #include "stdlib.h"
 #include "threading.h"
 

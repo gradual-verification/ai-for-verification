@@ -6,6 +6,11 @@
 
 typedef struct eloop *eloop;
 
+typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
+    //@ requires eloop(x) &*& [_]dataPred(data);
+    //@ ensures eloop(x) &*& [_]dataPred(data);
+
+
 struct eloop {
     int lock;
     int signalCount;
@@ -30,25 +35,16 @@ predicate_ctor I(eloop x)() =
 predicate eloop(eloop x) =
     [_]lock(&x->lock, I(x));
 @*/
-
-
-typedef void eloop_handler/*@(eloop x, predicate(void *) dataPred)@*/(void *data);
-    //@ requires eloop(x) &*& [_]dataPred(data);
-    //@ ensures eloop(x) &*& [_]dataPred(data);
     
 
-
-// TODO: make this function pass the verification
 void eloop_signal(eloop x)
     //@ requires eloop(x);
     //@ ensures eloop(x);
 {
-    //@ open eloop(x);
     acquire(&x->lock);
     //@ open I(x)();
     if (x->signalCount == INT_MAX) abort();
     x->signalCount++;
     //@ close I(x)();
     release(&x->lock);
-    //@ close eloop(x);
 }

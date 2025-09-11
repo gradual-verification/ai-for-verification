@@ -1,5 +1,13 @@
 #include "stdlib.h"
   
+/*
+  Destructors
+*/
+
+typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
+  //@ requires Ownership(data, _);
+  //@ ensures true;
+
 
 /*
   Stack
@@ -214,13 +222,6 @@ lemma void CheckSizePush<T>(void* item, T info, Stack<T> S)
 
 @*/
 
-/*
-  Destructors
-*/
-
-typedef void destructor/*@<T>(predicate(void *, T) Ownership)@*/(void* data);
-  //@ requires Ownership(data, _);
-  //@ ensures true;
 
 struct stack* create_empty_stack/*@ <T> @*/(destructor* destructor)
   //@ requires [_]is_destructor<T>(destructor, ?Ownership);
@@ -386,7 +387,7 @@ void check()
   //@ assert Stack(stack, _, _, ?S0);
   //@ SizeEmptyStack(S0);
   int s = size(stack);
-  assert s == 0;
+  assert(s == 0);
   
   struct data* data = create_data(1, 2);
   //@ close Data_Ownership(data, DataCarrier(1, 2));
@@ -404,7 +405,7 @@ void check()
   s = size(stack);
   //@ assert Stack(stack, _, _, ?S2);
   //@ SizePush(data, DataCarrier(2, 3), S1);
-  assert s == 2;
+  assert(s == 2);
   
   struct data* popped = pop(stack);
   destroy_data(popped);

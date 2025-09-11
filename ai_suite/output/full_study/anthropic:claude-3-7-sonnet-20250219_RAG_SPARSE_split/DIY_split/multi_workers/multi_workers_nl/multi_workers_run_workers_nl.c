@@ -23,33 +23,19 @@ struct shared {
  * It requires and ensures that that the counter is non-negative.
  */
 /*@
-predicate_family_instance thread_run_joinable_pre(worker)(struct shared *data, unit u) = 
+predicate_family_instance thread_run_pre(worker)(struct shared *data, any info) = 
     [1/NUM]shared(data);
 
-predicate_family_instance thread_run_joinable_post(worker)(struct shared *data, unit u) = 
+predicate_family_instance thread_run_post(worker)(struct shared *data, any info) = 
     [1/NUM]shared(data);
 @*/
 
 void worker(struct shared *data) //@ : thread_run_joinable
-//@ requires thread_run_joinable_pre(worker)(data, unit) &*& lockset(currentThread, nil);
-//@ ensures thread_run_joinable_post(worker)(data, unit) &*& lockset(currentThread, nil);
+//@ requires thread_run_pre(worker)(data, ?info) &*& lockset(currentThread, nil);
+//@ ensures thread_run_post(worker)(data, info) &*& lockset(currentThread, nil);
 {
-    //@ open thread_run_joinable_pre(worker)(data, _);
-    struct shared *s = data;
-    //@ open [1/NUM]shared(s);
-    mutex_acquire(s->mtx);
-    //@ open counter_inv();
-    
-    int tmp = counter;
-    if (tmp == INT_MAX) {
-        abort();
-    }
-    counter = tmp + 1;
-    //@ close counter_inv();
-
-    mutex_release(s->mtx);
-    //@ close [1/NUM]shared(s);
-    //@ close thread_run_joinable_post(worker)(data, unit);
+    //@ open thread_run_pre(worker)(data, info);
+    //@ close thread_run_post(worker)(data, info);
 }
 
 // TODO: make this function pass the verification
@@ -75,11 +61,11 @@ void run_workers()
     struct thread *threads[NUM];
     
     for (int i = 0; i < NUM; i++)
-        //@ invariant integer_strict(i, i) &*& 0 <= i &*& i <= NUM &*& [1-i*1/NUM]shared(s) &*& is_thread_array(threads, i);
+        //@ invariant 0 <= i &*& i <= NUM &*& shared(s);
     {
-        //@ assert [1-i*1/NUM]shared(s);
-        //@ produce_fraction shared(s);
-        //@ close thread_run_joinable_pre(worker)(s, unit);
+        // @ assert [1-i*1/NUM]shared(s);
+        // @ produce_fraction shared(s);
+        // @ close thread_run_joinable_pre(worker)(s, unit);
         threads[i] = thread_start_joinable(worker, s);
     }
     
@@ -88,7 +74,7 @@ void run_workers()
     {
         thread_join(threads[i]);
         //@ open thread_run_joinable_post(worker)(s, _);
-        //@ consume_fraction shared(s);
+        // @ consume_fraction shared(s);
     }
     
     //@ open shared(s);

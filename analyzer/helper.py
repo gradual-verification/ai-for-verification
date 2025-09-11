@@ -72,6 +72,7 @@ def remove_lib_files(lib_files: list[str], new_dir: str) -> None:
         new_lib_file = os.path.join(new_dir, lib_file_name)
         Path(new_lib_file).unlink(missing_ok=True)
 
+
 # copy the content from the source file to the destination file
 def copy_content(src_file: str, dst_file: str) -> None:
     target = Path(dst_file)

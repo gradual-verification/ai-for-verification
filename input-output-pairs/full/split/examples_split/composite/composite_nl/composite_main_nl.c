@@ -27,59 +27,6 @@ struct Node {
 
 /***
  * Description:
- * The `create` function creates and returns a new tree node with no children.
- *
- * @returns A pointer to a newly allocated `Node`.
- *
- * This function makes sure to return a tree with one node. 
- */
-struct Node* create() 
-{
-    struct Node* n = malloc(sizeof(struct Node));
-    if(n == 0) {
-        abort();
-    }
-    n->parent = 0;
-    n->left = 0;
-    n->right = 0;
-    n->count = 1;
-  
-    return n;
-}
-
-
-/***
- * Description:
- * The `addLeft` function adds a left child to a given node and returns the newly added child.
- *
- * @param node - A pointer to the node where the left child should be added, and its both children are originally empty.
- *
- * The function makes sure that a new (and distinct) left child node is added and returned.
- */
-struct Node* addLeft(struct Node* node)
-{
-    struct Node* newChild = internalAddLeft(node);
-    return newChild;
-}
-
-
-/***
- * Description:
- * The `getNbOfNodes` function retrieves the number of nodes in the subtree rooted at `n`.
- *
- * @param n - A pointer to the root of the subtree.
- *
- * The function makes sure not to change the subtree and return the `count` field of the node.
- */
-int getNbOfNodes(struct Node* n)
-{
-    int c = internalGetNbOfNodes(n);
-    return c;
-}
-
-
-/***
- * Description:
  * The `internalCreate` function creates a new node with a given parent.
  *
  * @param parent - A pointer to the parent node.
@@ -103,18 +50,24 @@ struct Node* internalCreate(struct Node* parent)
 
 /***
  * Description:
- * The `internalAddLeft` function creates and adds a left child to a node.
+ * The `create` function creates and returns a new tree node with no children.
  *
- * @param node - A pointer to the node where the left child should be added. The node has empty left child.
+ * @returns A pointer to a newly allocated `Node`.
  *
- * The function makes sure to add a left child to node and updates the `count` field of its ancestors by incrementing by 1.
+ * This function makes sure to return a tree with one node. 
  */
-struct Node* internalAddLeft(struct Node* node)
+struct Node* create() 
 {
-    struct Node* child = internalCreate(node);
-    node->left = child;
-    fix(node);
-    return child;
+    struct Node* n = malloc(sizeof(struct Node));
+    if(n == 0) {
+        abort();
+    }
+    n->parent = 0;
+    n->left = 0;
+    n->right = 0;
+    n->count = 1;
+  
+    return n;
 }
 
 
@@ -143,6 +96,38 @@ void fix(struct Node* node)
 
 /***
  * Description:
+ * The `internalAddLeft` function creates and adds a left child to a node.
+ *
+ * @param node - A pointer to the node where the left child should be added. The node has empty left child.
+ *
+ * The function makes sure to add a left child to node and updates the `count` field of its ancestors by incrementing by 1.
+ */
+struct Node* internalAddLeft(struct Node* node)
+{
+    struct Node* child = internalCreate(node);
+    node->left = child;
+    fix(node);
+    return child;
+}
+
+
+/***
+ * Description:
+ * The `addLeft` function adds a left child to a given node and returns the newly added child.
+ *
+ * @param node - A pointer to the node where the left child should be added, and its both children are originally empty.
+ *
+ * The function makes sure that a new (and distinct) left child node is added and returned.
+ */
+struct Node* addLeft(struct Node* node)
+{
+    struct Node* newChild = internalAddLeft(node);
+    return newChild;
+}
+
+
+/***
+ * Description:
  * The `internalGetNbOfNodes` function returns the number of nodes in the subtree rooted at `n`.
  *
  * @param n - A pointer to the root node.
@@ -152,6 +137,21 @@ void fix(struct Node* node)
 int internalGetNbOfNodes(struct Node* n)
 {
     int c = n->count;
+    return c;
+}
+
+
+/***
+ * Description:
+ * The `getNbOfNodes` function retrieves the number of nodes in the subtree rooted at `n`.
+ *
+ * @param n - A pointer to the root of the subtree.
+ *
+ * The function makes sure not to change the subtree and return the `count` field of the node.
+ */
+int getNbOfNodes(struct Node* n)
+{
+    int c = internalGetNbOfNodes(n);
     return c;
 }
 

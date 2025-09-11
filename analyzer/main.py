@@ -4,7 +4,7 @@ import sys
 from clang.cindex import Config
 
 from check_verifiability import *
-from check_preAndPost_FB import *
+from check_pre_and_post_FB import *
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
     output_root_dir = "../ai_suite/output/full_study/"
     processed_root_dir = "../ai_suite/output/full_study_processed/"
     output = input_type + "_" + llm + "_result.csv"
-    metric = "PP_FB_equiv"
+    metric = "FB_spec"
 
     output_subdir_names = get_subdir_names(output_root_dir, llm)
 
@@ -52,7 +52,7 @@ def main():
                 if option == "-v":
                     check_verifiability(input_file, target_func_name, output_file, processed_file, lib_files, writer)
                 elif option == "-p":
-                    check_preAndPost_FB(input_file, target_func_name, output_file, processed_file, writer)
+                    check_pre_and_post_FB(input_file, target_func_name, output_file, processed_file, lib_files, writer)
 
 
 

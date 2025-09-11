@@ -8,14 +8,11 @@ struct rwlock {
 };
 
 /*@
-predicate rwlock(struct rwlock *l, predicate() inv) =
+predicate_family_instance thread_run_data(reader)(struct rwlock *l) =
     l->mutex |-> ?mutex &*&
-    l->readers |-> ?readers &*&
-    mutex(mutex, inv) &*&
-    inv() &*&
-    readers >= 0;
+    mutex(mutex, reader_inv(l));
 
-predicate reader_inv(struct rwlock *l) =
+predicate_ctor reader_inv(struct rwlock *l)() =
     l->readers |-> ?readers &*&
     readers >= 0;
 
@@ -31,27 +28,29 @@ predicate reader_inv(struct rwlock *l) =
  * 
  */
 void reader(struct rwlock *l) //@ : thread_run
-    //@ requires rwlock(l, reader_inv(l));
-    //@ ensures rwlock(l, reader_inv(l));
+    //@ requires thread_run_data(reader)(l);
+    //@ ensures true;
 {
+    //@ open thread_run_data(reader)(l);
     mutex_acquire(l->mutex);
-    //@ open reader_inv(l);
+    //@ open reader_inv(l)();
 
     if (l->readers == INT_MAX) {
         abort();
     }
     l->readers++;
-    //@ close reader_inv(l);
+    //@ close reader_inv(l)();
     mutex_release(l->mutex);
 
     // critical section (reading)
 
     mutex_acquire(l->mutex);
-    //@ open reader_inv(l);
+    //@ open reader_inv(l)();
     if (l->readers == 0) {
         abort();
     }
     l->readers--;
-    //@ close reader_inv(l);
+    //@ close reader_inv(l)();
     mutex_release(l->mutex);
+    //@ leak l->mutex |-> _ &*& mutex(_, reader_inv(l));
 }

@@ -26,16 +26,8 @@ void worker(struct shared *data) //@ : thread_run_joinable
     //@ requires thread_run_pre(worker)(data, ?info);
     //@ ensures thread_run_post(worker)(data, info);
 {
-    struct shared *s = data;
-    mutex_acquire(s->mtx);
-    
-    int tmp = counter;
-    if (tmp == INT_MAX) {
-        abort();
-    }
-    counter = tmp + 1;
-
-    mutex_release(s->mtx);
+    //@ open thread_run_pre(worker)(data, info);
+    //@ close thread_run_post(worker)(data, info);
 }
 
 void run_workers()
@@ -52,11 +44,11 @@ void run_workers()
     //@ assert s->mtx |-> ?m;
     //@ assert mutex(m, shared_inv(s));
     
-    //@ split_fraction s->mtx |-> _, 1/NUM;
-    //@ split_fraction mutex(m, shared_inv(s)), 1/NUM;
+    //@ split_fraction shared_mtx(s, _) by 1/NUM;
+    //@ split_fraction mutex(m, shared_inv(s)) by 1/NUM;
     
     for (int i = 0; i < NUM; i++)
-    //@ invariant counter |-> ?c &*& c >= 0 &*& i >= 0 &*& i <= NUM &*& s != 0 &*& [(NUM-i)/NUM]s->mtx |-> ?mtx &*& [(NUM-i)/NUM]mutex(mtx, shared_inv(s));
+    //@ invariant i >= 0 &*& i <= NUM &*& s != 0 &*& [1/NUM]s->mtx |-> ?mtx &*& [1/NUM]mutex(mtx, shared_inv(s));
     {
         //@ close thread_run_pre(worker)(s, unit);
         struct thread *t = thread_start_joinable(worker, s);
@@ -65,7 +57,7 @@ void run_workers()
     }
     
     //@ merge_fractions s->mtx |-> _;
-    //@ merge_fractions mutex(_, _);
+    //@ merge_fractions mutex(m, _);
     
     mutex_dispose(s->mtx);
     //@ open shared_inv(s)();

@@ -1,17 +1,4 @@
-    /*@
-    predicate counter_inv() = integer(&counter, ?v) &*& 0 <= v;
-    @*/
-    /*@
-    predicate_family_instance thread_run_pre(worker)(void *data, any info) =
-        ((struct shared *)data)->mtx |-> ?mtx &*&
-        malloc_block_shared(data) &*&
-        mutex(mtx, counter_inv);
 
-    predicate_family_instance thread_run_post(worker)(void *data, any info) =
-        ((struct shared *)data)->mtx |-> ?mtx &*&
-        malloc_block_shared(data) &*&
-        mutex(mtx, counter_inv);
-    @*/
 #include "stdlib.h"
 #include "malloc.h"
 #include "threading.h"
@@ -53,19 +40,6 @@ void worker(struct shared *data) //@ : thread_run_joinable
     //@ ensures thread_run_post(worker)(data, info) &*& lockset(currentThread, nil);
 {
     //@ open thread_run_pre(worker)(data, info);
-    struct shared *s = data;
-    mutex_acquire(s->mtx);
-    //@ open counter_inv();
-    
-    int tmp = counter;
-    if (tmp == INT_MAX) {
-        abort();
-    }
-    counter = tmp + 1;
-    //@ assert 0 <= tmp + 1;
-    //@ close counter_inv();
-
-    mutex_release(s->mtx);
     //@ close thread_run_post(worker)(data, info);
 }
 
@@ -90,7 +64,7 @@ void run_workers()
     struct mutex *mtx = s->mtx;
     
     for (int i = 0; i < NUM; i++)
-        //@ invariant 0 <= i &*& i <= NUM &*& malloc_block_shared(s) &*& s->mtx |-> mtx &*& mutex(mtx, counter_inv);
+        //@ invariant 0 <= i &*& i <= NUM &*& malloc_block_shared(s) &*& s->mtx |-> ?m &*& mutex(m, counter_inv);
     {
         //@ close thread_run_pre(worker)(s, unit);
         struct thread *t = thread_start_joinable(worker, s);

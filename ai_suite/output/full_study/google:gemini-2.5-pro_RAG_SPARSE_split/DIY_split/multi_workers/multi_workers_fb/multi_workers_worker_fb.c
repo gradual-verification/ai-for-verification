@@ -30,7 +30,7 @@ void worker(struct shared *data) //@ : thread_run_joinable
     struct shared *s = data;
     //@ open thread_run_pre(worker)(s, info);
     mutex_acquire(s->mtx);
-    
+    //@ open shared_inv(s)();
     int tmp = counter;
     if (tmp == INT_MAX) {
         abort();

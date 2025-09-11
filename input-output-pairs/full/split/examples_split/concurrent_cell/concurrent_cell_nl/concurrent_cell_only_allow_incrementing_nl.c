@@ -40,5 +40,5 @@ void only_allow_incrementing(struct cell* c)
 {
   int x1 = get(c);
   int x2 = get(c);
-  assert x1 <= x2;
+  assert(x1 <= x2);
 }
