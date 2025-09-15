@@ -107,27 +107,22 @@ def extract_other_def(file: str, functions: list[Function]) -> str:
 
 # in the output file, remove the body of other functions (besides target function)
 # so that other functions become a declaration.
-def remove_other_func_bodies(target_func_name: str, input_functions: list[Function],
-                             output_functions: str, output_file: str, processed_file: str) -> None:
+def remove_other_func_bodies(target_func_name: str, output_functions: list[Function],
+                             output_file: str, processed_file: str) -> None:
     with open(output_file) as f:
         output_lines = f.readlines()
 
-    for input_func in input_functions:
-        if input_func.name != target_func_name:
-            for output_func in output_functions:
-                if output_func.name == input_func.name:
-                    sig_start_line = output_func.sig_start_line
-                    body_start_line = output_func.body_start_line
-                    body_end_line = output_func.body_end_line
+        for output_func in output_functions:
+            if output_func.name != target_func_name:
+                body_start_line = output_func.body_start_line
+                body_end_line = output_func.body_end_line
 
-                    # change the source code by lines (0-base)
-                    # add ";" at the end of signature
-                    if not output_lines[sig_start_line - 1].rstrip().endswith(";"):
-                        output_lines[sig_start_line - 1] = output_lines[sig_start_line - 1] + ";"
-                    # replace function body with "\n"
-                    if body_start_line >= 0 and body_end_line >= 0:
-                        for i in range(body_start_line - 1, body_end_line):
-                            output_lines[i] = "\n"
+                # change the source code by lines (0-base)
+                # replace function body with "{ //@ assume(false); \n}"
+                if body_start_line >= 0 and body_end_line >= 0:
+                    output_lines[body_start_line - 1] = "{ //@ assume(false); \n}"
+                    for i in range(body_start_line, body_end_line):
+                        output_lines[i] = "\n"
 
     processed_content = ''.join(output_lines)
 

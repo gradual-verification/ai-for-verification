@@ -28,23 +28,13 @@ def check_verifiability(input_file: str, target_func_name: str,
     input_functions = extract_funcs(input_file)
     output_functions = extract_funcs(output_file)
 
-    copy_lib_files(lib_files, output_file_dir)
-
-    # if there is only one function in the input file
-    # just verify the output file
-    if len(input_functions) == 1 and input_functions[0].name == target_func_name \
-            and any(getattr(func, "name", None) == target_func_name for func in output_functions):
-        result = run_verifast(output_file)
-    # if there are multiple functions in the input file
-    # then remove the body of other functions and put the new content into processed file
-    # and verify the processed file (note that it needs a double check since I am not sure whether
-    # the process of remove_body_of_other_functions introduces error.
-    elif len(input_functions) > 1 \
-            and any(getattr(func, "name", None) == target_func_name for func in input_functions) \
+    # remove the body of other functions and put the new content into processed file,
+    # and verify the processed file
+    if any(getattr(func, "name", None) == target_func_name for func in input_functions) \
             and any(getattr(func, "name", None) == target_func_name for func in output_functions):
         copy_lib_files(lib_files, processed_file_dir)
-        remove_other_func_bodies(target_func_name, input_functions, output_functions, output_file, processed_file)
-        result = run_verifast(processed_file) + " double-check"
+        remove_other_func_bodies(target_func_name, output_functions, output_file, processed_file)
+        result = run_verifast(processed_file)
     else:
         result = "unknown"
 

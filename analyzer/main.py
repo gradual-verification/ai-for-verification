@@ -5,12 +5,13 @@ from clang.cindex import Config
 
 from check_verifiability import *
 from check_pre_and_post_FB import *
+from check_output_pre_and_post_compile import *
 
 
 def main():
     if len(sys.argv) < 4:
         # llm: anthropic:claude-3-7-sonnet-20250219_RAG_SPARSE_split, google:gemini-2.5-pro_RAG_SPARSE_split, openai:gpt-4o_RAG_SPARSE_split
-        print("please add <input type> (nl, fb or fbp) and <llm> and <option> (-v for verifiability, -p for pre&post FB, -c for src code FB")
+        print("please add <input type> (nl, fb or fbp) and <llm> and <option> (-v for verifiability, -p for pre&post FB, -pc for pre&post compile check")
         exit()
 
 
@@ -25,7 +26,7 @@ def main():
     output_root_dir = "../ai_suite/output/full_study/"
     processed_root_dir = "../ai_suite/output/full_study_processed/"
     output = input_type + "_" + llm + "_result.csv"
-    metric = "FB_spec"
+    metric = "verifiability"
 
     output_subdir_names = get_subdir_names(output_root_dir, llm)
 
@@ -53,6 +54,8 @@ def main():
                     check_verifiability(input_file, target_func_name, output_file, processed_file, lib_files, writer)
                 elif option == "-p":
                     check_pre_and_post_FB(input_file, target_func_name, output_file, processed_file, lib_files, writer)
+                elif option == "-pc":
+                    check_output_pre_and_post_compile(output_file, processed_file, lib_files, writer)
 
 
 
