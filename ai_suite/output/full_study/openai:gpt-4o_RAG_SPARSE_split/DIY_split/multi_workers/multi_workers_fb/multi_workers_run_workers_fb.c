@@ -25,8 +25,16 @@ void worker(struct shared *data) //@ : thread_run_joinable
     //@ requires thread_run_pre(worker)(data, ?info);
     //@ ensures thread_run_post(worker)(data, info);
 {
-    //@ open thread_run_pre(worker)(data, info);
-    //@ close thread_run_post(worker)(data, info);
+    struct shared *s = data;
+    mutex_acquire(s->mtx);
+    
+    int tmp = counter;
+    if (tmp == INT_MAX) {
+        abort();
+    }
+    counter = tmp + 1;
+
+    mutex_release(s->mtx);
 }
 
 // TODO: make this function pass the verification
@@ -41,7 +49,6 @@ void run_workers()
     s->mtx = create_mutex();
 
     for (int i = 0; i < NUM; i++)
-    //@ invariant s->mtx |-> ?m &*& mutex(m, shared_inv(s));
     {
         //@ close thread_run_pre(worker)(s, unit);
         struct thread *t = thread_start_joinable(worker, s);

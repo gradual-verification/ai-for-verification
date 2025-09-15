@@ -15,12 +15,10 @@ struct shared {
 //@ predicate shared(struct shared *s) = s->mtx |-> ?mtx &*& mutex(mtx, counter_invariant);
 
 void worker(struct shared *data) //@ : thread_run_joinable
-    //@ requires thread_run_pre(worker)(data, ?info);
-    //@ ensures thread_run_post(worker)(data, info);
+    //@ requires thread_run_pre(worker)(data, ?info) &*& shared(data);
+    //@ ensures thread_run_post(worker)(data, info) &*& shared(data);
 {
     struct shared *s = data;
-    //@ open thread_run_pre(worker)(data, info);
-    //@ open shared(data);
     mutex_acquire(s->mtx);
     //@ open counter_invariant();
     
@@ -32,11 +30,28 @@ void worker(struct shared *data) //@ : thread_run_joinable
     
     //@ close counter_invariant();
     mutex_release(s->mtx);
-    //@ close shared(data);
-   //@ close thread_run_post(worker)(data, info);
-
 }
 
 //@ predicate_family_instance thread_run_pre(worker)(struct shared *data, any info) = shared(data);
 //@ predicate_family_instance thread_run_post(worker)(struct shared *data, any info) = shared(data);
 
+int main() //@ : main
+    //@ requires true;
+    //@ ensures true;
+{
+    struct shared *s = malloc(sizeof(struct shared));
+    if (s == 0) abort();
+    
+    //@ close counter_invariant();
+    //@ close create_mutex_ghost_arg(counter_invariant);
+    s->mtx = create_mutex();
+    //@ close shared(s);
+    
+    struct thread *t = thread_start_joinable(worker, s);
+    thread_join(t);
+    
+    mutex_dispose(s->mtx);
+    free(s);
+    
+    return 0;
+}

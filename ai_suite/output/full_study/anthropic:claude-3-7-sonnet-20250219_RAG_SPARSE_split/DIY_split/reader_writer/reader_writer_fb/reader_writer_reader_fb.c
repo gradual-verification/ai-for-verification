@@ -44,5 +44,4 @@ void reader(struct rwlock *l) //@ : thread_run
     
     //@ close rwlock_inv(l)();
     mutex_release(l->mutex);
-    //@ leak [1/2]l->mutex |-> ?m &*& [1/2]mutex(m, rwlock_inv(l));
 }

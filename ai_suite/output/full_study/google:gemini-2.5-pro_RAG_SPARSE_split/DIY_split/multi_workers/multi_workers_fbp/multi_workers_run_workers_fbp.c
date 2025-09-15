@@ -26,8 +26,18 @@ void worker(struct shared *data) //@ : thread_run_joinable
     //@ requires thread_run_pre(worker)(data, ?info);
     //@ ensures thread_run_post(worker)(data, info);
 {
-    //@ open thread_run_pre(worker)(data, info);
-    //@ close thread_run_post(worker)(data, info);
+    struct shared *s = data;
+    mutex_acquire(s->mtx);
+    //@ open shared_inv(s)();
+    
+    int tmp = counter;
+    if (tmp == INT_MAX) {
+        abort();
+    }
+    counter = tmp + 1;
+
+    //@ close shared_inv(s)();
+    mutex_release(s->mtx);
 }
 
 // TODO: make this function pass the verification

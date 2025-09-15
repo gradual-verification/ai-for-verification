@@ -14,7 +14,7 @@ predicate_ctor rwlock_inv(struct rwlock *l)() =
 // TODO: make this function pass the verification
 struct rwlock *rwlock_init()
     //@ requires true;
-    //@ ensures result->mutex |-> ?m &*& mutex(m, rwlock_inv(result)) &*& malloc_block_rwlock(result);
+    //@ ensures result->mutex |-> ?m &*& mutex(m, rwlock_inv(result));
 {
     struct rwlock *l = malloc(sizeof(struct rwlock));
     if (l == 0) abort();

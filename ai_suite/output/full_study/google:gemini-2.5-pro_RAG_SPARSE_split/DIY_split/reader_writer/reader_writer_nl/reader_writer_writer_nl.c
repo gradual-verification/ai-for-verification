@@ -9,7 +9,7 @@ struct rwlock {
 
 /*@
 
-predicate_ctor rwlock_inv(struct rwlock *l)() =
+predicate rwlock_inv(struct rwlock *l) =
     l->readers |-> ?r &*& r >= 0;
 
 predicate rwlock(struct rwlock *l) =
@@ -36,24 +36,23 @@ void writer(struct rwlock *l) //@ : thread_run
     //@ ensures lockset(currentThread, nil);
 {
     //@ open thread_run_data(writer)(l);
-    //@ assert [?f]rwlock(l);
     for (;;)
-        //@ invariant [f]rwlock(l) &*& lockset(currentThread, nil);
+        //@ invariant [_]rwlock(l) &*& lockset(currentThread, nil);
     {
-        //@ open [f]rwlock(l);
+        //@ open [_]rwlock(l);
         mutex_acquire(l->mutex);
-        //@ open rwlock_inv(l)();
+        //@ open rwlock_inv(l);
         if (l->readers == 0) {
             break;
         }
-        //@ close rwlock_inv(l)();
+        //@ close rwlock_inv(l);
         mutex_release(l->mutex);
-        //@ close [f]rwlock(l);
+        //@ close [_]rwlock(l);
     }
 
     // critical section (writing)
 
-    //@ close rwlock_inv(l)();
+    //@ close rwlock_inv(l);
     mutex_release(l->mutex);
-    //@ close [f]rwlock(l);
+    //@ close [_]rwlock(l);
 }

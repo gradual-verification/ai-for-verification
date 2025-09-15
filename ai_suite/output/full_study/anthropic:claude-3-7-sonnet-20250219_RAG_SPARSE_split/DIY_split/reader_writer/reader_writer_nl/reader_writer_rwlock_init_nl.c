@@ -11,7 +11,9 @@ struct rwlock {
 // Define a predicate for the rwlock that captures its state
 predicate rwlock(struct rwlock *lock; predicate() p) =
     lock->mutex |-> ?m &*&
-    mutex(m, rwlock_mutex_inv(lock, p)) &*&
+    lock->readers |-> ?readers &*&
+    readers >= 0 &*&
+    mutex(m, p) &*&
     malloc_block_rwlock(lock);
 
 // Define the invariant for the mutex inside the rwlock
@@ -45,5 +47,4 @@ struct rwlock *rwlock_init()
     
     //@ close rwlock(l, p);
     return l;
-    //@ leak create_rwlock_ghost_arg(p);
 }

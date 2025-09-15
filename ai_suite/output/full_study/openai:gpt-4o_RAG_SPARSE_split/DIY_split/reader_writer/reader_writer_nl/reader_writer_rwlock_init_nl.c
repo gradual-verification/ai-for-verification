@@ -7,7 +7,8 @@ struct rwlock {
     int readers;
 };
 
-//@ predicate rwlock(struct rwlock *l; predicate() p) = l->mutex |-> ?m &*& l->readers |-> 0 &*& mutex(m, p) &*& malloc_block_rwlock(l);
+//@ predicate rwlock(struct rwlock *l; predicate() p) =
+//@     l->mutex |-> ?m &*& l->readers |-> 0 &*& mutex(m, p) &*& malloc_block_rwlock(l);
 
 //@ predicate create_rwlock_ghost_arg(predicate() p) = true;
 
@@ -18,6 +19,8 @@ struct rwlock {
  *
  * The function ensures that the returned value is a reader-writer lock.
  */
+//@ requires create_rwlock_ghost_arg(?p) &*& p();
+//@ ensures result == 0 ? emp : rwlock(result, p);
 struct rwlock *rwlock_init()
     //@ requires create_rwlock_ghost_arg(?p) &*& p();
     //@ ensures result == 0 ? emp : rwlock(result, p);
@@ -29,5 +32,4 @@ struct rwlock *rwlock_init()
     l->mutex = create_mutex();
     //@ close rwlock(l, p);
     return l;
-    //@ leak create_rwlock_ghost_arg(p);
 }

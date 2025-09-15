@@ -40,5 +40,4 @@ void writer(struct rwlock *l) //@ : thread_run
 
     //@ close rwlock_inv(l)();
     mutex_release(l->mutex);
-    //@ leak [1/2]mutex(_, rwlock_inv(l));
 }
